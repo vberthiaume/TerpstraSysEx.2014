@@ -103,6 +103,8 @@
         <FILE id="chrN2g" name="SettingsContainer.h" compile="0" resource="0"
               file="Source/Settings/SettingsContainer.h"/>
       </GROUP>
+      <FILE id="WG01Cj" name="EditActions.cpp" compile="1" resource="0" file="Source/EditActions.cpp"/>
+      <FILE id="cMcg6t" name="EditActions.h" compile="0" resource="0" file="Source/EditActions.h"/>
       <FILE id="O80YOu" name="LumatoneMenu.cpp" compile="1" resource="0"
             file="Source/LumatoneMenu.cpp"/>
       <FILE id="W7Jek7" name="FileBrowserComponent.h" compile="0" resource="0"
@@ -295,7 +297,7 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <LINUX_MAKE targetFolder="Builds/Linux" smallIcon="fwSyLL" bigIcon="yjLw0u"
-                linuxExtraPkgConfig="libssh2" extraDefs="SERVERHOST=&quot;192.168.6.2&quot; HAVE_ARPA_INET_H=1 HAVE_UNISTD_H=1">
+                linuxExtraPkgConfig="libssh2" extraDefs="HAVE_ARPA_INET_H=1 HAVE_UNISTD_H=1 HAVE_POLL_H=1 SERVERHOST1=&quot;192.168.6.2&quot; SERVERHOST2=&quot;192.168.7.2&quot;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
                        targetName="LumatoneSetup"/>
@@ -314,8 +316,8 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="yjLw0u" hardenedRuntime="1"
-               extraDefs="HAVE_SYS_SOCKET_H=1 HAVE_NETINET_IN_H=1 HAVE_SYS_SELECT_H=1 HAVE_UNISTD_H=1 HAVE_ARPA_INET_H=1 HAVE_SYS_TIME_H=1 SERVERHOST=&quot;192.168.6.2&quot;"
-               xcodeValidArchs="arm64,x86_64" extraCompilerFlags="-I../../Libraries/mac/include"
+               extraDefs="HAVE_SYS_SOCKET_H=1 HAVE_NETINET_IN_H=1 HAVE_SYS_SELECT_H=1 HAVE_UNISTD_H=1 HAVE_ARPA_INET_H=1 HAVE_SYS_TIME_H=1 HAVE_POLL_H=1 SERVERHOST1=&quot;192.168.6.2&quot; SERVERHOST2=&quot;192.168.7.2&quot;"
+               xcodeValidArchs="x86_64" extraCompilerFlags="-I../../Libraries/mac/include"
                embeddedFrameworks="../../Libraries/mac/lib/libgpg-error.0.dylib&#10;../../Libraries/mac/lib/libgcrypt.20.dylib&#10;../../Libraries/mac/lib/libssh2.1.dylib"
                smallIcon="fwSyLL">
       <CONFIGURATIONS>

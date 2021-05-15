@@ -40,12 +40,22 @@
 #include <ctype.h>
 #include <time.h>
 
+#ifdef HAVE_POLL_H
+#include <poll.h>
+#endif
+
 #include "libssh2.h"
 
 
-#define STOPBEFOREINIT if (threadShouldExit()) { DBG("Stopping, thread shutdown requested."); return StatusCode::ThreadKillErr; }
-#define STOPDURINGEXEC if (threadShouldExit()) { DBG("Stopping, thread shutdown requested."); return shutdownSSHSession(session, sock, localFile, StatusCode::ThreadKillErr); }
+#define STOPBEFOREINIT if (threadShouldExit()) {DBG("Stopping, thread shutdown requested."); return StatusCode::ThreadKillErr;}
+#if WIN32
+    #define STOPDURINGSETUP if (threadShouldExit()) {DBG("Stopping, thread shutdown requested."); closesocket(sock); return StatusCode::ThreadKillErr;}
+#else
+    #define STOPDURINGSETUP if (threadShouldExit()) {DBG("Stopping, thread shutdown requested."); close(sock); return StatusCode::ThreadKillErr;}
+#endif
+#define STOPDURINGEXEC if (threadShouldExit()) {DBG("Stopping, thread shutdown requested."); return shutdownSSHSession(session, sock, localFile, StatusCode::ThreadKillErr);}
 
+#define SOCKTIMEOUTMS 1000
 
 FirmwareTransfer::FirmwareTransfer(TerpstraMidiDriver& driverIn)
 	: juce::ThreadWithProgressWindow("Lumatone Firmware Update", true, false), midiDriver(driverIn)
@@ -73,7 +83,6 @@ bool FirmwareTransfer::checkFirmwareFileIntegrity(String filePathIn)
 			isValid = true;
 		}
 	}
-
 	return isValid; 
 }
 
@@ -175,7 +184,7 @@ static FirmwareTransfer::StatusCode shutdownSSHSession(LIBSSH2_SESSION* session,
 	while (libssh2_session_disconnect(session, "Normal Shutdown,") == LIBSSH2_ERROR_EAGAIN);
 	libssh2_session_free(session);
 
-#ifdef WIN32
+#ifdef WIN32 // we're not distributing 32-bit, but just in case we ever need it
 	closesocket(sock);
 #else
 	close(sock);
@@ -252,16 +261,14 @@ void FirmwareTransfer::postUpdate(StatusCode codeIn)
 // adapted from:
 // https://www.libssh2.org/examples/scp_write_nonblock.html
 // https://www.libssh2.org/examples/ssh2_exec.html
+// https://stackoverflow.com/a/61960339
 FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 {
 	// Shared SSH session data
-	const char* deviceHostName = SERVERHOST;
-	unsigned long hostaddr = inet_addr(deviceHostName);
 	const char* username = SERVERKEY;
 	const char* password = SERVERPWD;
 
     int sock;
-	struct sockaddr_in sin;
 
 	LIBSSH2_SESSION* session = NULL;
 	LIBSSH2_CHANNEL* channel;
@@ -290,34 +297,177 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 	int err;
 
 	err = WSAStartup(MAKEWORD(2, 0), &wsadata);
-	if (err != 0) {
+	if (err != 0)
+    {
 		DBG("WSAStartup failed with error: " + String(err));
 		return StatusCode::StartupErr;
 	}
 #endif
 
-    // Do a stop-thread check before making libssh calls
+    // Occasionally check if for thread exit request before session is initiated
     STOPBEFOREINIT
     
-	int returnCode = libssh2_init(0);
+    int returnCode = libssh2_init(0);
+    if (returnCode != 0)
+    {
+        DBG("libssh2 initialization failed! error: " + String(returnCode));
+        return StatusCode::StartupErr;
+    }
 
-	if (returnCode != 0)
-	{
-		DBG("libssh2 initialization failed! error: " + String(returnCode));
-		return StatusCode::StartupErr;
-	}
 
-	// Prepare data for file transfer
-	localFile = fopen(filePath, "rb");
-	if (!localFile)
-	{
-		DBG("failed to open file!");
-		return StatusCode::StartupErr;
-	}
 
-    STOPBEFOREINIT
+#ifdef HAS_POLL_H
     
-	stat(filePath, &fileinfo);
+    int sockFlagsBefore = 0;
+
+    // Find correct hostname for OS
+    int failedTries = 0;
+    while (failedTries < 2)
+    {
+        STOPBEFOREINIT
+        returnCode = 0;
+        
+        // Create socket and connect to port 22
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock < 0)
+        {
+            DBG("failed to create socket!");
+            return StatusCode::StartupErr;
+        }
+        
+        if ((sockFlagsBefore = fcntl(sock, F_GETFL, 0) < 0))
+        {
+            DBG("bad socket flags received");
+        }
+        // Set to non-blocking
+        else if (fcntl(sock, F_SETFL, sockFlagsBefore | O_NONBLOCK) >= 0)
+        {
+            String deviceHostName = (failedTries == 0) ? SERVERHOST1 : SERVERHOST2;
+            unsigned int hostaddr = inet_addr(deviceHostName.getCharPointer());
+            struct sockaddr_in sin;
+            sin.sin_family = AF_INET;
+            sin.sin_port = htons(22);
+            sin.sin_addr.s_addr = hostaddr;
+
+            DBG("attempting to connect to host " + deviceHostName);
+            
+            do {
+                STOPDURINGSETUP
+                
+                if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) < 0)
+                {
+                    returnCode = errno;
+
+                    // If error, failure
+                    if ((errno != EWOULDBLOCK) && (errno != EINPROGRESS))
+                    {
+                        DBG("connection failed with error code: " + String(errno));
+                        failedTries++;
+                    }
+                
+                    // Wait with specified timeout
+                    else
+                    {
+                        // Set reference time b/c poll can be interrupted
+                        struct timespec now;
+                        if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
+                        {
+                            returnCode = -1;
+                            DBG("could not get current time");
+                        }
+                        else
+                        {
+                            struct timespec deadline =
+                            {
+                                .tv_sec = now.tv_sec,
+                                .tv_nsec = now.tv_nsec + SOCKTIMEOUTMS * 1000000l
+                            };
+                            
+                            do {
+                                // Keep checking how much time left
+                                if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
+                                {
+                                    returnCode = -1;
+                                    DBG("could not get current time");
+                                    break;
+                                }
+
+                                int msUntilDeadline = (int)( (deadline.tv_sec - now.tv_sec) * 1000l
+                                                           + (deadline.tv_nsec - now.tv_nsec) / 1000000l);
+                                if (msUntilDeadline < 0)
+                                {
+                                    returnCode = 0;
+                                    break;
+                                }
+
+                                STOPDURINGSETUP
+                                
+                                // Check connection status
+                                struct pollfd pfds[] = { { .fd = sock, .events = POLLOUT } };
+                                returnCode = poll(pfds, 1, msUntilDeadline);
+                                
+                                // Double-check there aren't other errors
+                                if (returnCode > 0)
+                                {
+                                    int err = 0;
+                                    socklen_t len = sizeof(err);
+                                    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &err, &len) == 0)
+                                        errno = err;
+                                    
+                                    if (err != 0)
+                                    {
+                                        returnCode = -1;
+                                        DBG("connection failed with errno " + String(err));
+                                    }
+                                }
+                                
+                            } while (returnCode == -1 && errno == EINTR); // If poll was interrupted, try again
+                                
+                            if (returnCode == 0)
+                            {
+                                // Fail if timed out
+                                errno = ETIMEDOUT;
+                                returnCode = -1;
+                            }
+                            
+                            // Success
+                            else if (returnCode > 0)
+                                returnCode = 0;
+                        }
+                    }
+                }
+            } while(0);
+            
+            if (returnCode == 0)
+            {
+                DBG("connected to " + deviceHostName);
+                break;
+            }
+        }
+        else
+        {
+            DBG("could not set to non-blocking for host connection");
+        }
+        
+        DBG("connection attempt failed");
+
+        close(sock);
+        failedTries++;
+    }
+    
+    if (failedTries == 2)
+    {
+        return StatusCode::HostConnectErr;
+    }
+    
+    if (fcntl(sock, F_SETFL, sockFlagsBefore) < 0)
+    {
+        DBG("could not reset sock flags");
+        return StatusCode::StartupErr;
+    }
+
+
+#else
 
 	// Create socket and connect to port 22
 	sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -327,18 +477,41 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 		return StatusCode::StartupErr;
 	}
 
-    STOPBEFOREINIT
-    
+	STOPBEFOREINIT
+
+	String deviceHostName = SERVERHOST;
+	unsigned int hostaddr = inet_addr(deviceHostName.getCharPointer());
+	struct sockaddr_in sin;
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(22);
 	sin.sin_addr.s_addr = hostaddr;
+	
 	if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0)
 	{
 		DBG("failed to connect!");
+
+#if WIN32
+		closesocket(sock);
+#else
+		close(sock);
+#endif
+
 		return StatusCode::HostConnectErr;
 	}
+
+#endif
+
+    // Prepare data for file transfer
+    localFile = fopen(filePath, "rb");
+    if (!localFile)
+    {
+        DBG("failed to open file!");
+        return StatusCode::StartupErr;
+    }
     
-    STOPBEFOREINIT
+    stat(filePath, &fileinfo);
+    
+    STOPDURINGSETUP
 
 	/* Create a session instance */
 	session = libssh2_session_init();
@@ -351,11 +524,11 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 	/* tell libssh2 we want it all done non-blocking */
 	libssh2_session_set_blocking(session, 0);
 
-
 	/* ... start it up. This will trade welcome banners, exchange keys,
 	 * and setup crypto, compression, and MAC layers
 	 */
 	postUpdate(StatusCode::SessionBegin);
+    wait(300);
     while ((returnCode = libssh2_session_handshake(session, sock)) == LIBSSH2_ERROR_EAGAIN && !threadShouldExit()) {};
     STOPDURINGEXEC
 	progressMadeSinceUpdate = true;
