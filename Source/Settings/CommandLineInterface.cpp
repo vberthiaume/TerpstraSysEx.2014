@@ -15,6 +15,8 @@ CommandParser::CommandParser()
     : midiDriver(TerpstraSysExApplication::getApp().getLumatoneController().getMidiDriver())
 {
     midiDriver.addListener(this);
+    addSupportedCommands();
+
 }
 
 CommandParser::~CommandParser()
@@ -63,7 +65,7 @@ void CommandParser::midiMessageReceived(MidiInput* source, const MidiMessage& mi
     }
 }
 
-CommandParser::CommandDefinition CommandParser::parseCommand(String command)
+CommandParser::RawCommand CommandParser::parseCommand(String command)
 {
     auto tokens = StringArray::fromTokens(command.trim(), false);
 
@@ -74,7 +76,7 @@ CommandParser::CommandDefinition CommandParser::parseCommand(String command)
     // If first token is "send", the next token needs to be a valid command name
     //   - TODO
 
-    CommandDefinition definition;
+    RawCommand definition;
 
     int payloadStart = -1;
 
@@ -102,7 +104,9 @@ CommandParser::CommandDefinition CommandParser::parseCommand(String command)
     // Word-command
     else
     {
-        // TODO
+        definition.commandIsWrapped = true;
+        definition.wrapped = command;
+        return definition;
     }
 
 
@@ -133,23 +137,24 @@ CommandParser::CommandDefinition CommandParser::parseCommand(String command)
     return definition;
 }
 
-void CommandParser::sendCommand(CommandDefinition commandDefinition)
+void CommandParser::sendCommand(RawCommand commandDefinition)
 {
-    if (commandDefinition.errorStatus == FirmwareSupport::Error::noError)
+    if (commandDefinition.commandIsWrapped)
     {
-        if (commandDefinition.commandIsWrapped)
+        auto args = ArgumentList("", commandDefinition.wrapped);
+        if (console.findAndRunCommand(args, false) < 0)
         {
-            // TODO
+            DBG("Unknown command");
         }
-        else
-        {
-            MidiMessage message = commandToSysEx(commandDefinition);
-            midiDriver.sendMessageWithAcknowledge(message);
-        }
+    }
+    else if (commandDefinition.errorStatus == FirmwareSupport::Error::noError)
+    {
+        MidiMessage message = commandToSysEx(commandDefinition);
+        midiDriver.sendMessageWithAcknowledge(message);
     }
 }
 
-MidiMessage CommandParser::commandToSysEx(CommandDefinition definition)
+MidiMessage CommandParser::commandToSysEx(RawCommand definition)
 {
     // Upper-bound size
     uint8 sysExData[255];
@@ -230,5 +235,44 @@ void CommandLineComponent::textEditorReturnKeyPressed(TextEditor& editor)
 void CommandLineComponent::textEditorEscapeKeyPressed(TextEditor& editor)
 {
     editor.clear();
+}
+
+
+//=============================================================================
+
+void CommandParser::addSupportedCommands()
+{
+    String helpMsg;
+    helpMsg << "Supported syntaxes:" << newLine
+        << "\tRaw SysEx Message bytes (enclosed in F0 and F7)" << newLine
+        << "\t<Command Byte> <Board Byte> <argByte0> ... <argByteN>" << newLine
+        << "\t<Command Name> <Board Index> <arg0> ... <argN>";
+
+    console.addHelpCommand("dontknowwhatthisis", helpMsg, true);
+
+    console.addCommand({
+        "setKeyParams",
+        "<Board ID: 1-5> <Key#: 0-55> <Note/CC#: 0-127> <Channel#: 1-16> <KeyType: 0-3> <Fader Polarity: 0-1>",
+        "Configure a specific key's note, channel, type, and polarity parameters",
+        "Configure a specific key's note, channel, type, and polarity parameters",
+        [&](const ArgumentList& args) { TerpstraSysExApplication::getApp().getLumatoneController().sendKeyConfig(
+            args[0].text.getIntValue(),
+            args[1].text.getIntValue(),
+            args[2].text.getIntValue(),
+            args[3].text.getIntValue(),
+            (LumatoneKeyType)args[4].text.getIntValue(),
+            (bool)args[4].text.getIntValue());
+        }});
+
+    console.addCommand({
+        "setKeyLightParams",
+        "<Board ID: 1-5> <Key#: 0-55> <Red Channel: 0-255> <Green Channel: 0-255> <Blue Channel: 0-255>",
+        "Configure a specific key's LED colour",
+        "Specify the LED channel intensities of a given key number and board index",
+        [&](const ArgumentList& args) { TerpstraSysExApplication::getApp().getLumatoneController().sendKeyColourConfig(
+            args[0].text.getIntValue(),
+            args[1].text.getIntValue(),
+            Colour((uint8)args[2].text.getIntValue(),(uint8)args[3].text.getIntValue(),(uint8)args[4].text.getIntValue()));
+        }});
 }
 

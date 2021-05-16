@@ -17,16 +17,16 @@ class CommandParser : private TerpstraMidiDriver::Listener, private LumatoneCont
 
 public:
 
-    struct CommandDefinition
+    struct RawCommand
     {
         bool commandIsWrapped = false;
+        String wrapped;
 
         int cmdNumber = -1;
         uint8 targetBoard = -1;
         size_t payloadLength = 0;
 
         Array<uint8> argByte; // Raw commands
-        Array<var> argVar; // For wrapped commands
 
         FirmwareSupport::Error errorStatus = FirmwareSupport::Error::messageIsNotSysEx;
 
@@ -50,6 +50,8 @@ public:
 
 private:
 
+    void addSupportedCommands();
+
     //============================================================================
     // Implementation of TerpstraMidiDriver::Listener
     
@@ -65,13 +67,15 @@ private:
 
 private:
 
-    CommandDefinition parseCommand(String command);
+    RawCommand parseCommand(String command);
 
-    void sendCommand(CommandDefinition commandDefinition);
+    void sendCommand(RawCommand commandDefinition);
 
-    MidiMessage commandToSysEx(CommandDefinition definition);
+    MidiMessage commandToSysEx(RawCommand definition);
 
 private:
+
+    ConsoleApplication console;
 
     LumatoneFirmwareVersion currentVersion;
     StringArray logQueue;
