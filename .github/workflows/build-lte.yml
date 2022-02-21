@@ -104,9 +104,9 @@ jobs:
           Start-Process $installer $arguments
       - name: List Directories
         run: |
-          echo this directory
-          Get-Children -Recursive
-          echo program files
-          Get-Children -Recursive C:\Program\ Files\
+          echo this
+          Get-ChildItem -Recursive
+          echo programs
+          Get-ChildItem -Recursive C:\Program\ Files\
 
 
