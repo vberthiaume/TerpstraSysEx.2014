@@ -105,8 +105,8 @@ jobs:
       - name: List Directories
         run: |
           echo this
-          Get-ChildItem -Recursive
+          Get-ChildItem -Recurse
           echo programs
-          Get-ChildItem -Recursive C:\Program\ Files\
+          Get-ChildItem C:\Program\ Files\ -Recurse
 
 
