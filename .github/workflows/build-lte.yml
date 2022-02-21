@@ -102,8 +102,10 @@ jobs:
           $installer = "innosetup.exe"
           $arguments = "/VERYSILENT /NORESTART /ALLUSERS"
           Start-Process $installer $arguments
-      - name: List Program Files
+      - name: Test ISCC command
         run: |
-          Get-ChildItem "C:\Program Files\" -Recurse
+          $build-installer = "iscc .\Installers\InnoSetup\LumatoneEditorWinInstallerScript.iss"
+          Start-Process $build-installer
+          Get-ChildItem ".\Installers\InnoSetup" -Recurse
 
 
