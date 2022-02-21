@@ -100,12 +100,15 @@ jobs:
         run: |
           Invoke-WebRequest https://jrsoftware.org/download.php/is.exe -O innosetup.exe
           $installer = "innosetup.exe"
-          $arguments = "/VERYSILENT /NORESTART /ALLUSERS"
+          $arguments = "/VERYSILENT /NORESTART /ALLUSERS /DIR=Installers\InnoSetup"
           Start-Process $installer $arguments
-      - name: Test ISCC command
-        run: |
-          $buildinstaller = "iscc .\Installers\InnoSetup\LumatoneEditorWinInstallerScript.iss"
-          Start-Process $buildinstaller
+      # - name: Test ISCC command
+      #   run: |
+      #     $buildinstaller = "iscc .\Installers\InnoSetup\LumatoneEditorWinInstallerScript.iss"
+      #     Start-Process $buildinstaller
+      #     Get-ChildItem ".\Installers\InnoSetup" -Recurse
+      - name: List Installers\InnoSetup
           Get-ChildItem ".\Installers\InnoSetup" -Recurse
+
 
 
