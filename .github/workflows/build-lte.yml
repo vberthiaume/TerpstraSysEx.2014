@@ -102,11 +102,8 @@ jobs:
           $installer = "innosetup.exe"
           $arguments = "/VERYSILENT /NORESTART /ALLUSERS"
           Start-Process $installer $arguments
-      - name: List Directories
+      - name: List Program Files
         run: |
-          echo this
-          Get-ChildItem -Recurse
-          echo programs
-          Get-ChildItem C:\Program\ Files\ -Recurse
+          Get-ChildItem "C:\Program Files\" -Recurse
 
 
