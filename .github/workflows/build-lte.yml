@@ -108,6 +108,7 @@ jobs:
       #     Start-Process $buildinstaller
       #     Get-ChildItem ".\Installers\InnoSetup" -Recurse
       - name: List Installers\InnoSetup
+        run: |
           Get-ChildItem ".\Installers\InnoSetup" -Recurse
 
 
