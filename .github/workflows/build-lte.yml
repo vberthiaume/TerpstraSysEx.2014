@@ -104,8 +104,8 @@ jobs:
           Start-Process $installer $arguments
       - name: Test ISCC command
         run: |
-          $build-installer = "iscc .\Installers\InnoSetup\LumatoneEditorWinInstallerScript.iss"
-          Start-Process $build-installer
+          $buildinstaller = "iscc .\Installers\InnoSetup\LumatoneEditorWinInstallerScript.iss"
+          Start-Process $buildinstaller
           Get-ChildItem ".\Installers\InnoSetup" -Recurse
 
 
