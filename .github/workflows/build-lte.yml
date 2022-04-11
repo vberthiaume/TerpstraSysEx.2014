@@ -78,7 +78,7 @@ jobs:
           msbuild Projucer.sln /p:configuration=Release
       - name: Build Lumatone Editor
         run: |
-          bash -c '\c\JUCE\extras\Projucer\Builds\VisualStudio2019\x64\Release\Projucer --resave TerpstraSysEx.jucer'
+          bash -c '\c\JUCE\extras\Projucer\Builds\VisualStudio2019\x64\Release\App\Projucer --resave TerpstraSysEx.jucer'
           cd Builds/VisualStudio2019
           msbuild "Lumatone Editor.sln" /p:configuration=Release
       - name: List build directory
