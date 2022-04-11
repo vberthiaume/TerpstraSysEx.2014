@@ -74,8 +74,7 @@ jobs:
       - name: Clone JUCE repo and build Projucer
         run: |
           git clone -b juce7 https://github.com/juce-framework/JUCE/
-          cd JUCE\extras\Projucer\Builds\VisualStudio2019
-          msbuild Projucer.sln /p:configuration=Release
+          msbuild JUCE\extras\Projucer\Builds\VisualStudio2019\Projucer.sln /p:configuration=Release
       - name: Build Lumatone Editor
         run: |
           bash -c '\c\JUCE\extras\Projucer\Builds\VisualStudio2019\x64\Release\App\Projucer --resave TerpstraSysEx.jucer'
