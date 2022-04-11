@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 env: {}
 
-# jobs:
+jobs:
 #   build-lte-linux:
 #     name: Build Lumatone Editor (Linux)
 
