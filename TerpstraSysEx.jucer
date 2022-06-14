@@ -85,6 +85,22 @@
       </GROUP>
     </GROUP>
     <GROUP id="{A73AEEF5-637C-D160-EE91-9A6158A5A60C}" name="Source">
+      <GROUP id="{55BA4725-4268-7C5F-0EB7-3BE690CD78BD}" name="tuning">
+        <FILE id="Aoi3Jl" name="Interval.h" compile="0" resource="0" file="Source/tuning/Interval.h"/>
+        <FILE id="n6A32B" name="NotationDefinition.cpp" compile="1" resource="0"
+              file="Source/tuning/NotationDefinition.cpp"/>
+        <FILE id="EM9b7u" name="NotationDefinition.h" compile="0" resource="0"
+              file="Source/tuning/NotationDefinition.h"/>
+        <FILE id="qHoFdb" name="NotationTable.cpp" compile="1" resource="0"
+              file="Source/tuning/NotationTable.cpp"/>
+        <FILE id="erNb5r" name="NotationTable.h" compile="0" resource="0" file="Source/tuning/NotationTable.h"/>
+        <FILE id="IxU9n2" name="TuningDefinition.cpp" compile="1" resource="0"
+              file="Source/tuning/TuningDefinition.cpp"/>
+        <FILE id="esoDyT" name="TuningDefinition.h" compile="0" resource="0"
+              file="Source/tuning/TuningDefinition.h"/>
+        <FILE id="VbYF7C" name="TuningTable.cpp" compile="1" resource="0" file="Source/tuning/TuningTable.cpp"/>
+        <FILE id="Ia6iO0" name="TuningTable.h" compile="0" resource="0" file="Source/tuning/TuningTable.h"/>
+      </GROUP>
       <FILE id="uHwlF9" name="MainWindow.cpp" compile="1" resource="0" file="Source/MainWindow.cpp"/>
       <FILE id="GIvNyp" name="MainWindow.h" compile="0" resource="0" file="Source/MainWindow.h"/>
       <FILE id="S1tuPL" name="ApplicationListeners.h" compile="0" resource="0"
