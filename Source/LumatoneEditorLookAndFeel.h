@@ -1031,16 +1031,34 @@ public:
 
     void drawTabButton(TabBarButton& tbb, Graphics& g, bool isMouseOver, bool isMouseDown) override
     {
-        Colour c;
+        Colour backgroundColour;
 
-        if (tbb.isFrontTab())
-            c = Colours::white;
+        if (tbb.getTabbedButtonBar().getNumTabs() > 1)
+        {
+            if (tbb.isFrontTab())
+                backgroundColour = findColour(LumatoneEditorColourIDs::LightBackground);
 
-        else if (isMouseOver)
-            c = c.withAlpha(0.15f);
+            if (isMouseOver)
+            {
+                if (backgroundColour.isTransparent())
+                    backgroundColour = juce::Colours::white.withAlpha(0.05f);
+                else
+                    backgroundColour = backgroundColour.brighter(0.05f);
+            }
 
-        g.setColour(c);
-        g.drawLine(0, tbb.getHeight(), tbb.getWidth(), tbb.getHeight(), 3.0f);
+            if (!backgroundColour.isTransparent())
+            {
+                // Draw border
+                g.setColour(backgroundColour);
+
+                auto bounds = tbb.getLocalBounds().toFloat();
+                const float cornerSize = 800.0f * ROUNDEDCORNERTOAPPHEIGHT;
+                auto rect = getConnectedRoundedRectPath(bounds, cornerSize, Button::ConnectedEdgeFlags::ConnectedOnBottom);
+
+                g.fillPath(rect);
+            }
+        }
+        //g.drawLine(0, tbb.getHeight(), tbb.getWidth(), tbb.getHeight(), 3.0f);
 
         drawTabButtonText(tbb, g, isMouseOver, isMouseDown);
     }
@@ -1057,8 +1075,8 @@ public:
         if (tbb.isFrontTab())
             c = findColour(LumatoneEditorColourIDs::ActiveText);
 
-        else if (isMouseOver)
-            c = c.brighter(0.15f);
+        if (isMouseOver)
+            c = c.overlaidWith(juce::Colours::white.withAlpha(0.15f));
 
         g.setColour(c);
 
