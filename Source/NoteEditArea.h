@@ -138,14 +138,15 @@ private:
 
     const float contentMarginY                  = 0.10101f;
 
-    const float assignControlsWidth             = 0.3846f;
+    const float assignControlsWidthHRatio       = 0.545f;
     const float assignControlsHeightInContent   = 0.9f;
 
-    const float assignMarginX                   = 0.05f;
+    const float assignControlsMarginXHRatio     = 0.07f;
     const float assignMarginYInContent          = 0.0444f;
     const float assignTabDepthInContent         = 0.075f;
+    const float tabBarLengthDepthRatio          = 15.0f;
 
-    const float assignLabelMarginX              = 0.01f;
+    const float assignLabelMarginXHRatio        = 0.0155f;
     const float assignLabelTabDepthHeight       = 0.9f;
 
     const float keyEditWidth                    = 0.48f;

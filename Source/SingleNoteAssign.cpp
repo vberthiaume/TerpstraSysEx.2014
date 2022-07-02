@@ -301,7 +301,8 @@ void SingleNoteAssign::resized()
     int halfMarginX = roundToInt(marginX * 0.5f);
     int halfMarginY = roundToInt(marginY * 0.5f);
 
-    int rowWidth = roundToInt(w - marginX * 2);
+
+    int rowWidth = roundToInt(controlH * rowWidthHeightProp - marginX * 2);
     int toggleWidthMargin = toggleHeight + marginX * 1.25f; // Toggle icon + combined margins
 
     //[/UserPreResize]
@@ -309,8 +310,7 @@ void SingleNoteAssign::resized()
     //[UserResized] Add your own custom resize handling here..
     instructionsAreaBounds.setBounds(0, 0, w, controlAreaTop);
     instructionsFont.setHeight(instructionsAreaBounds.getHeight() * fontHeightInBounds);
-    controlsX = roundToInt(w * controlsXScalar);
-
+    controlsX = marginX;
 
     instructionsBounds.setBounds(marginX, 0, w - marginX * 2, controlAreaTop);
 

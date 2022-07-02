@@ -155,30 +155,42 @@ void NoteEditArea::resized()
 	contentBackground.setBounds(0, contentY, getWidth(), getHeight() - contentY);
 
 	assignControlsBounds.setBounds(
-		getWidth() * assignMarginX, contentBackground.getHeight() * assignMarginYInContent + contentBackground.getY(),
-		getWidth() * assignControlsWidth, contentBackground.getHeight() * assignControlsHeightInContent
+		getHeight() * assignControlsMarginXHRatio, contentBackground.getHeight() * assignMarginYInContent + contentBackground.getY(),
+		getHeight() * assignControlsWidthHRatio, contentBackground.getHeight() * assignControlsHeightInContent
 	);
+
+	DBG("------NoteEditAreaSizes - START ------");
+	DBG("Parent size: " + getBounds().toString());
+	DBG("contentBackground: " + contentBackground.toString());
+	DBG("assignControlsBounds: " + assignControlsBounds.toString());
 
 	roundedCornerLayout = round(getParentHeight() * ROUNDEDCORNERTOAPPHEIGHT);
 
 	octaveTabsArea.setBounds(0, 0, getWidth(), round(getHeight() * 0.069f));
-
+	
+	const float tabBarDepth = assignTabDepthInContent * contentBackground.getHeight();
 	editFunctionsTab->setBounds(assignControlsBounds.toNearestInt());
-	editFunctionsTab->setTabBarDepth(assignTabDepthInContent * contentBackground.getHeight());
+	editFunctionsTab->setTabBarDepth(tabBarDepth);
+	DBG("TabBarDepth is " + String(tabBarDepth));
 
 	resizeLabelWithHeight(labelWindowTitle.get(), roundToInt(octaveBoardSelectorTab->getHeight() * assignLabelTabDepthHeight));
-	labelWindowTitle->setTopLeftPosition(roundToInt(getWidth() * assignLabelMarginX), roundToInt((octaveTabsArea.getHeight() - labelWindowTitle->getHeight()) * 0.5f));
+	labelWindowTitle->setTopLeftPosition(roundToInt(assignLabelMarginXHRatio * getHeight()), roundToInt((octaveTabsArea.getHeight() - labelWindowTitle->getHeight()) * 0.5f));
+	DBG("LabelWindwoTitle bounds: " + labelWindowTitle->getBoundsInParent().toString());
 
 	keyEditBounds.setBounds(
 		getWidth() * keyEditMarginX, contentBackground.getHeight() * assignMarginYInContent + contentBackground.getY(),
 		getWidth() * keyEditWidth, contentBackground.getHeight() * assignControlsHeightInContent
 	);
 
+	DBG("KeyEditBounds: " + keyEditBounds.toString());
+
     //[/UserPreResize]
 
     //[UserResized] Add your own custom resize handling here..
 
 	octaveBoardSelectorTab->setBounds(labelWindowTitle->getRight(), 0, getWidth() - labelWindowTitle->getRight(), octaveTabsArea.getHeight());
+	DBG("First tab bounds: " + octaveBoardSelectorTab->getTabButton(0)->getBoundsInParent().toString());
+	DBG("Last tab bounds: " + octaveBoardSelectorTab->getTabButton(4)->getBoundsInParent().toString());
 
 	// Single Key fields
 
@@ -208,6 +220,7 @@ void NoteEditArea::resized()
 
 	jassert(TerpstraSysExApplication::getApp().getOctaveBoardSize() == keyIndex);
 
+	DBG("------NoteEditAreaSizes - END ------");
     //[/UserResized]
 }
 

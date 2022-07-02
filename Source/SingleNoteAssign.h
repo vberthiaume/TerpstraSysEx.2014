@@ -104,6 +104,7 @@ private:
 
     const float xMarginScalar       = 0.0917f;
     const float yMarginScalar       = 0.075f;
+    const float rowWidthHeightProp  = 11.455f;
     const float controlAreaYScalar  = 0.183333f;
     const float controlsXScalar     = 0.06f;
     const float separatorYScalar    = 0.666667f;
