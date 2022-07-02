@@ -77,6 +77,8 @@ public:
 	void refreshKeyDataFields();
 	void refreshAllFields();
 
+	void setEditAreaExpanded(bool isExpanded);
+
 	// Implementation of LumatoneEditor::FirmwareListener
 
 	void octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData) override;
@@ -125,6 +127,7 @@ private:
 
 	std::unique_ptr<PedalSensitivityDlg> pedalSensitivityDlg;
 
+
 	// Version signature in bottom left of window
 	std::unique_ptr<Label> lblAppName;
 
@@ -138,9 +141,18 @@ private:
 	TerpstraKeys		copiedSubBoardData;
 
 	//==============================================================================
+	// View settings
+	std::unique_ptr<TextButton> editAreaSizeButton;
+
+	bool expandedEditArea = false;
+
+	//==============================================================================
 	// Position and Size helpers
 
     Rectangle<int> controlsArea;
+
+	float cornerSize = 0.0f;
+
 
     const float headerHeight                = 0.0776f;
 
@@ -170,5 +182,4 @@ private:
     const Rectangle<float> generalSettingsBounds = { settingsColumnX, settingsAreaY, 0.17f, settingsAreaHeight };
     const Rectangle<float>   pedalSettingsBounds = { 0.777778f,       settingsAreaY, 0.18f, settingsAreaHeight };
     const Rectangle<float>      curvesAreaBounds = { settingsColumnX, 0.7174f,       0.3626f, 0.21f };
-
 };

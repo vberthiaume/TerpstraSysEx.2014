@@ -47,6 +47,11 @@ MainContentComponent::MainContentComponent()
 	addAndMakeVisible(globalSettingsArea.get());
 	globalSettingsArea->listenToColourEditButtons(this);
 
+	editAreaSizeButton.reset(new TextButton(">", juce::translate("Hide settings to expand edit area")));
+	editAreaSizeButton->setClickingTogglesState(true);
+	addAndMakeVisible(editAreaSizeButton.get());
+	editAreaSizeButton->addListener(this);
+
 	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
 
 	//lblAppName.reset(new Label("lblAppName", TerpstraSysExApplication::getApp().getApplicationName()));
@@ -375,6 +380,11 @@ void MainContentComponent::buttonClicked(Button* btn)
 		paletteWindow->listenToColourSelection(colourEdit);
 		// TODO: Set swatch # or custom colour as current colour
 	}
+
+	if (editAreaSizeButton.get() == dynamic_cast<TextButton*>(btn))
+	{
+		setEditAreaExpanded(editAreaSizeButton->getToggleState());
+	}
 }
 
 void MainContentComponent::paint (Graphics& g)
@@ -406,9 +416,17 @@ void MainContentComponent::resized()
 	int newKeysOverviewAreaHeight = jmax(controlsArea.getY() - midiAreaHeight, MINIMALTERPSTRAKEYSETAREAHEIGHT);
 	allKeysOverview->setBounds(0, midiAreaHeight, newWidth, newKeysOverviewAreaHeight);
 
-	// Edit function/single key field area
-	noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
+
+	// Edit key field area
 	noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
+
+	float noteEditWidthRatio = assignWidth;
+	if (expandedEditArea)
+	{
+		noteEditWidthRatio += curvesAreaBounds.getWidth();
+	}
+	
+	noteEditArea->setSize(proportionOfWidth(noteEditWidthRatio), proportionOfHeight(assignHeight));
 	
 	generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
 	pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
@@ -416,9 +434,16 @@ void MainContentComponent::resized()
 	curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
 
 	globalSettingsArea->setBounds(getLocalBounds()
-		.withTop(roundToInt(getHeight() * footerAreaY))
+		.withTop(roundToInt(newHeight * footerAreaY))
 		.withTrimmedRight(footerHeight)
 	);
+
+	cornerSize = (float)getParentWidth() * ROUNDEDCORNERTOAPPHEIGHT;
+
+	const float size = cornerSize * 4;
+	const float margin = cornerSize * 0.5;
+	editAreaSizeButton->setSize(size, size);
+	editAreaSizeButton->setTopRightPosition(noteEditArea->getRight() - margin, generalOptionsArea->getY());
 
 	resizeLabelWithHeight(lblAppName.get(), roundToInt(footerHeight * lumatoneVersionHeight), 1.0f, " ");
 	lblAppName->setTopLeftPosition(proportionOfWidth(lumatoneVersionMarginX), footerY + (footerHeight - lblAppName->getHeight()) * 0.5f);
@@ -442,3 +467,25 @@ void MainContentComponent::refreshAllFields()
 	curvesArea->repaint();
 }
 
+void MainContentComponent::setEditAreaExpanded(bool isExpanded)
+{
+	expandedEditArea = isExpanded;
+
+	generalOptionsArea->setVisible(!expandedEditArea);
+	pedalSensitivityDlg->setVisible(!expandedEditArea);
+	curvesArea->setVisible(!expandedEditArea);
+
+	if (isExpanded)
+	{
+		noteEditArea->setBounds(noteEditArea->getBounds().withRight(curvesArea->getRight()));
+		editAreaSizeButton->setButtonText("<");
+	}
+	else
+	{
+		noteEditArea->setBounds(noteEditArea->getBounds().withWidth(proportionOfWidth(assignWidth)));
+		editAreaSizeButton->setButtonText(">");
+	}
+
+	const float margin = cornerSize * 0.5f;
+	editAreaSizeButton->setTopRightPosition(noteEditArea->getRight() - margin, generalOptionsArea->getY());
+}
