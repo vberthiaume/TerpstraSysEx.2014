@@ -17,24 +17,39 @@ TerpstraKeyEdit class
 ==============================================================================
 */
 
-TerpstraKeyEdit::TerpstraKeyEdit()
-	: isSelected(false), keyColour(juce::Colour()), keyType(LumatoneKeyType::noteOnNoteOff)
+TerpstraKeyEdit::TerpstraKeyEdit(int boardIndex, int keyIndex)
+	: isSelected(false), board_idx(boardIndex), key_idx(keyIndex), keyColour(juce::Colour()), keyType(LumatoneKeyType::noteOnNoteOff)
 {
 	midiNoteLabel = new Label("midiNoteLabel", "0");
 	addAndMakeVisible(midiNoteLabel);
 	midiNoteLabel->setJustificationType(Justification::centredRight);
 	midiNoteLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowBold));
+
 	
 	midiChannelLabel = new Label("midiChannelLabel", "0");
 	addAndMakeVisible(midiChannelLabel);
 	midiChannelLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
 	midiChannelLabel->setJustificationType(Justification::centredRight);
+
+	addMouseListener(this, true);
 }
 
 TerpstraKeyEdit::~TerpstraKeyEdit()
 {
+	listeners.clear();
 	deleteAllChildren();
 }
+
+int TerpstraKeyEdit::getBoardIndex() const
+{
+	return board_idx;
+}
+
+int TerpstraKeyEdit::getKeyIndex() const
+{
+	return key_idx;
+}
+
 
 TerpstraKey TerpstraKeyEdit::getValue() const
 {
@@ -227,5 +242,54 @@ void TerpstraKeyEdit::setKeySize(float keySizeIn)
 {
 	keySize = keySizeIn;
 	setSize(keySize, keySize);
+}
+
+void TerpstraKeyEdit::mouseDown(const juce::MouseEvent& e)
+{
+	DBG("key clicked!");
+	auto value = getValue();
+	listeners.call(&LumatoneKeyEditListener::keyClickedCallback, e, board_idx, key_idx, value);
+}
+
+void TerpstraKeyEdit::addKeyEditListener(LumatoneKeyEditListener* listenerIn)
+{
+	listeners.add(listenerIn);
+}
+
+void TerpstraKeyEdit::removeKeyEditListener(LumatoneKeyEditListener* listenerIn)
+{
+	listeners.remove(listenerIn);
+}
+
+
+/*
+==============================================================================
+LumatoneKeyPtr struct
+==============================================================================
+*/
+
+LumatoneKeyPtr::LumatoneKeyPtr(int boardIndex, int keyIndex, TerpstraKey* keyPtr)
+	: board_idx(boardIndex), key_idx(keyIndex), key(keyPtr) {}
+
+bool LumatoneKeyPtr::isValid() const
+{
+	if (key_idx >= 0 && key_idx < TerpstraSysExApplication::getApp().getOctaveBoardSize() && board_idx >= 0)
+		return true;
+	return false;
+}
+
+bool LumatoneKeyPtr::isNull() const
+{
+	return key == nullptr;
+}
+
+
+LumatoneBoardSet::LumatoneBoardSet(int boardIndex)
+	: board_idx(boardIndex)
+{
+	for (int i = 0; i < TerpstraSysExApplication::getApp().getOctaveBoardSize(); i++)
+	{
+		keys[i].reset(new TerpstraKeyEdit(boardIndex, i));
+	}
 }
 

@@ -48,8 +48,10 @@
 */
 class NoteEditArea  : public Component,
                       public ChangeListener,
+                      public LumatoneKeyEditListener,
                       public ColourSelectionBroadcaster
 {
+
 public:
     //==============================================================================
     NoteEditArea ();
@@ -67,7 +69,9 @@ public:
 	void onSetData(TerpstraKeyMapping& newData);
 
 	// Fill key fields with values from a certain octaveboard subset
-	void setKeyFieldValues(const TerpstraKeys& keySet);
+	void setKeyFieldValues(const LumatoneKeySelection& keySelection);
+    void setKeyFieldValues(const TerpstraKeys& keys, int octaveIndex);
+    void setKeyFieldValues(const TerpstraKeys** allOctaveKeys);
 
 	TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
 
@@ -77,7 +81,9 @@ public:
 
     IsomorphicMassAssign* getIsomorphicMassAssignPanel() { return dynamic_cast<IsomorphicMassAssign*>(editFunctionsTab->getTabContentComponent(1)); }
 
-	void changeSingleKeySelection(int newSelection);
+	void changeKeySelection(LumatoneKeySelection& selection);
+
+    void resetKeySelection();
 
 	void refreshKeyFields();
 
@@ -91,6 +97,8 @@ public:
     // ColourSelectionBroadcaster Implementation
     Colour getSelectedColour() override;
     void deselectColour() override {};
+
+    void keyClickedCallback(const juce::MouseEvent& e, int boardIndex, int keyIndex, TerpstraKey value) override;
 
     //[/UserMethods]
 
@@ -111,13 +119,17 @@ private:
     int currentBoardSize = 0;
 	bool showIsomorphicMassAssign = false;
 
+    // TODO support arbitrary octave sets?
+    int octaveIndexBeingEdited = 0; // Less than 0 means all octaves are being edited
+
 	// Selector for octave boards
 	std::unique_ptr<TabbedButtonBar> octaveBoardSelectorTab;
 
 	// Editing single keys (of the selected 56-key set)
-	std::unique_ptr<TerpstraKeyEdit>	terpstraKeyFields[56];
+	juce::OwnedArray<LumatoneBoardSet> octaveKeySets;
 
-    int					currentSingleKeySelection;
+    //int currentSingleKeySelection;
+    LumatoneKeySelection currentKeySelection;
 
     // Key edit positioning
     HexagonTilingGeometry tilingGeometry;
