@@ -38,7 +38,7 @@ public:
 	int getKeyIndex() const;
 
 	TerpstraKey getValue() const;
-	void setValue(TerpstraKey newValue);
+	void setValue(const TerpstraKey& newValue);
 
 	void setIsSelected(bool newValue);
 
@@ -55,6 +55,8 @@ public:
 	};
 
 	void mouseDown(const juce::MouseEvent& e) override;
+
+	juce::String toString() const;
 
 public:
 

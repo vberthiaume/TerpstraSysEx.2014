@@ -63,11 +63,15 @@ TerpstraKey TerpstraKeyEdit::getValue() const
 	return newValue;
 }
 
-void TerpstraKeyEdit::setValue(TerpstraKey newValue)
+void TerpstraKeyEdit::setValue(const TerpstraKey& newValue)
 {
-    if (newValue.keyType == LumatoneKeyType::disabled || newValue.keyType == LumatoneKeyType::disabledDefault)
+	auto newKeyType = newValue.keyType;
+    if (newKeyType == LumatoneKeyType::disabled || newKeyType == LumatoneKeyType::disabledDefault)
     {
-        newValue.keyType = LumatoneKeyType::disabled;
+		// TODO move this behavior elsewhere
+        //newValue.keyType = LumatoneKeyType::disabled;
+
+		newKeyType = LumatoneKeyType::disabled;
         midiNoteLabel->setText("x", juce::NotificationType::sendNotification);
         midiChannelLabel->setText("x", juce::NotificationType::sendNotification);
     }
@@ -76,8 +80,9 @@ void TerpstraKeyEdit::setValue(TerpstraKey newValue)
         midiNoteLabel->setText(String(newValue.noteNumber), juce::NotificationType::sendNotification);
         midiChannelLabel->setText(String(newValue.channelNumber), juce::NotificationType::sendNotification);
     }
+
 	keyColour = newValue.colour;
-	keyType = newValue.keyType;
+	keyType = newKeyType;
     ccFaderDefault = newValue.ccFaderDefault;
 
 	String newTooltip = translate("KeyType") + " ";
@@ -101,7 +106,7 @@ void TerpstraKeyEdit::setValue(TerpstraKey newValue)
 		newTooltip += translate("Disabled");
 		break;
 	default:
-		jassertfalse;
+		//jassertfalse;
 		newTooltip += translate("Unknown");
 		break;
 	}
@@ -249,6 +254,19 @@ void TerpstraKeyEdit::mouseDown(const juce::MouseEvent& e)
 	DBG("key clicked!");
 	auto value = getValue();
 	listeners.call(&LumatoneKeyEditListener::keyClickedCallback, e, board_idx, key_idx, value);
+}
+
+juce::String TerpstraKeyEdit::toString() const
+{
+	juce::StringArray tokens;
+	tokens.add("Board " + juce::String(board_idx));
+	tokens.add("Key " + juce::String(key_idx));
+	tokens.add("Note " + midiNoteLabel->getText());
+	tokens.add("Ch " + midiChannelLabel->getText());
+	tokens.add("Type " + juce::String(keyType));
+	tokens.add("Col " + keyColour.toString());
+	tokens.add("Size " + juce::String(keySize));
+	return tokens.joinIntoString(" | ");
 }
 
 void TerpstraKeyEdit::addKeyEditListener(LumatoneKeyEditListener* listenerIn)
