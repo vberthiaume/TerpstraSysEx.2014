@@ -475,6 +475,9 @@ void MainContentComponent::setEditAreaExpanded(bool isExpanded)
 	pedalSensitivityDlg->setVisible(!expandedEditArea);
 	curvesArea->setVisible(!expandedEditArea);
 
+	noteEditArea->setEditAllOctaves(isExpanded);
+	
+
 	if (isExpanded)
 	{
 		noteEditArea->setBounds(noteEditArea->getBounds().withRight(curvesArea->getRight()));

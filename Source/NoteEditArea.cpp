@@ -159,10 +159,10 @@ void NoteEditArea::resized()
 		getHeight() * assignControlsWidthHRatio, contentBackground.getHeight() * assignControlsHeightInContent
 	);
 
-	DBG("------NoteEditAreaSizes - START ------");
-	DBG("Parent size: " + getBounds().toString());
-	DBG("contentBackground: " + contentBackground.toString());
-	DBG("assignControlsBounds: " + assignControlsBounds.toString());
+	//DBG("------NoteEditAreaSizes - START ------");
+	//DBG("Parent size: " + getBounds().toString());
+	//DBG("contentBackground: " + contentBackground.toString());
+	//DBG("assignControlsBounds: " + assignControlsBounds.toString());
 
 	roundedCornerLayout = round(getParentHeight() * ROUNDEDCORNERTOAPPHEIGHT);
 
@@ -171,70 +171,79 @@ void NoteEditArea::resized()
 	const float tabBarDepth = assignTabDepthInContent * contentBackground.getHeight();
 	editFunctionsTab->setBounds(assignControlsBounds.toNearestInt());
 	editFunctionsTab->setTabBarDepth(tabBarDepth);
-	DBG("TabBarDepth is " + String(tabBarDepth));
+	//DBG("TabBarDepth is " + String(tabBarDepth));
 
 	resizeLabelWithHeight(labelWindowTitle.get(), roundToInt(octaveBoardSelectorTab->getHeight() * assignLabelTabDepthHeight));
 	labelWindowTitle->setTopLeftPosition(roundToInt(assignLabelMarginXHRatio * getHeight()), roundToInt((octaveTabsArea.getHeight() - labelWindowTitle->getHeight()) * 0.5f));
-	DBG("LabelWindwoTitle bounds: " + labelWindowTitle->getBoundsInParent().toString());
+	//DBG("LabelWindwoTitle bounds: " + labelWindowTitle->getBoundsInParent().toString());
 
-	keyEditBounds.setBounds(
-		getWidth() * keyEditMarginX, contentBackground.getHeight() * assignMarginYInContent + contentBackground.getY(),
-		getWidth() * keyEditWidth, contentBackground.getHeight() * assignControlsHeightInContent
-	);
+	//keyEditBounds.setBounds(
+	//	getWidth() * keyEditMarginX, contentBackground.getHeight() * assignMarginYInContent + contentBackground.getY(),
+	//	getWidth() * keyEditWidth, contentBackground.getHeight() * assignControlsHeightInContent
+	//);
 
-	DBG("KeyEditBounds: " + keyEditBounds.toString());
 
 	//[/UserPreResize]
 
 	//[UserResized] Add your own custom resize handling here..
 
 	octaveBoardSelectorTab->setBounds(labelWindowTitle->getRight(), 0, getWidth() - labelWindowTitle->getRight(), octaveTabsArea.getHeight());
-	DBG("First tab bounds: " + octaveBoardSelectorTab->getTabButton(0)->getBoundsInParent().toString());
-	DBG("Last tab bounds: " + octaveBoardSelectorTab->getTabButton(4)->getBoundsInParent().toString());
+	//DBG("First tab bounds: " + octaveBoardSelectorTab->getTabButton(0)->getBoundsInParent().toString());
+	//DBG("Last tab bounds: " + octaveBoardSelectorTab->getTabButton(4)->getBoundsInParent().toString());
 
 	// Single Key fields
 
 	keyEditBounds = contentBackground.withLeft(assignControlsBounds.getRight() + assignControlsBounds.getX() * 0.5f);
+	DBG("KeyEditBounds: " + keyEditBounds.toString());
 
 	int numOctaves = 1;
 	int widestRow = boardGeometry.getMaxHorizontalLineSize();
 	int longestColumn = boardGeometry.horizontalLineCount();
+	int expectedNumKeys = currentBoardSize;
 	
 	if (octaveIndexBeingEdited < 0)
 	{
 		numOctaves = 5;
-		widestRow *= 5;
+		widestRow = 33;
+		expectedNumKeys *= 5;
 	}
 
 	tilingGeometry.fitTilingTo(
 		keyEditBounds,
 		widestRow,
 		longestColumn,
-		round(keyEditBounds.getWidth() * singleKeyMarginFromWidth),
+		round(keyEditBounds.getWidth() * singleKeyMarginFromWidth), // TODO recalculate this to be height-based
 		TERPSTRASINGLEKEYROTATIONANGLE, true
 	);
 
 	Array<Point<float>> keyCentres = tilingGeometry.getHexagonCentres(boardGeometry, 0, numOctaves);
-	jassert(keyCentres.size() == TerpstraSysExApplication::getApp().getOctaveBoardSize());
+
+	jassert(keyCentres.size() == expectedNumKeys);
 
 	float keySize = tilingGeometry.getKeySize();
 
 	for (int oct = 0; oct < numOctaves; oct++)
 	{
 		auto octave = octaveKeySets[oct];
-		int keyIndex = 0;
-		for (keyIndex = 0; keyIndex < keyCentres.size(); keyIndex++)
+		int keyIndex;
+		for (keyIndex = 0; keyIndex < currentBoardSize; keyIndex++)
 		{
-			Point<float> centre = keyCentres[keyIndex];
+			//juce::String msg = juce::String("Resizing Oct ") + juce::String(oct) + " Key " + juce::String(keyIndex);
+			//DBG(msg);
+			int centreIndex = keyIndex + oct * currentBoardSize;
+			Point<float> centre = keyCentres[centreIndex];
 
-			octave->keys[keyIndex]->setKeySize(keySize);
-			octave->keys[keyIndex]->setCentrePosition(centre.roundToInt());
+			auto key = octave->keys[keyIndex].get();
+			key->setKeySize(keySize);
+			key->setCentrePosition(centre.roundToInt());
+			//key->setVisible(true);
+			
 		}
 
-		jassert(TerpstraSysExApplication::getApp().getOctaveBoardSize() == keyIndex);
+		//jassert(TerpstraSysExApplication::getApp().getOctaveBoardSize() == keyIndex);
 	}
 
-	DBG("------NoteEditAreaSizes - END ------");
+	//DBG("------NoteEditAreaSizes - END ------");
     //[/UserResized]
 }
 
@@ -325,7 +334,7 @@ void NoteEditArea::keyClickedCallback(const juce::MouseEvent& e, int boardIndex,
 	{
 		// Perform the edit, according to edit mode. Including sending to device
 		auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-		jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS&& keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize());
+		jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS&& keyIndex >= 0 && keyIndex < currentBoardSize);
 
 		int editMode = editFunctionsTab->getCurrentTabIndex();
 		switch (editMode)
@@ -402,32 +411,31 @@ void NoteEditArea::onSetData(TerpstraKeyMapping& newData)
 	// Add colours of the mapping to the colour combo box
 	return dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->onSetData(newData);
 }
-
-void NoteEditArea::setKeyFieldValues(const LumatoneKeySelection& keySelection)
-{
-	for (auto keyPtr : keySelection)
-	{
-		if (keyPtr.isValid() && !keyPtr.isNull())
-		{
-			auto octave = octaveKeySets[keyPtr.board_idx];
-			for (int i = 0; i < TerpstraSysExApplication::getApp().getOctaveBoardSize(); i++)
-				octave->keys[i]->setValue(*keyPtr.key);
-
-			continue;
-		}
-
-		DBG("Warning: invalid or null key passed to NoteEditArea::setKeyFieldValues");
-	}
-}
+//
+//void NoteEditArea::setKeyFieldValues(const LumatoneKeySelection& keySelection)
+//{
+//	for (auto keyPtr : keySelection)
+//	{
+//		if (keyPtr.isValid() && !keyPtr.isNull())
+//		{
+//			auto octave = octaveKeySets[keyPtr.board_idx];
+//			for (int i = 0; i < TerpstraSysExApplication::getApp().getOctaveBoardSize(); i++)
+//				octave->keys[i]->setValue(*keyPtr.key);
+//
+//			continue;
+//		}
+//
+//		DBG("Warning: invalid or null key passed to NoteEditArea::setKeyFieldValues");
+//	}
+//}
 
 void NoteEditArea::setKeyFieldValues(const TerpstraKeys& keys, int octaveIndex)
 {
 	if (octaveIndex >= 0 && octaveIndex < NUMBEROFBOARDS)
 	{
-		auto octave = octaveKeySets[octaveIndex];
-		for (int i = 0; i < TerpstraSysExApplication::getApp().getOctaveBoardSize(); i++)
+		for (int i = 0; i < currentBoardSize; i++)
 		{
-			octave->keys[i]->setValue(keys.theKeys[i]);
+			octaveKeySets[0]->keys[i]->setValue(keys.theKeys[i]);
 		}
 
 		octaveIndexBeingEdited = octaveIndex;
@@ -438,7 +446,7 @@ void NoteEditArea::setKeyFieldValues(const TerpstraKeys& keys, int octaveIndex)
 	DBG("Warning: invalid octaveIndex passed to NoteEditArea::setKeyFieldValues");
 }
 
-void NoteEditArea::setKeyFieldValues(const TerpstraKeys** allOctaveKeys)
+void NoteEditArea::setKeyFieldValues(const TerpstraKeys (&allOctaveKeys)[5])
 {
 	if (allOctaveKeys == nullptr)
 	{
@@ -448,12 +456,16 @@ void NoteEditArea::setKeyFieldValues(const TerpstraKeys** allOctaveKeys)
 
 	for (int oct = 0; oct < NUMBEROFBOARDS; oct++)
 	{
-		auto octaveSetIn = allOctaveKeys[oct];
+		//auto keysIn = (allOctaveKeys[oct])->theKeys;
 		auto octave = octaveKeySets[oct];
 
-		for (int i = 0; i < TerpstraSysExApplication::getApp().getOctaveBoardSize(); i++)
+		for (int i = 0; i < currentBoardSize; i++)
 		{
-			octave->keys[i]->setValue(octaveSetIn->theKeys[i]);
+			auto keyEdit = octave->keys[i].get();
+			auto keyValue = &(allOctaveKeys[oct].theKeys[i]);
+			keyEdit->setValue(*keyValue);
+			keyEdit->setVisible(true);
+			DBG("Oct " + String(oct) + ", Key " + String(i) + ": " + keyEdit->toString());
 		}
 	}
 
@@ -467,7 +479,7 @@ ColourEditComponent* NoteEditArea::getColourEditComponent()
 
 ColourTextEditor* NoteEditArea::getSingleNoteColourTextEditor()
 {
-	return dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->getColourTextEditor();;
+	return dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->getColourTextEditor();
 }
 
 void NoteEditArea::changeKeySelection(LumatoneKeySelection& selection)
@@ -501,12 +513,54 @@ void NoteEditArea::resetKeySelection()
 	changeKeySelection(selection);
 }
 
+void NoteEditArea::setEditAllOctaves(bool editAllOctaves)
+{
+	octaveBoardSelectorTab->setVisible(!editAllOctaves);
+
+	if (editAllOctaves)
+	{
+		//auto sets = &((MainContentComponent*)getParentComponent())->getMappingInEdit().sets;
+		setKeyFieldValues(((MainContentComponent*)getParentComponent())->getMappingInEdit().sets);
+
+		octaveIndexBeingEdited = -1;
+
+		return;
+	}
+
+	hideInactiveOctaves();
+}
+
+void NoteEditArea::hideInactiveOctaves()
+{
+	for (int oct = 1; oct < NUMBEROFBOARDS; oct++)
+	{
+		auto octave = octaveKeySets[oct];
+		for (int i = 0; i < currentBoardSize; i++)
+		{
+			octave->keys[i]->setVisible(false);
+		}
+	}
+
+	octaveIndexBeingEdited = octaveBoardSelectorTab->getCurrentTabIndex();
+	refreshKeyFields();
+}
+
 void NoteEditArea::refreshKeyFields()
 {
-	auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-	jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS);
-	
-	setKeyFieldValues(((MainContentComponent*)getParentComponent())->getMappingInEdit().sets[setSelection], setSelection);
+	if (octaveIndexBeingEdited >= 0)
+	{
+		//auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
+		//jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS);
+		jassert(octaveIndexBeingEdited >= 0 && octaveIndexBeingEdited < NUMBEROFBOARDS);
+
+		setKeyFieldValues(((MainContentComponent*)getParentComponent())->getMappingInEdit().sets[octaveIndexBeingEdited], octaveIndexBeingEdited);
+		return;
+	}
+	else
+	{
+		// All octaves mode
+		setEditAllOctaves(true);
+	}
 }
 
 void NoteEditArea::resetOctaveSize(bool refreshAndResize)

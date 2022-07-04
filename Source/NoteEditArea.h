@@ -69,9 +69,9 @@ public:
 	void onSetData(TerpstraKeyMapping& newData);
 
 	// Fill key fields with values from a certain octaveboard subset
-	void setKeyFieldValues(const LumatoneKeySelection& keySelection);
+	//void setKeyFieldValues(const LumatoneKeySelection& keySelection);
     void setKeyFieldValues(const TerpstraKeys& keys, int octaveIndex);
-    void setKeyFieldValues(const TerpstraKeys** allOctaveKeys);
+    void setKeyFieldValues(const TerpstraKeys (&allOctaveKeys)[5]);
 
 	TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
 
@@ -84,6 +84,9 @@ public:
 	void changeKeySelection(LumatoneKeySelection& selection);
 
     void resetKeySelection();
+
+    void setEditAllOctaves(bool editAllOctaves);
+    void hideInactiveOctaves();
 
 	void refreshKeyFields();
 
