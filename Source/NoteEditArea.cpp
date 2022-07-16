@@ -212,15 +212,20 @@ void NoteEditArea::resized()
 		keyEditBounds,
 		widestRow,
 		longestColumn,
-		round(keyEditBounds.getWidth() * singleKeyMarginFromWidth), // TODO recalculate this to be height-based
+		round(keyEditBounds.getHeight() * singleKeyMarginFromHeight), // TODO recalculate this to be height-based
 		TERPSTRASINGLEKEYROTATIONANGLE, true
 	);
+
+	DBG("key margin: " + juce::String(keyEditBounds.getHeight() * singleKeyMarginFromHeight));
+
 
 	Array<Point<float>> keyCentres = tilingGeometry.getHexagonCentres(boardGeometry, 0, numOctaves);
 
 	jassert(keyCentres.size() == expectedNumKeys);
 
 	float keySize = tilingGeometry.getKeySize();
+
+	DBG("key size: " + String(keySize));
 
 	for (int oct = 0; oct < numOctaves; oct++)
 	{

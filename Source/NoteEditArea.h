@@ -177,7 +177,7 @@ private:
     const float singleKeyFieldLineWidth         = 0.003f;
     const float singleKeyFieldLineWidthSelected = 0.005f;
 
-    const float singleKeyMarginFromWidth = 0.0164f;
+    const float singleKeyMarginFromHeight       = 0.0148f;
 
 	// Geometry settings
 	TerpstraBoardGeometry	boardGeometry;
