@@ -8,3 +8,5 @@
 /Installers/Packages/build*
 .vscode
 /Releases
+/build
+/.vs
