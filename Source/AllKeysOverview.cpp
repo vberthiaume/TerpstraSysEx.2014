@@ -32,14 +32,11 @@
 
 
 //==============================================================================
-KeyMiniDisplayInsideAllKeysOverview::KeyMiniDisplayInsideAllKeysOverview(int newBoardIndex, int newKeyIndex)
-	: Component("AllKeysOverview_Key" + String(newKeyIndex) + "," + String(newBoardIndex))
+KeyMiniDisplayInsideAllKeysOverview::KeyMiniDisplayInsideAllKeysOverview(int newBoardIndex, int newKeyIndex, const LumatoneKey& keyDataIn)
+	: MappedLumatoneKey(keyDataIn, newBoardIndex, newKeyIndex)
+	, Component("AllKeysOverview_Key" + String(newKeyIndex) + "," + String(newBoardIndex))
 {
-	// In your constructor, you should add any child components, and
-	// initialise any special settings that your component needs.
-	boardIndex = newBoardIndex;
-	keyIndex = newKeyIndex;
-
+	renderMode = LumatoneComponentRenderMode::GraphicInteractive;
 //	TerpstraSysExApplication::getApp().getLumatoneController()->addMidiListener(this);
 }
 
@@ -53,20 +50,72 @@ void KeyMiniDisplayInsideAllKeysOverview::paint(Graphics& g)
 	jassert(getParentComponent() != nullptr);
 	bool boardIsSelected = boardIndex == dynamic_cast<AllKeysOverview*>(getParentComponent())->getCurrentSetSelection();
 
-	auto hexagonColour = getKeyColour();
-	// Colour hexagonColour = findColour(TerpstraKeyEdit::backgroundColourId).overlaidWith(getKeyColour());
-    // if (hexagonColour.getPerceivedBrightness() >= 0.6)
-    //     hexagonColour = hexagonColour.darker((1.0 - hexagonColour.getPerceivedBrightness()));
+	juce::Colour hexagonColour = getKeyColour();
+	// juce::Colour hexagonColour = findColour(LumatoneKeyEdit::backgroundColourId).overlaidWith(getKeyColour());
+	// if (hexagonColour.getPerceivedBrightness() >= 0.6f)
+	//    hexagonColour = hexagonColour.darker((1.0f - hexagonColour.getPerceivedBrightness()));
 
-    g.setColour(hexagonColour);
+	// set color
+	juce::Colour drawColour = hexagonColour;
 
-	if (colourGraphic.isValid() && shadowGraphic.isValid())
+	//switch (renderMode)
+	//{
+	//default:
+	//	break;
+
+	//case LumatoneComponentRenderMode::ShapeInteractive:
+	//case LumatoneComponentRenderMode::GraphicInteractive:
+	//case LumatoneComponentRenderMode::MaxRes:
+	//	if (isSelected)
+	//	{
+	//		drawColour = drawColour.overlaidWith(juce::Colours::slateblue.withAlpha(0.2f));
+	//	}
+	//	if (isNoteOn || isClicked)
+	//	{
+	//		drawColour = hexagonColour.contrasting(0.5f);
+	//	}
+	//	else if (mouseIsOver)
+	//	{
+	//		drawColour = drawColour.contrasting(0.25f);
+	//	}
+	//	break;
+	//}
+
+	// draw
+	switch (renderMode)
 	{
-		int x = 0; //roundToInt((getWidth()  - colourGraphic->getWidth()) * 0.5f);
-		int y = 0; //roundToInt((getHeight() - colourGraphic->getHeight()) * 0.5f);
+	default:
+		break;
 
-		g.drawImageAt(colourGraphic, x, y, true);
-		g.drawImageAt(shadowGraphic, x, y);
+	case LumatoneComponentRenderMode::Shape:
+	case LumatoneComponentRenderMode::ShapeInteractive:
+		break; // TODO
+
+	case LumatoneComponentRenderMode::Graphic:
+	case LumatoneComponentRenderMode::GraphicInteractive:
+	{
+		if (colourGraphic.isValid() && shadowGraphic.isValid())
+		{
+			int x = 0;
+			int y = 0;
+
+			g.setColour(drawColour);
+
+			g.drawImageAt(colourGraphic, x, y, true);
+			g.drawImageAt(shadowGraphic, x, y);
+		}
+		break;
+	}
+
+	case LumatoneComponentRenderMode::MaxRes:
+	{
+		if (drawColour != hexagonColour && shadowGraphic.isValid())
+		{
+			g.setColour(juce::Colours::black.withAlpha(0.2f).overlaidWith(drawColour));
+			g.drawImageAt(shadowGraphic, 0, 0, true);
+		}
+		break;
+	}
 	}
 }
 
@@ -145,20 +194,24 @@ void KeyMiniDisplayInsideAllKeysOverview::handleMidiMessage(const MidiMessage& m
 	// }
 }
 
-LumatoneKey KeyMiniDisplayInsideAllKeysOverview::getKeyData() const
-{
-	if (boardIndex >= 0 && boardIndex < MAXNUMBOARDS && keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize())
-	{
-		return TerpstraSysExApplication::getApp().getMappingData()->getBoard(boardIndex)->theKeys[keyIndex];
-	}
-
-	return LumatoneKey();
-}
+//LumatoneKey KeyMiniDisplayInsideAllKeysOverview::getKeyData() const
+//{
+//	if (boardIndex >= 0 && boardIndex < MAXNUMBOARDS && keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize())
+//	{
+//		return TerpstraSysExApplication::getApp().getMappingData()->getBoard(boardIndex)->theKeys[keyIndex];
+//	}
+//
+//	return LumatoneKey();
+//}
 
 Colour KeyMiniDisplayInsideAllKeysOverview::getKeyColour() const
 {
-	juce::Colour keyColour = getKeyData().colour;
-	return TerpstraSysExApplication::getApp().getColourModel()->getModelColour(keyColour);
+	return TerpstraSysExApplication::getApp().getColourModel()->getModelColour(colour);
+}
+
+void KeyMiniDisplayInsideAllKeysOverview::setRenderMode(LumatoneComponentRenderMode modeIn)
+{
+	renderMode = modeIn;
 }
 
 void KeyMiniDisplayInsideAllKeysOverview::setKeyGraphics(Image colourGraphicIn, Image shadowGraphicIn)
@@ -211,12 +264,9 @@ AllKeysOverview::AllKeysOverview ()
 	TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
 	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
 
+	renderMode = LumatoneComponentRenderMode::Graphic;
 	resetOctaveSize();
 
-	LumatoneAssets::LoadAssets(LumatoneAssets::ID::LumatoneGraphic);
-    //LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeybedShadows);
-    LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeyShape);
-    LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeyShadow);
     //[/UserPreSize]
 
     setSize (928, 214);
@@ -240,7 +290,7 @@ AllKeysOverview::~AllKeysOverview()
 
 
     //[Destructor]. You can add your own custom destruction code here..
-	imageProcessor = nullptr;
+	//imageProcessor = nullptr;
     //[/Destructor]
 }
 
@@ -252,7 +302,20 @@ void AllKeysOverview::paint (juce::Graphics& g)
 
     //[UserPaint] Add your own custom painting code here..
 
-	g.drawImageAt(lumatoneGraphic, lumatoneBounds.getX(), lumatoneBounds.getY());
+	switch (renderMode)
+	{
+	case LumatoneComponentRenderMode::Graphic:
+	case LumatoneComponentRenderMode::GraphicInteractive:
+		g.drawImageAt(lumatoneGraphic, lumatoneBounds.getX(), lumatoneBounds.getY());
+		break;
+
+	case LumatoneComponentRenderMode::MaxRes:
+		if (currentRender.isValid())
+			g.drawImageAt(currentRender, lumatoneBounds.getX(), lumatoneBounds.getY());
+		else if (lumatoneGraphic.isValid())
+			g.drawImageAt(lumatoneGraphic, lumatoneBounds.getX(), lumatoneBounds.getY());
+		break;
+	}
 
 	// Draw a line under the selected sub board
 	if (currentSetSelection >= 0 && currentSetSelection < MAXNUMBOARDS)
@@ -307,19 +370,19 @@ void AllKeysOverview::resized()
 	keyWidth = roundToInt(lumatoneBounds.getWidth() * keyW);
 	keyHeight = roundToInt(lumatoneBounds.getHeight() * keyH);
 
-	// Scale key graphics once
-	lumatoneGraphic = getResizedImage((juce::int64)LumatoneAssets::ID::LumatoneGraphic, lumatoneBounds.getWidth(), lumatoneBounds.getHeight(), false);
-	keyShapeGraphic = getResizedImage((juce::int64)LumatoneAssets::ID::KeyShape, keyWidth, keyHeight, false);
-	keyShadowGraphic = getResizedImage((juce::int64)LumatoneAssets::ID::KeyShadow, keyWidth, keyHeight, false);
-
-	// oct1Key1 = Point<float>(oct1Key1X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct1Key1Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
-	// oct1Key56 = Point<float>(oct1Key56X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct1Key56Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
-	// oct5Key7 = Point<float>(oct5Key7X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct5Key7Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
-
-	// lumatoneTiling.fitSkewedTiling(oct1Key1, oct1Key56, 10, oct5Key7, 24, false);
-
-	// Array<Point<float>> keyCentres = lumatoneTiling.getHexagonCentresSkewed(boardGeometry, 0, MAXNUMBOARDS);
-	// jassert(keyCentres.size() == TerpstraSysExApplication::getApp().getOctaveBoardSize() * MAXNUMBOARDS);
+	switch (renderMode)
+	{
+	default:
+	case LumatoneComponentRenderMode::Graphic:
+	case LumatoneComponentRenderMode::GraphicInteractive:
+		lumatoneGraphic = lumatoneRender.getResizedAsset(LumatoneAssets::ID::LumatoneGraphic, lumatoneBounds.getWidth(), lumatoneBounds.getHeight());
+		keyShapeGraphic = lumatoneRender.getResizedAsset(LumatoneAssets::ID::KeyShape, keyWidth, keyHeight);
+		keyShadowGraphic = lumatoneRender.getResizedAsset(LumatoneAssets::ID::KeyShadow, keyWidth, keyHeight);
+		break;
+	case LumatoneComponentRenderMode::MaxRes:
+		currentRender = lumatoneRender.getResizedRender(lumatoneBounds.getWidth(), lumatoneBounds.getHeight());
+		break;
+	}
 
 	int octaveIndex = 0;
 	octaveBoards[octaveIndex]->leftPos = keyCentres[0].getX() * lumatoneBounds.getWidth() + lumatoneBounds.getX() - keyWidth * 0.5f;
@@ -382,31 +445,6 @@ void AllKeysOverview::buttonClicked (juce::Button* buttonThatWasClicked)
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
-void AllKeysOverview::prepareHexTiling()
-{
-	lumatoneGeometry.reset(new LumatoneGeometry(GetLumatoneBoardSize(currentOctaveSize)));
-
-    lumatoneTiling.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
-    lumatoneTiling.setRowAngle(LUMATONEGRAPHICROWANGLE);
-
-    oct1Key1 = juce::Point<float>(oct1Key1X, oct1Key1Y);
-    oct1Key56 = juce::Point<float>(oct1Key56X, oct1Key56Y);
-    oct5Key7 = juce::Point<float>(oct5Key7X, oct5Key7Y);
-
-    lumatoneTiling.fitSkewedTiling(oct1Key1, oct1Key56, 10, oct5Key7, 24, true);
-    keyCentres = lumatoneTiling.getHexagonCentresSkewed(*lumatoneGeometry, 0, MAXNUMBOARDS);
-}
-
-juce::Image AllKeysOverview::getResizedImage(juce::int64 assetId, int targetWidth, int targetHeight, bool useJuceResize)
-{
-	auto cachedImage = LumatoneAssets::getImage((LumatoneAssets::ID)assetId, targetHeight, targetWidth);
-
-	if (useJuceResize)
-        return cachedImage.rescaled(targetWidth, targetHeight, juce::Graphics::ResamplingQuality::highResamplingQuality);
-
-	return imageProcessor->resizeImage(cachedImage, targetWidth, targetHeight);
-}
-
 void AllKeysOverview::setFirmwareVersion(FirmwareVersion versionIn)
 {
 	if (versionIn.isValid())
@@ -466,7 +504,6 @@ void AllKeysOverview::resetOctaveSize()
 	int octaveSize = TerpstraSysExApplication::getApp().getOctaveBoardSize();
 	if (currentOctaveSize != octaveSize)
 	{
-		lumatoneTiling = LumatoneTiling();
 		octaveBoards.clear();
 
 		for (int subBoardIndex = 0; subBoardIndex < MAXNUMBOARDS; subBoardIndex++)
@@ -475,8 +512,10 @@ void AllKeysOverview::resetOctaveSize()
 
 			for (int keyIndex = 0; keyIndex < octaveSize; keyIndex++)
 			{
-				auto key = board->keyMiniDisplay.add(new KeyMiniDisplayInsideAllKeysOverview(subBoardIndex, keyIndex));
-				addAndMakeVisible(key);
+				auto keyData = TerpstraSysExApplication::getApp().getMappingData()->readKey(subBoardIndex, keyIndex);
+				auto keyDisplay= board->keyMiniDisplay.add(new KeyMiniDisplayInsideAllKeysOverview(subBoardIndex, keyIndex, *keyData));
+				keyDisplay->setRenderMode(renderMode);
+				addAndMakeVisible(keyDisplay);
 			}
 
 			jassert(board->keyMiniDisplay.size() == octaveSize);
@@ -487,7 +526,75 @@ void AllKeysOverview::resetOctaveSize()
 
 	jassert(octaveBoards.size() == MAXNUMBOARDS);
 
-	prepareHexTiling();
+	lumatoneRender.resetOctaveSize();
+	keyCentres = lumatoneRender.getKeyCentres();
+	resized();
+}
+
+void AllKeysOverview::refreshMappingData(int boardIndex, int keyIndex, bool repaint)
+{
+	const LumatoneKey* key = TerpstraSysExApplication::getApp().getMappingData()->readKey(boardIndex, keyIndex);
+	KeyMiniDisplayInsideAllKeysOverview* keyDisplay = octaveBoards[boardIndex]->keyMiniDisplay[keyIndex];
+	*(LumatoneKey*)keyDisplay = *key;
+
+	if (repaint)
+	{
+		if (renderMode == LumatoneComponentRenderMode::MaxRes)
+		{
+			rerender();
+		}
+		else
+			keyDisplay->repaint();
+	}
+}
+
+void AllKeysOverview::refreshMappingData(int boardIndex, bool repaint)
+{
+	for (int i = 0; i < currentOctaveSize; i++)
+		refreshMappingData(boardIndex, i, repaint);
+}
+
+void AllKeysOverview::refreshMappingData()
+{
+	bool doRepaint = renderMode != LumatoneComponentRenderMode::MaxRes;
+
+	for (int i = 0; i < TerpstraSysExApplication::getApp().getNumBoards(); i++)
+		refreshMappingData(i, doRepaint);
+	
+	if (renderMode == LumatoneComponentRenderMode::MaxRes)
+	{
+		rerender();
+	}
+}
+
+void AllKeysOverview::setRenderMode(LumatoneComponentRenderMode modeIn)
+{
+	renderMode = modeIn;
+	for (int boardIndex = 0; boardIndex < octaveBoards.size(); boardIndex++)
+	{
+		auto board = octaveBoards[boardIndex];
+
+		for (int keyIndex = 0; keyIndex < board->keyMiniDisplay.size(); keyIndex++)
+		{
+			auto key = board->keyMiniDisplay[keyIndex];
+			key->setRenderMode(renderMode);
+		}
+	}
+
+	if (renderMode == LumatoneComponentRenderMode::MaxRes)
+		lumatoneRender.render();
+
+	if (currentWidth == 0 || currentHeight == 0)
+		return;
+
+	resized();
+}
+
+void AllKeysOverview::rerender()
+{
+	lumatoneRender.render();
+	currentRender = lumatoneRender.getResizedRender(lumatoneBounds.getWidth(), lumatoneBounds.getHeight());
+	repaint(lumatoneBounds);
 }
 
 //[/MiscUserCode]
@@ -526,4 +633,5 @@ END_JUCER_METADATA
 
 
 //[EndFile] You can add extra defines here...
+
 //[/EndFile]

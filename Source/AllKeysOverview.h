@@ -22,17 +22,27 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
+#include "lumatone_render.h"
 #include "LumatoneController.h"
-#include "lumatone_tiling.h"
 
-#include "ImageResampling/ImageResampler.h"
+enum class LumatoneComponentRenderMode
+{
+	NoDisplay = -1,
 
+	Shape = 0x000010,
+	ShapeInteractive = 0x000011,
+
+	Graphic = 0x000020,
+	GraphicInteractive = 0x000021,
+
+	MaxRes = 0x000030,
+};
 
 // Representation of a key inside the overview
-class KeyMiniDisplayInsideAllKeysOverview : public Component, public LumatoneEditor::MidiListener
+class KeyMiniDisplayInsideAllKeysOverview : public MappedLumatoneKey, public Component, public LumatoneEditor::MidiListener
 {
 public:
-	KeyMiniDisplayInsideAllKeysOverview(int newBoardIndex, int newKeyIndex);
+	KeyMiniDisplayInsideAllKeysOverview(int newBoardIndex, int newKeyIndex, const LumatoneKey& keyDataIn);
 	~KeyMiniDisplayInsideAllKeysOverview();
 
 	void paint(Graphics&) override;
@@ -40,9 +50,10 @@ public:
 	void mouseDown(const MouseEvent& e) override;
 	void mouseUp(const juce::MouseEvent& e) override;
 
-	juce::Colour getKeyColour() const;
-	LumatoneKey getKeyData() const;
+	LumatoneComponentRenderMode getRenderMode() const { return renderMode; }
+	void setRenderMode(LumatoneComponentRenderMode uiModeIn);
 
+	juce::Colour getKeyColour() const;
 	void setKeyGraphics(Image colourGraphicIn, Image shadowGraphicIn);
 
 	// Implementation of TerpstraNidiDriver::Listener
@@ -55,15 +66,12 @@ public:
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KeyMiniDisplayInsideAllKeysOverview)
 
-	int boardIndex = -1;
-	int keyIndex = -1;
+	LumatoneComponentRenderMode renderMode;
+
 	bool isHighlighted = false;
 
 	juce::Image colourGraphic;
 	juce::Image shadowGraphic;
-
-	//DEBUG
-	juce::Colour keyColour;
 };
 
 //[/Headers]
@@ -100,6 +108,15 @@ public:
 
 	void resetOctaveSize();
 
+	void refreshMappingData(int boardIndex, int keyIndex, bool repaint=true);
+	void refreshMappingData(int boardIndex, bool repaint = true);
+	void refreshMappingData();
+
+	LumatoneComponentRenderMode getRenderMode() const { return renderMode; }
+	void setRenderMode(LumatoneComponentRenderMode modeIn);
+
+	void rerender();
+
 	// LumatoneEditor::StatusListener
 	void connectionEstablished(int, int) override;
 	void connectionLost() override;
@@ -118,11 +135,6 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
-	void prepareHexTiling();
-	juce::Image getResizedImage(juce::int64 assetId, int targetWidth, int targetHeight, bool useJuceResize);
-
-private:
-
 	struct OctaveBoard
 	{
 		OwnedArray<KeyMiniDisplayInsideAllKeysOverview>	keyMiniDisplay;
@@ -135,15 +147,13 @@ private:
 	int			currentOctaveSize = 0;
 	int			currentSetSelection;
 
-	std::unique_ptr<LumatoneGeometry> lumatoneGeometry;
-	LumatoneTiling 	 lumatoneTiling;
+	LumatoneComponentRenderMode renderMode;
+	LumatoneRender lumatoneRender;
 
     std::unique_ptr<Label> lblFirmwareVersion;
 
 	//==============================================================================
 	// Style helpers
-
-	std::unique_ptr<ImageProcessor> imageProcessor;
 
     int currentWidth = 0;
     int currentHeight = 0;
@@ -156,9 +166,11 @@ private:
 
     juce::Array<juce::Point<float>> keyCentres;
 
-	Image lumatoneGraphic;
-	Image keyShapeGraphic;
-	Image keyShadowGraphic;
+	juce::Image lumatoneGraphic;
+	juce::Image keyShapeGraphic;
+	juce::Image keyShadowGraphic;
+	
+	juce::Image currentRender;
 
 	//==============================================================================
 	// Position and sizing constants in reference to parent bounds
@@ -186,20 +198,8 @@ private:
 	const float keyW = 0.027352f;
 	const float keyH = 0.07307f;
 
-	const float oct1Key1X = 0.0839425f;
-	const float oct1Key1Y = 0.335887f;
-
-	const float oct1Key56X = 0.27304881f;
-	const float oct1Key56Y = 0.8314673f;
-
-	const float oct5Key7X = 0.878802f;
-	const float oct5Key7Y = 0.356511491f;
 
 	//===============================================================================
-
-	Point<float>  oct1Key1;
-	Point<float> oct1Key56;
-	Point<float>  oct5Key7;
 
     //[/UserVariables]
 

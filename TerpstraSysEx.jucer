@@ -28,9 +28,15 @@
                 file="BinaryData/Assets/PNG/KeyShadow@2x.png"/>
           <FILE id="LSKZqM" name="KeyShadow@4x.png" compile="0" resource="1"
                 file="BinaryData/Assets/PNG/KeyShadow@4x.png"/>
+          <FILE id="FqeATq" name="KeyShadow@8x.png" compile="0" resource="1"
+                file="BinaryData/Assets/PNG/KeyShadow@8x.png"/>
+          <FILE id="VoABSO" name="KeyShadow@16x.png" compile="0" resource="1"
+                file="BinaryData/Assets/PNG/KeyShadow@16x.png"/>
           <FILE id="zt8OHR" name="KeyShape.png" compile="0" resource="1" file="BinaryData/Assets/PNG/KeyShape.png"/>
           <FILE id="av2Blw" name="KeyShape@2x.png" compile="0" resource="1" file="BinaryData/Assets/PNG/KeyShape@2x.png"/>
           <FILE id="LQe7eF" name="KeyShape@4x.png" compile="0" resource="1" file="BinaryData/Assets/PNG/KeyShape@4x.png"/>
+          <FILE id="EHeag4" name="KeyShape@8x.png" compile="0" resource="1" file="BinaryData/Assets/PNG/KeyShape@8x.png"/>
+          <FILE id="E70xVV" name="KeyShape@16.png" compile="0" resource="1" file="BinaryData/Assets/PNG/KeyShape@16.png"/>
           <FILE id="G9gLEQ" name="LoadIcon@4x.png" compile="0" resource="1" file="BinaryData/Assets/PNG/LoadIcon@4x.png"/>
           <FILE id="esJ0QD" name="ltn.ico" compile="0" resource="1" file="BinaryData/Assets/PNG/ltn.ico"/>
           <FILE id="baq11U" name="LTN.png" compile="0" resource="1" file="BinaryData/Assets/PNG/LTN.png"/>
@@ -167,6 +173,10 @@
         <FILE id="pKv4Ei" name="TuningTable.cpp" compile="1" resource="0" file="Source/tuning/TuningTable.cpp"/>
         <FILE id="thzIk5" name="TuningTable.h" compile="0" resource="0" file="Source/tuning/TuningTable.h"/>
       </GROUP>
+      <FILE id="JdAwbS" name="lumatone_render.h" compile="0" resource="0"
+            file="Source/lumatone_render.h"/>
+      <FILE id="vms2bU" name="lumatone_render.cpp" compile="1" resource="0"
+            file="Source/lumatone_render.cpp"/>
       <FILE id="d788XW" name="AllKeysOverview.cpp" compile="1" resource="0"
             file="Source/AllKeysOverview.cpp"/>
       <FILE id="LDrzLN" name="AllKeysOverview.h" compile="0" resource="0"

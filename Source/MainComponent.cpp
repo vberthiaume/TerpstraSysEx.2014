@@ -431,8 +431,8 @@ void MainContentComponent::resized()
 
 void MainContentComponent::refreshKeyDataFields()
 {
-	allKeysOverview->repaint();
 	noteEditArea->refreshKeyFields();
+	juce::Timer::callAfterDelay(1, [&]() { allKeysOverview->refreshMappingData(); });
 }
 
 void MainContentComponent::refreshAllFields()
