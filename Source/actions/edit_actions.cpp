@@ -32,7 +32,7 @@ SingleNoteAssignAction::SingleNoteAssignAction(
     , setKeyType(setKeyType), setChannel(setChannel), setNote(setNote), setColour(setColour), setCCFaderPolarity(setCCPolarity)
     , newData(newKeyType, newChannelNumber, newNoteNumber, newColour, newCCFaderIsDefault)
 {
-    previousData = controller->getKey(boardIndexIn, keyIndexIn);
+    previousData = *controller->getKey(boardIndexIn, keyIndexIn);
 }
 
 SingleNoteAssignAction::SingleNoteAssignAction(
@@ -175,7 +175,7 @@ SectionEditAction::SectionEditAction(LumatoneController* controller, int boardIn
     , boardId(boardIndexIn + 1)
     , newData(newSectionValue)
 {
-    previousData = controller->getBoard(boardIndexIn);
+    previousData = *controller->getBoard(boardIndexIn);
 }
 
 bool SectionEditAction::isValid() const
@@ -230,7 +230,7 @@ MultiKeyAssignAction::MultiKeyAssignAction(LumatoneController* controller, const
             newData.add(updatedKey);
 
             auto key = controller->getKey(coord.boardIndex, coord.keyIndex);
-            previousKeys.add(MappedLumatoneKey(key, coord));
+            previousKeys.add(MappedLumatoneKey(*key, coord));
         }
     }
 }

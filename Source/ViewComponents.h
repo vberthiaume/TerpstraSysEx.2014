@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-#include "./data/lumatone_layout.h"
+#include "./data/lumatone_key.h"
 #include "ViewConstants.h"
 
 
@@ -20,14 +20,13 @@
 Display of the data of one key
 ==============================================================================
 */
-class TerpstraKeyEdit : public Component, public SettableTooltipClient
+class TerpstraKeyEdit : public MappedLumatoneKey, public Component, public SettableTooltipClient
 {
 public:
-	TerpstraKeyEdit();
+	TerpstraKeyEdit(int boardIndex, int keyIndex, LumatoneKey keyData=LumatoneKey());
 	~TerpstraKeyEdit();
 
-	LumatoneKey getValue() const;
-	void setValue(LumatoneKey newValue);
+	void setValue(const LumatoneKey& newValue);
 
 	void setIsSelected(bool newValue);
 
@@ -49,10 +48,6 @@ private:
     Path    hexPath;
 	Label*	midiNoteLabel;
 	Label*  midiChannelLabel;
-
-	juce::Colour			keyColour;
-	LumatoneKeyType			keyType;
-    bool                    ccFaderDefault;
 
 	float					keySize;
 

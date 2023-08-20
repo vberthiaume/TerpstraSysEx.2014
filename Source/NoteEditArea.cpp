@@ -225,7 +225,7 @@ void NoteEditArea::mouseDown (const juce::MouseEvent& e)
 			// Grab key colour - may be replaced with eyedropper tool
 			if (e.mods.isAltDown())
 			{
-				auto colour = terpstraKeyFields[keyIndex]->getValue().colour;
+				auto colour = terpstraKeyFields[keyIndex]->colour;
 				selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, colour);
 			}
 			// Standard assign action
@@ -352,7 +352,7 @@ void NoteEditArea::refreshKeyFields()
 {
 	auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
 	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS);
-	setKeyFieldValues(*TerpstraSysExApplication::getApp().getMappingData()->getBoard(setSelection));
+	setKeyFieldValues(*TerpstraSysExApplication::getApp().getLumatoneController()->getBoard(setSelection));
 }
 
 void NoteEditArea::resetOctaveSize(bool refreshAndResize)
@@ -360,6 +360,8 @@ void NoteEditArea::resetOctaveSize(bool refreshAndResize)
 	int boardSize = TerpstraSysExApplication::getApp().getOctaveBoardSize();
 
 	jassert(boardSize == 55 || boardSize == 56);
+
+	int boardIndex = octaveBoardSelectorTab->getCurrentTabIndex();
 
 	if (currentBoardSize != boardSize)
 	{
@@ -370,7 +372,7 @@ void NoteEditArea::resetOctaveSize(bool refreshAndResize)
 
 		for (int i = 0; i < boardSize; i++)
 		{
-			terpstraKeyFields[i].reset(new TerpstraKeyEdit());
+			terpstraKeyFields[i].reset(new TerpstraKeyEdit(boardIndex, i));
 			addAndMakeVisible(terpstraKeyFields[i].get());
 			terpstraKeyFields[i]->addMouseListener(this, true);
 		}
@@ -389,7 +391,7 @@ Colour NoteEditArea::getSelectedColour()
 {
 	if (currentSingleKeySelection >= 0 && currentSingleKeySelection < TerpstraSysExApplication::getApp().getOctaveBoardSize())
 	{
-		return terpstraKeyFields[currentSingleKeySelection]->getValue().colour;
+		return terpstraKeyFields[currentSingleKeySelection]->colour;
 	}
 
 	auto singleNoteAssign = dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(SingleNoteAssignMode));

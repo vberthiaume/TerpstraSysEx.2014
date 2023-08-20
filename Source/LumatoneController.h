@@ -74,8 +74,8 @@ public:
 public:
     // LumatoneLayout intermediaries
 
-    LumatoneKey& getKey(int boardIndex, int keyIndex);
-    LumatoneBoard& getBoard(int boardIndex);
+    LumatoneKey* getKey(int boardIndex, int keyIndex);
+    LumatoneBoard* getBoard(int boardIndex);
 
     int getNumBoards() const;
     int getOctaveBoardSize() const;
