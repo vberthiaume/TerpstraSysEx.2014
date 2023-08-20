@@ -19,7 +19,7 @@
 
 //[Headers] You can add your own extra header files here...
 #include "Main.h"
-#include "EditActions.h"
+#include "./actions/edit_actions.h"
 //[/Headers]
 
 #include "PedalSensitivityDlg.h"
@@ -190,13 +190,18 @@ void PedalSensitivityDlg::buttonClicked (juce::Button* buttonThatWasClicked)
     if (buttonThatWasClicked == btnInvertExpression.get())
     {
         //[UserButtonCode_btnInvertExpression] -- add your button handler code here..
-		TerpstraSysExApplication::getApp().performUndoableAction(new Lumatone::InvertFootControllerEditAction(btnInvertExpression->getToggleState()));
+		TerpstraSysExApplication::getApp().performUndoableAction(new LumatoneEditAction::InvertFootControllerEditAction(
+             TerpstraSysExApplication::getApp().getLumatoneController(),
+             btnInvertExpression->getToggleState()
+             ));
         //[/UserButtonCode_btnInvertExpression]
     }
     else if (buttonThatWasClicked == btnInvertSustain.get())
     {
         //[UserButtonCode_btnInvertSustain] -- add your button handler code here..
-        TerpstraSysExApplication::getApp().performUndoableAction(new Lumatone::InvertSustainEditAction(btnInvertSustain->getToggleState()));
+        TerpstraSysExApplication::getApp().performUndoableAction(new LumatoneEditAction::InvertSustainEditAction(
+            TerpstraSysExApplication::getApp().getLumatoneController(),
+            btnInvertSustain->getToggleState()));
         //[/UserButtonCode_btnInvertSustain]
     }
 
@@ -341,4 +346,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

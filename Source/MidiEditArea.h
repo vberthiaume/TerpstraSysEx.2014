@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "JuceHeader.h"
+#include <JuceHeader.h>
 #include "HajuLib/HajuErrorVisualizer.h"
 #include "ApplicationListeners.h"
 #include "LumatoneEditorLookAndFeel.h"
@@ -61,7 +61,7 @@ public:
     void connectionFailed() override;
     void connectionEstablished(int inputDevice, int outputDevice) override;
     void connectionLost() override;
-    
+
     // Implementation of LumatoneEditor::EditorListener
     void editorModeChanged(sysExSendingMode editMode) override;
 
@@ -190,4 +190,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

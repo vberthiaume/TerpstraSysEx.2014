@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "MappingLogic.h"
 #include "LumatoneEditorStyleCommon.h"
 //[/Headers]
@@ -79,4 +79,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

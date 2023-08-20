@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 #include "KBMMappingDataStructure.h"
 #include "ScaleStructureController/ScaleStructure.h"
 
@@ -36,12 +36,12 @@ public:
 	virtual juce::Colour indexToColour(int inx) const;
 
 	// sets the Terpstra key specification for the "inx"-th note
-	virtual void indexToTerpstraKey(int inx, TerpstraKey& keyData) const;
+	virtual void indexToTerpstraKey(int inx, LumatoneKey& keyData) const;
 
 	// Returns the Terpstra key specification for the "inx"-th note
-	virtual TerpstraKey indexToTerpstraKey(int inx) const;
+	virtual LumatoneKey indexToTerpstraKey(int inx) const;
 
-	virtual int terpstraKeyToIndex(TerpstraKey keyData) const = 0;
+	virtual int terpstraKeyToIndex(LumatoneKey keyData) const = 0;
 
 	// Listener class, to notify changes
 	class Listener
@@ -99,7 +99,7 @@ public:
 	int indexToMIDIChannel(int inx) const override;
 	int indexToMIDINote(int inx) const override;
 
-	virtual int terpstraKeyToIndex(TerpstraKey keyData) const override;
+	virtual int terpstraKeyToIndex(LumatoneKey keyData) const override;
 
 	bool isSingleChannel() const { return this->channelInCaseOfSingleChannel > 0; }
 
@@ -138,7 +138,7 @@ private:
 public:
     KBMFilesMappingLogic(ScaleStructure& scaleStructureIn, Array<Colour>& colourTableIn);
     virtual ~KBMFilesMappingLogic() {}
-    
+
     //===============================
 	// Set parameters
 
@@ -156,7 +156,7 @@ public:
 	int indexToMIDIChannel(int inx) const override;
 	int indexToMIDINote(int inx) const override;
 
-	virtual int terpstraKeyToIndex(TerpstraKey keyData) const override;
+	virtual int terpstraKeyToIndex(LumatoneKey keyData) const override;
 
     //===============================
     // Attributes
@@ -171,4 +171,3 @@ private:
     SortedSet<KBMMappingTableEntry> mappingTable;
 
 };
-

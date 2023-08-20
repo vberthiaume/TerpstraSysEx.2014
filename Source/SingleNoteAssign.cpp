@@ -19,7 +19,7 @@
 
 //[Headers] You can add your own extra header files here...
 #include "Main.h"
-#include "EditActions.h"
+#include "./actions/edit_actions.h"
 //[/Headers]
 
 #include "SingleNoteAssign.h"
@@ -581,7 +581,8 @@ UndoableAction* SingleNoteAssign::createEditAction(int setSelection, int keySele
 	int newNote = noteInput->getValue();
 	int newChannel = channelInput->getValue();
 
-	auto editAction = new Lumatone::SingleNoteAssignAction(
+	auto editAction = new LumatoneEditAction::SingleNoteAssignAction(
+        TerpstraSysExApplication::getApp().getLumatoneController(),
 		setSelection, keySelection,
 		keyTypeToggleButton->getToggleState(), setChannelToggleButton->getToggleState(),
 		setNoteToggleButton->getToggleState(), setColourToggleButton->getToggleState(),
@@ -616,7 +617,7 @@ UndoableAction* SingleNoteAssign::createEditAction(int setSelection, int keySele
 	return editAction;
 }
 
-void SingleNoteAssign::onSetData(TerpstraKeyMapping& newData)
+void SingleNoteAssign::onSetData(LumatoneLayout& newData)
 {
     // TODO: switch to palettes & active colour
 	//SortedSet<int> usedColours = newData.getUsedColours();
@@ -765,4 +766,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

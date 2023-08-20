@@ -21,6 +21,8 @@
 #include "LocalisationMap.h"
 #include "FirmwareTransfer.h"
 
+#include "./color/colour_model.h"
+
 #define CHOOSE_FILE_NOOP [](bool) -> void {}
 
 //==============================================================================
@@ -53,7 +55,7 @@ public:
 	LumatoneController* getLumatoneController() { return lumatoneController.get(); }
 	Array<LumatoneEditorColourPalette>& getColourPalettes() { return colourPalettes; }
 	Font getAppFont(LumatoneEditorFont fontIdIn, float height = 12.0f) { return appFonts.getFont(fontIdIn, height); }
-	int getOctaveBoardSize() const { return lumatoneController->getOctaveSize(); }
+	int getOctaveBoardSize() const { return lumatoneController->getOctaveBoardSize(); }
     int getNumBoards() const { return lumatoneController->getNumBoards(); }
 
 	FirmwareVersion getFirmwareVersion() const { return lumatoneController->getFirmwareVersion(); }
@@ -71,6 +73,7 @@ public:
 	void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
 	bool perform(const InvocationInfo& info) override;
 
+
 	bool openSysExMapping();
 	bool saveSysExMapping(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 	bool saveSysExMappingAs(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
@@ -81,7 +84,7 @@ public:
 	bool pasteSubBoardData();
     bool pasteModifiedSubBoardData(CommandID commandID);
     bool canPasteSubBoardData() const;
-    
+
     void setEditMode(sysExSendingMode editMode);
 
 	void setCalibrationMode(bool calibrationStarted) { inCalibrationMode = calibrationStarted; }
@@ -90,6 +93,9 @@ public:
 	bool performUndoableAction(UndoableAction* editAction);
 	bool undo();
 	bool redo();
+
+	LumatoneLayout* getMappingData() { return &mappingData; }
+	LumatoneColourModel* getColourModel();
 
 	bool toggleDeveloperMode();
 
@@ -131,9 +137,11 @@ private:
 	bool						inCalibrationMode = false;
 
 	juce::UndoManager undoManager;
-	
+
 	LumatoneEditorFonts			appFonts;
 	LumatoneEditorLookAndFeel	lookAndFeel;
+
+	LumatoneColourModel			colourModel;
 
 	PropertiesFile*				propertiesFile;
 	File						currentFile;
@@ -143,6 +151,8 @@ private:
 	File						userMappingsDirectory;
 	File						userPalettesDirectory;
 
+	LumatoneLayout mappingData;
+
 	Array<LumatoneEditorColourPalette> colourPalettes;
 
 	// Make sure an open dialog window is deleted on shutdown
@@ -151,7 +161,7 @@ private:
 	// Communication with Lumatone
 	std::unique_ptr<LumatoneController> lumatoneController;
 
-	std::unique_ptr<FileChooser> chooser;
+	std::unique_ptr<juce::FileChooser> fileChooser;
 
 	bool firmwareUpdateWasPerformed = false; // Allows us to deinitialize libssh2 a single time
 };

@@ -20,16 +20,16 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "ViewComponents.h"
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 #include "ColourEditComponent.h"
 
-#include "HexagonTilingGeometry.h"
-#include "LumatoneEditorStyleCommon.h"
+#include "lumatone_geometry.h"
+#include "lumatone_tiling.h"
 
-#include "BoardGeometry.h"
+#include "LumatoneEditorStyleCommon.h"
 
 #include "SingleNoteAssign.h"
 #include "IsomorphicMassAssign.h"
@@ -64,10 +64,10 @@ public:
 	void changeListenerCallback(ChangeBroadcaster *source) override;
 
 	// Things to be done when a new mapping is loaded. E. g. fill the colour combo box with the colours appearing in the mapping.
-	void onSetData(TerpstraKeyMapping& newData);
+	void onSetData(LumatoneLayout& newData);
 
 	// Fill key fields with values from a certain octaveboard subset
-	void setKeyFieldValues(const TerpstraKeys& keySet);
+	void setKeyFieldValues(const LumatoneBoard& keySet);
 
 	TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
 
@@ -120,7 +120,7 @@ private:
     int					currentSingleKeySelection;
 
     // Key edit positioning
-    HexagonTilingGeometry tilingGeometry;
+    LumatoneTiling lumatoneGeometry;
 
     //===========================================================================
     // Style Helpers
@@ -164,7 +164,7 @@ private:
     const float singleKeyMarginFromWidth = 0.0164f;
 
 	// Geometry settings
-	TerpstraBoardGeometry	boardGeometry;
+	LumatoneGeometry	boardGeometry;
 
     //[/UserVariables]
 
@@ -179,4 +179,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

@@ -20,11 +20,11 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "VelocityCurveComponents.h"
 #include "VelocityCurveEditStrategy.h"
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 
 //[/Headers]
 
@@ -43,7 +43,7 @@ class VelocityCurveDlgBase  : public Component,
 {
 public:
     //==============================================================================
-    VelocityCurveDlgBase (TerpstraVelocityCurveConfig::VelocityCurveType typeValue);
+    VelocityCurveDlgBase (LumatoneConfigTable::TableType typeValue);
     ~VelocityCurveDlgBase() override;
 
     //==============================================================================
@@ -62,8 +62,8 @@ public:
 protected:
 	virtual float beamWidth(int xPos) { return getWidth() / 128.0f; }
 
-	TerpstraKeyMapping*	getMappingInEdit();
-	TerpstraVelocityCurveConfig* getConfigInEdit();
+	LumatoneLayout*	getMappingInEdit();
+	LumatoneConfigTable* getConfigInEdit();
 	VelocityCurveEditStrategyBase* getCurrentDrawingStrategy();
 
 public:
@@ -79,7 +79,7 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-	TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType;
+	LumatoneConfigTable::TableType velocityCurveType;
 	//Path beamTableFrame;
     Path beamTableContour;
     Path beamTableGrid;
@@ -89,7 +89,7 @@ private:
 	VelocityCurveLinearDrawingStrategy linearDrawingStrategy;
 	VelocityCurveQuadraticDrawingStrategy quadraticDrawingStrategy;
 
-	std::map<TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX, VelocityCurveEditStrategyBase*> drawingStrategies;
+	std::map<LumatoneConfigTable::DrawMode, VelocityCurveEditStrategyBase*> drawingStrategies;
 
     ColourGradient beamColourGradient;
     Colour backgroundColour;
@@ -109,4 +109,3 @@ protected:
 //[EndFile] You can add extra defines here...
 
 //[/EndFile]
-

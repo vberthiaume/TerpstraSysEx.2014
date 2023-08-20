@@ -20,21 +20,21 @@ public:
 
 class FaderVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    FaderVelocityCurveDialog() : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::fader)
+    FaderVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::fader)
     {
     }
 };
 
 class AftertouchVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    AftertouchVelocityCurveDialog() : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::afterTouch)
+    AftertouchVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::afterTouch)
     {
     }
 };
 
 class LumatouchVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    LumatouchVelocityCurveDialog() : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::lumaTouch)
+    LumatouchVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::lumaTouch)
     {
     }
 };

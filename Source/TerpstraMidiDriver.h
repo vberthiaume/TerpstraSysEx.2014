@@ -11,7 +11,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "JuceHeader.h"
+#include <JuceHeader.h>
 #include "HajuLib/HajuMidiDriver.h"
 #include "HajuLib/HajuErrorVisualizer.h"
 #include "LumatoneFirmwareDefinitions.h"
@@ -33,7 +33,7 @@ public:
 
 	public:
         virtual ~Collector() {}
-        
+
 		virtual void midiMessageReceived(MidiInput* source, const MidiMessage& message) = 0;
 		virtual void midiMessageSent(MidiOutput* target, const MidiMessage& message) = 0;
 		virtual void midiSendQueueSize(int size) = 0;
@@ -61,7 +61,7 @@ private:
     } TimerType;
 
 public:
-	TerpstraMidiDriver();
+	TerpstraMidiDriver(int numBoardsIn);
 	~TerpstraMidiDriver();
 
 //	void addListener(Listener* listenerToAdd);
@@ -172,7 +172,7 @@ public:
 
 	// CMD 1Ch: Get back flag whether or not each key of target board meets minimum threshold
 	void sendKeyValidityParametersRequest(uint8 boardIndex);
-	
+
 	// CMD 1Dh: Read back the current velocity look up table of the keyboard.
 	void sendVelocityConfigRequest();
 
@@ -194,7 +194,7 @@ public:
 	// CMD 23h: This command is used to read back the serial identification number of the keyboard.
 	void sendGetSerialIdentityRequest(int sendToTestDevice = -1);
 
-	// CMD 24h: Initiate the key calibration routine; each pair of macro buttons  
+	// CMD 24h: Initiate the key calibration routine; each pair of macro buttons
 	// on each octave must be pressed to return to normal state
 	void sendCalibrateKeys();
 
@@ -288,7 +288,7 @@ public:
 	void sendGetAftertouchTriggerDelayRequest(uint8 boardIndex);
 
 	// CMD 41h: Set the Lumatouch note-off delay value, an 11-bit integer representing the amount of 1.1ms ticks before
-	// sending a note-off event after a Lumatone-configured key is released. 
+	// sending a note-off event after a Lumatone-configured key is released.
 	void setLumatouchNoteOffDelay(uint8 boardIndex, int delayValue);
 	void setLumatouchNoteOffDelay(uint8 boardIndex, uint8 valueBits8_11, uint8 valueBits4_7, uint8 valueBits0_3);
 
@@ -315,7 +315,7 @@ public:
 
 	// For CMD 48h response: get expression pedal sensitivity
 	void sendGetExpressionPedalSensitivity();
-	
+
 	// TODO CMD 49h-4Eh
 
 	//============================================================================
@@ -344,7 +344,7 @@ public:
 
 	// For CMD 13h response: unpacks 8-bit key data for red LED intensity. 112 bytes, lower and upper nibbles for 56 values
 	FirmwareSupport::Error unpackGetLEDConfigResponse(const MidiMessage& response, int& boardId, int* keyData);
-	
+
 	// For CMD 13h response: unpacks 7-bit key data for red LED intensity. 56 bytes, each value must be multiplied by 5
 	FirmwareSupport::Error unpackGetLEDConfigResponse_Version_1_0_0(const MidiMessage& response, int& boardId, uint8 numKeys, int* keyData);
 
@@ -466,7 +466,7 @@ private:
 	// Send a SysEx message to toggle a state
 	void sendSysExToggle(uint8 boardIndex, uint8 cmd, bool turnStateOn);
 
-	// Checks if message is a valid Lumatone firmware response and is expected length, then runs supplied unpacking function or returns an error code 
+	// Checks if message is a valid Lumatone firmware response and is expected length, then runs supplied unpacking function or returns an error code
 	FirmwareSupport::Error unpackIfValid(const MidiMessage& response, size_t numBytes, std::function<FirmwareSupport::Error(const uint8*)> unpackFunction);
 
 	// Generic unpacking of octave data from a SysEx message
@@ -496,6 +496,8 @@ protected:
 	Array<Collector*> collectors;
 
 private:
+
+	int numBoards = 0;
 
     MidiMessage currentMsgWaitingForAck;    // std::optional would be the object of choice,once that is available...
 	bool hasMsgWaitingForAck = false;       // will be obsolete when std::optional is available

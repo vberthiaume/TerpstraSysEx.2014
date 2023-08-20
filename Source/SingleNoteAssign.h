@@ -20,8 +20,8 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "JuceHeader.h"
-#include "KeyboardDataStructure.h"
+#include <JuceHeader.h>
+#include "./data/lumatone_layout.h"
 #include "ColourEditComponent.h"
 #include "LumatoneEditorLookAndFeel.h"
 //[/Headers]
@@ -45,13 +45,13 @@ class SingleNoteAssign  : public Component,
 {
 public:
     //==============================================================================
-    SingleNoteAssign ();
+    SingleNoteAssign();
     ~SingleNoteAssign() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
 	UndoableAction* createEditAction(int setSelection, int keySelection);
-	void onSetData(TerpstraKeyMapping& newData);
+	void onSetData(LumatoneLayout& newData);
 
 	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
 	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
@@ -144,4 +144,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

@@ -23,11 +23,9 @@
 #include <JuceHeader.h>
 
 #include "LumatoneController.h"
-#include "HexagonTilingGeometry.h"
+#include "lumatone_tiling.h"
 
 #include "ImageResampling/ImageResampler.h"
-#include "BoardGeometry.h"
-#include "LumatoneController.h"
 
 
 // Representation of a key inside the overview
@@ -42,8 +40,10 @@ public:
 	void mouseDown(const MouseEvent& e) override;
 	void mouseUp(const juce::MouseEvent& e) override;
 
+	juce::Colour getKeyColour() const;
+	LumatoneKey getKeyData() const;
 
-	void setKeyGraphics(Image& colourGraphicIn, Image& shadowGraphicIn);
+	void setKeyGraphics(Image colourGraphicIn, Image shadowGraphicIn);
 
 	// Implementation of TerpstraNidiDriver::Listener
 	//void midiMessageReceived(const MidiMessage& midiMessage) override;
@@ -55,18 +55,15 @@ public:
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KeyMiniDisplayInsideAllKeysOverview)
 
-	const TerpstraKey* getKeyData() const;
-	Colour getKeyColour() const;
-
 	int boardIndex = -1;
 	int keyIndex = -1;
 	bool isHighlighted = false;
 
-	Image* colourGraphic = nullptr;
-	Image* shadowGraphic = nullptr;
+	juce::Image colourGraphic;
+	juce::Image shadowGraphic;
 
 	//DEBUG
-	Colour keyColour;
+	juce::Colour keyColour;
 };
 
 //[/Headers]
@@ -109,6 +106,7 @@ public:
 
 	// LumatoneEditor::FirmwareListener implementation
 	void firmwareRevisionReceived(FirmwareVersion version) override;
+
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -120,6 +118,8 @@ public:
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
+	void prepareHexTiling();
+	juce::Image getResizedImage(juce::int64 assetId, int targetWidth, int targetHeight, bool useJuceResize);
 
 private:
 
@@ -135,10 +135,8 @@ private:
 	int			currentOctaveSize = 0;
 	int			currentSetSelection;
 
-	HexagonTilingGeometry tilingGeometry;
-
-	Image keyColourLayer;
-	Image keyShadowLayer;
+	std::unique_ptr<LumatoneGeometry> lumatoneGeometry;
+	LumatoneTiling 	 lumatoneTiling;
 
     std::unique_ptr<Label> lblFirmwareVersion;
 
@@ -147,8 +145,16 @@ private:
 
 	std::unique_ptr<ImageProcessor> imageProcessor;
 
+    int currentWidth = 0;
+    int currentHeight = 0;
+
 	Rectangle<int> lumatoneBounds;
 	int octaveLineY = 0;
+
+ 	int keyWidth = 0;
+    int keyHeight = 0;
+
+    juce::Array<juce::Point<float>> keyCentres;
 
 	Image lumatoneGraphic;
 	Image keyShapeGraphic;
@@ -195,9 +201,6 @@ private:
 	Point<float> oct1Key56;
 	Point<float>  oct5Key7;
 
-	// Geometry settings
-	TerpstraBoardGeometry	boardGeometry;
-
     //[/UserVariables]
 
     //==============================================================================
@@ -212,4 +215,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

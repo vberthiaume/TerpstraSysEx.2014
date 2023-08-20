@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 #include "ViewConstants.h"
 
 
@@ -26,8 +26,8 @@ public:
 	TerpstraKeyEdit();
 	~TerpstraKeyEdit();
 
-	TerpstraKey getValue() const;
-	void setValue(TerpstraKey newValue);
+	LumatoneKey getValue() const;
+	void setValue(LumatoneKey newValue);
 
 	void setIsSelected(bool newValue);
 
@@ -53,7 +53,7 @@ private:
 	juce::Colour			keyColour;
 	LumatoneKeyType			keyType;
     bool                    ccFaderDefault;
-	
+
 	float					keySize;
 
 	const float				channelLabelRadiusScalar = 0.4347826f;

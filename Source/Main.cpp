@@ -136,7 +136,7 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 	commandManager.reset(new ApplicationCommandManager());
 	commandManager->registerAllCommandsForTarget(this);
     menuModel.reset(new Lumatone::Menu::MainMenuModel(commandManager.get()));
-    
+
 	boundsConstrainer = std::make_unique<ComponentBoundsConstrainer>();
 
 	mainWindow.reset(new MainWindow(boundsConstrainer.get()));
@@ -147,7 +147,7 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 	MenuBarModel::setMacMainMenu(menuModel.get());
 #else
 	mainWindow->setMenuBar(menuModel.get());
-	mainWindow->getMenuBarComponent()->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour, 
+	mainWindow->getMenuBarComponent()->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour,
 		lookAndFeel.findColour(LumatoneEditorColourIDs::MenuBarBackground).toString()
 	);
 
@@ -205,10 +205,10 @@ void TerpstraSysExApplication::systemRequestedQuit()
 	if (hasChangesToSave)
 	{
 		AlertWindow::showYesNoCancelBox(
-			AlertWindow::AlertIconType::QuestionIcon, 
-			"Quitting the application", 
-			"Do you want to save your changes?", 
-			"Yes", "No", "Cancel", nullptr, 
+			AlertWindow::AlertIconType::QuestionIcon,
+			"Quitting the application",
+			"Do you want to save your changes?",
+			"Yes", "No", "Cancel", nullptr,
 			ModalCallbackFunction::create([&](int retc)
 			{
 				if (retc == 0)
@@ -277,15 +277,15 @@ bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& pa
                 pathToFile.deleteFile();
             }
         }
-        
+
 		// New file
 		if (!pathToFile.existsAsFile())
 		{
             String fileName = "UnnamedPalette";
-            
+
 			if (palette.getName().isNotEmpty())
                 fileName = palette.getName();
-                       
+
             pathToFile = userPalettesDirectory.getChildFile(fileName);
 
 			// Make sure filename is unique since saving happens automatically
@@ -338,7 +338,7 @@ void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
         Lumatone::Menu::commandIDs::pasteOctaveBoardNotes,
         Lumatone::Menu::commandIDs::pasteOctaveBoardColours,
         Lumatone::Menu::commandIDs::pasteOctaveBoardTypes,
-        
+
 		Lumatone::Menu::commandIDs::undo,
 		Lumatone::Menu::commandIDs::redo,
 
@@ -401,19 +401,19 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
         result.addDefaultKeypress('v', ModifierKeys::commandModifier | ModifierKeys::altModifier);
         result.setActive(canPasteSubBoardData());
         break;
-            
+
     case Lumatone::Menu::commandIDs::pasteOctaveBoardColours:
         result.setInfo("Paste colours", "Paste copied section colours", "Edit", 0);
         result.addDefaultKeypress('v', ModifierKeys::altModifier);
         result.setActive(canPasteSubBoardData());
         break;
-            
+
     case Lumatone::Menu::commandIDs::pasteOctaveBoardTypes:
         result.setInfo("Paste types", "Paste copied section key types", "Edit", 0);
         result.addDefaultKeypress('v', ModifierKeys::altModifier | ModifierKeys::shiftModifier);
         result.setActive(canPasteSubBoardData());
         break;
-            
+
 	case Lumatone::Menu::commandIDs::undo:
 		result.setInfo("Undo", "Undo latest edit", "Edit", 0);
 		result.addDefaultKeypress('z', ModifierKeys::commandModifier);
@@ -487,11 +487,12 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 
 bool TerpstraSysExApplication::openSysExMapping()
 {
-	chooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", recentFiles.getFile(0).getParentDirectory(), "*.ltn;*.tsx");
-	chooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
+	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", recentFiles.getFile(0).getParentDirectory(), "*.ltn;*.tsx");
+	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
 			currentFile = chooser.getResult();
+			// if (currentFile.)
 			openFromCurrentFile();
 		});
 
@@ -509,8 +510,8 @@ bool TerpstraSysExApplication::saveSysExMapping(std::function<void(bool success)
 
 bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> saveFileCallback)
 {
-	chooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", recentFiles.getFile(0).getParentDirectory(), "*.ltn");
-	chooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
+	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", recentFiles.getFile(0).getParentDirectory(), "*.ltn");
+	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
 			currentFile = chooser.getResult();
@@ -625,6 +626,11 @@ bool TerpstraSysExApplication::redo()
 		return false;
 }
 
+LumatoneColourModel* TerpstraSysExApplication::getColourModel()
+{
+	return &colourModel;
+}
+
 bool TerpstraSysExApplication::toggleDeveloperMode()
 {
 	bool newMode = !propertiesFile->getBoolValue("DeveloperMode");
@@ -684,7 +690,7 @@ bool TerpstraSysExApplication::noteOnOffVelocityCurveDialog()
 
 bool TerpstraSysExApplication::faderVelocityCurveDialog()
 {
-	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::fader);
+	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(LumatoneConfigTable::TableType::fader);
 	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
 
 	int dlgWidth = propertiesFile->getIntValue("FaderVelocityCurveWindowWidth", 648);
@@ -708,7 +714,7 @@ bool TerpstraSysExApplication::faderVelocityCurveDialog()
 
 bool TerpstraSysExApplication::aftertouchVelocityCurveDialog()
 {
-	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::afterTouch);
+	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(LumatoneConfigTable::TableType::afterTouch);
 	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
 
 	int dlgWidth = propertiesFile->getIntValue("AftertouchVelocityCurveWindowWidth", 768);
@@ -746,7 +752,7 @@ bool TerpstraSysExApplication::openFromCurrentFile()
 		// XXX StringArray format: platform-independent?
 		StringArray stringArray;
 		currentFile.readLines(stringArray);
-		TerpstraKeyMapping keyMapping;
+		LumatoneLayout keyMapping;
 		keyMapping.fromStringArray(stringArray);
 
 		((MainContentComponent*)(mainWindow->getContentComponent()))->setData(keyMapping);
@@ -792,14 +798,14 @@ bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)>
 	bool retc = currentFile.create();
 	// XXX error handling
 
-	TerpstraKeyMapping keyMapping;
+	LumatoneLayout keyMapping;
 	((MainContentComponent*)(mainWindow->getContentComponent()))->getData(keyMapping);
 
     bool appendSuccess = true;
 	StringArray stringArray = keyMapping.toStringArray();
 	for (int i = 0; i < stringArray.size(); i++)
 		appendSuccess = appendSuccess && currentFile.appendText(stringArray[i] + "\n");
-        
+
 	setHasChangesToSave(!appendSuccess);
     saveFileCallback(appendSuccess);
 
@@ -813,20 +819,18 @@ bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)>
 
 void TerpstraSysExApplication::sendCurrentConfigurationToDevice()
 {
-	auto theConfig = ((MainContentComponent*)(mainWindow->getContentComponent()))->getMappingInEdit();
-
 	// MIDI channel, MIDI note, colour and key type config for all keys
-	getLumatoneController()->sendCompleteMapping(theConfig);
+	getLumatoneController()->sendCompleteMapping(mappingData);
 
 	// General options
-	getLumatoneController()->setAftertouchEnabled(theConfig.afterTouchActive);
-	getLumatoneController()->sendLightOnKeyStrokes(theConfig.lightOnKeyStrokes);
-	getLumatoneController()->sendInvertFootController(theConfig.invertExpression);
-	getLumatoneController()->sendExpressionPedalSensivity(theConfig.expressionControllerSensivity);
-    getLumatoneController()->invertSustainPedal(theConfig.invertSustain);
+	getLumatoneController()->setAftertouchEnabled(mappingData.afterTouchActive);
+	getLumatoneController()->sendLightOnKeyStrokes(mappingData.lightOnKeyStrokes);
+	getLumatoneController()->sendInvertFootController(mappingData.invertExpression);
+	getLumatoneController()->sendExpressionPedalSensivity(mappingData.expressionControllerSensivity);
+    getLumatoneController()->invertSustainPedal(mappingData.invertSustain);
 
 	// Velocity curve config
-	getLumatoneController()->setVelocityIntervalConfig(theConfig.velocityIntervalTableValues);
+	getLumatoneController()->setVelocityIntervalConfig(mappingData.table);
 
 	((MainContentComponent*)(mainWindow->getContentComponent()))->getCurvesArea()->sendConfigToController();
 }
@@ -853,8 +857,8 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 				else if (retc == 1)
 				{
 					// "Yes". Try to save. Cancel if unsuccessful
-					saveSysExMapping([this](bool success) 
-					{ 
+					saveSysExMapping([this](bool success)
+					{
 						if (success)
 							this->requestConfigurationFromDevice();
 						else

@@ -75,7 +75,7 @@ NoteEditArea::NoteEditArea ()
 	octaveBoardSelectorTab.reset(new TabbedButtonBar(TabbedButtonBar::Orientation::TabsAtTop));
 	addAndMakeVisible(octaveBoardSelectorTab.get());
 
-	for (int i = 0; i < NUMBEROFBOARDS; i++)
+	for (int i = 0; i < MAXNUMBOARDS; i++)
 	{
 		octaveBoardSelectorTab->addTab(translate("Section") + " " + String(i + 1), juce::Colours::lightgrey, i + 1);
 	}
@@ -184,7 +184,7 @@ void NoteEditArea::resized()
 
 	keyEditBounds = contentBackground.withLeft(assignControlsBounds.getRight() + assignControlsBounds.getX() * 0.5f);
 
-	tilingGeometry.fitTilingTo(
+	lumatoneGeometry.fitTilingTo(
 		keyEditBounds,
 		boardGeometry.getMaxHorizontalLineSize(),
 		boardGeometry.horizontalLineCount(),
@@ -192,10 +192,10 @@ void NoteEditArea::resized()
 		TERPSTRASINGLEKEYROTATIONANGLE, true
 	);
 
-	Array<Point<float>> keyCentres = tilingGeometry.getHexagonCentres(boardGeometry);
+	Array<Point<float>> keyCentres = lumatoneGeometry.getHexagonCentres(boardGeometry);
 	jassert(keyCentres.size() == TerpstraSysExApplication::getApp().getOctaveBoardSize());
 
-	float keySize = tilingGeometry.getKeySize();
+	float keySize = lumatoneGeometry.getKeySize();
 
 	int keyIndex = 0;
 	for (keyIndex = 0; keyIndex < keyCentres.size(); keyIndex++)
@@ -233,7 +233,7 @@ void NoteEditArea::mouseDown (const juce::MouseEvent& e)
 			{
 				// Perform the edit, according to edit mode. Including sending to device
 				auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-				jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS&& keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize());
+				jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS&& keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize());
 
 				int editMode = editFunctionsTab->getCurrentTabIndex();
 				switch (editMode)
@@ -307,20 +307,20 @@ void NoteEditArea::changeListenerCallback(ChangeBroadcaster *source)
 	if (source == octaveBoardSelectorTab.get())
 	{
 		auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-		jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS);
+		jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS);
 
-		setKeyFieldValues(((MainContentComponent*)getParentComponent())->getMappingInEdit().sets[setSelection]);
+		setKeyFieldValues(*TerpstraSysExApplication::getApp().getMappingData()->getBoard(setSelection));
 	}
 }
 
 
-void NoteEditArea::onSetData(TerpstraKeyMapping& newData)
+void NoteEditArea::onSetData(LumatoneLayout& newData)
 {
 	// Add colours of the mapping to the colour combo box
 	return dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->onSetData(newData);
 }
 
-void NoteEditArea::setKeyFieldValues(const TerpstraKeys& keySet)
+void NoteEditArea::setKeyFieldValues(const LumatoneBoard& keySet)
 {
 	for (int i = 0; i < TerpstraSysExApplication::getApp().getOctaveBoardSize(); i++)
 		terpstraKeyFields[i]->setValue(keySet.theKeys[i]);
@@ -351,8 +351,8 @@ void NoteEditArea::changeSingleKeySelection(int newSelection)
 void NoteEditArea::refreshKeyFields()
 {
 	auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-	jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS);
-	setKeyFieldValues(((MainContentComponent*)getParentComponent())->getMappingInEdit().sets[setSelection]);
+	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS);
+	setKeyFieldValues(*TerpstraSysExApplication::getApp().getMappingData()->getBoard(setSelection));
 }
 
 void NoteEditArea::resetOctaveSize(bool refreshAndResize)
@@ -363,7 +363,7 @@ void NoteEditArea::resetOctaveSize(bool refreshAndResize)
 
 	if (currentBoardSize != boardSize)
 	{
-		boardGeometry = TerpstraBoardGeometry();
+		boardGeometry = LumatoneGeometry();
 
 		for (int i = 0; i < 56; i++)
 			terpstraKeyFields[i] = nullptr;
@@ -442,4 +442,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

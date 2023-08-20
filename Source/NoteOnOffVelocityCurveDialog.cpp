@@ -14,6 +14,6 @@
 
 //==============================================================================
 NoteOnOffVelocityCurveDialog::NoteOnOffVelocityCurveDialog()
-    : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::noteOnNoteOff)
+    : VelocityCurveDlgBase(LumatoneConfigTable::TableType::velocityInterval)
 {
 }

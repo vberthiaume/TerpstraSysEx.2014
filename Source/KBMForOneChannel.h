@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../../TerpstraSysEx.2014/JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "HajuLib/HajuErrorVisualizer.h"
 #include "MappingLogic.h"
@@ -88,4 +88,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

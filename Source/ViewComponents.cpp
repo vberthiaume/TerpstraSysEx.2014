@@ -24,7 +24,7 @@ TerpstraKeyEdit::TerpstraKeyEdit()
 	addAndMakeVisible(midiNoteLabel);
 	midiNoteLabel->setJustificationType(Justification::centredRight);
 	midiNoteLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowBold));
-	
+
 	midiChannelLabel = new Label("midiChannelLabel", "0");
 	addAndMakeVisible(midiChannelLabel);
 	midiChannelLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
@@ -36,9 +36,9 @@ TerpstraKeyEdit::~TerpstraKeyEdit()
 	deleteAllChildren();
 }
 
-TerpstraKey TerpstraKeyEdit::getValue() const
+LumatoneKey TerpstraKeyEdit::getValue() const
 {
-	TerpstraKey newValue;
+	LumatoneKey newValue;
 	newValue.noteNumber = midiNoteLabel->getText().getIntValue();
 	newValue.channelNumber = midiChannelLabel->getText().getIntValue();
 	newValue.colour = keyColour;
@@ -48,7 +48,7 @@ TerpstraKey TerpstraKeyEdit::getValue() const
 	return newValue;
 }
 
-void TerpstraKeyEdit::setValue(TerpstraKey newValue)
+void TerpstraKeyEdit::setValue(LumatoneKey newValue)
 {
     if (newValue.keyType == LumatoneKeyType::disabled || newValue.keyType == LumatoneKeyType::disabledDefault)
     {
@@ -93,7 +93,7 @@ void TerpstraKeyEdit::setValue(TerpstraKey newValue)
 
 	newTooltip += newLine;
 	newTooltip += translate("KeyColour") + " " + keyColour.toDisplayString(false);
-	
+
 	setTooltip(newTooltip);
 	midiNoteLabel->setTooltip(newTooltip);
 	midiChannelLabel->setTooltip(newTooltip);
@@ -112,7 +112,7 @@ void TerpstraKeyEdit::setIsSelected(bool newValue)
 
 void TerpstraKeyEdit::paint(Graphics& g)
 {
-	TerpstraKey currentValue = getValue();
+	LumatoneKey currentValue = getValue();
 
 	// Selected or not: color and thickness of the line
 	float lineWidth = TERPSTRASINGLEKEYFLDLINEWIDTH;
@@ -126,10 +126,10 @@ void TerpstraKeyEdit::paint(Graphics& g)
 	{
 		textColour = textColour.brighter();
 	}
-	
+
     midiChannelLabel->setColour(juce::Label::textColourId, textColour);
     midiNoteLabel->setColour(juce::Label::textColourId, textColour);
-    
+
     // Look depending on Key type
     if (currentValue.keyType == LumatoneKeyType::continuousController)
 	{
@@ -189,7 +189,7 @@ void TerpstraKeyEdit::paint(Graphics& g)
 //        g.drawText("x", midiChannelLabel->getBounds(), midiChannelLabel->getJustificationType());
 //        g.drawText("x", midiNoteLabel->getBounds(), midiChannelLabel->getJustificationType());
 //    }
-    
+
 	// Something parametrized or not?
 	if (currentValue.isEmpty())
 	{
@@ -228,4 +228,3 @@ void TerpstraKeyEdit::setKeySize(float keySizeIn)
 	keySize = keySizeIn;
 	setSize(keySize, keySize);
 }
-

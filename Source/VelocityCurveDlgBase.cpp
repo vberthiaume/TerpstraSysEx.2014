@@ -28,7 +28,7 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-VelocityCurveDlgBase::VelocityCurveDlgBase (TerpstraVelocityCurveConfig::VelocityCurveType typeValue)
+VelocityCurveDlgBase::VelocityCurveDlgBase (LumatoneConfigTable::TableType typeValue)
     : freeDrawingStrategy(velocityBeamTable),
       linearDrawingStrategy(velocityBeamTable),
       quadraticDrawingStrategy(velocityBeamTable)
@@ -54,9 +54,9 @@ VelocityCurveDlgBase::VelocityCurveDlgBase (TerpstraVelocityCurveConfig::Velocit
     //[UserPreSize]
 	cbEditMode->getProperties().set(LumatoneEditorStyleIDs::roundedDiagonalCorners, 0);
 
-    drawingStrategies[TerpstraVelocityCurveConfig::freeDrawing] = &freeDrawingStrategy;
-	drawingStrategies[TerpstraVelocityCurveConfig::linearSegments] = &linearDrawingStrategy;
-	drawingStrategies[TerpstraVelocityCurveConfig::quadraticCurves] = &quadraticDrawingStrategy;
+    drawingStrategies[LumatoneConfigTable::freeDrawing] = &freeDrawingStrategy;
+	drawingStrategies[LumatoneConfigTable::linearSegments] = &linearDrawingStrategy;
+	drawingStrategies[LumatoneConfigTable::quadraticCurves] = &quadraticDrawingStrategy;
 
 	for (int x = 0; x < 128; x++)
 	{
@@ -200,7 +200,7 @@ void VelocityCurveDlgBase::comboBoxChanged (juce::ComboBox* comboBoxThatHasChang
 		auto configInEdit = getConfigInEdit();
 		if (configInEdit != nullptr)
 		{
-			configInEdit->editStrategy = static_cast<TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX>(editModeIndex);
+			configInEdit->editStrategy = static_cast<LumatoneConfigTable::DrawMode>(editModeIndex);
 		}
 
 		// Set edit config according to current values of velocity table, of possible
@@ -238,7 +238,7 @@ void VelocityCurveDlgBase::lookAndFeelChanged()
 
 void VelocityCurveDlgBase::loadFromMapping()
 {
-	auto defaultConfig = TerpstraVelocityCurveConfig(velocityCurveType);
+	auto defaultConfig = LumatoneConfigTable(velocityCurveType);
 	auto configInEdit = getConfigInEdit();
 	if (configInEdit == nullptr)
 		configInEdit = &defaultConfig;
@@ -249,7 +249,7 @@ void VelocityCurveDlgBase::loadFromMapping()
 	}
 	else
 	{
-		cbEditMode->setSelectedItemIndex(TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX::none, juce::NotificationType::dontSendNotification);
+		cbEditMode->setSelectedItemIndex(LumatoneConfigTable::DrawMode::none, juce::NotificationType::dontSendNotification);
 	}
 
 	// Set edit config according to current values of velocity table, if possible
@@ -351,7 +351,7 @@ void VelocityCurveDlgBase::mouseUp(const MouseEvent &event)
 	repaint();
 }
 
-TerpstraKeyMapping*	VelocityCurveDlgBase::getMappingInEdit()
+LumatoneLayout*	VelocityCurveDlgBase::getMappingInEdit()
 {
 	// Security at start of program
 	if (getParentComponent() == nullptr)
@@ -364,13 +364,13 @@ TerpstraKeyMapping*	VelocityCurveDlgBase::getMappingInEdit()
 	return &(dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent()))->getMappingInEdit();
 }
 
-TerpstraVelocityCurveConfig* VelocityCurveDlgBase::getConfigInEdit()
+LumatoneConfigTable* VelocityCurveDlgBase::getConfigInEdit()
 {
 	auto mappingInEdit = getMappingInEdit();
 	if(mappingInEdit == nullptr)
 		return nullptr;
 
-	return mappingInEdit->getVelocityCurveConfig(velocityCurveType);
+	return mappingInEdit->getConfigTable(velocityCurveType);
 }
 
 VelocityCurveEditStrategyBase* VelocityCurveDlgBase::getCurrentDrawingStrategy()
@@ -399,7 +399,7 @@ VelocityCurveEditStrategyBase* VelocityCurveDlgBase::getCurrentDrawingStrategy()
 BEGIN_JUCER_METADATA
 
 <JUCER_COMPONENT documentType="Component" className="VelocityCurveDlgBase" componentName=""
-                 parentClasses="public Component" constructorParams="TerpstraVelocityCurveConfig::VelocityCurveType typeValue"
+                 parentClasses="public Component" constructorParams="LumatoneConfigTable::TableType typeValue"
                  variableInitialisers="freeDrawingStrategy(velocityBeamTable)&#10;linearDrawingStrategy(velocityBeamTable)&#10;quadraticDrawingStrategy(velocityBeamTable)"
                  snapPixels="8" snapActive="1" snapShown="1" overlayOpacity="0.330"
                  fixedSize="1" initialWidth="320" initialHeight="160">
@@ -420,4 +420,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

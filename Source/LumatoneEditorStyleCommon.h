@@ -12,7 +12,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "ImageResampling/ImageResampler.h"
+#include "lumatone_assets.h"
 
 //==================================================================
 //
@@ -478,7 +478,7 @@ static void drawFolderIconAt(Graphics& g, int x, int y, int width, int height, C
     PathStrokeType stroke(1.25f);
     stroke.setEndStyle(PathStrokeType::EndCapStyle::rounded);
     stroke.setJointStyle(PathStrokeType::JointStyle::curved);
-    
+
     g.setColour(arrowColour);
     g.strokePath(arrowPath, stroke);
 }
@@ -520,20 +520,20 @@ static Path getSaveIconPath()
 static void getCCPolarityIconPath(bool inverted, Path& arrowPath, Path& faderPath)
 {
     float glyphWidth = 0.25f;
-    
+
     float y1 = 0.8f;
     float y2 = 1.0f - y1;
-    
+
     float arrowX = 0.3f;
     float arrowHeadDif = abs(y1 - y2) * 0.333;
-    
+
     float faderMax = 0.81f;
     float faderEdge = faderMax - glyphWidth;
-    
+
     if (inverted)
     {
         arrowPath = getArrowPath(Point<float>(arrowX, y1), Point<float>(arrowX, y2), glyphWidth, y2 + arrowHeadDif);
-        
+
         faderPath.startNewSubPath(faderEdge, y1);
         faderPath.lineTo(faderEdge, y2);
         faderPath.lineTo(faderMax, y2);
@@ -542,7 +542,7 @@ static void getCCPolarityIconPath(bool inverted, Path& arrowPath, Path& faderPat
     else
     {
         arrowPath = getArrowPath(Point<float>(arrowX, y2), Point<float>(arrowX, y1), glyphWidth, y1 - arrowHeadDif);
-        
+
         faderPath.startNewSubPath(faderEdge, y1);
         faderPath.lineTo(faderMax, y1);
         faderPath.lineTo(faderEdge, y2);
@@ -560,13 +560,13 @@ static Path getCloneIconPath()
 //
 //    auto leftRect = Rectangle<float>(1.0/12.0f, yMargin, width, height);
 //    auto rightRect = Rectangle<float>(width, yMargin, width, height);
-    
+
     // bottom left overlapping top right
-    
+
     float xMargin = 0.1f;
     float yMargin = 0.1f;
     float size = 0.5f;
-    
+
     auto leftRect = Rectangle<float>(xMargin, 1.0f - yMargin - size, size, size);
     auto rightRect = Rectangle<float>(1.0f - xMargin - size, yMargin, size, size);
 
@@ -577,30 +577,13 @@ static Path getCloneIconPath()
     return path;
 }
 
-// Hash codes for use with ImageCache::getFromHashCode()
-enum LumatoneEditorAssets
-{
-    //LoadIcon            = 0x0002000,
-    //SaveIcon            = 0x0002001,
-    //ImportIcon          = 0x0002002,
-    LumatoneGraphic     = 0x0002100,
-    KeybedShadows       = 0x0002101,
-    KeyShape            = 0x0002200,
-    KeyShadow           = 0x0002201,
-    TickBox             = 0x0003100,
-    SavePalette         = 0x0005000,
-    CancelPalette       = 0x0005001,
-    TrashCanIcon        = 0x0005002,
-    CloneIcon           = 0x0005003
-};
-
 // TODO: clean up / make a better routine with ImageCache usage
 static Image getCachedCloneImage()
 {
-    auto cloneImg = ImageCache::getFromHashCode(LumatoneEditorAssets::CloneIcon);
+    auto cloneImg = ImageCache::getFromHashCode((juce::int64)LumatoneAssets::ID::CloneIcon);
     if (cloneImg.isValid())
         return cloneImg;
-    
+
     // Create duplicate icon
     auto cloneIcon = getCloneIconPath();
     cloneIcon.scaleToFit(0, 0, 80, 80, true);
@@ -611,7 +594,7 @@ static Image getCachedCloneImage()
     cloneG.setOrigin(Point<int>(10, 10));
     auto stroke = PathStrokeType(8.0f, PathStrokeType::JointStyle::curved);
     cloneG.strokePath(cloneIcon, stroke);
-    ImageCache::addImageToCache(cloneImg, LumatoneEditorAssets::CloneIcon);
+    ImageCache::addImageToCache(cloneImg, (juce::int64)LumatoneAssets::ID::CloneIcon);
     return cloneImg;
 }
 
@@ -653,7 +636,7 @@ enum LumatoneEditorColourIDs
 };
 
 namespace LumatoneEditorStyleIDs
-{    
+{
     // Index of LumatoneEditorFontCollection
     static Identifier fontOverride = Identifier("AppFontIndex");
     // TODO: Review with new Font access method

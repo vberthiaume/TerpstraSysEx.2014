@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 
 namespace Lumatone {
@@ -28,7 +28,7 @@ namespace Lumatone {
             pasteOctaveBoardChannels = 0x200104,
             pasteOctaveBoardColours = 0x200105,
             pasteOctaveBoardTypes = 0x200106,
-            
+
 			undo = 0x200200,
 			redo = 0x200201,
 

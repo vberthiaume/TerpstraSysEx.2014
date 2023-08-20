@@ -22,7 +22,7 @@
 #include "MainComponent.h"
 #include "Main.h"
 #include "LumatoneMenu.h"
-
+#include "lumatone_assets.h"
 //[/Headers]
 
 #include "AllKeysOverview.h"
@@ -53,19 +53,20 @@ void KeyMiniDisplayInsideAllKeysOverview::paint(Graphics& g)
 	jassert(getParentComponent() != nullptr);
 	bool boardIsSelected = boardIndex == dynamic_cast<AllKeysOverview*>(getParentComponent())->getCurrentSetSelection();
 
-	Colour hexagonColour = findColour(TerpstraKeyEdit::backgroundColourId).overlaidWith(getKeyColour());
-    if (hexagonColour.getPerceivedBrightness() >= 0.6)
-        hexagonColour = hexagonColour.darker((1.0 - hexagonColour.getPerceivedBrightness()));
+	auto hexagonColour = getKeyColour();
+	// Colour hexagonColour = findColour(TerpstraKeyEdit::backgroundColourId).overlaidWith(getKeyColour());
+    // if (hexagonColour.getPerceivedBrightness() >= 0.6)
+    //     hexagonColour = hexagonColour.darker((1.0 - hexagonColour.getPerceivedBrightness()));
 
     g.setColour(hexagonColour);
 
-	if (colourGraphic && shadowGraphic)
+	if (colourGraphic.isValid() && shadowGraphic.isValid())
 	{
-		int x = roundToInt((getWidth()  - colourGraphic->getWidth()) * 0.5f);
-		int y = roundToInt((getHeight() - colourGraphic->getHeight()) * 0.5f);
+		int x = 0; //roundToInt((getWidth()  - colourGraphic->getWidth()) * 0.5f);
+		int y = 0; //roundToInt((getHeight() - colourGraphic->getHeight()) * 0.5f);
 
-		g.drawImageAt(*colourGraphic, x, y, true);
-		g.drawImageAt(*shadowGraphic, x, y);
+		g.drawImageAt(colourGraphic, x, y, true);
+		g.drawImageAt(shadowGraphic, x, y);
 	}
 }
 
@@ -136,40 +137,34 @@ void KeyMiniDisplayInsideAllKeysOverview::mouseUp(const MouseEvent& e)
 
 void KeyMiniDisplayInsideAllKeysOverview::handleMidiMessage(const MidiMessage& msg)
 {
-	auto keyData = getKeyData();
-	if (keyData != nullptr && msg.getChannel() == keyData->channelNumber && msg.getNoteNumber() == keyData->noteNumber)
-	{
-		isHighlighted = msg.isNoteOn();
-		repaint();
-	}
+	// auto keyData = getKeyData();
+	// if (keyData != nullptr && msg.getChannel() == keyData.channelNumber && msg.getNoteNumber() == keyData.noteNumber)
+	// {
+	// 	isHighlighted = msg.isNoteOn();
+	// 	repaint();
+	// }
 }
 
-const TerpstraKey* KeyMiniDisplayInsideAllKeysOverview::getKeyData() const
+LumatoneKey KeyMiniDisplayInsideAllKeysOverview::getKeyData() const
 {
-	if (boardIndex >= 0 && boardIndex < NUMBEROFBOARDS && keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize())
+	if (boardIndex >= 0 && boardIndex < MAXNUMBOARDS && keyIndex >= 0 && keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize())
 	{
-		jassert(getParentComponent() != nullptr);
-		jassert(getParentComponent()->getParentComponent() != nullptr);
-		return &dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent())
-			->getMappingInEdit().sets[boardIndex].theKeys[keyIndex];
+		return TerpstraSysExApplication::getApp().getMappingData()->getBoard(boardIndex)->theKeys[keyIndex];
 	}
 
-	return nullptr;
+	return LumatoneKey();
 }
 
 Colour KeyMiniDisplayInsideAllKeysOverview::getKeyColour() const
 {
-	auto keyData = getKeyData();
-	if ( keyData != nullptr)
-		return keyData->colour;
-	else
-		return findColour(TerpstraKeyEdit::backgroundColourId);
+	juce::Colour keyColour = getKeyData().colour;
+	return TerpstraSysExApplication::getApp().getColourModel()->getModelColour(keyColour);
 }
 
-void KeyMiniDisplayInsideAllKeysOverview::setKeyGraphics(Image& colourGraphicIn, Image& shadowGraphicIn)
+void KeyMiniDisplayInsideAllKeysOverview::setKeyGraphics(Image colourGraphicIn, Image shadowGraphicIn)
 {
-	colourGraphic = &colourGraphicIn;
-	shadowGraphic = &shadowGraphicIn;
+	colourGraphic = colourGraphicIn;
+	shadowGraphic = shadowGraphicIn;
 }
 
 //[/MiscUserDefs]
@@ -213,14 +208,15 @@ AllKeysOverview::AllKeysOverview ()
 	lblFirmwareVersion.reset(new Label("FirmwareVersionLabel"));
 	addChildComponent(lblFirmwareVersion.get());
 
-	tilingGeometry.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
-	tilingGeometry.setRowAngle(LUMATONEGRAPHICROWANGLE);
-
 	TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
 	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
 
 	resetOctaveSize();
 
+	LumatoneAssets::LoadAssets(LumatoneAssets::ID::LumatoneGraphic);
+    //LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeybedShadows);
+    LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeyShape);
+    LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeyShadow);
     //[/UserPreSize]
 
     setSize (928, 214);
@@ -259,7 +255,7 @@ void AllKeysOverview::paint (juce::Graphics& g)
 	g.drawImageAt(lumatoneGraphic, lumatoneBounds.getX(), lumatoneBounds.getY());
 
 	// Draw a line under the selected sub board
-	if (currentSetSelection >= 0 && currentSetSelection < NUMBEROFBOARDS)
+	if (currentSetSelection >= 0 && currentSetSelection < MAXNUMBOARDS)
 	{
 		Path selectionMarkPath;
 		selectionMarkPath.startNewSubPath(octaveBoards[currentSetSelection]->leftPos, octaveLineY);
@@ -281,12 +277,12 @@ void AllKeysOverview::resized()
     //[UserResized] Add your own custom resize handling here..
 
 	// Prepare position helpers for graphics
-	int graphicHeight = roundToInt(getHeight() * imageHeight);
-	int graphicWidth = roundToInt(imageAspect * graphicHeight);
+	currentHeight = roundToInt(getHeight() * imageHeight);
+	currentWidth = roundToInt(imageAspect * currentHeight);
 
 	lumatoneBounds.setBounds(
-		roundToInt((getWidth() - graphicWidth) / 2.0f), roundToInt(getHeight() * imageY),
-		graphicWidth, graphicHeight
+		roundToInt((getWidth() - currentWidth) * 0.5f), roundToInt(getHeight() * imageY),
+		currentWidth, currentHeight
 	);
 
 	int btnHeight = roundToInt(getHeight() * saveLoadH);
@@ -308,45 +304,45 @@ void AllKeysOverview::resized()
 	resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
 	lblFirmwareVersion->setTopLeftPosition(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 0.6f);
 
-	int keyWidth = roundToInt(lumatoneBounds.getWidth() * keyW);
-	int keyHeight = roundToInt(lumatoneBounds.getHeight() * keyH);
+	keyWidth = roundToInt(lumatoneBounds.getWidth() * keyW);
+	keyHeight = roundToInt(lumatoneBounds.getHeight() * keyH);
 
 	// Scale key graphics once
-	lumatoneGraphic = imageProcessor->resizeImage(ImageCache::getFromHashCode(LumatoneEditorAssets::LumatoneGraphic), lumatoneBounds.getWidth(), lumatoneBounds.getHeight());
-	keyShapeGraphic = imageProcessor->resizeImage(ImageCache::getFromHashCode(LumatoneEditorAssets::KeyShape), keyWidth, keyHeight);
-	keyShadowGraphic = imageProcessor->resizeImage(ImageCache::getFromHashCode(LumatoneEditorAssets::KeyShadow), keyWidth, keyHeight);
+	lumatoneGraphic = getResizedImage((juce::int64)LumatoneAssets::ID::LumatoneGraphic, lumatoneBounds.getWidth(), lumatoneBounds.getHeight(), false);
+	keyShapeGraphic = getResizedImage((juce::int64)LumatoneAssets::ID::KeyShape, keyWidth, keyHeight, false);
+	keyShadowGraphic = getResizedImage((juce::int64)LumatoneAssets::ID::KeyShadow, keyWidth, keyHeight, false);
 
-	oct1Key1 = Point<float>(oct1Key1X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct1Key1Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
-	oct1Key56 = Point<float>(oct1Key56X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct1Key56Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
-	oct5Key7 = Point<float>(oct5Key7X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct5Key7Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
+	// oct1Key1 = Point<float>(oct1Key1X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct1Key1Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
+	// oct1Key56 = Point<float>(oct1Key56X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct1Key56Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
+	// oct5Key7 = Point<float>(oct5Key7X * lumatoneBounds.getWidth() + lumatoneBounds.getX(), oct5Key7Y * lumatoneBounds.getHeight() + lumatoneBounds.getY());
 
-	tilingGeometry.fitSkewedTiling(oct1Key1, oct1Key56, 10, oct5Key7, 24, false);
+	// lumatoneTiling.fitSkewedTiling(oct1Key1, oct1Key56, 10, oct5Key7, 24, false);
 
-	Array<Point<float>> keyCentres = tilingGeometry.getHexagonCentresSkewed(boardGeometry, 0, NUMBEROFBOARDS);
-	jassert(keyCentres.size() == TerpstraSysExApplication::getApp().getOctaveBoardSize() * NUMBEROFBOARDS);
+	// Array<Point<float>> keyCentres = lumatoneTiling.getHexagonCentresSkewed(boardGeometry, 0, MAXNUMBOARDS);
+	// jassert(keyCentres.size() == TerpstraSysExApplication::getApp().getOctaveBoardSize() * MAXNUMBOARDS);
 
 	int octaveIndex = 0;
-	octaveBoards[octaveIndex]->leftPos = keyCentres[0].getX() - keyWidth * 0.5;
+	octaveBoards[octaveIndex]->leftPos = keyCentres[0].getX() * lumatoneBounds.getWidth() + lumatoneBounds.getX() - keyWidth * 0.5f;
 
 	for (int keyIndex = 0; keyIndex < keyCentres.size(); keyIndex++)
 	{
 		int keyOctaveIndex = keyIndex % TerpstraSysExApplication::getApp().getOctaveBoardSize();
 
-		// Apply rotational transform
-		Point<int> centre = keyCentres[keyIndex].roundToInt();
+		juce::Point<int> keyPos = juce::Point<int>(
+            (int)(keyCentres[keyIndex].x * lumatoneBounds.getWidth() + lumatoneBounds.getX() - keyWidth * 0.5f),
+            (int)(keyCentres[keyIndex].y * lumatoneBounds.getHeight() + lumatoneBounds.getY() - keyHeight * 0.5f)
+        );
 
-		auto key = octaveBoards[octaveIndex]->keyMiniDisplay[keyOctaveIndex];
-		key->setSize(keyWidth, keyHeight);
-		key->setCentrePosition(centre);
-		key->setKeyGraphics(keyShapeGraphic, keyShadowGraphic);
-
+        auto key = octaveBoards[octaveIndex]->keyMiniDisplay[keyOctaveIndex];
+        key->setKeyGraphics(keyShapeGraphic, keyShadowGraphic);
+        key->setBounds(keyPos.x, keyPos.y, keyWidth, keyHeight);
 
 		if (keyOctaveIndex + 1 == TerpstraSysExApplication::getApp().getOctaveBoardSize())
 		{
 			octaveBoards[octaveIndex]->rightPos = key->getRight();
 			octaveIndex++;
 
-			if (octaveIndex < NUMBEROFBOARDS)
+			if (octaveIndex < MAXNUMBOARDS)
 				octaveBoards[octaveIndex]->leftPos = key->getX();
 		}
 	}
@@ -385,6 +381,31 @@ void AllKeysOverview::buttonClicked (juce::Button* buttonThatWasClicked)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
+
+void AllKeysOverview::prepareHexTiling()
+{
+	lumatoneGeometry.reset(new LumatoneGeometry(GetLumatoneBoardSize(currentOctaveSize)));
+
+    lumatoneTiling.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
+    lumatoneTiling.setRowAngle(LUMATONEGRAPHICROWANGLE);
+
+    oct1Key1 = juce::Point<float>(oct1Key1X, oct1Key1Y);
+    oct1Key56 = juce::Point<float>(oct1Key56X, oct1Key56Y);
+    oct5Key7 = juce::Point<float>(oct5Key7X, oct5Key7Y);
+
+    lumatoneTiling.fitSkewedTiling(oct1Key1, oct1Key56, 10, oct5Key7, 24, true);
+    keyCentres = lumatoneTiling.getHexagonCentresSkewed(*lumatoneGeometry, 0, MAXNUMBOARDS);
+}
+
+juce::Image AllKeysOverview::getResizedImage(juce::int64 assetId, int targetWidth, int targetHeight, bool useJuceResize)
+{
+	auto cachedImage = LumatoneAssets::getImage((LumatoneAssets::ID)assetId, targetHeight, targetWidth);
+
+	if (useJuceResize)
+        return cachedImage.rescaled(targetWidth, targetHeight, juce::Graphics::ResamplingQuality::highResamplingQuality);
+
+	return imageProcessor->resizeImage(cachedImage, targetWidth, targetHeight);
+}
 
 void AllKeysOverview::setFirmwareVersion(FirmwareVersion versionIn)
 {
@@ -445,10 +466,10 @@ void AllKeysOverview::resetOctaveSize()
 	int octaveSize = TerpstraSysExApplication::getApp().getOctaveBoardSize();
 	if (currentOctaveSize != octaveSize)
 	{
-		boardGeometry = TerpstraBoardGeometry();
+		lumatoneTiling = LumatoneTiling();
 		octaveBoards.clear();
 
-		for (int subBoardIndex = 0; subBoardIndex < NUMBEROFBOARDS; subBoardIndex++)
+		for (int subBoardIndex = 0; subBoardIndex < MAXNUMBOARDS; subBoardIndex++)
 		{
 			OctaveBoard* board = octaveBoards.add(new OctaveBoard());
 
@@ -464,7 +485,9 @@ void AllKeysOverview::resetOctaveSize()
 		currentOctaveSize = octaveSize;
 	}
 
-	jassert(octaveBoards.size() == NUMBEROFBOARDS);
+	jassert(octaveBoards.size() == MAXNUMBOARDS);
+
+	prepareHexTiling();
 }
 
 //[/MiscUserCode]
@@ -504,4 +527,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

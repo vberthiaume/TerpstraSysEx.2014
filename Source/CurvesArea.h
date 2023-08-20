@@ -22,7 +22,7 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 
 #include "LumatoneEditorStyleCommon.h"
 //[/Headers]
@@ -104,4 +104,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

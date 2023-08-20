@@ -608,22 +608,21 @@ void IsomorphicMassAssign::setSaveSend(int setSelection, int keySelection, int n
 
 	auto mainComponent = dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent());
 
-    TerpstraKey& keyData = mainComponent->getMappingInEdit().sets[setSelection].theKeys[keySelection];
+    LumatoneKey keyData = *TerpstraSysExApplication::getApp().getMappingData()->readKey(setSelection, keySelection);
     keyData.keyType = LumatoneKeyType::noteOnNoteOff;
 
 	// Save data
-	this->mappingLogic->indexToTerpstraKey(
+	mappingLogic->indexToTerpstraKey(
         noteIndex,
         keyData
 		);
 
 	// Send to device
-	TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyParam(setSelection + 1, keySelection,
-		mainComponent->getMappingInEdit().sets[setSelection].theKeys[keySelection]);
+	TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyParam(setSelection + 1, keySelection, keyData);
 }
 
 // Fill a line in current octave board. Starting point is assumed to have been set
-void IsomorphicMassAssign::fillLine(int setSelection, TerpstraBoardGeometry::StraightLine& line, int startPos, int startNoteIndex, int stepSize)
+void IsomorphicMassAssign::fillLine(int setSelection, LumatoneGeometry::StraightLine& line, int startPos, int startNoteIndex, int stepSize)
 {
 	jassert(stepSize != 0);
 
@@ -646,7 +645,7 @@ void IsomorphicMassAssign::fillLine(int setSelection, TerpstraBoardGeometry::Str
 }
 
 // Fill a horizontal line over all octave boards. Starting point is assumed to have been set.
-void IsomorphicMassAssign::fillGlobalLine(int setSelection, TerpstraBoardGeometry::StraightLineSet& globalLine, int startPos, int startNoteIndex, int stepSize)
+void IsomorphicMassAssign::fillGlobalLine(int setSelection, LumatoneGeometry::StraightLineSet& globalLine, int startPos, int startNoteIndex, int stepSize)
 {
 	jassert(stepSize != 0);
 
@@ -678,7 +677,7 @@ void IsomorphicMassAssign::mappingLogicChanged(MappingLogicBase* mappingLogicTha
 
 	for (int i = 0; i < mappingLogicThatChanged->globalMappingSize(); i++)
 	{
-		TerpstraKey keyData = mappingLogicThatChanged->indexToTerpstraKey(i);
+		LumatoneKey keyData = mappingLogicThatChanged->indexToTerpstraKey(i);
 		jassert(!keyData.isEmpty());
 
         String keyLabel = String(i) + ": Key_" + String(keyData.noteNumber) + ", Chan_" + String(keyData.channelNumber);
@@ -737,7 +736,7 @@ void IsomorphicMassAssign::colourChangedCallback(ColourSelectionBroadcaster* sou
 bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
 {
 	bool mappingChanged = false;
-	jassert(setSelection >= 0 && setSelection < NUMBEROFBOARDS && keySelection >= 0 && keySelection < TerpstraSysExApplication::getApp().getOctaveBoardSize());
+	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS && keySelection >= 0 && keySelection < TerpstraSysExApplication::getApp().getOctaveBoardSize());
 
 	int startNoteIndex = this->startingPointBox->getSelectedItemIndex();
 	if (this->mappingLogic != nullptr && startNoteIndex >= 0)
@@ -749,7 +748,7 @@ bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
 
         Point<int>startPos = boardGeometry.coordinatesForKey(setSelection, keySelection); // Get the coordinates of the clicked key.
 
-        for (int boardIx = 0; boardIx < NUMBEROFBOARDS; boardIx++) { // For each board
+        for (int boardIx = 0; boardIx < MAXNUMBOARDS; boardIx++) { // For each board
             for (int keyIx = 0; keyIx < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIx++) { // For each key on that board
                 Point<int> keyPos = boardGeometry.coordinatesForKey(boardIx, keyIx); // Get the coordinates of the key to assign.
                 Point<int> keyOffset = keyPos - startPos; // Get the offset of the key to assign, relative to where the user clicked.
@@ -857,4 +856,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

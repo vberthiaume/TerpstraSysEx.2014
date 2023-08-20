@@ -81,7 +81,7 @@ void ColourPaletteComponent::setColourPalette(Array<Colour> colourPaletteIn)
 void ColourPaletteComponent::setSwatchColour(int swatchNumber, Colour newColour)
 {
     Palette::setSwatchColour(swatchNumber, newColour);
-    
+
     if (getSelectedSwatchNumber() == swatchNumber)
         selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, getSelectedSwatchColour());
 }
@@ -119,7 +119,7 @@ PaletteControlGroup::PaletteControlGroup(LumatoneEditorColourPalette newPaletteI
     );
     cloneButton.setTooltip(translate("CloneButtonTip"));
 
-    const Image trashIcon = ImageCache::getFromHashCode(LumatoneEditorAssets::TrashCanIcon);
+    const Image trashIcon = ImageCache::getFromHashCode((juce::int64)LumatoneAssets::ID::TrashCanIcon);
     trashButton.setImages(false, true, true,
         trashIcon, 1.0f, Colour(),
         trashIcon, 1.0f, Colours::white.withAlpha(0.4f),

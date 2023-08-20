@@ -9,7 +9,7 @@
 */
 
 #pragma once
-#include "JuceHeader.h"
+#include <JuceHeader.h>
 
 /*
 ==============================================================================
@@ -234,8 +234,8 @@ struct FirmwareVersion
 
 	String toString() const { return String(major) + "." + String(minor) + "." + String(revision); }
 
-	String toDisplayString() const 
-	{ 
+	String toDisplayString() const
+	{
 		String str = String(major) + "." + String(minor);
 		if (revision > 0)
 			str += ("." + String(revision));
@@ -293,7 +293,7 @@ struct FirmwareVersion
 		// Return special definition for 55-keys version
 		else if (versionIn == LumatoneFirmwareVersion::VERSION_55_KEYS)
 			return FirmwareVersion(0, 0, 55);
-		
+
 		return FirmwareVersion(0, 0, 0);
 	}
 };
@@ -362,7 +362,7 @@ struct FirmwareSupport
 
 		else if ((versionIn.major < 0) | (versionIn.minor < 0) | (versionIn.revision < 0))
 			return LumatoneFirmwareVersion::UNKNOWN_VERSION;
-		
+
         // MAJOR: 1
 		else if (versionIn.major == 1)
 		{
@@ -379,20 +379,20 @@ struct FirmwareSupport
 				else if (versionIn.revision >= 3)
 					return (LumatoneFirmwareVersion)((int)LumatoneFirmwareVersion::VERSION_1_0_3 + (versionIn.revision - 3));
 			}
-            
+
             // MINOR: 1
             else if (versionIn.minor == 1)
             {
                 if (versionIn.revision == 0)
                     return LumatoneFirmwareVersion::VERSION_1_1_0;
             }
-            
+
             else if (versionIn.minor == 2)
             {
                 if (versionIn.revision == 0)
                     return LumatoneFirmwareVersion::VERSION_1_2_0;
             }
-            
+
             return LumatoneFirmwareVersion::FUTURE_VERSION;
 		}
 
@@ -465,7 +465,7 @@ struct FirmwareSupport
 	{
 		return msg.getSysExData()[CMD_ID];
 	}
-    
+
     String serialIdentityToString(int* serialBytes)
     {
         return String::toHexString(serialBytes, 6);

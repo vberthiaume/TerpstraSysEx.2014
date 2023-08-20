@@ -15,7 +15,7 @@ MainWindow::MainWindow(ComponentBoundsConstrainer* constrainerIn) : DocumentWind
     DocumentWindow::minimiseButton + DocumentWindow::closeButton),
     constrainer(constrainerIn)
 {
-    setContentOwned(new MainContentComponent(), true);
+    setContentOwned(new MainContentComponent(*TerpstraSysExApplication::getApp().getMappingData()), true);
 
     setResizable(true, true);
 #if JUCE_ANDROID
@@ -23,7 +23,7 @@ MainWindow::MainWindow(ComponentBoundsConstrainer* constrainerIn) : DocumentWind
 #else
     // Window aspect ratio
     constrainer->setFixedAspectRatio(DEFAULTMAINWINDOWASPECT);
-    constrainer->setMinimumSize(800, round(800 / DEFAULTMAINWINDOWASPECT));
+    constrainer->setMinimumSize(800, juce::roundToInt(800 / DEFAULTMAINWINDOWASPECT));
 
     setConstrainer(constrainer);
     updateBounds();
@@ -56,19 +56,19 @@ bool MainWindow::isLargerThanCurrentScreen() const
 {
     if (maxWindowHeight > 0)
         return getHeight() > maxWindowHeight;
-    
+
     return false; // shouldn't happen
 }
 
 bool MainWindow::isOutOfVerticalBounds() const
 {
-    return getScreenY() < 0 
+    return getScreenY() < 0
         || getScreenY() >= (maxWindowHeight - verticalBoundsThreshold);
 }
 
 bool MainWindow::isOutOfHorizontalBounds() const
 {
-    return getScreenBounds().getRight() < horizontalBoundsThreshold 
+    return getScreenBounds().getRight() < horizontalBoundsThreshold
         || getScreenX() >= (maxWindowWidth - horizontalBoundsThreshold);
 }
 
@@ -93,7 +93,7 @@ void MainWindow::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
 void MainWindow::updateBounds()
 {
     auto thisDisplay = Desktop::getInstance().getDisplays().getDisplayForRect(getScreenBounds());
-    
+
     if (thisDisplay != nullptr)
     {
         int screenWidth = thisDisplay->userArea.getWidth();
@@ -103,7 +103,7 @@ void MainWindow::updateBounds()
             maxWindowWidth = screenWidth;
             maxWindowHeight = screenHeight;
             constrainer->setMaximumHeight(maxWindowHeight);
-            
+
             fixWindowPositionAndSize();
             return;
         }
@@ -128,7 +128,7 @@ void MainWindow::fixWindowPositionAndSize(bool setToDefault)
                                             : maxWindowHeight - verticalBoundsThreshold;
         setTopLeftPosition(getScreenX(), correctedY);
     }
-    
+
     if (isOutOfHorizontalBounds())
     {
         auto bounds = getScreenBounds();
@@ -141,7 +141,7 @@ void MainWindow::fixWindowPositionAndSize(bool setToDefault)
 void MainWindow::timerCallback()
 {
     // Set threshold to be a quarter of the window handle height
-    verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f); 
+    verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f);
 
     updateBounds();
 }

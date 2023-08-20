@@ -11,7 +11,7 @@
 #pragma once
 
 #include "ApplicationListeners.h"
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 #include "TerpstraMidiDriver.h"
 #include "DeviceActivityMonitor.h"
 #include "FirmwareTransfer.h"
@@ -32,7 +32,7 @@ public:
 
     LumatoneController();
     ~LumatoneController();
-    
+
     //============================================================================
     // Methods to configure firmware communication parameters
 
@@ -44,10 +44,6 @@ public:
     LumatoneFirmwareVersion getConfirmedVersion() const { return determinedVersion; }
 
     const FirmwareSupport& getFirmwareSupport() const { return firmwareSupport; }
-
-    int getOctaveSize() const { return octaveSize; }
-    
-    int getNumBoards() const { return BOARD_OCT_5; } // TODO: Set variable based on serial/version
 
     void refreshAvailableMidiDevices();
 
@@ -64,7 +60,7 @@ public:
 
     bool requestFirmwareUpdate(File firmwareFile, FirmwareTransfer::ProcessListener* listenerIn = nullptr);
 
-    // Auto-connection and monitoring 
+    // Auto-connection and monitoring
 
     void detectAndConnectToLumatone();
     void stopAutoConnection();
@@ -75,14 +71,31 @@ public:
     bool willCheckConnectionWhenInactvie() const { return deviceMonitor->willCheckForInactivity(); }
     void checkConnectionWhenInactive(bool checkWhenInactive) { deviceMonitor->setCheckForInactivity(checkWhenInactive); }
 
+public:
+    // LumatoneLayout intermediaries
+
+    LumatoneKey& getKey(int boardIndex, int keyIndex);
+    LumatoneBoard& getBoard(int boardIndex);
+
+    int getNumBoards() const;
+    int getOctaveBoardSize() const;
+    bool isKeyCoordValid(LumatoneKeyCoord coord) const;
+
+    bool getInvertExpression() const;
+    bool getInvertSustain() const;
+    juce::uint8 getExpressionSensitivity() const;
+
+
+public:
+
     //============================================================================
     // Combined (hi-level) commands
 
     // Send all parametrizations of one sub board
-    void sendAllParamsOfBoard(int boardIndex, TerpstraKeys boardData);
+    void sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData);
 
     // Send and save a complete key mapping
-    void sendCompleteMapping(TerpstraKeyMapping mappingData);
+    void sendCompleteMapping(LumatoneLayout mappingData);
 
     // Send request to receive the current mapping of one sub board on the controller
     void sendGetMappingOfBoardRequest(int boardIndex);
@@ -91,13 +104,13 @@ public:
     void sendGetCompleteMappingRequest();
 
     // Send parametrization of one key to the device
-    void sendKeyParam(int boardIndex, int keyIndex, TerpstraKey keyData);
+    void sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData);
 
     // Send configuration of a certain look up table
-    void sendTableConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType, const uint8* table);
+    void sendTableConfig(LumatoneConfigTable::TableType velocityCurveType, const uint8* table);
 
     // Reset configuration of a certain look up table to factory settings
-    void resetVelocityConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType);
+    void resetVelocityConfig(LumatoneConfigTable::TableType velocityCurveType);
 
     // Ping a device cached in the device list, will primarily use GetSerialIdentity, or Ping if determined version happens to be >= 1.0.9
     unsigned int sendTestMessageToDevice(int deviceIndex, unsigned int pingId);
@@ -220,16 +233,16 @@ public:
     void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, String msg) override;
 
     void exitSignalSent() override;
-    
+
     //============================================================================
     // juce::Timer implementation
 
     void timerCallback() override;
-    
+
     // Buffer read helpers
     FirmwareSupport::Error getBufferErrorCode(const uint8* sysExData);
     FirmwareSupport::Error handleBufferCommand(const MidiMessage& midiMessage);
-    
+
     //============================================================================
     // juce::ChangeListener implementation
 
@@ -240,9 +253,9 @@ public:
     // Test functions
 
     void loadRandomMapping(int testTimeoutMs, int maxIterations, int i = 0);
-    
+
 private:
-    
+
     // Takes a generic firmware version and parses it into a recognized firmware version
     void setFirmwareVersion(FirmwareVersion firmwareVersionIn);
 
@@ -260,13 +273,13 @@ protected:
     virtual void noAnswerToMessage(MidiInput* expectedDevice, const MidiMessage& midiMessage) override;
 
 private:
-    
+
     void confirmAutoConnection();
     void onConnectionConfirm(bool sendChangeSignal);
     void onDisconnection();
     void onFirmwareUpdateReceived();
-    
-    
+
+
 private:
     ListenerList<LumatoneEditor::StatusListener> statusListeners;
 public:
@@ -296,7 +309,7 @@ private:
     // Lower-level message unpacking and handling
 
     FirmwareSupport::Error handleOctaveConfigResponse(
-        const MidiMessage& midiMessage, 
+        const MidiMessage& midiMessage,
         std::function <FirmwareSupport::Error(const MidiMessage&, int&, uint8, int*)> unpackFunction,
         std::function <void(int,void*)> callbackFunctionIfNoError = {}
     );
@@ -324,7 +337,7 @@ private:
     FirmwareSupport::Error handleFaderConfigResponse(const MidiMessage& midiMessage);
 
     FirmwareSupport::Error handleFaderTypeConfigResponse(const MidiMessage& midiMessage);
-    
+
     FirmwareSupport::Error handleSerialIdentityResponse(const MidiMessage& midiMessage);
 
     FirmwareSupport::Error handleFirmwareRevisionResponse(const MidiMessage& midiMessage);
@@ -359,7 +372,7 @@ private:
 
     HajuErrorVisualizer         errorVisualizer;
     TerpstraMidiDriver          midiDriver;
-    
+
     std::unique_ptr<DeviceActivityMonitor>  deviceMonitor;
 
     std::unique_ptr<FirmwareTransfer>       firmwareTransfer;
@@ -378,6 +391,6 @@ private:
     int                         lastTestDeviceResponded = -1;
     bool                        waitingForTestResponse = false;
     bool                        currentDevicePairConfirmed = false;
-    
+
     sysExSendingMode editingMode = sysExSendingMode::offlineEditor;
 };

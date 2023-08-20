@@ -12,7 +12,7 @@
 #define HAJUMIDIDRIVER_H_INCLUDED
 
 //[Headers]     -- You can add your own extra header files here --
-#include "JuceHeader.h"
+#include <JuceHeader.h>
 //[/Headers]
 
 
@@ -36,10 +36,10 @@ public:
 	const Array<MidiDeviceInfo>& getMidiInputList();
 	// List of MIDI output device names
 	const Array<MidiDeviceInfo>& getMidiOutputList();
-    
+
 	MidiDeviceInfo getLastMidiOutputInfo() const { return lastOutputDevice; }
 	MidiDeviceInfo getLastMidiInputInfo() const { return lastInputDevice; }
-    
+
 	// Return the current input device index
     int getMidiInputIndex() const { return lastInputIndex; }
 
@@ -71,10 +71,10 @@ public:
 	// Higher level commands
 	void sendNoteOnMessage(int noteNumber, int channelNumber, uint8 velocity);
 	void sendNoteOffMessage(int noteNumber, int channelNumber, uint8 velocity);
-    
+
     // Close current input device
     void closeMidiInput();
-    
+
     // Close current output device
     void closeMidiOutput();
 

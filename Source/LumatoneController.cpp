@@ -13,8 +13,9 @@
 
 
 LumatoneController::LumatoneController()
-    : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()),
-        readQueueSize(0)
+    : midiDriver(getNumBoards())
+    , errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel())
+    , readQueueSize(0)
 {
     reset(bufferReadSize);
     midiDriver.addMessageCollector(this);
@@ -42,7 +43,7 @@ void LumatoneController::setSysExSendingMode(sysExSendingMode newMode)
             stopTimer();
         }
     }
-    
+
     editorListeners.call(&LumatoneEditor::EditorListener::editorModeChanged, newMode);
     midiDriver.restrictToRequestMessages(editingMode == sysExSendingMode::offlineEditor);
 }
@@ -62,9 +63,9 @@ void LumatoneController::setFirmwareVersion(LumatoneFirmwareVersion lumatoneVers
 
     if (parseVersion)
         firmwareVersion = FirmwareVersion::fromDeterminedVersion(determinedVersion);
-    
+
     firmwareListeners.call(&LumatoneEditor::FirmwareListener::firmwareRevisionReceived, firmwareVersion);
-    
+
     // Set connection process as complete
     if (!currentDevicePairConfirmed)
     {
@@ -96,8 +97,8 @@ void LumatoneController::stopAutoConnection()
     deviceMonitor->setDetectDeviceIfDisconnected(false);
 }
 
-void LumatoneController::refreshAvailableMidiDevices() 
-{ 
+void LumatoneController::refreshAvailableMidiDevices()
+{
     if (midiDriver.refreshDeviceLists() && midiDriver.testIsIncomplete())
         midiDriver.openAvailableDevicesForTesting();
 }
@@ -124,13 +125,56 @@ bool LumatoneController::requestFirmwareUpdate(File firmwareFile, FirmwareTransf
     return false;
 }
 
+LumatoneKey& LumatoneController::getKey(int boardIndex, int keyIndex)
+{
+    return TerpstraSysExApplication::getApp().getMappingData()->getBoard(boardIndex)->theKeys[keyIndex];
+}
+
+LumatoneBoard& LumatoneController::getBoard(int boardIndex)
+{
+    return *TerpstraSysExApplication::getApp().getMappingData()->getBoard(boardIndex);
+}
+
+int LumatoneController::getNumBoards() const
+{
+    return MAXNUMBOARDS;
+}
+
+int LumatoneController::getOctaveBoardSize() const
+{
+    return octaveSize;
+}
+
+bool LumatoneController::isKeyCoordValid(LumatoneKeyCoord coord) const
+{
+    return coord.boardIndex >= 0
+        && coord.boardIndex < getNumBoards()
+        && coord.keyIndex >= coord.keyIndex
+        && coord.keyIndex < getOctaveBoardSize();
+}
+
+bool LumatoneController::getInvertExpression() const
+{
+    return TerpstraSysExApplication::getApp().getMappingData()->invertExpression;
+}
+
+bool LumatoneController::getInvertSustain() const
+{
+    return TerpstraSysExApplication::getApp().getMappingData()->invertSustain;
+}
+
+juce::uint8 LumatoneController::getExpressionSensitivity() const
+{
+    return TerpstraSysExApplication::getApp().getMappingData()->expressionControllerSensivity;
+}
+
 /*
 ==============================================================================
 Combined (hi-level) commands
 */
 
 
-void LumatoneController::sendAllParamsOfBoard(int boardIndex, TerpstraKeys boardData)
+void LumatoneController::sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData)
 {
     if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
     {
@@ -152,10 +196,10 @@ void LumatoneController::sendAllParamsOfBoard(int boardIndex, TerpstraKeys board
     }
 }
 
-void LumatoneController::sendCompleteMapping(TerpstraKeyMapping mappingData)
+void LumatoneController::sendCompleteMapping(LumatoneLayout mappingData)
 {
-    for (int boardIndex = 1; boardIndex <= NUMBEROFBOARDS; boardIndex++)
-        sendAllParamsOfBoard(boardIndex, mappingData.sets[boardIndex - 1]);
+    for (int boardIndex = 1; boardIndex <= getNumBoards(); boardIndex++)
+        sendAllParamsOfBoard(boardIndex, *mappingData.getBoard(boardIndex - 1));
 }
 
 void LumatoneController::sendGetMappingOfBoardRequest(int boardIndex)
@@ -171,24 +215,24 @@ void LumatoneController::sendGetMappingOfBoardRequest(int boardIndex)
 
 void LumatoneController::sendGetCompleteMappingRequest()
 {
-    for (int boardIndex = 1; boardIndex <= NUMBEROFBOARDS; boardIndex++)
+    for (int boardIndex = 1; boardIndex <= getNumBoards(); boardIndex++)
         sendGetMappingOfBoardRequest(boardIndex);
 }
 
-void LumatoneController::resetVelocityConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType)
+void LumatoneController::resetVelocityConfig(LumatoneConfigTable::TableType velocityCurveType)
 {
     switch (velocityCurveType)
     {
-    case TerpstraVelocityCurveConfig::VelocityCurveType::noteOnNoteOff:
+    case LumatoneConfigTable::TableType::velocityInterval:
         resetVelocityConfig();
         break;
-    case TerpstraVelocityCurveConfig::VelocityCurveType::fader:
+    case LumatoneConfigTable::TableType::fader:
         resetFaderConfig();
         break;
-    case TerpstraVelocityCurveConfig::VelocityCurveType::afterTouch:
+    case LumatoneConfigTable::TableType::afterTouch:
         resetAftertouchConfig();
         break;
-    case TerpstraVelocityCurveConfig::VelocityCurveType::lumaTouch:
+    case LumatoneConfigTable::TableType::lumaTouch:
         resetLumatouchConfig();
         break;
     default:
@@ -246,28 +290,28 @@ void LumatoneController::testCurrentDeviceConnection()
     }
 }
 
+void LumatoneController::sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData)
 // Send parametrization of one key to the device
-void LumatoneController::sendKeyParam(int boardIndex, int keyIndex, TerpstraKey keyData)
-{    
+{
     // Default CC polarity = 1, Inverted CC polarity = 0
     sendKeyConfig(boardIndex, keyIndex, keyData.noteNumber, keyData.channelNumber, keyData.keyType, keyData.ccFaderDefault);
     sendKeyColourConfig(boardIndex, keyIndex, keyData.colour);
 }
 
 // Send configuration of a certain look up table
-void LumatoneController::sendTableConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType, const uint8* table)
+void LumatoneController::sendTableConfig(LumatoneConfigTable::TableType velocityCurveType, const uint8* table)
 {
     switch (velocityCurveType)
     {
-    case TerpstraVelocityCurveConfig::VelocityCurveType::fader:
+    case LumatoneConfigTable::TableType::fader:
         setFaderConfig(table);
         break;
 
-    case TerpstraVelocityCurveConfig::VelocityCurveType::afterTouch:
+    case LumatoneConfigTable::TableType::afterTouch:
         setAftertouchConfig(table);
         break;
 
-    case TerpstraVelocityCurveConfig::VelocityCurveType::lumaTouch:
+    case LumatoneConfigTable::TableType::lumaTouch:
         setLumatouchConfig(table);
         break;
 
@@ -579,7 +623,7 @@ void LumatoneController::midiMessageReceived(MidiInput* source, const MidiMessag
 
 void LumatoneController::midiMessageSent(MidiOutput* target, const MidiMessage& midiMessage) { }
 
-void LumatoneController::midiSendQueueSize(int queueSize) 
+void LumatoneController::midiSendQueueSize(int queueSize)
 {
     sendQueueSize = queueSize;
 }
@@ -591,7 +635,7 @@ void LumatoneController::noAnswerToMessage(MidiInput* expectedDevice, const Midi
     if (midiMessage.isSysEx())
     {
     //    callAfterDelay(bufferReadTimeoutMs, [&]() { firmwareListeners.call(&LumatoneEditor::FirmwareListener::noAnswerToCommand, midiMessage.getSysExData()[CMD_ID]); });
-        
+
         if (!currentDevicePairConfirmed)
         {
             statusListeners.call(&LumatoneEditor::StatusListener::connectionFailed);
@@ -600,13 +644,13 @@ void LumatoneController::noAnswerToMessage(MidiInput* expectedDevice, const Midi
 }
 
 FirmwareSupport::Error LumatoneController::handleOctaveConfigResponse(
-    const MidiMessage& midiMessage, 
+    const MidiMessage& midiMessage,
     std::function<FirmwareSupport::Error(const MidiMessage&, int&, uint8, int*)> unpackFunction,
     std::function<void(int,void*)> callbackFunctionIfNoError)
 {
     int boardId = -1;
     int channelData[56];
-    
+
     auto errorCode = unpackFunction(midiMessage, boardId, octaveSize, channelData);
     if (errorCode == FirmwareSupport::Error::noError)
     {
@@ -625,7 +669,7 @@ FirmwareSupport::Error LumatoneController::handleTableConfigResponse(
     auto errorCode = unpackFunction(midiMessage, veloctiyData);
     if (errorCode == FirmwareSupport::Error::noError)
         callbackFunctionIfNoError(veloctiyData);
-    
+
     return errorCode;
 }
 
@@ -652,7 +696,7 @@ FirmwareSupport::Error LumatoneController::handleLEDConfigResponse(const MidiMes
         int colorCode = cmd - GET_RED_LED_CONFIG;
         firmwareListeners.call(&LumatoneEditor::FirmwareListener::octaveColourConfigReceived, boardId, colorCode, colourData);
     }
-    
+
     return errorCode;
 }
 
@@ -743,7 +787,7 @@ FirmwareSupport::Error LumatoneController::handleSerialIdentityResponse(const Mi
     DBG("Device serial is: " + connectedSerialNumber);
 
     firmwareListeners.call(&LumatoneEditor::FirmwareListener::serialIdentityReceived, lastTestDeviceResponded, serialBytes);
-    
+
     // Get Firmware Version
     if (connectedSerialNumber == SERIAL_55_KEYS)
         setFirmwareVersion(LumatoneFirmwareVersion::VERSION_55_KEYS);
@@ -782,12 +826,12 @@ FirmwareSupport::Error LumatoneController::handlePingResponse(const MidiMessage&
 {
     unsigned int value = 0;
     auto errorCode = midiDriver.unpackPingResponse(midiMessage, value);
-    
+
     if (errorCode != FirmwareSupport::Error::noError)
         return errorCode;
 
     firmwareListeners.call(&LumatoneEditor::FirmwareListener::pingResponseReceived, lastTestDeviceResponded, value);
-    
+
     return errorCode;
 }
 
@@ -835,7 +879,7 @@ FirmwareSupport::Error LumatoneController::handlePeripheralCalibrationData(const
 {
     int mode = -1;
     auto errorCode = midiDriver.unpackPeripheralCalibrationMode(midiMessage, mode);
-    
+
     if (errorCode != FirmwareSupport::Error::noError)
         return errorCode;
 
@@ -893,14 +937,14 @@ void LumatoneController::handleMidiDriverError(FirmwareSupport::Error errorToHan
     case FirmwareSupport::Error::messageIsAnEcho:
     case FirmwareSupport::Error::commandNotImplemented:
         return;
-        
+
     case FirmwareSupport::Error::messageHasInvalidStatusByte:
         return;
-            
+
     default:
         DBG("ERROR from command " + String::toHexString(commandReceived) + ": " + firmwareSupport.errorToString(errorToHandle));
     }
-    
+
     jassertfalse;
 }
 
@@ -920,7 +964,7 @@ void LumatoneController::firmwareTransferUpdate(FirmwareTransfer::StatusCode sta
         midiDriver.closeMidiOutput();
         startTimer(UPDATETIMEOUT);
         break;
-            
+
     default:
         if (statusCode < FirmwareTransfer::StatusCode::NoErr)
         {
@@ -973,7 +1017,7 @@ FirmwareSupport::Error LumatoneController::getBufferErrorCode(const uint8* sysEx
             "");
         break;
     }
-    
+
     return FirmwareSupport::Error::noError;
 }
 
@@ -981,7 +1025,7 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
 {
     auto sysExData = midiMessage.getSysExData();
     unsigned int cmd = sysExData[CMD_ID];
-    
+
     switch (cmd)
     {
     case GET_RED_LED_CONFIG:
@@ -1006,13 +1050,13 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
 
     case GET_VELOCITY_CONFIG:
         return handleVelocityConfigResponse(midiMessage);
-            
+
     case GET_FADER_TYPE_CONFIGURATION:
         return handleFaderTypeConfigResponse(midiMessage);
 
     case GET_SERIAL_IDENTITY:
         return handleSerialIdentityResponse(midiMessage);
-            
+
     case CALIBRATE_PITCH_MOD_WHEEL:
         firmwareListeners.call(&LumatoneEditor::FirmwareListener::calibratePitchModWheelAnswer, (TerpstraMIDIAnswerReturnCode)sysExData[MSG_STATUS]);
         return FirmwareSupport::Error::noError;
@@ -1037,7 +1081,7 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
 
     case GET_EXPRESSION_PEDAL_SENSITIVIY:
         return handleGetExpressionPedalSensitivityResponse(midiMessage);
-            
+
     case SET_VELOCITY_CONFIG:
         DBG("Send layout complete.");
         // loadRandomMapping(1000, 1); // uncomment for test sequence
@@ -1057,7 +1101,7 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
             return FirmwareSupport::Error::commandNotImplemented;
         }
     }
-    
+
     return FirmwareSupport::Error::unknownCommand;
 }
 
@@ -1080,29 +1124,29 @@ void LumatoneController::timerCallback()
             {
                 auto sysExData = midiMessage.getSysExData();
                 auto cmd = sysExData[CMD_ID];
-                
+
                 auto errorCode = getBufferErrorCode(sysExData);
                 handleMidiDriverError(errorCode, cmd);
-                
+
                 if (sysExData[MSG_STATUS] == 1)
                 {
                     errorCode = handleBufferCommand(midiMessage);
                     handleMidiDriverError(errorCode, cmd);
                 }
             }
-            
+
             // Ignore non-sysex messages
         }
 
         auto bufferSize = jlimit(0, 999999, readQueueSize.load() - bufferReadSize);
         readQueueSize.store(bufferSize);
-        
+
         if (bufferSize != 0)
             startTimer(bufferReadTimeoutMs);
-        
+
         break;
     }
-    
+
     case sysExSendingMode::firmwareUpdate:
     {
         if (firmwareTransfer == nullptr)
@@ -1117,7 +1161,7 @@ void LumatoneController::timerCallback()
             onDisconnection();
             break;
         }
-        
+
         firmwareTransfer->incrementProgress();
 
         if (waitingForTestResponse)
@@ -1127,7 +1171,7 @@ void LumatoneController::timerCallback()
                 waitingForTestResponse = true;
                 onFirmwareUpdateReceived();
             }
-            
+
             // THIS IS A KLUDGE! Something kills DeviceActivityMonitor's timer after device comes back online and I'm not yet sure why - vsicurella
             else if (!deviceMonitor->isTimerRunning())
             {
@@ -1147,11 +1191,11 @@ void LumatoneController::timerCallback()
             midiDriver.closeMidiOutput();
             deviceMonitor->initializeDeviceDetection();
         }
-        
+
         startTimer(UPDATETIMEOUT);
         break;
     }
-            
+
     default:
         jassertfalse;
     }
@@ -1188,7 +1232,7 @@ void LumatoneController::changeListenerCallback(ChangeBroadcaster* source)
 
             // return;
         }
-        
+
         if (currentDevicePairConfirmed)
         {
             // This should not get triggered if we are already disconnected
@@ -1226,7 +1270,7 @@ void LumatoneController::onConnectionConfirm(bool sendChangeSignal)
     currentDevicePairConfirmed = true;
     TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastInputDeviceId", midiDriver.getLastMidiInputInfo().identifier);
     TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastOutputDeviceId", midiDriver.getLastMidiOutputInfo().identifier);
-    
+
     deviceMonitor->intializeConnectionLossDetection();
 
     if (sendChangeSignal)
@@ -1238,7 +1282,7 @@ void LumatoneController::onDisconnection()
     midiDriver.closeMidiInput();
     midiDriver.closeMidiOutput();
     midiDriver.clearMIDIMessageBuffer();
-    
+
     waitingForTestResponse = false;
     currentDevicePairConfirmed = false;
     lastTestDeviceResponded = -1;
@@ -1248,7 +1292,7 @@ void LumatoneController::onDisconnection()
     editingMode = sysExSendingMode::offlineEditor;
 
     statusListeners.call(&LumatoneEditor::StatusListener::connectionLost);
-    
+
     deviceMonitor->initializeDeviceDetection();
 }
 
@@ -1288,7 +1332,7 @@ void LumatoneController::loadRandomMapping(int testTimeoutMs,  int maxIterations
     auto mappings = dir.findChildFiles(File::TypesOfFileToFind::findFiles, true);
     auto numfiles = mappings.size();
     auto r = Random();
-        
+
     auto fileIndex = r.nextInt(numfiles-1);
     auto file = mappings[fileIndex];
 
@@ -1297,7 +1341,7 @@ void LumatoneController::loadRandomMapping(int testTimeoutMs,  int maxIterations
         DBG("Found " + String(numfiles) + " files, loading " + file.getFileName());
         MessageManager::callAsync([file]() { TerpstraSysExApplication::getApp().setCurrentFile(file); });
     }
-    
+
 //    if (i < maxIterations)
 //        Timer::callAfterDelay(testTimeoutMs, [&]() { loadRandomMapping(testTimeoutMs, maxIterations, i + 1); });
 //    else

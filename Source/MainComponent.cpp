@@ -11,13 +11,15 @@
 #include "MainComponent.h"
 #include "ViewConstants.h"
 #include "Main.h"
-#include "EditActions.h"
+
+#include "./actions/edit_actions.h"
 
 
 //==============================================================================
-MainContentComponent::MainContentComponent()
-	: copiedSubBoardData()
-{ 
+MainContentComponent::MainContentComponent(LumatoneLayout& mappingDataIn)
+	: mappingData(mappingDataIn)
+	, copiedSubBoardData()
+{
 	setName("MainContentComponent");
 
 	// Midi input + output
@@ -102,7 +104,7 @@ void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesF
 }
 
 // Set the current mapping to be edited to the value passed in parameter
-void MainContentComponent::setData(TerpstraKeyMapping& newData, bool withRefresh)
+void MainContentComponent::setData(LumatoneLayout& newData, bool withRefresh)
 {
 	mappingData = newData;
 
@@ -116,12 +118,12 @@ void MainContentComponent::setData(TerpstraKeyMapping& newData, bool withRefresh
 
 void MainContentComponent::deleteAll(bool withRefresh)
 {
-	TerpstraKeyMapping keyMapping;
+	LumatoneLayout keyMapping;
 	setData(keyMapping, withRefresh);
 }
 
 // Copy the edited mapping to the variable passed as parameter
-void MainContentComponent::getData(TerpstraKeyMapping& newData)
+void MainContentComponent::getData(LumatoneLayout& newData)
 {
 	newData = mappingData;
 }
@@ -131,8 +133,8 @@ UndoableAction* MainContentComponent::createDeleteCurrentSectionAction()
 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
 	if (currentSetSelection >= 0 && currentSetSelection < TerpstraSysExApplication::getApp().getOctaveBoardSize())
 	{
-        auto keySet = TerpstraKeys();
-        return new Lumatone::SectionEditAction(currentSetSelection, keySet);
+        auto keySet = LumatoneBoard();
+        return new LumatoneEditAction::SectionEditAction(TerpstraSysExApplication::getApp().getLumatoneController(), currentSetSelection, keySet);
 	}
 	else
 		return nullptr;
@@ -143,7 +145,7 @@ bool MainContentComponent::copyCurrentSubBoardData()
 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
 	if (currentSetSelection >= 0 && currentSetSelection < TerpstraSysExApplication::getApp().getOctaveBoardSize())
 	{
-		copiedSubBoardData = mappingData.sets[currentSetSelection];
+		copiedSubBoardData = *mappingData.getBoard(currentSetSelection);
 		return true;
 	}
 	else
@@ -156,7 +158,7 @@ UndoableAction* MainContentComponent::createPasteCurrentSectionAction()
 	if (currentSetSelection >= 0 && currentSetSelection < TerpstraSysExApplication::getApp().getNumBoards()
 		&& !copiedSubBoardData.isEmpty())
 	{
-		return new Lumatone::SectionEditAction(currentSetSelection, copiedSubBoardData);
+		return new LumatoneEditAction::SectionEditAction(TerpstraSysExApplication::getApp().getLumatoneController(), currentSetSelection, copiedSubBoardData);
 	}
 	else
 		return nullptr;
@@ -170,38 +172,38 @@ UndoableAction* MainContentComponent::createModifiedPasteCurrentSectionAction(Co
     {
         auto modifiedSubBoardData = copiedSubBoardData;
         auto octaveSize = TerpstraSysExApplication::getApp().getOctaveBoardSize();
-        
+
         for (int i = 0; i < octaveSize; i++)
         {
-            auto currentSectionKey = mappingData.sets[currentSetSelectionIndex].theKeys[i];
+            auto currentSectionKey = mappingData.getBoard(currentSetSelectionIndex)->theKeys[i];
             auto modifiedKey = modifiedSubBoardData.theKeys[i];
-            
+
             switch (commandID)
             {
             case Lumatone::Menu::commandIDs::pasteOctaveBoardNotes:
                 modifiedKey = currentSectionKey.withNoteOrCC(modifiedKey.noteNumber);
                 break;
-                    
+
             case Lumatone::Menu::commandIDs::pasteOctaveBoardChannels:
                 modifiedKey = currentSectionKey.withChannelNumber(modifiedKey.channelNumber);
                 break;
-                    
+
             case Lumatone::Menu::commandIDs::pasteOctaveBoardColours:
                 modifiedKey = currentSectionKey.withColour(modifiedKey.colour);
                 break;
-                    
+
             case Lumatone::Menu::commandIDs::pasteOctaveBoardTypes:
                 modifiedKey = currentSectionKey.withKeyType(modifiedKey.keyType).withInvertCCFader(modifiedKey.ccFaderDefault);
                 break;
-                    
+
             default:
                 jassertfalse;
             }
-            
+
             modifiedSubBoardData.theKeys[i] = modifiedKey;
         }
-        
-        return new Lumatone::SectionEditAction(currentSetSelectionIndex, modifiedSubBoardData);
+
+        return new LumatoneEditAction::SectionEditAction(TerpstraSysExApplication::getApp().getLumatoneController(), currentSetSelectionIndex, modifiedSubBoardData);
     }
     else
         return nullptr;
@@ -224,7 +226,7 @@ void MainContentComponent::octaveColourConfigReceived(int octaveIndex, uint8 rgb
 {
 	for (int keyIndex = 0; keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIndex++)
 	{
-		TerpstraKey& keyData = this->mappingData.sets[octaveIndex - 1].theKeys[keyIndex];
+		LumatoneKey& keyData = mappingData.getBoard(octaveIndex - 1)->theKeys[keyIndex];
 		auto newValue = colourData[keyIndex];
 
 		if (rgbFlag == 0)
@@ -251,7 +253,7 @@ void MainContentComponent::octaveChannelConfigReceived(int octaveIndex, const in
 	for (int keyIndex = 0; keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIndex++)
 	{
 		// Check channel values?
-		this->mappingData.sets[octaveIndex - 1].theKeys[keyIndex].channelNumber = channelData[keyIndex];
+		mappingData.getBoard(octaveIndex - 1)->theKeys[keyIndex].channelNumber = channelData[keyIndex];
 	}
 
 	refreshKeyDataFields();
@@ -262,7 +264,7 @@ void MainContentComponent::octaveNoteConfigReceived(int octaveIndex, const int* 
 	for (int keyIndex = 0; keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIndex++)
 	{
 		// Check note values?
-		this->mappingData.sets[octaveIndex - 1].theKeys[keyIndex].noteNumber = noteData[keyIndex];
+		mappingData.getBoard(octaveIndex - 1)->theKeys[keyIndex].noteNumber = noteData[keyIndex];
 	}
 
 	refreshKeyDataFields();
@@ -273,7 +275,7 @@ void MainContentComponent::keyTypeConfigReceived(int octaveIndex, const int* key
 	for (int keyIndex = 0; keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIndex++)
 	{
 		// Check type values?
-		this->mappingData.sets[octaveIndex - 1].theKeys[keyIndex].keyType = LumatoneKeyType(keyTypeData[keyIndex]);
+		mappingData.getBoard(octaveIndex - 1)->theKeys[keyIndex].keyType = LumatoneKeyType(keyTypeData[keyIndex]);
 	}
 
 	refreshKeyDataFields();
@@ -281,29 +283,29 @@ void MainContentComponent::keyTypeConfigReceived(int octaveIndex, const int* key
 
 void MainContentComponent::velocityConfigReceived(const int* velocityData)
 {
-	this->mappingData.noteOnOffVelocityCurveConfig.editStrategy = TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX::freeDrawing;
+	mappingData.velocityTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
 	for (int i = 0; i < 128; i++)
-		this->mappingData.noteOnOffVelocityCurveConfig.velocityValues[i] = velocityData[127 - i]; // Reversed
+		mappingData.velocityTable.velocityValues[i] = velocityData[127 - i]; // Reversed
 	curvesArea->loadFromMapping();
 }
 
 void MainContentComponent::aftertouchConfigReceived(const int* aftertouch)
 {
-	this->mappingData.afterTouchConfig.editStrategy = TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX::freeDrawing;
-	memmove(this->mappingData.afterTouchConfig.velocityValues, aftertouch, sizeof(int) * 128);
+	mappingData.afterTouchTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
+	memmove(mappingData.afterTouchTable.velocityValues, aftertouch, sizeof(int) * 128);
 	curvesArea->loadFromMapping();
 }
 
 void MainContentComponent::velocityIntervalConfigReceived(const int* velocityData)
 {
-	memmove(this->mappingData.velocityIntervalTableValues, velocityData, sizeof(int) * VELOCITYINTERVALTABLESIZE);
+	memmove(mappingData.table, velocityData, sizeof(int) * VELOCITYINTERVALTABLESIZE);
 	curvesArea->loadFromMapping();
 }
 
 void MainContentComponent::faderConfigReceived(const int* faderData)
 {
-	this->mappingData.faderConfig.editStrategy = TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX::freeDrawing;
-	memmove(this->mappingData.faderConfig.velocityValues, faderData, sizeof(int) * 128);
+	mappingData.faderTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
+	memmove(mappingData.faderTable.velocityValues, faderData, sizeof(int) * 128);
 	curvesArea->loadFromMapping();
 }
 
@@ -311,14 +313,14 @@ void MainContentComponent::faderTypeConfigReceived(int octaveIndex, const int* f
 {
 	for (int keyIndex = 0; keyIndex < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIndex++)
 	{
-		this->mappingData.sets[octaveIndex - 1].theKeys[keyIndex].ccFaderDefault = faderTypeData[keyIndex];
+		mappingData.getBoard(octaveIndex - 1)->theKeys[keyIndex].ccFaderDefault = faderTypeData[keyIndex];
 	}
 }
 
 void MainContentComponent::lumatouchConfigReceived(const int* lumatouchData)
 {
-	this->mappingData.lumaTouchConfig.editStrategy = TerpstraVelocityCurveConfig::EDITSTRATEGYINDEX::freeDrawing;
-	memmove(this->mappingData.lumaTouchConfig.velocityValues, lumatouchData, sizeof(int) * 128);
+	mappingData.lumaTouchTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
+	memmove(mappingData.lumaTouchTable.velocityValues, lumatouchData, sizeof(int) * 128);
 	curvesArea->loadFromMapping();
 }
 
@@ -353,12 +355,12 @@ void MainContentComponent::buttonClicked(Button* btn)
         {
             colourEdit = noteEditArea->getColourEditComponent();
             paletteWindow->listenToColourSelection(noteEditArea->getSingleNoteColourTextEditor());
-            
+
             // Shouldn't be necessary when Isomorphic is moved from dev to public
             auto isomorphicPanel = noteEditArea->getIsomorphicMassAssignPanel();
             if (isomorphicPanel != nullptr)
                 paletteWindow->listenToColourSelection(isomorphicPanel);
-            
+
 			paletteWindow->addColourSelectorToGroup(noteEditArea.get());
 			paletteWindow->setCurrentColourSelector(noteEditArea->getSingleNoteColourTextEditor());
         }
@@ -409,7 +411,7 @@ void MainContentComponent::resized()
 	// Edit function/single key field area
 	noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
 	noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
-	
+
 	generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
 	pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
 
@@ -441,4 +443,3 @@ void MainContentComponent::refreshAllFields()
 	curvesArea->loadFromMapping();
 	curvesArea->repaint();
 }
-
