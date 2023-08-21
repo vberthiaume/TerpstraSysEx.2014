@@ -58,6 +58,7 @@ public:
 	int getOctaveBoardSize() const { return lumatoneController->getOctaveBoardSize(); }
     int getNumBoards() const { return lumatoneController->getNumBoards(); }
 
+	LumatoneFirmwareVersion getLumatoneVersion() const { return lumatoneController->getLumatoneVersion(); }
 	FirmwareVersion getFirmwareVersion() const { return lumatoneController->getFirmwareVersion(); }
 	String getFirmwareVersionStr() const { return lumatoneController->getFirmwareVersion().toDisplayString(); }
 

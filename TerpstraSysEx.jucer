@@ -173,6 +173,10 @@
         <FILE id="pKv4Ei" name="TuningTable.cpp" compile="1" resource="0" file="Source/tuning/TuningTable.cpp"/>
         <FILE id="thzIk5" name="TuningTable.h" compile="0" resource="0" file="Source/tuning/TuningTable.h"/>
       </GROUP>
+      <FILE id="i3lnlL" name="key_update_buffer.cpp" compile="1" resource="0"
+            file="Source/key_update_buffer.cpp"/>
+      <FILE id="sPQ3wT" name="key_update_buffer.h" compile="0" resource="0"
+            file="Source/key_update_buffer.h"/>
       <FILE id="JdAwbS" name="lumatone_render.h" compile="0" resource="0"
             file="Source/lumatone_render.h"/>
       <FILE id="vms2bU" name="lumatone_render.cpp" compile="1" resource="0"

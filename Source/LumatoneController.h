@@ -15,6 +15,7 @@
 #include "TerpstraMidiDriver.h"
 #include "DeviceActivityMonitor.h"
 #include "FirmwareTransfer.h"
+#include "key_update_buffer.h"
 
 //==============================================================================
 // Helper class for parsing and comparing (todo) firmware versions
@@ -41,7 +42,7 @@ public:
 
     FirmwareVersion getFirmwareVersion() const { return firmwareVersion; }
 
-    LumatoneFirmwareVersion getConfirmedVersion() const { return determinedVersion; }
+    LumatoneFirmwareVersion getLumatoneVersion() const { return determinedVersion; }
 
     const FirmwareSupport& getFirmwareSupport() const { return firmwareSupport; }
 
@@ -92,10 +93,10 @@ public:
     // Combined (hi-level) commands
 
     // Send all parametrizations of one sub board
-    void sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData);
+    void sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData, bool bufferMessages=false);
 
     // Send and save a complete key mapping
-    void sendCompleteMapping(LumatoneLayout mappingData);
+    void sendCompleteMapping(LumatoneLayout mappingData, bool bufferMessages=false);
 
     // Send request to receive the current mapping of one sub board on the controller
     void sendGetMappingOfBoardRequest(int boardIndex);
@@ -104,7 +105,7 @@ public:
     void sendGetCompleteMappingRequest();
 
     // Send parametrization of one key to the device
-    void sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData);
+    void sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData, bool bufferMessages = false);
 
     // Send configuration of a certain look up table
     void sendTableConfig(LumatoneConfigTable::TableType velocityCurveType, const uint8* table);
@@ -122,9 +123,9 @@ public:
     // Single (mid-level) commands
 
     // Send note, channel, cc, and fader polarity data
-    void sendKeyConfig(int boardIndex, int keyIndex, int noteOrCCNum, int channel, int keyType, bool faderUpIsNull = true);
+    void sendKeyConfig(int boardIndex, int keyIndex, int noteOrCCNum, int channel, int keyType, bool faderUpIsNull = true, bool bufferMessages = false);
 
-    void sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour);
+    void sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour, bool bufferMessages = false);
 
     // Send expression pedal sensivity
     void sendExpressionPedalSensivity(unsigned char value);
@@ -372,6 +373,8 @@ private:
 
     HajuErrorVisualizer         errorVisualizer;
     TerpstraMidiDriver          midiDriver;
+
+    LumatoneKeyUpdateBuffer     keyUpdater;
 
     std::unique_ptr<DeviceActivityMonitor>  deviceMonitor;
 

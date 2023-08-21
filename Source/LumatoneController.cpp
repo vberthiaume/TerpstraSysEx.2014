@@ -16,6 +16,7 @@ LumatoneController::LumatoneController()
     : midiDriver(getNumBoards())
     , errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel())
     , readQueueSize(0)
+    , keyUpdater(midiDriver)
 {
     reset(bufferReadSize);
     midiDriver.addMessageCollector(this);
@@ -174,34 +175,19 @@ Combined (hi-level) commands
 */
 
 
-void LumatoneController::sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData)
+void LumatoneController::sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData, bool bufferMessages)
 {
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
+    for (int keyIndex = 0; keyIndex < octaveSize; keyIndex++)
     {
-        for (int keyIndex = 0; keyIndex < octaveSize; keyIndex++)
-        {
-            auto key = &boardData.theKeys[keyIndex];
-            midiDriver.sendKeyFunctionParameters(boardIndex, keyIndex, key->noteNumber, key->channelNumber, key->keyType & 0x3);
-            midiDriver.sendKeyLightParameters(boardIndex, keyIndex, key->colour.getRed(), key->colour.getGreen(), key->colour.getBlue());
-            *getKey(boardIndex - 1, keyIndex) = *key;
-        }
-    }
-    else
-    {
-        for (int keyIndex = 0; keyIndex < octaveSize; keyIndex++)
-        {
-            auto key = &boardData.theKeys[keyIndex];
-            midiDriver.sendKeyFunctionParameters(boardIndex, keyIndex, key->noteNumber, key->channelNumber, key->keyType & 0x3);
-            midiDriver.sendKeyLightParameters_Version_1_0_0(boardIndex, keyIndex, key->colour.getRed() / 2, key->colour.getGreen() / 2, key->colour.getBlue() / 2);
-            *getKey(boardIndex - 1, keyIndex) = *key;
-        }
+        auto key = &boardData.theKeys[keyIndex];
+        sendKeyParam(boardIndex, keyIndex, *key, bufferMessages);
     }
 }
 
-void LumatoneController::sendCompleteMapping(LumatoneLayout mappingData)
+void LumatoneController::sendCompleteMapping(LumatoneLayout mappingData, bool bufferMessages)
 {
     for (int boardIndex = 1; boardIndex <= getNumBoards(); boardIndex++)
-        sendAllParamsOfBoard(boardIndex, *mappingData.getBoard(boardIndex - 1));
+        sendAllParamsOfBoard(boardIndex, *mappingData.getBoard(boardIndex - 1), bufferMessages);
 }
 
 void LumatoneController::sendGetMappingOfBoardRequest(int boardIndex)
@@ -292,12 +278,12 @@ void LumatoneController::testCurrentDeviceConnection()
     }
 }
 
-void LumatoneController::sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData)
+void LumatoneController::sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData, bool bufferMessages)
 // Send parametrization of one key to the device
 {
     // Default CC polarity = 1, Inverted CC polarity = 0
-    sendKeyConfig(boardIndex, keyIndex, keyData.noteNumber, keyData.channelNumber, keyData.keyType, keyData.ccFaderDefault);
-    sendKeyColourConfig(boardIndex, keyIndex, keyData.colour);
+    sendKeyConfig(boardIndex, keyIndex, keyData.noteNumber, keyData.channelNumber, keyData.keyType, keyData.ccFaderDefault, bufferMessages);
+    sendKeyColourConfig(boardIndex, keyIndex, keyData.colour, bufferMessages);
 }
 
 // Send configuration of a certain look up table
@@ -326,20 +312,28 @@ void LumatoneController::sendTableConfig(LumatoneConfigTable::TableType velocity
 // Mid-level firmware functions
 
 // Send note, channel, cc, and fader polarity data
-void LumatoneController::sendKeyConfig(int boardIndex, int keyIndex, int noteOrCCNum, int channel, int keyType, bool faderUpIsNull)
+void LumatoneController::sendKeyConfig(int boardIndex, int keyIndex, int noteOrCCNum, int channel, int keyType, bool faderUpIsNull, bool bufferMessages)
 {
-    midiDriver.sendKeyFunctionParameters(boardIndex, keyIndex, noteOrCCNum, channel, keyType & 0x3, faderUpIsNull);
+    if (bufferMessages)
+        keyUpdater.sendKeyConfig(boardIndex, keyIndex, noteOrCCNum, channel, keyType & 0x3, faderUpIsNull);
+    else
+        midiDriver.sendKeyFunctionParameters(boardIndex, keyIndex, noteOrCCNum, channel, keyType & 0x3, faderUpIsNull);
 
     auto key = getKey(boardIndex - 1, keyIndex);
     *key = LumatoneKey((LumatoneKeyType)keyType, channel - 1, noteOrCCNum, key->colour, faderUpIsNull);
 }
 
-void LumatoneController::sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour)
+void LumatoneController::sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour, bool bufferMessages)
 {
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
-        midiDriver.sendKeyLightParameters(boardIndex, keyIndex, colour.getRed(), colour.getGreen(), colour.getBlue());
+    if (bufferMessages)
+        keyUpdater.sendKeyColourConfig(boardIndex, keyIndex, colour);
     else
-        midiDriver.sendKeyLightParameters_Version_1_0_0(boardIndex, keyIndex, colour.getRed() / 2, colour.getGreen() / 2, colour.getBlue() / 2);
+    {
+        if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
+            midiDriver.sendKeyLightParameters(boardIndex, keyIndex, colour.getRed(), colour.getGreen(), colour.getBlue());
+        else
+            midiDriver.sendKeyLightParameters_Version_1_0_0(boardIndex, keyIndex, colour.getRed() / 2, colour.getGreen() / 2, colour.getBlue() / 2);
+    }
 
     getKey(boardIndex - 1, keyIndex)->colour = colour;
 }
