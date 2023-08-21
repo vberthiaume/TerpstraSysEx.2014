@@ -70,6 +70,10 @@
               file="Source/actions/lumatone_action.h"/>
       </GROUP>
       <GROUP id="{1D045154-85AC-9B69-9047-6C814D640D8F}" name="color">
+        <FILE id="pcaFso" name="adjust_layout_colour.cpp" compile="1" resource="0"
+              file="Source/color/adjust_layout_colour.cpp"/>
+        <FILE id="Kh1Cdz" name="adjust_layout_colour.h" compile="0" resource="0"
+              file="Source/color/adjust_layout_colour.h"/>
         <FILE id="U06owE" name="colour_model.cpp" compile="1" resource="0"
               file="Source/color/colour_model.cpp"/>
         <FILE id="N3OzGK" name="colour_model.h" compile="0" resource="0" file="Source/color/colour_model.h"/>
@@ -97,6 +101,14 @@
               file="Source/HajuLib/HajuMidiDriver.cpp"/>
         <FILE id="fDRwAt" name="HajuMidiDriver.h" compile="0" resource="0"
               file="Source/HajuLib/HajuMidiDriver.h"/>
+      </GROUP>
+      <GROUP id="{A494C101-F32B-2EF2-029B-BC89392A79E4}" name="hex">
+        <FILE id="RffZMX" name="hex_field.cpp" compile="1" resource="0" file="Source/hex/hex_field.cpp"/>
+        <FILE id="SWJKW0" name="hex_field.h" compile="0" resource="0" file="Source/hex/hex_field.h"/>
+        <FILE id="Y1UPAR" name="lumatone_hex_map.cpp" compile="1" resource="0"
+              file="Source/hex/lumatone_hex_map.cpp"/>
+        <FILE id="tEGDhZ" name="lumatone_hex_map.h" compile="0" resource="0"
+              file="Source/hex/lumatone_hex_map.h"/>
       </GROUP>
       <GROUP id="{C95FA357-E04E-B9A8-0904-5DC460C3478E}" name="ImageResampling">
         <FILE id="ZPQRHz" name="ImageResampler.h" compile="0" resource="0"

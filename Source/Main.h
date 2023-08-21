@@ -91,7 +91,7 @@ public:
 	void setCalibrationMode(bool calibrationStarted) { inCalibrationMode = calibrationStarted; }
 	bool getInCalibrationMode() const { return inCalibrationMode; }
 
-	bool performUndoableAction(UndoableAction* editAction);
+	bool performUndoableAction(UndoableAction* editAction, bool newTransaction=true);
 	bool undo();
 	bool redo();
 
