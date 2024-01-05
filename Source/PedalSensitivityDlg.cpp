@@ -102,7 +102,7 @@ PedalSensitivityDlg::PedalSensitivityDlg (const LumatoneEditorState& stateIn)
     labelExprContrSensitivity->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
     labelExprContrSensitivity->setJustificationType(Justification::centred);
 
-    // getLumatoneController()->addFirmwareListener(this);
+    addEditorListener(this);
     //[/UserPreSize]
 
     setSize (134, 96);
@@ -115,6 +115,7 @@ PedalSensitivityDlg::PedalSensitivityDlg (const LumatoneEditorState& stateIn)
 PedalSensitivityDlg::~PedalSensitivityDlg()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
+    removeEditorListener(this);
     //[/Destructor_pre]
 
     labelExprContrSensitivity = nullptr;
@@ -263,9 +264,49 @@ void PedalSensitivityDlg::loadFromMapping()
 	sldExprCtrlSensitivity->setValue(getExpressionSensitivity(), juce::NotificationType::dontSendNotification);
 }
 
-void PedalSensitivityDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
+//void PedalSensitivityDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
+//{
+//    if (getFirmwareSupport().versionAcknowledgesCommand(version, INVERT_SUSTAIN_PEDAL))
+//    {
+//        btnInvertSustain->setEnabled(true);
+//        btnInvertSustain->setTooltip("");
+//    }
+//    else
+//    {
+//        btnInvertSustain->setEnabled(false);
+//        btnInvertSustain->setTooltip("This feature is not supported by the firmware version of your Lumatone.");
+//    }
+//}
+
+//void PedalSensitivityDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
+//{
+//    btnInvertExpression->setToggleState(presetFlags.expressionPedalInverted, dontSendNotification);
+//    btnInvertSustain->setToggleState(presetFlags.sustainPedalInverted, dontSendNotification);
+//}
+
+//void PedalSensitivityDlg::expressionPedalSensitivityReceived(int sensitivity)
+//{
+//    sldExprCtrlSensitivity->setValue(sensitivity, dontSendNotification);
+//}
+
+void PedalSensitivityDlg::expressionPedalSensitivityChanged(unsigned char value) 
 {
-    if (getFirmwareSupport().versionAcknowledgesCommand(version, INVERT_SUSTAIN_PEDAL))
+    sldExprCtrlSensitivity->setValue(getExpressionSensitivity(), dontSendNotification);
+}
+
+void PedalSensitivityDlg::invertFootControllerChanged(bool inverted) 
+{
+    btnInvertExpression->setToggleState(getInvertExpression(), dontSendNotification);
+}
+
+void PedalSensitivityDlg::invertSustainToggled(bool inverted) 
+{
+    btnInvertSustain->setToggleState(getInvertSustain(), dontSendNotification);
+}
+
+void PedalSensitivityDlg::firmwareVersionChanged()
+{
+    if (getFirmwareSupport().versionAcknowledgesCommand(getLumatoneVersion(), INVERT_SUSTAIN_PEDAL))
     {
         btnInvertSustain->setEnabled(true);
         btnInvertSustain->setTooltip("");
@@ -277,16 +318,6 @@ void PedalSensitivityDlg::firmwareRevisionReceived(LumatoneFirmware::Version ver
     }
 }
 
-void PedalSensitivityDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
-{
-    btnInvertExpression->setToggleState(presetFlags.expressionPedalInverted, dontSendNotification);
-    btnInvertSustain->setToggleState(presetFlags.sustainPedalInverted, dontSendNotification);
-}
-
-void PedalSensitivityDlg::expressionPedalSensitivityReceived(int sensitivity)
-{
-    sldExprCtrlSensitivity->setValue(sensitivity, dontSendNotification);
-}
 
 //[/MiscUserCode]
 

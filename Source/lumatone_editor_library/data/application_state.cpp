@@ -175,6 +175,15 @@ void LumatoneApplicationState::setCompleteConfig(const LumatoneLayout &layoutIn)
     }
 
     editorListeners->call(&LumatoneEditor::EditorListener::completeMappingLoaded, *mappingData);
+    editorListeners->call(&LumatoneEditor::EditorListener::expressionPedalSensitivityChanged, getExpressionSensitivity());
+    editorListeners->call(&LumatoneEditor::EditorListener::invertFootControllerChanged, getInvertExpression());
+    editorListeners->call(&LumatoneEditor::EditorListener::lightOnKeyStrokesChanged, getLightOnKeyStrokes());
+    editorListeners->call(&LumatoneEditor::EditorListener::aftertouchToggled, getAftertouchOn());
+
+    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, LumatoneConfigTable::TableType::velocityInterval);
+    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, LumatoneConfigTable::TableType::fader);
+    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, LumatoneConfigTable::TableType::afterTouch);
+    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, LumatoneConfigTable::TableType::lumaTouch);
 }
 
 void LumatoneApplicationState::setLayout(const LumatoneLayout &layoutIn)
@@ -335,7 +344,7 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
         controller->sendTableConfig(type, table.velocityValues);
     }
 
-    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, type, *mappingData->getConfigTable(type));
+    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, type);
 }
 //
 //void LumatoneApplicationState::setVelocityIntervalTable(const LumatoneConfigTable& tableIn)

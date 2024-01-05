@@ -68,7 +68,7 @@ GeneralOptionsDlg::GeneralOptionsDlg (const LumatoneEditorState& stateIn)
     //[UserPreSize]
     labelGeneralSettingslTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
 
-    // getLumatoneController()->addFirmwareListener(this);
+    addEditorListener(this);
     //[/UserPreSize]
 
     setSize (188, 96);
@@ -81,7 +81,7 @@ GeneralOptionsDlg::GeneralOptionsDlg (const LumatoneEditorState& stateIn)
 GeneralOptionsDlg::~GeneralOptionsDlg()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-    // getLumatoneController()->removeFirmwareListener(this);
+    removeEditorListener(this);
     //[/Destructor_pre]
 
     labelGeneralSettingslTitle = nullptr;
@@ -173,10 +173,22 @@ void GeneralOptionsDlg::loadFromMapping()
 	buttonLightOnKeyStrokes->setToggleState(getLightOnKeyStrokes(), juce::NotificationType::dontSendNotification);
 }
 
-void GeneralOptionsDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
+//void GeneralOptionsDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
+//{
+//    buttonAfterTouchActive->setToggleState(presetFlags.polyphonicAftertouch, dontSendNotification);
+//    buttonLightOnKeyStrokes->setToggleState(presetFlags.lightsOnKeystroke, dontSendNotification);
+//}
+
+void GeneralOptionsDlg::lightOnKeyStrokesChanged(bool lightOn)
 {
-    buttonAfterTouchActive->setToggleState(presetFlags.polyphonicAftertouch, dontSendNotification);
-    buttonLightOnKeyStrokes->setToggleState(presetFlags.lightsOnKeystroke, dontSendNotification);
+    buttonLightOnKeyStrokes->setToggleState(getLightOnKeyStrokes(), dontSendNotification);
+
+}
+
+void GeneralOptionsDlg::aftertouchToggled(bool enabled)
+{
+    buttonAfterTouchActive->setToggleState(getAftertouchOn(), dontSendNotification);
+
 }
 
 //[/MiscUserCode]

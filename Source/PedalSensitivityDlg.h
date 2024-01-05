@@ -24,7 +24,7 @@
 
 #include "LumatoneEditorState.h"
 
-#include "./lumatone_editor_library/listeners/firmware_listener.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
 //[/Headers]
 
 
@@ -37,11 +37,12 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class PedalSensitivityDlg  : public juce::Component,
-                             public LumatoneEditorState,
-                             public LumatoneEditor::FirmwareListener,
-                             public juce::Button::Listener,
-                             public juce::Slider::Listener
+class PedalSensitivityDlg  : public juce::Component
+                           , public LumatoneEditorState
+                           //, private LumatoneEditor::FirmwareListener
+                           , private LumatoneEditor::EditorListener
+                           , private juce::Button::Listener
+                           , private juce::Slider::Listener
 {
 public:
     //==============================================================================
@@ -56,9 +57,17 @@ public:
 	void lookAndFeelChanged() override;
 
     // LumatoneEditor::FirmwareListener implementation
-    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
-    void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
-    void expressionPedalSensitivityReceived(int sensitivity) override;
+    //void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+    //void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
+    //void expressionPedalSensitivityReceived(int sensitivity) override;
+
+    // LumatoneEditor::Editor implementation
+    void expressionPedalSensitivityChanged(unsigned char value) override;
+    void invertFootControllerChanged(bool inverted) override;
+
+    void invertSustainToggled(bool inverted) override;
+
+    void firmwareVersionChanged() override;
 
     //[/UserMethods]
 
@@ -66,8 +75,6 @@ public:
     void resized() override;
     void buttonClicked (juce::Button* buttonThatWasClicked) override;
     void sliderValueChanged (juce::Slider* sliderThatWasMoved) override;
-
-
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.

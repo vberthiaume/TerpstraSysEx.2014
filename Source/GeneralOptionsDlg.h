@@ -22,7 +22,7 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "./lumatone_editor_library/listeners/firmware_listener.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
 
 #include "LumatoneEditorState.h"
 //[/Headers]
@@ -39,7 +39,7 @@
 */
 class GeneralOptionsDlg  : public juce::Component,
                            public LumatoneEditorState,
-                           public LumatoneEditor::FirmwareListener,
+                           public LumatoneEditor::EditorListener,
                            public juce::Button::Listener
 {
 public:
@@ -56,7 +56,11 @@ public:
     void lookAndFeelChanged() override;
 
     // LumatoneEditor::FirmwareListener Implementation
-    void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
+    //void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
+
+    // LumatoneEditor::EditorListener Implementation
+    void lightOnKeyStrokesChanged(bool lightOn) override;
+    void aftertouchToggled(bool enabled) override;
 
     //[/UserMethods]
 
