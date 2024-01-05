@@ -35,7 +35,7 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class KBMMappingDlg  : public Component
+class KBMMappingDlg  : public juce::Component
 {
 public:
     //==============================================================================

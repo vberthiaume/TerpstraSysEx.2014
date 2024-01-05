@@ -10,6 +10,19 @@
 */
 
 #include "Main.h"
+
+#include "MainWindow.h"
+#include "MainComponent.h"
+
+#include "FirmwareTransfer.h"
+
+#include "LumatoneEditorLookAndFeel.h"
+
+#include "./lumatone_editor_library/device/lumatone_controller.h"
+#include "./lumatone_editor_library/device/activity_monitor.h"
+#include "./lumatone_editor_library/graphics/view_constants.h"
+#include "./lumatone_editor_library/palettes/colour_palette_file.h"
+
 #include "GeneralOptionsDlg.h"
 #include "VelocityCurveDlgBase.h"
 #include "NoteOnOffVelocityCurveDialog.h"
@@ -24,83 +37,24 @@ MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
 }
 
 TerpstraSysExApplication::TerpstraSysExApplication()
-	: lookAndFeel(appFonts.fonts, true), tooltipWindow(), hasChangesToSave(false)
+	: firmwareDriver(LumatoneFirmwareDriver::HostMode::Driver)
+	, state("LumatoneEditor", firmwareDriver, &undoManager)
 {
-	PropertiesFile::Options options;
-	options.applicationName = "LumatoneSetup";
-	options.filenameSuffix = "settings";
-	options.osxLibrarySubFolder = "Application Support";
-#if JUCE_LINUX
-	options.folderName = "~/.config/LumatoneSetup";
-#else
-	options.folderName = "LumatoneSetup";
-#endif
-	propertiesFile = new PropertiesFile(options);
-	jassert(propertiesFile != nullptr);
-
-	lumatoneController = std::make_unique<LumatoneController>();
+	activityMonitor.reset(new DeviceActivityMonitor(&firmwareDriver, state));
 
 	// Localisation
 	String localisation = getLocalisation(SystemStats::getDisplayLanguage());
 	LocalisedStrings::setCurrentMappings(new LocalisedStrings(localisation, false));
 	LocalisedStrings::getCurrentMappings()->setFallback(new LocalisedStrings(BinaryData::engb_txt, false));
 
-	// Colour scheme
-	//lookAndFeel.setColourScheme(lookAndFeel.getDarkColourScheme());
-
-	//lookAndFeel.setColour(juce::ComboBox::arrowColourId, Colour(0xfff7990d));
-	//lookAndFeel.setColour(juce::ToggleButton::tickColourId, Colour(0xfff7990d));
-
-	lookAndFeel.setColour(TerpstraKeyEdit::backgroundColourId, lookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
-	lookAndFeel.setColour(TerpstraKeyEdit::outlineColourId, Colour(0xffd7d9da));
-	lookAndFeel.setColour(TerpstraKeyEdit::selectedKeyOutlineId, Colour(0xfff7990d));
-
-	lookAndFeel.setColour(VelocityCurveBeam::beamColourId, Colour(0x66ff5e00));
-	lookAndFeel.setColour(VelocityCurveBeam::outlineColourId, Colour(0xffd7d9da));
-
-	// Recent files list
-	recentFiles.restoreFromString(propertiesFile->getValue("RecentFiles"));
-	recentFiles.removeNonExistentFiles();
-
-	// Save/Load location preferences or default fallback values
-
-	String possibleDirectory = propertiesFile->getValue("UserDocumentsDirectory");
-	if (File::isAbsolutePath(possibleDirectory))
-	{
-		userDocumentsDirectory = File(possibleDirectory);
-	}
-	if (!userDocumentsDirectory.exists() || userDocumentsDirectory.existsAsFile())
-	{
-		userDocumentsDirectory = File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("Lumatone Editor");
-		userDocumentsDirectory.createDirectory();
-	}
-
-	possibleDirectory = propertiesFile->getValue("UserMappingsDirectory");
-	if (File::isAbsolutePath(possibleDirectory))
-	{
-		userMappingsDirectory = File(possibleDirectory);
-	}
-	if (!userMappingsDirectory.exists() || userMappingsDirectory.existsAsFile())
-	{
-		userMappingsDirectory = userDocumentsDirectory.getChildFile("Mappings");
-		userMappingsDirectory.createDirectory();
-	}
-
-	possibleDirectory = propertiesFile->getValue("UserPalettesDirectory");
-	if (File::isAbsolutePath(possibleDirectory))
-	{
-		userPalettesDirectory = File(possibleDirectory);
-	}
-	if (!userPalettesDirectory.exists() || userPalettesDirectory.existsAsFile())
-	{
-		userPalettesDirectory = userDocumentsDirectory.getChildFile("Palettes");
-		userPalettesDirectory.createDirectory();
-	}
-
-	reloadColourPalettes();
-
-	// State of main window will be read from properties file when main window is created
+	 reloadColourPalettes();
 }
+//
+//LumatoneFirmwareDriver& TerpstraSysExApplication::initializeDriver()
+//{
+//	firmwareDriver = new LumatoneFirmwareDriver(LumatoneFirmwareDriver::HostMode::Driver);
+//	return *firmwareDriver;
+//}
 
 //==============================================================================
 void TerpstraSysExApplication::initialise(const String& commandLine)
@@ -119,42 +73,32 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 			// Try to open a config file
 			if (File::isAbsolutePath(commandLineParameter))
 			{
-				currentFile = File(commandLineParameter);
+				state.currentFile = File(commandLineParameter);
 			}
 			else
 			{
 				// If file name is with quotes, try removing the quotes
 				if (commandLine.startsWithChar('"') && commandLine.endsWithChar('"'))
-					currentFile = File(commandLine.substring(1, commandLine.length() - 1));
+					state.currentFile = File(commandLine.substring(1, commandLine.length() - 1));
+					//state.setCurrentFile(commandLine.substring(1, commandLine.length()-1));
 			}
 
-			if (currentFile.existsAsFile())
+			if (state.getCurrentFile().existsAsFile())
 				break;	// There can only be one file, and the file name is supposed to be the last parameter
 		}
 	}
 
 	commandManager.reset(new ApplicationCommandManager());
 	commandManager->registerAllCommandsForTarget(this);
-    menuModel.reset(new Lumatone::Menu::MainMenuModel(commandManager.get()));
 
 	boundsConstrainer = std::make_unique<ComponentBoundsConstrainer>();
 
-	mainWindow.reset(new MainWindow(boundsConstrainer.get()));
-	mainWindow->addKeyListener(commandManager->getKeyMappings());
-	mainWindow->restoreStateFromPropertiesFile(propertiesFile);
+	mainWindow.reset(new MainWindow(state, commandManager.get()));
+	mainWindow->restoreStateFromPropertiesFile(state.propertiesFile.get());
 
-#if JUCE_MAC
-	MenuBarModel::setMacMainMenu(menuModel.get());
-#else
-	mainWindow->setMenuBar(menuModel.get());
-	mainWindow->getMenuBarComponent()->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour,
-		lookAndFeel.findColour(LumatoneEditorColourIDs::MenuBarBackground).toString()
-	);
 
-#endif
-
-	if (currentFile.existsAsFile())
-		openFromCurrentFile();
+	if (state.getCurrentFile().existsAsFile())
+		state.openFromCurrentFile();
 }
 
 void TerpstraSysExApplication::shutdown()
@@ -162,35 +106,30 @@ void TerpstraSysExApplication::shutdown()
 	// Add your application's shutdown code here..
 
 	// Save documents directories (Future: provide option to change them and save after changed by user)
-	propertiesFile->setValue("UserDocumentsDirectory", userDocumentsDirectory.getFullPathName());
-	propertiesFile->setValue("UserMappingsDirectory", userMappingsDirectory.getFullPathName());
-	propertiesFile->setValue("UserPalettesDirectory", userPalettesDirectory.getFullPathName());
+	state.propertiesFile->setValue("UserDocumentsDirectory", state.getUserDocumentsDirectory().getFullPathName());
+	state.propertiesFile->setValue("UserMappingsDirectory", state.getUserMappingsDirectory().getFullPathName());
+	state.propertiesFile->setValue("UserPalettesDirectory", state.getUserPalettesDirectory().getFullPathName());
 
 	// Save recent files list
-	recentFiles.removeNonExistentFiles();
-	jassert(propertiesFile != nullptr);
-	propertiesFile->setValue("RecentFiles", recentFiles.toString());
+	state.recentFiles.removeNonExistentFiles();
+	jassert(state.propertiesFile != nullptr);
+	state.propertiesFile->setValue("RecentFiles", state.recentFiles.toString());
 
 	// Save state of main window
-	mainWindow->saveStateToPropertiesFile(propertiesFile);
+	mainWindow->saveStateToPropertiesFile(state.propertiesFile.get());
 
-	propertiesFile->saveIfNeeded();
-	delete propertiesFile;
-	propertiesFile = nullptr;
+	state.propertiesFile->saveIfNeeded();
+	state.propertiesFile = nullptr;
 
 	LocalisedStrings::setCurrentMappings(nullptr);
 
-#if JUCE_MAC
-    MenuBarModel::setMacMainMenu(nullptr);
-#else
-	mainWindow->setMenuBarComponent(nullptr);
-#endif
-    menuModel = nullptr;
+    mainWindow = nullptr;
 
-    mainWindow = nullptr; // (deletes our window)
-
-	if (firmwareUpdateWasPerformed)
+	if (state.firmwareUpdateCompleted())
 		FirmwareTransfer::exitLibSsh2();
+
+	activityMonitor = nullptr;
+	//delete firmwareDriver;
 
 //	commandManager = nullptr;
 }
@@ -202,7 +141,7 @@ void TerpstraSysExApplication::systemRequestedQuit()
 	// request and let the app carry on running, or call quit() to allow the app to close.
 
 	// If there are changes: ask for save
-	if (hasChangesToSave)
+	if (state.getHasChangesToSave())
 	{
 		AlertWindow::showYesNoCancelBox(
 			AlertWindow::AlertIconType::QuestionIcon,
@@ -242,21 +181,6 @@ void TerpstraSysExApplication::anotherInstanceStarted(const String& commandLine)
 	// the other instance's command-line arguments were.
 }
 
-void TerpstraSysExApplication::reloadColourPalettes()
-{
-	auto foundPaletteFiles = userPalettesDirectory.findChildFiles(File::TypesOfFileToFind::findFiles, true, '*' + String(PALETTEFILEEXTENSION));
-
-	colourPalettes.clear();
-
-	auto paletteSorter = LumatoneEditorPaletteSorter();
-	for (auto file : foundPaletteFiles)
-	{
-		LumatoneEditorColourPalette palette = LumatoneEditorColourPalette::loadFromFile(file);
-		colourPalettes.addSorted(paletteSorter, palette);
-	}
-
-}
-
 bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& palette, File pathToFile)
 {
 	bool success = false;
@@ -286,7 +210,7 @@ bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& pa
 			if (palette.getName().isNotEmpty())
                 fileName = palette.getName();
 
-            pathToFile = userPalettesDirectory.getChildFile(fileName);
+            pathToFile = state.getUserPalettesDirectory().getChildFile(fileName);
 
 			// Make sure filename is unique since saving happens automatically
             // Sorry programmers, we're using cardinal numbers here, and the original is implicitly #1 ;)
@@ -294,7 +218,7 @@ bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& pa
 			while (pathToFile.withFileExtension(PALETTEFILEEXTENSION).existsAsFile() && nameId < 999999)
 			{
                 auto fileNameToSave = fileName + "_" + String(++nameId);
-                pathToFile = userPalettesDirectory.getChildFile(fileNameToSave);
+                pathToFile = state.getUserPalettesDirectory().getChildFile(fileNameToSave);
 			}
 		}
 
@@ -303,22 +227,27 @@ bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& pa
 		// TODO error handling?
 	}
 
-	if (success)
-		reloadColourPalettes();
+	// if (success)
+		// reloadColourPalettes();
 
 	return success;
 }
 
-bool TerpstraSysExApplication::deletePaletteFile(File pathToPalette)
+void TerpstraSysExApplication::reloadColourPalettes()
 {
-	bool success = false;
+    auto directory = state.getUserPalettesDirectory();
+	auto foundPaletteFiles = directory.findChildFiles(juce::File::TypesOfFileToFind::findFiles, true, '*' + juce::String(PALETTEFILEEXTENSION));
 
-	if (pathToPalette.existsAsFile())
+	juce::Array<LumatoneEditorColourPalette> newPalettes;
+
+	auto paletteSorter = LumatoneEditorPaletteSorter();
+	for (auto file : foundPaletteFiles)
 	{
-		success = pathToPalette.deleteFile();
+		LumatoneEditorColourPalette palette = LumatoneEditorColourPalette::loadFromFile(file);
+		newPalettes.addSorted(paletteSorter, palette);
 	}
 
-	return success;
+	state.setColourPalettes(newPalettes);
 }
 
 void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
@@ -487,13 +416,12 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 
 bool TerpstraSysExApplication::openSysExMapping()
 {
-	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", recentFiles.getFile(0).getParentDirectory(), "*.ltn;*.tsx");
+	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.recentFiles.getFile(0).getParentDirectory(), "*.ltn;*.tsx");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
-			currentFile = chooser.getResult();
-			// if (currentFile.)
-			openFromCurrentFile();
+			state.currentFile = chooser.getResult();
+			state.openFromCurrentFile();
 		});
 
 	return true;
@@ -501,7 +429,7 @@ bool TerpstraSysExApplication::openSysExMapping()
 
 bool TerpstraSysExApplication::saveSysExMapping(std::function<void(bool success)> saveFileCallback)
 {
-	if (currentFile.getFileName().isEmpty())
+	if (state.getCurrentFile().getFileName().isEmpty())
 		return saveSysExMappingAs(saveFileCallback);
 	else
 		return saveCurrentFile(saveFileCallback);
@@ -510,11 +438,11 @@ bool TerpstraSysExApplication::saveSysExMapping(std::function<void(bool success)
 
 bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> saveFileCallback)
 {
-	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", recentFiles.getFile(0).getParentDirectory(), "*.ltn");
+	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.recentFiles.getFile(0).getParentDirectory(), "*.ltn");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
-			currentFile = chooser.getResult();
+			state.currentFile = chooser.getResult();
 			bool saved = saveCurrentFile();
 			if (saved)
 			{
@@ -530,23 +458,56 @@ bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> save
 
 bool TerpstraSysExApplication::resetSysExMapping()
 {
-	// Clear file
-	currentFile = File();
+    // Clear file
+    state.setCurrentFile(juce::File());
 
 	// Clear all edit fields
-	((MainContentComponent*)(mainWindow->getContentComponent()))->deleteAll();
+	// ((MainContentComponent*)(mainWindow->getContentComponent()))->deleteAll();
 
-	setHasChangesToSave(false);
+	//state.setHasChangesToSave(false);
 
 	// Clear undoable actions
 	// ToDo (?)
-	undoManager.clearUndoHistory();
+	// undoManager.clearUndoHistory();
 
 
 	// Window title
-	updateMainTitle();
+	// updateMainTitle();
 
 	return true;
+}
+
+
+// Saves the current mapping to file, specified in state.getCurrentFile().
+bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)> saveFileCallback)
+{
+	if (state.getCurrentFile().existsAsFile())
+		state.getCurrentFile().deleteFile();
+	bool retc = state.getCurrentFile().create();
+	// XXX error handling
+
+    bool appendSuccess = true;
+	StringArray stringArray = state.getMappingData()->toStringArray();
+	for (int i = 0; i < stringArray.size(); i++)
+		appendSuccess = appendSuccess && state.getCurrentFile().appendText(stringArray[i] + "\n");
+
+	state.setHasChangesToSave(!appendSuccess);
+    saveFileCallback(appendSuccess);
+
+	// ToDo undo history?
+
+	// Add file to recent files list - or put it on top of the list
+	state.recentFiles.addFile(state.currentFile);
+
+	return retc;
+}
+
+// open a file from the "recent files" menu
+bool TerpstraSysExApplication::openRecentFile(int recentFileIndex)
+{
+	jassert(recentFileIndex >= 0 && recentFileIndex < state.recentFiles.getNumFiles());
+	state.currentFile = state.recentFiles.getFile(recentFileIndex);
+	return state.openFromCurrentFile();
 }
 
 bool TerpstraSysExApplication::deleteSubBoardData()
@@ -595,7 +556,7 @@ bool TerpstraSysExApplication::performUndoableAction(UndoableAction* editAction,
 
 		if (undoManager.perform(editAction))	// UndoManager will check for nullptr and also for disposing of the object
 		{
-			setHasChangesToSave(true);
+			// setHasChangesToSave(true);
 			((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
 			return true;
 		}
@@ -608,8 +569,8 @@ bool TerpstraSysExApplication::undo()
 {
 	if (undoManager.undo())
 	{
-		setHasChangesToSave(true);
-		((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
+		// setHasChangesToSave(true);
+		// ((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
 		return true;
 	}
 	else
@@ -620,227 +581,132 @@ bool TerpstraSysExApplication::redo()
 {
 	if (undoManager.redo())
 	{
-		setHasChangesToSave(true);
-		((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
+		// setHasChangesToSave(true);
+		// ((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
 		return true;
 	}
 	else
 		return false;
 }
 
-LumatoneColourModel* TerpstraSysExApplication::getColourModel()
-{
-	return &colourModel;
-}
+// LumatoneColourModel* TerpstraSysExApplication::getColourModel()
+// {
+// 	return &colourModel;
+// }
 
 bool TerpstraSysExApplication::toggleDeveloperMode()
 {
-	bool newMode = !propertiesFile->getBoolValue("DeveloperMode");
-	propertiesFile->setValue("DeveloperMode", newMode);
-	return ((MainContentComponent*)(mainWindow->getContentComponent()))->setDeveloperMode(newMode);
+	state.setDeveloperMode(!state.getInDeveloperMode());
+	return state.getInDeveloperMode();
+	// bool newMode = !propertiesFile->getBoolValue("DeveloperMode");
+	// propertiesFile->setValue("DeveloperMode", newMode);
+	// return ((MainContentComponent*)(mainWindow->getContentComponent()))->state.setDeveloperMode(newMode);
 }
 
-void TerpstraSysExApplication::setEditMode(sysExSendingMode editMode)
-{
-    lumatoneController->setSysExSendingMode(editMode);
-}
+// void TerpstraSysExApplication::state.setEditMode(EditorMode editMode)
+// {
+// 	state.setEditMode(editMode);
+//     // lumatoneController->setSysExSendingMode(editMode);
+// }
 
-bool TerpstraSysExApplication::generalOptionsDialog()
-{
-	GeneralOptionsDlg* optionsWindow = new GeneralOptionsDlg();
-	optionsWindow->setLookAndFeel(&lookAndFeel);
+// bool TerpstraSysExApplication::generalOptionsDialog()
+// {
+// 	GeneralOptionsDlg* optionsWindow = new GeneralOptionsDlg();
+// 	optionsWindow->setLookAndFeel(&lookAndFeel);
 
-	DialogWindow::LaunchOptions launchOptions;
-	launchOptions.content.setOwned(optionsWindow);
-	launchOptions.content->setSize(480, 240);
+// 	DialogWindow::LaunchOptions launchOptions;
+// 	launchOptions.content.setOwned(optionsWindow);
+// 	launchOptions.content->setSize(480, 240);
 
-	launchOptions.dialogTitle = "General options";
-	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(juce::ResizableWindow::backgroundColourId);
-	launchOptions.escapeKeyTriggersCloseButton = true;
-	launchOptions.useNativeTitleBar = false;
-	launchOptions.resizable = true;
+// 	launchOptions.dialogTitle = "General options";
+// 	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(juce::ResizableWindow::backgroundColourId);
+// 	launchOptions.escapeKeyTriggersCloseButton = true;
+// 	launchOptions.useNativeTitleBar = false;
+// 	launchOptions.resizable = true;
 
-	DialogWindow* dw = launchOptions.launchAsync();
-	dw->centreWithSize(480, 240);
+// 	DialogWindow* dw = launchOptions.launchAsync();
+// 	dw->centreWithSize(480, 240);
 
-	return true;
-}
+// 	return true;
+// }
 
-bool TerpstraSysExApplication::noteOnOffVelocityCurveDialog()
-{
-	NoteOnOffVelocityCurveDialog* velocityCurveWindow = new NoteOnOffVelocityCurveDialog();
-	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
+// bool TerpstraSysExApplication::noteOnOffVelocityCurveDialog()
+// {
+// 	NoteOnOffVelocityCurveDialog* velocityCurveWindow = new NoteOnOffVelocityCurveDialog();
+// 	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
 
-	int dlgWidth = propertiesFile->getIntValue("VelocityCurveWindowWidth", 648);
-	int dlgHeight = propertiesFile->getIntValue("VelocityCurveWindowHeight", 424);
+// 	int dlgWidth = propertiesFile->getIntValue("VelocityCurveWindowWidth", 648);
+// 	int dlgHeight = propertiesFile->getIntValue("VelocityCurveWindowHeight", 424);
 
-	DialogWindow::LaunchOptions launchOptions;
-	launchOptions.content.setOwned(velocityCurveWindow);
-	launchOptions.content->setSize(dlgWidth, dlgHeight);
+// 	DialogWindow::LaunchOptions launchOptions;
+// 	launchOptions.content.setOwned(velocityCurveWindow);
+// 	launchOptions.content->setSize(dlgWidth, dlgHeight);
 
-	launchOptions.dialogTitle = "Note on/off velocity curve";
-	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(ResizableWindow::backgroundColourId);
-	launchOptions.escapeKeyTriggersCloseButton = true;
-	launchOptions.useNativeTitleBar = false;
-	launchOptions.resizable = true;
+// 	launchOptions.dialogTitle = "Note on/off velocity curve";
+// 	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(ResizableWindow::backgroundColourId);
+// 	launchOptions.escapeKeyTriggersCloseButton = true;
+// 	launchOptions.useNativeTitleBar = false;
+// 	launchOptions.resizable = true;
 
-	DialogWindow* dw = launchOptions.launchAsync();
-	dw->centreWithSize(dlgWidth, dlgHeight);
+// 	DialogWindow* dw = launchOptions.launchAsync();
+// 	dw->centreWithSize(dlgWidth, dlgHeight);
 
-	return true;
-}
+// 	return true;
+// }
 
-bool TerpstraSysExApplication::faderVelocityCurveDialog()
-{
-	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(LumatoneConfigTable::TableType::fader);
-	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
+// bool TerpstraSysExApplication::faderVelocityCurveDialog()
+// {
+// 	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(LumatoneConfigTable::TableType::fader);
+// 	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
 
-	int dlgWidth = propertiesFile->getIntValue("FaderVelocityCurveWindowWidth", 648);
-	int dlgHeight = propertiesFile->getIntValue("FaderVelocityCurveWindowHeight", 424);
+// 	int dlgWidth = propertiesFile->getIntValue("FaderVelocityCurveWindowWidth", 648);
+// 	int dlgHeight = propertiesFile->getIntValue("FaderVelocityCurveWindowHeight", 424);
 
-	DialogWindow::LaunchOptions launchOptions;
-	launchOptions.content.setOwned(velocityCurveWindow);
-	launchOptions.content->setSize(dlgWidth, dlgHeight);
+// 	DialogWindow::LaunchOptions launchOptions;
+// 	launchOptions.content.setOwned(velocityCurveWindow);
+// 	launchOptions.content->setSize(dlgWidth, dlgHeight);
 
-	launchOptions.dialogTitle = "Fader velocity curve";
-	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(ResizableWindow::backgroundColourId);
-	launchOptions.escapeKeyTriggersCloseButton = true;
-	launchOptions.useNativeTitleBar = false;
-	launchOptions.resizable = true;
+// 	launchOptions.dialogTitle = "Fader velocity curve";
+// 	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(ResizableWindow::backgroundColourId);
+// 	launchOptions.escapeKeyTriggersCloseButton = true;
+// 	launchOptions.useNativeTitleBar = false;
+// 	launchOptions.resizable = true;
 
-	DialogWindow* dw = launchOptions.launchAsync();
-	dw->centreWithSize(dlgWidth, dlgHeight);
+// 	DialogWindow* dw = launchOptions.launchAsync();
+// 	dw->centreWithSize(dlgWidth, dlgHeight);
 
-	return true;
-}
+// 	return true;
+// }
 
-bool TerpstraSysExApplication::aftertouchVelocityCurveDialog()
-{
-	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(LumatoneConfigTable::TableType::afterTouch);
-	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
+// bool TerpstraSysExApplication::aftertouchVelocityCurveDialog()
+// {
+// 	VelocityCurveDlgBase* velocityCurveWindow = new VelocityCurveDlgBase(LumatoneConfigTable::TableType::afterTouch);
+// 	velocityCurveWindow->setLookAndFeel(&lookAndFeel);
 
-	int dlgWidth = propertiesFile->getIntValue("AftertouchVelocityCurveWindowWidth", 768);
-	int dlgHeight = propertiesFile->getIntValue("AftertouchVelocityCurveWindowHeight", 424);
+// 	int dlgWidth = propertiesFile->getIntValue("AftertouchVelocityCurveWindowWidth", 768);
+// 	int dlgHeight = propertiesFile->getIntValue("AftertouchVelocityCurveWindowHeight", 424);
 
-	DialogWindow::LaunchOptions launchOptions;
-	launchOptions.content.setOwned(velocityCurveWindow);
-	launchOptions.content->setSize(dlgWidth, dlgHeight);
+// 	DialogWindow::LaunchOptions launchOptions;
+// 	launchOptions.content.setOwned(velocityCurveWindow);
+// 	launchOptions.content->setSize(dlgWidth, dlgHeight);
 
-	launchOptions.dialogTitle = "Aftertouch parameters";
-	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(ResizableWindow::backgroundColourId);
-	launchOptions.escapeKeyTriggersCloseButton = true;
-	launchOptions.useNativeTitleBar = false;
-	launchOptions.resizable = true;
+// 	launchOptions.dialogTitle = "Aftertouch parameters";
+// 	launchOptions.dialogBackgroundColour = lookAndFeel.findColour(ResizableWindow::backgroundColourId);
+// 	launchOptions.escapeKeyTriggersCloseButton = true;
+// 	launchOptions.useNativeTitleBar = false;
+// 	launchOptions.resizable = true;
 
-	DialogWindow* dw = launchOptions.launchAsync();
-	dw->centreWithSize(dlgWidth, dlgHeight);
+// 	DialogWindow* dw = launchOptions.launchAsync();
+// 	dw->centreWithSize(dlgWidth, dlgHeight);
 
-	return true;
-}
+// 	return true;
+// }
 
-// open a file from the "recent files" menu
-bool TerpstraSysExApplication::openRecentFile(int recentFileIndex)
-{
-	jassert(recentFileIndex >= 0 && recentFileIndex < recentFiles.getNumFiles());
-	currentFile = recentFiles.getFile(recentFileIndex);
-	return openFromCurrentFile();
-}
-
-// Open a SysEx mapping from the file specified in currentFile
-bool TerpstraSysExApplication::openFromCurrentFile()
-{
-	if (currentFile.existsAsFile())
-	{
-		// XXX StringArray format: platform-independent?
-		StringArray stringArray;
-		currentFile.readLines(stringArray);
-		LumatoneLayout keyMapping;
-		keyMapping.fromStringArray(stringArray);
-
-		((MainContentComponent*)(mainWindow->getContentComponent()))->setData(keyMapping);
-
-		// Window title
-		updateMainTitle();
-
-		// Send configuration to controller, if connected
-		sendCurrentConfigurationToDevice();
-
-		// Mark file as unchanged
-		setHasChangesToSave(false);
-
-		// Clear undo history
-		undoManager.clearUndoHistory();
-
-		// Add file to recent files list
-		recentFiles.addFile(currentFile);
-
-		return true;
-	}
-	else
-	{
-		// Show error message
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Open File Error", "The file " + currentFile.getFullPathName() + " could not be opened.");
-
-		// XXX Update Window title in any case? Make file name empty/make data empty in case of error?
-		return false;
-	}
-}
-
-bool TerpstraSysExApplication::setCurrentFile(File fileToOpen)
-{
-    currentFile = fileToOpen;
-    return openFromCurrentFile();
-}
-
-// Saves the current mapping to file, specified in currentFile.
-bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)> saveFileCallback)
-{
-	if (currentFile.existsAsFile())
-		currentFile.deleteFile();
-	bool retc = currentFile.create();
-	// XXX error handling
-
-	LumatoneLayout keyMapping;
-	((MainContentComponent*)(mainWindow->getContentComponent()))->getData(keyMapping);
-
-    bool appendSuccess = true;
-	StringArray stringArray = keyMapping.toStringArray();
-	for (int i = 0; i < stringArray.size(); i++)
-		appendSuccess = appendSuccess && currentFile.appendText(stringArray[i] + "\n");
-
-	setHasChangesToSave(!appendSuccess);
-    saveFileCallback(appendSuccess);
-
-	// ToDo undo history?
-
-	// Add file to recent files list - or put it on top of the list
-	recentFiles.addFile(currentFile);
-
-	return retc;
-}
-
-void TerpstraSysExApplication::sendCurrentConfigurationToDevice()
-{
-	// MIDI channel, MIDI note, colour and key type config for all keys
-	getLumatoneController()->sendCompleteMapping(mappingData);
-
-	// General options
-	getLumatoneController()->setAftertouchEnabled(mappingData.afterTouchActive);
-	getLumatoneController()->sendLightOnKeyStrokes(mappingData.lightOnKeyStrokes);
-	getLumatoneController()->sendInvertFootController(mappingData.invertExpression);
-	getLumatoneController()->sendExpressionPedalSensivity(mappingData.expressionControllerSensivity);
-    getLumatoneController()->invertSustainPedal(mappingData.invertSustain);
-
-	// Velocity curve config
-	getLumatoneController()->setVelocityIntervalConfig(mappingData.table);
-
-	((MainContentComponent*)(mainWindow->getContentComponent()))->getCurvesArea()->sendConfigToController();
-}
 
 void TerpstraSysExApplication::requestConfigurationFromDevice()
 {
 	// if editing operations were done that have not been saved, give the possibility to save them
-	if (hasChangesToSave)
+	if (state.getHasChangesToSave())
 	{
 		AlertWindow::showYesNoCancelBox(
 			AlertWindow::AlertIconType::QuestionIcon,
@@ -853,7 +719,7 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 				{
 					// "Cancel". Do not receive config, go offline
 					DBG("Layout import cancelled");
-                    setEditMode(sysExSendingMode::offlineEditor);
+                    state.setEditMode(EditorMode::OFFLINE);
 					return;
 				}
 				else if (retc == 1)
@@ -871,7 +737,7 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 				{
 					// retc == 2: "No" -> no saving, overwrite
 					DBG("Overwriting current edits");
-					setHasChangesToSave(false);
+					// setHasChangesToSave(false);
 					requestConfigurationFromDevice();
 				}
 			})
@@ -880,42 +746,42 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 		return;
 	}
 
-	TerpstraSysExApplication::getApp().resetSysExMapping();
+	resetSysExMapping();
 
 	// Request MIDI channel, MIDI note, colour and key type config for all keys
-	getLumatoneController()->sendGetCompleteMappingRequest();
+	state.getLumatoneController()->sendGetCompleteMappingRequest();
 
 	// General options
-	getLumatoneController()->getPresetFlags();
-	getLumatoneController()->getExpressionPedalSensitivity();
+	state.getLumatoneController()->requestPresetFlags();
+	state.getLumatoneController()->requestExpressionPedalSensitivity();
 
 	// Velocity curve config
-	getLumatoneController()->sendVelocityIntervalConfigRequest();
-	getLumatoneController()->sendVelocityConfigRequest();
-	getLumatoneController()->sendFaderConfigRequest();
-	getLumatoneController()->sendAftertouchConfigRequest();
-
+	state.getLumatoneController()->sendVelocityIntervalConfigRequest();
+	state.getLumatoneController()->sendVelocityConfigRequest();
+	state.getLumatoneController()->sendFaderConfigRequest();
+	state.getLumatoneController()->sendAftertouchConfigRequest();
 }
 
 void TerpstraSysExApplication::updateMainTitle()
 {
 	String windowTitle("Lumatone Editor");
-	if (!currentFile.getFileName().isEmpty())
-		windowTitle << " - " << currentFile.getFileName();
-	if (hasChangesToSave)
+
+	if (!state.getCurrentFile().getFileName().isEmpty())
+		windowTitle << " - " << state.getCurrentFile().getFileName();
+	if (state.getHasChangesToSave())
 		windowTitle << "*";
 	mainWindow->setName(windowTitle);
 }
 
-void TerpstraSysExApplication::setHasChangesToSave(bool value)
-{
-	if (value != hasChangesToSave)
-	{
-		hasChangesToSave = value;
-		updateMainTitle();
-	}
-}
-
+// void TerpstraSysExApplication::setHasChangesToSave(bool value)
+// {
+	// if (value != hasCh)
+	// {
+		// hasChangesToSave = value;
+		// updateMainTitle();
+	// }
+// }
+//
 //https://forum.juce.com/t/closing-dialog-windows-on-shutdown/27326/6
 void TerpstraSysExApplication::setOpenDialogWindow(DialogWindow* dialogWindowIn)
 {
@@ -952,10 +818,10 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 	DialogWindow::LaunchOptions options;
 	auto textDisplay = new TextEditor();
 	//textDisplay->setLookAndFeel(&lookAndFeel);
-	lookAndFeel.setupTextEditor(*textDisplay);
+	state.getEditorLookAndFeel().setupTextEditor(*textDisplay);
 	textDisplay->setMultiLine(true, true);
 	textDisplay->setText(m, dontSendNotification);
-	textDisplay->setFont(lookAndFeel.getAppFont(LumatoneEditorFont::FranklinGothic));
+	textDisplay->setFont(state.getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
 	textDisplay->setReadOnly(true);
 	textDisplay->setCaretVisible(false);
 	options.content.setOwned(textDisplay);
@@ -966,7 +832,7 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 	//resizeLabelWithHeight(label, roundToInt(area.getHeight() * 0.24f));
 
 	options.dialogTitle = "About Lumatone Editor";
-	options.dialogBackgroundColour = lookAndFeel.findColour(LumatoneEditorColourIDs::DarkBackground);
+	options.dialogBackgroundColour = state.getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DarkBackground);
 
 	options.escapeKeyTriggersCloseButton = true;
 	options.useNativeTitleBar = false;

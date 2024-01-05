@@ -27,7 +27,7 @@ public:
 	virtual ~VelocityCurveEditStrategyBase() {}
 
 	// Set value table (e. g. from LMT file)
-	virtual bool setEditConfig(int velocityTableValues[]) = 0;
+	virtual bool setEditConfig(const int velocityTableValues[]) = 0;
 	// Export value table (for saving in LMT file)
 	virtual bool exportEditConfig(int velocityTableValues[]) = 0;
 	// Takes a given velocity table and tries to extract edit parameters. Returns whether it was successful.
@@ -62,7 +62,7 @@ class VelocityCurveFreeDrawingStrategy : public VelocityCurveEditStrategyBase
 public:
 	VelocityCurveFreeDrawingStrategy(/*Path& beamTableFrameRef,*/ std::unique_ptr<VelocityCurveBeam>* velocityBeamTablePtr);
 
-	bool setEditConfig(int velocityTableValues[]) override;
+	bool setEditConfig(const int velocityTableValues[]) override;
 	bool exportEditConfig(int velocityTableValues[]) override;
 
 	void paint(Graphics& g, LookAndFeel& lookAndFeel) override;
@@ -87,7 +87,7 @@ public:
 	VelocityCurveSegmentEditStrategyBase(/*Path& beamTableFrameRef, */std::unique_ptr<VelocityCurveBeam>* velocityBeamTablePtr);
 	virtual ~VelocityCurveSegmentEditStrategyBase() {}
 
-	bool setEditConfig(int velocityTableValues[]) override;
+	bool setEditConfig(const int velocityTableValues[]) override;
 	bool exportEditConfig(int velocityTableValues[]) override;
 
 	String getDescriptionText() override { return "Click with the mouse in the graphics to draw the velocity curve. Right-click to delete a segment point."; }
@@ -155,4 +155,3 @@ public:
 protected:
 	Path createCurveToDraw() override;
 };
-

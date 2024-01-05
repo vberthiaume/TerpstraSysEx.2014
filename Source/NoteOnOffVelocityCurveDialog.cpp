@@ -9,11 +9,9 @@
 */
 
 #include "NoteOnOffVelocityCurveDialog.h"
-#include "TerpstraMidiDriver.h"
-#include "Main.h"
 
 //==============================================================================
-NoteOnOffVelocityCurveDialog::NoteOnOffVelocityCurveDialog()
-    : VelocityCurveDlgBase(LumatoneConfigTable::TableType::velocityInterval)
+NoteOnOffVelocityCurveDialog::NoteOnOffVelocityCurveDialog(const LumatoneEditorState& stateIn)
+    : VelocityCurveDlgBase(stateIn, LumatoneConfigTable::TableType::velocityInterval)
 {
 }

@@ -18,9 +18,12 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "ViewConstants.h"
-#include "Main.h"
-#include "MainComponent.h"
+#include "LumatoneEditorLookAndFeel.h"
+
+#include "./lumatone_editor_library/graphics/view_constants.h"
+#include "./lumatone_editor_library/device/lumatone_controller.h"
+#include "./lumatone_editor_library/palettes/colour_palette_component.h"
+
 //[/Headers]
 
 #include "IsomorphicMassAssign.h"
@@ -30,14 +33,15 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-IsomorphicMassAssign::IsomorphicMassAssign ()
+IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("IsomorphicMassAssign", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
     periodSize = 0;
 
     labelMappingType.reset(new juce::Label("labelMappingType", translate("Type")));
     addAndMakeVisible(labelMappingType.get());
-    labelMappingType->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    labelMappingType->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
 
     labelMappingType->setBounds(20, 64, 88, 24);
 
@@ -92,7 +96,7 @@ IsomorphicMassAssign::IsomorphicMassAssign ()
     labelStartingPoint.reset(new juce::Label("labelStartingPoint", translate("StartingValue")));
     addAndMakeVisible(labelStartingPoint.get());
     labelStartingPoint->setTooltip(translate("StartingPointTooltip"));
-    labelStartingPoint->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    labelStartingPoint->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
 
     labelStartingPoint->setBounds(8, 344, 150, 24);
 
@@ -108,7 +112,7 @@ IsomorphicMassAssign::IsomorphicMassAssign ()
 
     labelPeriodSize.reset(new juce::Label("labelPeriodSize", TRANS("Period")));
     addAndMakeVisible(labelPeriodSize.get());
-    labelPeriodSize->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    labelPeriodSize->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
 
     labelPeriodSize->setBounds(16, 8, 168, 24);
 
@@ -133,7 +137,7 @@ IsomorphicMassAssign::IsomorphicMassAssign ()
 
     labelHorizontalSteps.reset(new juce::Label("labelHorizontalSteps", translate("HorizontalSteps")));
     addAndMakeVisible(labelHorizontalSteps.get());
-    labelHorizontalSteps->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    labelHorizontalSteps->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
 
     labelHorizontalSteps->setBounds(208, 344, 112, 24);
 
@@ -151,7 +155,7 @@ IsomorphicMassAssign::IsomorphicMassAssign ()
 
     labelRightUpwardSteps.reset(new juce::Label("labelRightUpwardSteps", translate("RightUpwardSteps")));
     addAndMakeVisible(labelRightUpwardSteps.get());
-    labelRightUpwardSteps->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    labelRightUpwardSteps->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
     labelRightUpwardSteps->setBounds(152, 296, 136, 24);
 
     editRightUpwardSteps.reset(new juce::TextEditor("editRightUpwardSteps"));
@@ -392,10 +396,10 @@ void IsomorphicMassAssign::paint (juce::Graphics& g)
     //[UserPaint] Add your own custom painting code here..
     g.fillAll(Colour(0xff2d3135));
 
-    g.setColour(getLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
     g.fillRect(instructionsBounds);
 
-    g.setColour(getLookAndFeel().findColour(LumatoneEditorColourIDs::InactiveText));
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::InactiveText));
     g.setFont(instructionsFont);
     g.drawFittedText(translate("IsomorphicAssignDirections"), instructionsBounds, Justification::centred, 3, 1.0f);
 
@@ -542,7 +546,7 @@ void IsomorphicMassAssign::buttonClicked (juce::Button* buttonThatWasClicked)
 		{
 			scaleDesignWindow.reset(
                 new ScaleDesignWindow(scaleStructure, colourTable, findColour(ResizableWindow::backgroundColourId)));
-			scaleDesignWindow->setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel());
+			// scaleDesignWindow->setLookAndFeel(getLookAndFeel());
 			scaleDesignWindow->addScaleDesignerListener(this);
 		}
 
@@ -606,10 +610,11 @@ void IsomorphicMassAssign::setSaveSend(int setSelection, int keySelection, int n
 {
 	// XXX This could be in a common base class for all assign edit components
 
-	auto mainComponent = dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent());
+	// auto mainComponent = dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent());
 
-    LumatoneKey keyData = *TerpstraSysExApplication::getApp().getMappingData()->readKey(setSelection, keySelection);
-    keyData.keyType = LumatoneKeyType::noteOnNoteOff;
+    // LumatoneKey keyData = *TerpstraSysExApplication::getApp().getMappingData()->readKey(setSelection, keySelection);
+    LumatoneKey keyData = getKey(setSelection, keySelection);
+    keyData.setKeyType(LumatoneKeyType::noteOnNoteOff);
 
 	// Save data
 	mappingLogic->indexToTerpstraKey(
@@ -618,7 +623,8 @@ void IsomorphicMassAssign::setSaveSend(int setSelection, int keySelection, int n
 		);
 
 	// Send to device
-	TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyParam(setSelection + 1, keySelection, keyData);
+    setKey(keyData, setSelection + 1, noteIndex);
+	// getLumatoneController()->sendKeyParam(setSelection + 1, keySelection, keyData);
 }
 
 // Fill a line in current octave board. Starting point is assumed to have been set
@@ -680,7 +686,7 @@ void IsomorphicMassAssign::mappingLogicChanged(MappingLogicBase* mappingLogicTha
 		LumatoneKey keyData = mappingLogicThatChanged->indexToTerpstraKey(i);
 		jassert(!keyData.isEmpty());
 
-        String keyLabel = String(i) + ": Key_" + String(keyData.noteNumber) + ", Chan_" + String(keyData.channelNumber);
+        String keyLabel = String(i) + ": Key_" + String(keyData.getMidiNumber()) + ", Chan_" + String(keyData.getMidiChannel());
         startingPointBox->addItem(keyLabel, i + 1);
 
         if (keyLabel == previousStartingLabel)
@@ -736,12 +742,12 @@ void IsomorphicMassAssign::colourChangedCallback(ColourSelectionBroadcaster* sou
 bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
 {
 	bool mappingChanged = false;
-	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS && keySelection >= 0 && keySelection < TerpstraSysExApplication::getApp().getOctaveBoardSize());
+	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS && keySelection >= 0 && keySelection < getOctaveBoardSize());
 
 	int startNoteIndex = this->startingPointBox->getSelectedItemIndex();
 	if (this->mappingLogic != nullptr && startNoteIndex >= 0)
 	{
-	    auto mainComponent = dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent());
+	    // auto mainComponent = dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent());
 
 		int horizStepSize = editHorizontalSteps->getText().getIntValue();
 		int rUpwStepSize = editRightUpwardSteps->getText().getIntValue();
@@ -749,7 +755,7 @@ bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
         Point<int>startPos = boardGeometry.coordinatesForKey(setSelection, keySelection); // Get the coordinates of the clicked key.
 
         for (int boardIx = 0; boardIx < MAXNUMBOARDS; boardIx++) { // For each board
-            for (int keyIx = 0; keyIx < TerpstraSysExApplication::getApp().getOctaveBoardSize(); keyIx++) { // For each key on that board
+            for (int keyIx = 0; keyIx < getOctaveBoardSize(); keyIx++) { // For each key on that board
                 Point<int> keyPos = boardGeometry.coordinatesForKey(boardIx, keyIx); // Get the coordinates of the key to assign.
                 Point<int> keyOffset = keyPos - startPos; // Get the offset of the key to assign, relative to where the user clicked.
                 setSaveSend(

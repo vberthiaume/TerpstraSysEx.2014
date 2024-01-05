@@ -10,8 +10,7 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-#include "../LumatoneFirmwareDefinitions.h"
+#include "../lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
 //==============================================================================
 /*
@@ -24,7 +23,7 @@ public:
     {
         float defaultMinPoint = (0.5f - 0.15) / ADCSCALAR;
         float defaultMaxPoint = (0.5f + 0.15) / ADCSCALAR;
-        auto initCalibration = WheelsCalibrationData();
+        auto initCalibration = LumatoneFirmware::WheelsCalibrationData();
         initCalibration.minPitch = defaultMinPoint;
         initCalibration.maxPitch = defaultMaxPoint;
         initCalibration.minMod = defaultMinPoint;
@@ -68,7 +67,7 @@ public:
     }
 
     // TODO: improve this
-    void updateCalibrationData(WheelsCalibrationData calibrationDataIn, bool redraw = true)
+    void updateCalibrationData(LumatoneFirmware::WheelsCalibrationData calibrationDataIn, bool redraw = true)
     {
         calibrationData = calibrationDataIn;
 
@@ -115,7 +114,7 @@ public:
 
 private:
 
-    WheelsCalibrationData calibrationData;
+    LumatoneFirmware::WheelsCalibrationData calibrationData;
 
     Rectangle<float> wheelBounds;
     Path pitchPath;

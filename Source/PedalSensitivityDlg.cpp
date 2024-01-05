@@ -18,8 +18,10 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "Main.h"
-#include "./actions/edit_actions.h"
+#include "./lumatone_editor_library/device/lumatone_controller.h"
+
+#include "LumatoneEditorStyleCommon.h"
+#include "LumatoneEditorFontLibrary.h"
 //[/Headers]
 
 #include "PedalSensitivityDlg.h"
@@ -29,7 +31,8 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-PedalSensitivityDlg::PedalSensitivityDlg ()
+PedalSensitivityDlg::PedalSensitivityDlg (const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("PedalSensitivityDialog", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
@@ -94,11 +97,12 @@ PedalSensitivityDlg::PedalSensitivityDlg ()
 
 
     //[UserPreSize]
-    lblExpression->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-    lblSustain->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-    labelExprContrSensitivity->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    lblExpression->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    lblSustain->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    labelExprContrSensitivity->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
     labelExprContrSensitivity->setJustificationType(Justification::centred);
-    TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
+
+    // getLumatoneController()->addFirmwareListener(this);
     //[/UserPreSize]
 
     setSize (134, 96);
@@ -190,18 +194,13 @@ void PedalSensitivityDlg::buttonClicked (juce::Button* buttonThatWasClicked)
     if (buttonThatWasClicked == btnInvertExpression.get())
     {
         //[UserButtonCode_btnInvertExpression] -- add your button handler code here..
-		TerpstraSysExApplication::getApp().performUndoableAction(new LumatoneEditAction::InvertFootControllerEditAction(
-             TerpstraSysExApplication::getApp().getLumatoneController(),
-             btnInvertExpression->getToggleState()
-             ));
+        setInvertExpression(btnInvertExpression->getToggleState());
         //[/UserButtonCode_btnInvertExpression]
     }
     else if (buttonThatWasClicked == btnInvertSustain.get())
     {
         //[UserButtonCode_btnInvertSustain] -- add your button handler code here..
-        TerpstraSysExApplication::getApp().performUndoableAction(new LumatoneEditAction::InvertSustainEditAction(
-            TerpstraSysExApplication::getApp().getLumatoneController(),
-            btnInvertSustain->getToggleState()));
+        setInvertSustain(btnInvertSustain->getToggleState());
         //[/UserButtonCode_btnInvertSustain]
     }
 
@@ -231,10 +230,7 @@ void PedalSensitivityDlg::sliderValueChanged (juce::Slider* sliderThatWasMoved)
             sldExprCtrlSensitivity->setValue(newSensitvity);
         }
 
-        ((MainContentComponent*)getParentComponent())->getMappingInEdit().expressionControllerSensivity = newSensitvity;
-        TerpstraSysExApplication::getApp().setHasChangesToSave(true);
-        TerpstraSysExApplication::getApp().getLumatoneController()->sendExpressionPedalSensivity(newSensitvity);
-
+        setExpressionSensitivity(newSensitvity);
         //[/UserSliderCode_sldExprCtrlSensitivity]
     }
 
@@ -248,29 +244,28 @@ void PedalSensitivityDlg::sliderValueChanged (juce::Slider* sliderThatWasMoved)
 
 void PedalSensitivityDlg::lookAndFeelChanged()
 {
-    auto newLookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-    if (newLookAndFeel)
-    {
-        lblExpression->setColour(Label::ColourIds::textColourId, newLookAndFeel->findColour(LumatoneEditorColourIDs::LabelBlue));
-        lblSustain->setColour(Label::ColourIds::textColourId, newLookAndFeel->findColour(LumatoneEditorColourIDs::LabelBlue));
-        labelExprContrSensitivity->setColour(Label::ColourIds::textColourId, newLookAndFeel->findColour(LumatoneEditorColourIDs::DescriptionText));
-    }
+    juce::Component::lookAndFeelChanged();
+//     auto newLookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
+//     if (newLookAndFeel)
+//     {
+//         lblExpression->setColour(Label::ColourIds::textColourId, newLookAndFeel->findColour(LumatoneEditorColourIDs::LabelBlue));
+//         lblSustain->setColour(Label::ColourIds::textColourId, newLookAndFeel->findColour(LumatoneEditorColourIDs::LabelBlue));
+//         labelExprContrSensitivity->setColour(Label::ColourIds::textColourId, newLookAndFeel->findColour(LumatoneEditorColourIDs::DescriptionText));
+//     }
 }
 
 void PedalSensitivityDlg::loadFromMapping()
 {
-	auto mappingInEdit = ((MainContentComponent*)getParentComponent())->getMappingInEdit();
+	// auto mappingInEdit = ((MainContentComponent*)getParentComponent())->getMappingInEdit();
 
-	btnInvertExpression->setToggleState(mappingInEdit.invertExpression, juce::NotificationType::dontSendNotification);
-    btnInvertSustain->setToggleState(mappingInEdit.invertSustain, juce::NotificationType::dontSendNotification);
-	sldExprCtrlSensitivity->setValue(mappingInEdit.expressionControllerSensivity, juce::NotificationType::dontSendNotification);
+	btnInvertExpression->setToggleState(getInvertExpression(), juce::NotificationType::dontSendNotification);
+    btnInvertSustain->setToggleState(getInvertSustain(), juce::NotificationType::dontSendNotification);
+	sldExprCtrlSensitivity->setValue(getExpressionSensitivity(), juce::NotificationType::dontSendNotification);
 }
 
-void PedalSensitivityDlg::firmwareRevisionReceived(FirmwareVersion version)
+void PedalSensitivityDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
-    FirmwareSupport firmwareSupport;
-
-    if (firmwareSupport.versionAcknowledgesCommand(version, INVERT_SUSTAIN_PEDAL))
+    if (getFirmwareSupport().versionAcknowledgesCommand(version, INVERT_SUSTAIN_PEDAL))
     {
         btnInvertSustain->setEnabled(true);
         btnInvertSustain->setTooltip("");
@@ -282,7 +277,7 @@ void PedalSensitivityDlg::firmwareRevisionReceived(FirmwareVersion version)
     }
 }
 
-void PedalSensitivityDlg::presetFlagsReceived(PresetFlags presetFlags)
+void PedalSensitivityDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
 {
     btnInvertExpression->setToggleState(presetFlags.expressionPedalInverted, dontSendNotification);
     btnInvertSustain->setToggleState(presetFlags.sustainPedalInverted, dontSendNotification);

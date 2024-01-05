@@ -18,8 +18,12 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "../ViewConstants.h"
-#include "../Main.h"
+#include "WheelsCalibrationComponent.h"
+
+#include "../LumatoneEditorLookAndFeel.h"
+
+#include "../lumatone_editor_library/graphics/view_constants.h"
+#include "../lumatone_editor_library/device/lumatone_controller.h"
 //[/Headers]
 
 #include "CalibrationDlg.h"
@@ -29,10 +33,11 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-CalibrationDlg::CalibrationDlg ()
+CalibrationDlg::CalibrationDlg (const LumatoneEditorState& stateIn)
+	: LumatoneEditorState("CalibrationDialog", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
-	instructionsFont = TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::FranklinGothic);
+	instructionsFont = getAppFonts().getFont(LumatoneEditorFont::FranklinGothic);
     //[/Constructor_pre]
 
     btnStart.reset (new juce::TextButton ("btnStart"));
@@ -64,7 +69,7 @@ CalibrationDlg::CalibrationDlg ()
 
 	calibrationSelectorTab->addChangeListener(this);
 
-	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
+	// getLumatoneController()->addFirmwareListener(this);
 
     //[/UserPreSize]
 
@@ -81,7 +86,7 @@ CalibrationDlg::CalibrationDlg ()
 CalibrationDlg::~CalibrationDlg()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-	TerpstraSysExApplication::getApp().getLumatoneController()->removeFirmwareListener(this);
+	// getLumatoneController()->removeFirmwareListener(this);
     //[/Destructor_pre]
 
     btnStart = nullptr;
@@ -173,15 +178,15 @@ void CalibrationDlg::buttonClicked (juce::Button* buttonThatWasClicked)
 		switch (tabSelection)
 		{
 		case calibrateKeys:
-			TerpstraSysExApplication::getApp().getLumatoneController()->startCalibrateKeys();
+			getLumatoneController()->startCalibrateKeys();
 			break;
 
 		case calibrateAftertouch:
-			TerpstraSysExApplication::getApp().getLumatoneController()->startCalibrateAftertouch();
+			getLumatoneController()->startCalibrateAftertouch();
 			break;
 
 		case calibrateModulationWheel:
-			TerpstraSysExApplication::getApp().getLumatoneController()->setCalibratePitchModWheel(true);
+			getLumatoneController()->setCalibratePitchModWheel(true);
             startCalibration = true;
 			break;
 
@@ -206,7 +211,7 @@ void CalibrationDlg::buttonClicked (juce::Button* buttonThatWasClicked)
 			jassertfalse;
 			break;
 		case calibrateModulationWheel:
-			TerpstraSysExApplication::getApp().getLumatoneController()->setCalibratePitchModWheel(false);
+			getLumatoneController()->setCalibratePitchModWheel(false);
             startCalibration = false;
 			break;
 		default:
@@ -224,12 +229,8 @@ void CalibrationDlg::buttonClicked (juce::Button* buttonThatWasClicked)
 void CalibrationDlg::lookAndFeelChanged()
 {
     //[UserCode_lookAndFeelChanged] -- Add your code here...
-	auto lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-	if (lookAndFeel)
-	{
-		setColour(ResizableWindow::ColourIds::backgroundColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::LightBackground));
-		setColour(DocumentWindow::ColourIds::textColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::InactiveText));
-	}
+	setColour(ResizableWindow::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
+	setColour(DocumentWindow::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::InactiveText));
     //[/UserCode_lookAndFeelChanged]
 }
 
@@ -274,7 +275,7 @@ void CalibrationDlg::changeListenerCallback(ChangeBroadcaster *source)
 			setupWheelCalibrationLayout();
 			updateWheelCalibrationStatus();
 			break;
-                
+
 		default:
 			jassertfalse;
 			break;
@@ -285,8 +286,7 @@ void CalibrationDlg::changeListenerCallback(ChangeBroadcaster *source)
 
 void CalibrationDlg::setupWheelCalibrationLayout()
 {
-	FirmwareSupport support;
-	if (support.versionAcknowledgesCommand(TerpstraSysExApplication::getApp().getFirmwareVersion(), PERIPHERAL_CALBRATION_DATA))
+	if (getFirmwareSupport().versionAcknowledgesCommand(getFirmwareVersion(), PERIPHERAL_CALBRATION_DATA))
 	{
 		wheelsCalibrationComponent.reset(new WheelsCalibrationComponent());
 		addAndMakeVisible(wheelsCalibrationComponent.get());
@@ -297,25 +297,21 @@ void CalibrationDlg::setupWheelCalibrationLayout()
 
 void CalibrationDlg::updateWheelCalibrationStatus()
 {
-	bool inCalibration = TerpstraSysExApplication::getApp().getInCalibrationMode();
-	btnStart->setEnabled(!inCalibration);
-	btnStop->setEnabled(inCalibration);
+	btnStart->setEnabled(!getInCalibrationMode());
+	btnStop->setEnabled(getInCalibrationMode());
 }
 
-void CalibrationDlg::calibratePitchModWheelAnswer(TerpstraMIDIAnswerReturnCode code)
+void CalibrationDlg::calibratePitchModWheelAnswer(LumatoneFirmware::ReturnCode code)
 {
-    if (code == TerpstraMIDIAnswerReturnCode::ACK)
+    if (code == LumatoneFirmware::ReturnCode::ACK)
     {
-        if (startCalibration)
-            TerpstraSysExApplication::getApp().setCalibrationMode(true);
-        else
-            TerpstraSysExApplication::getApp().setCalibrationMode(false);
+		getLumatoneController()->setCalibratePitchModWheel(startCalibration);
         updateWheelCalibrationStatus();
         startCalibration = false;
     }
 }
 
-void CalibrationDlg::wheelsCalibrationDataReceived(WheelsCalibrationData calibrationData)
+void CalibrationDlg::wheelsCalibrationDataReceived(LumatoneFirmware::WheelsCalibrationData calibrationData)
 {
 	if (wheelsCalibrationComponent != nullptr)
 	{
@@ -361,4 +357,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

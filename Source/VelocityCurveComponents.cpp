@@ -9,7 +9,7 @@
 */
 
 #include "VelocityCurveComponents.h"
-#include "ViewConstants.h"
+#include "./lumatone_editor_library/graphics/view_constants.h"
 
 /*
 ==============================================================================

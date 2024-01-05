@@ -9,46 +9,49 @@
 */
 
 #pragma once
+
+#include "../LumatoneEditorState.h"
 #include "../FileBrowserComponent.h"
 #include "../FirmwareTransfer.h"
-#include "../LumatoneController.h"
 
+#include "../lumatone_editor_library/listeners/firmware_listener.h"
 
-class FirmwareDlg : public Component, 
-    protected Button::Listener, 
-    protected PathBrowserComponent::Listener,
-    protected FirmwareTransfer::ProcessListener,
-    protected LumatoneEditor::FirmwareListener,
-    private Timer
+class FirmwareDlg : public Component
+                  , public LumatoneEditorState
+                  , protected Button::Listener
+                  , protected PathBrowserComponent::Listener
+                  , protected FirmwareTransfer::ProcessListener
+                  , protected LumatoneEditor::FirmwareListener
+                  , private Timer
 {
 public:
 
-    FirmwareDlg();
+    FirmwareDlg(const LumatoneEditorState& stateIn);
     ~FirmwareDlg();
 
-    void paint(Graphics& g) override;
+    void paint(juce::Graphics& g) override;
 
     void resized() override;
 
-    void buttonClicked(Button* btn) override;
+    void buttonClicked(juce::Button* btn) override;
 
     void updateFirmwareVersionLabel();
 
-    void postMessage(String msgForLog);
-    
+    void postMessage(juce::String msgForLog);
+
     //=========================================================================
     // PathBrowserComponent::Listener Implementation
-    void fileChanged(PathBrowserComponent* source, File) override;
+    void fileChanged(PathBrowserComponent* source, juce::File) override;
 
     //=========================================================================
     // FirmwareTransfer::Listener Implementation
-    void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, String msg) override;
+    void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, juce::String msg) override;
 
     //=========================================================================
     // LumatoneEditor::FirmwareListener implementation
 
-    void firmwareRevisionReceived(FirmwareVersion version) override;
-    
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+
     //=========================================================================
     // juce::Timer Implementation
     void timerCallback() override;
@@ -58,16 +61,16 @@ private:
     bool updateIsAvailable = false;
     bool firmwareUpdateInProgress = false;
 
-    File firmwareFileSelected;
+    juce::File firmwareFileSelected;
 
     //std::unique_ptr<TextButton> checkUpdateBtn;
     std::unique_ptr<PathBrowserComponent> fileBrowser;
-    std::unique_ptr<TextButton> doUpdateBtn;
-    std::unique_ptr<TextEditor> infoBox;
-    
-    std::unique_ptr<Label> firmwareStatusLabel;
+    std::unique_ptr<juce::TextButton> doUpdateBtn;
+    std::unique_ptr<juce::TextEditor> infoBox;
 
-    String msgLog;
+    std::unique_ptr<juce::Label> firmwareStatusLabel;
+
+    juce::String msgLog;
     bool infoNeedsUpdate = false;
     const int infoUpdateTimeoutMs = 100;
 

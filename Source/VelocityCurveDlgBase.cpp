@@ -18,7 +18,13 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "Main.h"
+#include "./lumatone_editor_library/data/lumatone_layout.h"
+#include "./lumatone_editor_library/device/lumatone_controller.h"
+#include "./lumatone_editor_library/graphics/view_constants.h"
+
+#include "LumatoneEditorLookAndFeel.h"
+
+#include "MainComponent.h"
 //[/Headers]
 
 #include "VelocityCurveDlgBase.h"
@@ -28,10 +34,11 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-VelocityCurveDlgBase::VelocityCurveDlgBase (LumatoneConfigTable::TableType typeValue)
-    : freeDrawingStrategy(velocityBeamTable),
-      linearDrawingStrategy(velocityBeamTable),
-      quadraticDrawingStrategy(velocityBeamTable)
+VelocityCurveDlgBase::VelocityCurveDlgBase (const LumatoneEditorState& stateIn, LumatoneConfigTable::TableType typeValue)
+    : LumatoneEditorState("LumatoneConfigTableBase", stateIn)
+	, freeDrawingStrategy(velocityBeamTable)
+    , linearDrawingStrategy(velocityBeamTable)
+    , quadraticDrawingStrategy(velocityBeamTable)
 {
     //[Constructor_pre] You can add your own custom stuff here..
 	velocityCurveType = typeValue;
@@ -200,7 +207,7 @@ void VelocityCurveDlgBase::comboBoxChanged (juce::ComboBox* comboBoxThatHasChang
 		auto configInEdit = getConfigInEdit();
 		if (configInEdit != nullptr)
 		{
-			configInEdit->editStrategy = static_cast<LumatoneConfigTable::DrawMode>(editModeIndex);
+			// configInEdit->editStrategy = static_cast<LumatoneConfigTable::DrawMode>(editModeIndex); // TODO FIX
 		}
 
 		// Set edit config according to current values of velocity table, of possible
@@ -208,7 +215,7 @@ void VelocityCurveDlgBase::comboBoxChanged (juce::ComboBox* comboBoxThatHasChang
 		if (currentDrawingStrategy != nullptr)
 			currentDrawingStrategy->setEditConfigFromVelocityTable();
 
-		TerpstraSysExApplication::getApp().setHasChangesToSave(true);
+		// TerpstraSysExApplication::getApp().setHasChangesToSave(true);
 
 		repaint();
         //[/UserComboBoxCode_cbEditMode]
@@ -221,19 +228,15 @@ void VelocityCurveDlgBase::comboBoxChanged (juce::ComboBox* comboBoxThatHasChang
 void VelocityCurveDlgBase::lookAndFeelChanged()
 {
     //[UserCode_lookAndFeelChanged] -- Add your code here...
-	auto lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-	if (lookAndFeel)
-	{
-		beamColourGradient.clearColours();
-		beamColourGradient.addColour(0.0, lookAndFeel->findColour(LumatoneEditorColourIDs::CurveGradientMin));
-		beamColourGradient.addColour(1.0, lookAndFeel->findColour(LumatoneEditorColourIDs::CurveGradientMax));
+	beamColourGradient.clearColours();
+	beamColourGradient.addColour(0.0, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::CurveGradientMin));
+	beamColourGradient.addColour(1.0, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::CurveGradientMax));
 
-		backgroundColour = lookAndFeel->findColour(LumatoneEditorColourIDs::ControlBoxBackground);
-		gridColour = lookAndFeel->findColour(LumatoneEditorColourIDs::CurveGridColour);
+	backgroundColour = getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlBoxBackground);
+	gridColour = getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::CurveGridColour);
 
-		cbEditMode->setColour(ComboBox::ColourIds::backgroundColourId, Colours::black);
-		cbEditMode->setColour(ComboBox::ColourIds::textColourId, Colours::white);
-	}
+	cbEditMode->setColour(ComboBox::ColourIds::backgroundColourId, Colours::black);
+	cbEditMode->setColour(ComboBox::ColourIds::textColourId, Colours::white);
 }
 
 void VelocityCurveDlgBase::loadFromMapping()
@@ -283,14 +286,16 @@ void VelocityCurveDlgBase::paintOverChildren(juce::Graphics& g)
 
 void VelocityCurveDlgBase::sendVelocityTableToController()
 {
-	unsigned char velocityValues[128];
+	int velocityValues[128];
+	LumatoneConfigTable table(LumatoneConfigTable::TableType::velocityInterval);
 
 	for (int x = 0; x < 128; x++)
 	{
-		velocityValues[x] = velocityBeamTable[x]->getValue();
+		//velocityValues[x] = velocityBeamTable[x]->getValue();
+		table.velocityValues[x] = velocityBeamTable[x]->getValue();
 	}
 
-	TerpstraSysExApplication::getApp().getLumatoneController()->sendTableConfig(velocityCurveType, velocityValues);
+	setConfigTable(velocityCurveType, table);
 }
 
 void VelocityCurveDlgBase::mouseMove(const MouseEvent &event)
@@ -342,8 +347,8 @@ void VelocityCurveDlgBase::mouseUp(const MouseEvent &event)
 		auto configInEdit = getConfigInEdit();
 		if (configInEdit != nullptr)
 		{
-			currentDrawingStrategy->exportEditConfig(configInEdit->velocityValues);
-			TerpstraSysExApplication::getApp().setHasChangesToSave(true);
+			// currentDrawingStrategy->exportEditConfig(configInEdit->velocityValues);
+			// TerpstraSysExApplication::getApp().setHasChangesToSave(true);
 			sendVelocityTableToController();
 		}
 	}
@@ -351,26 +356,26 @@ void VelocityCurveDlgBase::mouseUp(const MouseEvent &event)
 	repaint();
 }
 
-LumatoneLayout*	VelocityCurveDlgBase::getMappingInEdit()
+// LumatoneLayout*	VelocityCurveDlgBase::getMappingInEdit()
+// {
+// 	// Security at start of program
+// 	if (getParentComponent() == nullptr)
+// 		return nullptr;
+// 	if (getParentComponent()->getParentComponent() == nullptr)
+// 		return nullptr;
+// 	if (getParentComponent()->getParentComponent()->getParentComponent() == nullptr)
+// 		return nullptr;
+
+// 	return &(dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent()))->getMappingInEdit();
+// }
+
+const LumatoneConfigTable* VelocityCurveDlgBase::getConfigInEdit() const
 {
-	// Security at start of program
-	if (getParentComponent() == nullptr)
-		return nullptr;
-	if (getParentComponent()->getParentComponent() == nullptr)
-		return nullptr;
-	if (getParentComponent()->getParentComponent()->getParentComponent() == nullptr)
-		return nullptr;
+	// auto mappingInEdit = getMappingInEdit();
+	// if(mappingInEdit == nullptr)
+		// return nullptr;
 
-	return &(dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent()))->getMappingInEdit();
-}
-
-LumatoneConfigTable* VelocityCurveDlgBase::getConfigInEdit()
-{
-	auto mappingInEdit = getMappingInEdit();
-	if(mappingInEdit == nullptr)
-		return nullptr;
-
-	return mappingInEdit->getConfigTable(velocityCurveType);
+	return getMappingData()->getConfigTable(velocityCurveType);
 }
 
 VelocityCurveEditStrategyBase* VelocityCurveDlgBase::getCurrentDrawingStrategy()

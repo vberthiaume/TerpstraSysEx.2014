@@ -21,9 +21,12 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
-#include "ColourEditComponent.h"
-#include "LumatoneController.h"
-#include "Settings/SettingsContainer.h"
+
+#include "./LumatoneEditorState.h"
+
+#include "./lumatone_editor_library/listeners/status_listener.h"
+#include "./lumatone_editor_library/palettes/colour_view_component.h"
+
 //[/Headers]
 
 
@@ -37,13 +40,14 @@
                                                                     //[/Comments]
 */
 class GlobalSettingsArea  : public juce::Component,
+                            public LumatoneEditorState,
                             public ChangeListener,
                             public LumatoneEditor::StatusListener,
                             public juce::Button::Listener
 {
 public:
     //==============================================================================
-    GlobalSettingsArea ();
+    GlobalSettingsArea (const LumatoneEditorState& stateIn);
     ~GlobalSettingsArea() override;
 
     //==============================================================================
@@ -60,8 +64,9 @@ public:
     void setDeveloperMode(bool devModeOn);
 
     // LumatoneEditor::StatusListener implementation
-    void connectionEstablished(int inputDevice, int outputDevice) override;
-    void connectionLost() override;
+    // void connectionEstablished(int inputDevice, int outputDevice) override;
+    void connectionStateChanged(ConnectionState newState) override;
+    // void connectionFailed() override;
 
     //[/UserMethods]
 
@@ -73,8 +78,8 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-	std::unique_ptr<ColourEditComponent> inactiveMacroButtonColourEdit;
-	std::unique_ptr<ColourEditComponent> activeMacroButtonColourEdit;
+	std::unique_ptr<ColourViewComponent> inactiveMacroButtonColourEdit;
+	std::unique_ptr<ColourViewComponent> activeMacroButtonColourEdit;
 
     std::unique_ptr<Label> lblDeveloperMode;
 
@@ -109,4 +114,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

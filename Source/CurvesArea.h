@@ -22,9 +22,7 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "./data/lumatone_layout.h"
-
-#include "LumatoneEditorStyleCommon.h"
+#include "LumatoneEditorState.h"
 //[/Headers]
 
 
@@ -38,11 +36,12 @@
                                                                     //[/Comments]
 */
 class CurvesArea  : public juce::Component,
+                    public LumatoneEditorState,
                     public juce::Button::Listener
 {
 public:
     //==============================================================================
-    CurvesArea ();
+    CurvesArea (const LumatoneEditorState& stateIn);
     ~CurvesArea() override;
 
     //==============================================================================
@@ -75,11 +74,13 @@ public:
     void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
 
+private:
+    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 
-	bool showDeveloperMode = false;
+	// bool showDeveloperMode = false;
 
     //==============================================================================
     // Size and position constants

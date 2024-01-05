@@ -21,9 +21,14 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
-#include "./data/lumatone_layout.h"
-#include "ColourEditComponent.h"
-#include "LumatoneEditorLookAndFeel.h"
+
+#include "./lumatone_editor_library/palettes/colour_selection_broadcaster.h"
+
+#include "LumatoneEditorState.h"
+
+class ColourViewComponent;
+class ColourTextEditor;
+class LumatoneAction;
 //[/Headers]
 
 
@@ -36,7 +41,8 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class SingleNoteAssign  : public Component,
+class SingleNoteAssign  : public juce::Component,
+                          public LumatoneEditorState,
                           public ColourSelectionListener,
                           public TextEditor::Listener,
                           public juce::Button::Listener,
@@ -45,20 +51,20 @@ class SingleNoteAssign  : public Component,
 {
 public:
     //==============================================================================
-    SingleNoteAssign();
+    SingleNoteAssign(const LumatoneEditorState& stateIn);
     ~SingleNoteAssign() override;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-	UndoableAction* createEditAction(int setSelection, int keySelection);
+	LumatoneAction* createEditAction(int setSelection, int keySelection);
 	void onSetData(LumatoneLayout& newData);
 
-	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
-	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
+	void restoreStateFromPropertiesFile(juce::PropertiesFile* propertiesFile);
+	void saveStateToPropertiesFile(juce::PropertiesFile* propertiesFile);
 
     void lookAndFeelChanged() override;
 
-    ColourEditComponent* getColourEditComponent() { return colourSubwindow.get(); }
+    ColourViewComponent* getColourViewComponent() { return colourSubwindow.get(); }
     ColourTextEditor* getColourTextEditor() { return colourTextEditor.get(); }
 
     void colourChangedCallback(ColourSelectionBroadcaster* source, Colour newColour) override;
@@ -84,11 +90,11 @@ private:
     float controlsX;
     float separatorY;
 
-    Font instructionsFont;
-    Font parametersFont;
+    juce::Font instructionsFont;
+    juce::Font parametersFont;
 
-    Array<FlexBox> flexRows;
-    Array<Rectangle<int>> flexBounds; // Primarily for debugging
+    juce::Array<juce::FlexBox> flexRows;
+    juce::Array<juce::Rectangle<int>> flexBounds; // Primarily for debugging
     enum SingleNoteFlexRows
     {
         keyType = 0,
@@ -115,11 +121,11 @@ private:
 
     const float separatorThicknessScalar = 0.005f;
 
-    const Colour toggleTextColour = Colour(0xffcbcbcb);
+    const juce::Colour toggleTextColour = juce::Colour(0xffcbcbcb);
 
     std::unique_ptr<juce::ImageButton> ccFaderIsDefault;
-    Path faderDownArrow;
-    Path faderUpArrow;
+    juce::Path faderDownArrow;
+    juce::Path faderUpArrow;
     //[/UserVariables]
 
     //==============================================================================
@@ -131,7 +137,7 @@ private:
     std::unique_ptr<juce::ToggleButton> keyTypeToggleButton;
     std::unique_ptr<juce::ComboBox> keyTypeCombo;
     std::unique_ptr<juce::Slider> noteInput;
-    std::unique_ptr<ColourEditComponent> colourSubwindow;
+    std::unique_ptr<ColourViewComponent> colourSubwindow;
     std::unique_ptr<juce::Label> autoIncrementLabel;
     std::unique_ptr<ColourTextEditor> colourTextEditor;
     std::unique_ptr<juce::Slider> channelInput;

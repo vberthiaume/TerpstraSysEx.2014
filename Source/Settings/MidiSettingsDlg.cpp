@@ -9,16 +9,21 @@
 */
 
 #include "MidiSettingsDlg.h"
-#include "../Main.h"
 
-MidiSettingsDlg::MidiSettingsDlg()
+#include "../LumatoneEditorFontLibrary.h"
+
+#include "../lumatone_editor_library/device/lumatone_controller.h"
+
+
+MidiSettingsDlg::MidiSettingsDlg(const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("MidiSettingsDlg", stateIn)
 {
     setMidiChannelHeader.reset(new Label("SetMidiChannelHeader", "Set Controller MIDI Channel"));
     setMidiChannelHeader->setJustificationType(Justification::centred);
-    setMidiChannelHeader->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaPro));
+    setMidiChannelHeader->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaPro));
     addAndMakeVisible(setMidiChannelHeader.get());
 
-    controlLabelFont = TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium);
+    controlLabelFont = getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium);
 
     for (auto controlName : ControlNames)
     {
@@ -44,16 +49,16 @@ MidiSettingsDlg::MidiSettingsDlg()
     flexBox.justifyContent = FlexBox::JustifyContent::flexStart;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
 
-    TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
+    // getLumatoneController()->addFirmwareListener(this);
 
-    setSupportedControls(TerpstraSysExApplication::getApp().getFirmwareVersion());
+    setSupportedControls(getFirmwareVersion());
 }
 
 MidiSettingsDlg::~MidiSettingsDlg()
 {
     // Not good when app closes with this window open...
-    TerpstraSysExApplication::getApp().getLumatoneController()->removeFirmwareListener(this);
-    
+    // getLumatoneController()->removeFirmwareListener(this);
+
     setMidiChannelHeader = nullptr;
     setMidiChannelLabels.clear();
     setMidiChannelSliders.clear();
@@ -102,7 +107,7 @@ void MidiSettingsDlg::resized()
         flexRow.items.add(sldItem);
 
         auto rowItem = FlexItem(getWidth(), rowHeight);
-        rowItem.associatedFlexBox = &flexRow; 
+        rowItem.associatedFlexBox = &flexRow;
         rowItem.margin = FlexItem::Margin(0, 0, margin, 0);
 
         flexBox.items.add(rowItem);
@@ -119,12 +124,12 @@ void MidiSettingsDlg::sliderValueChanged(Slider* sld)
 
     if (controlIndex >= 0 && controlIndex < ControlNames.size())
     {
-        channelSettings.setChannel((PeripheralChannel)controlIndex, sld->getValue());
+        channelSettings.setChannel((LumatoneFirmware::PeripheralChannel)controlIndex, sld->getValue());
         sendChannelSettings();
     }
 }
 
-void MidiSettingsDlg::setSupportedControls(FirmwareVersion version)
+void MidiSettingsDlg::setSupportedControls(LumatoneFirmware::Version version)
 {
     bool setChannelsEnabled = false;
 
@@ -132,7 +137,7 @@ void MidiSettingsDlg::setSupportedControls(FirmwareVersion version)
     if (support.versionAcknowledgesCommand(version, SET_PERIPHERAL_CHANNELS))
     {
         setChannelsEnabled = true;
-        TerpstraSysExApplication::getApp().getLumatoneController()->getPeripheralChannels();
+        getLumatoneController()->getPeripheralChannels();
     }
 
     for (int i = 0; i < ControlNames.size(); i++)
@@ -146,31 +151,31 @@ void MidiSettingsDlg::setSupportedControls(FirmwareVersion version)
     }
 }
 
-void MidiSettingsDlg::updateChannelSettings(PeripheralChannelSettings channelSettingsIn)
+void MidiSettingsDlg::updateChannelSettings(LumatoneFirmware::PeripheralChannelSettings channelSettingsIn)
 {
     channelSettings = channelSettingsIn;
 
     for (int i = 0; i < ControlNames.size(); i++)
     {
-        auto channel = channelSettings.getChannel((PeripheralChannel)i);
+        auto channel = channelSettings.getChannel((LumatoneFirmware::PeripheralChannel)i);
         setMidiChannelSliders[i]->setValue(channel, dontSendNotification);
     }
 }
 
 void MidiSettingsDlg::sendChannelSettings()
 {
-    TerpstraSysExApplication::getApp().getLumatoneController()->setPeripheralChannels(channelSettings);
+    getLumatoneController()->setPeripheralChannels(channelSettings);
 }
 
 //=========================================================================
 // LumatoneEditor::FirmwareListener implementation
 
-void MidiSettingsDlg::firmwareRevisionReceived(FirmwareVersion version)
+void MidiSettingsDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
     setSupportedControls(version);
 }
 
-void MidiSettingsDlg::peripheralMidiChannelsReceived(PeripheralChannelSettings channelSettings)
+void MidiSettingsDlg::peripheralMidiChannelsReceived(LumatoneFirmware::PeripheralChannelSettings channelSettings)
 {
     updateChannelSettings(channelSettings);
 }

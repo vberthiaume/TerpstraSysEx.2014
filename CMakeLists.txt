@@ -84,11 +84,17 @@ if (UNIX)
     )
 endif()
 
-file(GLOB_RECURSE BinaryData
+file(GLOB_RECURSE LibraryBinaryData
+        CONFIGURE_DEPENDS
+            "${CMAKE_CURRENT_SOURCE_DIR}/Source/lumatone_editor_library/assets/*"
+    )
+juce_add_binary_data(LumatoneEditorLibraryAssets SOURCES ${LibraryBinaryData})
+
+file(GLOB_RECURSE EditorBinaryData
         CONFIGURE_DEPENDS
             "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/*"
     )
-juce_add_binary_data(LumatoneEditorAssets SOURCES ${BinaryData})
+juce_add_binary_data(LumatoneEditorAssets SOURCES ${EditorBinaryData})
 
 # juce_add_bundle_resources_directory(LumatoneEditor "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/lib")
 

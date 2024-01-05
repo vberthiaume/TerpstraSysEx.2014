@@ -18,8 +18,11 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "Main.h"
-#include "./actions/edit_actions.h"
+#include "./lumatone_editor_library/actions/edit_actions.h"
+#include "./lumatone_editor_library/palettes/colour_view_component.h"
+#include "./lumatone_editor_library/palettes/colour_edit_textbox.h"
+
+#include "LumatoneEditorLookAndFeel.h"
 //[/Headers]
 
 #include "SingleNoteAssign.h"
@@ -29,7 +32,8 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-SingleNoteAssign::SingleNoteAssign ()
+SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("SingleNoteAssign", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
@@ -101,7 +105,7 @@ SingleNoteAssign::SingleNoteAssign ()
 
     noteInput->setBounds (120, 128, 112, 24);
 
-    colourSubwindow.reset (new ColourEditComponent());
+    colourSubwindow.reset (new ColourViewComponent());
     addAndMakeVisible (colourSubwindow.get());
     colourSubwindow->setName ("colourSubwindow");
 
@@ -169,7 +173,7 @@ SingleNoteAssign::SingleNoteAssign ()
     setChannelToggleButton->setColour(ToggleButton::ColourIds::textColourId, toggleTextColour);
     channelInput->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, controlBoxFontHeightScalar);
 
-    autoIncrementLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+    autoIncrementLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
     autoIncrementLabel->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, controlBoxFontHeightScalar);
 
     noteAutoIncrButton->setButtonText(translate("NotesPerClick"));
@@ -178,8 +182,8 @@ SingleNoteAssign::SingleNoteAssign ()
     channelAutoIncrButton->setColour(ToggleButton::ColourIds::textColourId, toggleTextColour);
     channelAutoIncrNoteInput->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, controlBoxFontHeightScalar);
 
-    instructionsFont = TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::FranklinGothic);
-    parametersFont = TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium);
+    instructionsFont = getAppFonts().getFont(LumatoneEditorFont::FranklinGothic);
+    parametersFont = getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium);
 
     // TODO: load last active colour?
     colourTextEditor->addColourSelectionListener(this);
@@ -250,13 +254,13 @@ void SingleNoteAssign::paint (juce::Graphics& g)
     Path topBack = getConnectedRoundedRectPath(instructionsAreaBounds.toFloat(), roundedCornerSize, Button::ConnectedEdgeFlags::ConnectedOnBottom);
     Path bottomBack = getConnectedRoundedRectPath(bottomPart, roundedCornerSize, Button::ConnectedEdgeFlags::ConnectedOnTop);
 
-    g.setColour(getLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
     g.fillPath(topBack);
 
     g.setColour(Colour(0xff2d3135));
     g.fillPath(bottomBack);
 
-    g.setColour(getLookAndFeel().findColour(LumatoneEditorColourIDs::InactiveText));
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::InactiveText));
     g.setFont(instructionsFont);
     g.drawFittedText(translate("ManualAssignDirections"), instructionsBounds, Justification::centred, 2, 1.0f);
 
@@ -427,7 +431,7 @@ void SingleNoteAssign::resized()
     }
 
     // Style adjustments
-    colourTextEditor->applyFontToAllText(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium, controlHScaled * CONTROLBOXFONTHEIGHTSCALAR), true);
+    colourTextEditor->applyFontToAllText(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium, controlHScaled * CONTROLBOXFONTHEIGHTSCALAR), true);
 
     noteInput->setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxLeft, false, roundToInt(noteInput->getWidth() * incDecButtonTextBoxWidthScalar), noteInput->getHeight());
 
@@ -576,13 +580,13 @@ void SingleNoteAssign::colourChangedCallback(ColourSelectionBroadcaster* source,
 
 /// <summary>Called from parent when one of the keys is clicked</summary>
 /// <returns>Pointer to undoable action to be passed to the undo manager. The latter has to be done in calling function.</returns>
-UndoableAction* SingleNoteAssign::createEditAction(int setSelection, int keySelection)
+LumatoneAction* SingleNoteAssign::createEditAction(int setSelection, int keySelection)
 {
 	int newNote = noteInput->getValue();
 	int newChannel = channelInput->getValue();
 
 	auto editAction = new LumatoneEditAction::SingleNoteAssignAction(
-        TerpstraSysExApplication::getApp().getLumatoneController(),
+        this,
 		setSelection, keySelection,
 		keyTypeToggleButton->getToggleState(), setChannelToggleButton->getToggleState(),
 		setNoteToggleButton->getToggleState(), setColourToggleButton->getToggleState(),
@@ -666,15 +670,14 @@ void SingleNoteAssign::redrawCCFlipBtn()
     arrowInvertedPath.applyTransform(transform);
     faderInvertedPath.applyTransform(transform);
 
-    auto lookAndFeel = &TerpstraSysExApplication::getApp().getLookAndFeel();
-    auto background = lookAndFeel->findColour(TextButton::ColourIds::buttonColourId);
+    auto background = getLookAndFeel().findColour(TextButton::ColourIds::buttonColourId);
     g.setColour(background);
     g.fillRoundedRectangle(ccFaderIsDefault->getLocalBounds().toFloat(), 5.0f);
     gi.setColour(background);
     gi.fillRoundedRectangle(ccFaderIsDefault->getLocalBounds().toFloat(), 5.0f);
 
     auto arrowStroke = PathStrokeType(PHI, PathStrokeType::JointStyle::curved);
-    auto colour = lookAndFeel->findColour(LumatoneEditorColourIDs::ActiveText).brighter(0.1);
+    auto colour = getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ActiveText).brighter(0.1);
     g.setColour(colour);
     g.strokePath(arrowPath, arrowStroke);
     g.fillPath(faderPath);
@@ -737,8 +740,8 @@ BEGIN_JUCER_METADATA
           textBoxEditable="1" textBoxWidth="56" textBoxHeight="20" skewFactor="1.0"
           needsCallback="1"/>
   <GENERICCOMPONENT name="colourSubwindow" id="e66042f7ac61358f" memberName="colourSubwindow"
-                    virtualName="ColourEditComponent" explicitFocusOrder="0" pos="120 96 56 24"
-                    class="ColourEditComponent" params=""/>
+                    virtualName="ColourViewComponent" explicitFocusOrder="0" pos="120 96 56 24"
+                    class="ColourViewComponent" params=""/>
   <LABEL name="autoIncrementLabel" id="5657d893807891e2" memberName="autoIncrementLabel"
          virtualName="" explicitFocusOrder="0" pos="8 204 111 24" edTextCol="ff000000"
          edBkgCol="0" labelText="Auto-Increment" editableSingleClick="0"

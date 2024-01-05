@@ -61,12 +61,12 @@ juce::Colour MappingLogicBase::indexToColour(int inx) const
 
 void MappingLogicBase::indexToTerpstraKey(int inx, LumatoneKey& keyData) const
 {
-    keyData.keyType = LumatoneKeyType::noteOnNoteOff;
-	keyData.channelNumber = indexToMIDIChannel(inx);
-	keyData.noteNumber = indexToMIDINote(inx);
+    keyData.setKeyType(LumatoneKeyType::noteOnNoteOff);
+	keyData.setChannelNumber(indexToMIDIChannel(inx));
+	keyData.setNoteOrCC(indexToMIDINote(inx));
 
 	if (this->assignColours)
-        keyData.colour = indexToColour(inx);
+        keyData.setColour(indexToColour(inx));
 }
 
 LumatoneKey MappingLogicBase::indexToTerpstraKey(int inx) const
@@ -163,17 +163,17 @@ int IncrMidiNotesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
 	if (this->isSingleChannel())
 	{
 	    // notes start at 0 and go until periodSize-1
-		if (keyData.channelNumber != this->channelInCaseOfSingleChannel || keyData.noteNumber >= this->periodSize )
+		if (!keyData.hasMidiChannel(this->channelInCaseOfSingleChannel) || !keyData.hasMidiNumber(this->periodSize))
 			return -1;
 
-		return keyData.noteNumber;
+		return keyData.getMidiNumber();
 	}
 	else
 	{
-		if (keyData.noteNumber >= this->periodSize)
+		if (keyData.getMidiNumber() >= this->periodSize)
 			return -1;
 
-		return (keyData.channelNumber - 1) * this->periodSize + keyData.noteNumber;
+		return (keyData.getMidiChannel() - 1) * this->periodSize + keyData.getMidiNumber();
 	}
 }
 
@@ -247,8 +247,8 @@ int KBMFilesMappingLogic::getStartOfMap() const
     }
 
     LumatoneKey keyData;
-    keyData.channelNumber = channelMappingData[subTableIndex].channelNumber;
-    keyData.noteNumber = channelMappingData[subTableIndex].mapping.noteNrWhereMappingStarts;
+    keyData.setChannelNumber(channelMappingData[subTableIndex].channelNumber);
+    keyData.setNoteOrCC(channelMappingData[subTableIndex].mapping.noteNrWhereMappingStarts);
 
     return terpstraKeyToIndex(keyData);
 }
@@ -307,7 +307,7 @@ int KBMFilesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
 	int inx;
     for ( inx = 0; inx < globalMappingSize(); inx++)
     {
-        if ( mappingTable[inx].channelNumber == keyData.channelNumber && mappingTable[inx].noteNumber == keyData.noteNumber )
+        if (keyData.hasMidiChannel(mappingTable[inx].channelNumber) && keyData.hasMidiNumber(mappingTable[inx].noteNumber))
             break;
     }
 

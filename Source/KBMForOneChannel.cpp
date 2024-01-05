@@ -29,7 +29,8 @@
 
 //==============================================================================
 KBMForOneChannel::KBMForOneChannel (int		subDlgIndex, KBMFilesMappingLogic&	mappingLogic, int& periodSizeReference)
-    : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()), periodSize(periodSizeReference)
+    // : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel())
+    : periodSize(periodSizeReference)
 {
     //[Constructor_pre] You can add your own custom stuff here..
     this->subDlgIndex = subDlgIndex;
@@ -160,9 +161,9 @@ void KBMForOneChannel::buttonClicked (juce::Button* buttonThatWasClicked)
 		//	currentFile = chooser.getResult();
 		//	updateFieldsAndMappingLogic();
 		//}
-        
+
         // TODO: update this to Juce 6.1
-         
+
         //[/UserButtonCode_btnFileSelectMacro]
     }
 
@@ -231,38 +232,39 @@ void KBMForOneChannel::updateFieldsAndMappingLogic()
         kbmMappingStructure.fromStringArray(stringArray);
 
         // Tooltip: either the file name with full path or an error message
-        String errorMsg = kbmMappingStructure.getErrorMessage();
-        if (!errorMsg.isEmpty())
-        {
-            errorVisualizer.setErrorLevel(
-                *textMappingFile.get(),
-                HajuErrorVisualizer::ErrorLevel::error,
-                errorMsg);
-        }
-        else
-        {
-            // Warning if the kbm file's scale size doesn't match the global periodSize
-            if (kbmMappingStructure.periodSize != this->periodSize)
-                errorVisualizer.setErrorLevel(
-                    *textMappingFile.get(),
-                    HajuErrorVisualizer::ErrorLevel::warning,
-                    "Scale size of KBM file does not match");
-            else
-                errorVisualizer.setErrorLevel(
-                    *textMappingFile.get(),
-                    HajuErrorVisualizer::ErrorLevel::noError,
-                    currentFile.getFullPathName());
-        }
-    }
-	else
-	{
-		kbmMappingStructure = KBMMappingDataStructure();
+    //     String errorMsg = kbmMappingStructure.getErrorMessage();
+    //     if (!errorMsg.isEmpty())
+    //     {
+    //         errorVisualizer.setErrorLevel(
+    //             *textMappingFile.get(),
+    //             HajuErrorVisualizer::ErrorLevel::error,
+    //             errorMsg);
+    //     }
+    //     else
+    //     {
+    //         // Warning if the kbm file's scale size doesn't match the global periodSize
+    //         if (kbmMappingStructure.periodSize != this->periodSize)
+    //             errorVisualizer.setErrorLevel(
+    //                 *textMappingFile.get(),
+    //                 HajuErrorVisualizer::ErrorLevel::warning,
+    //                 "Scale size of KBM file does not match");
+    //         else
+    //             errorVisualizer.setErrorLevel(
+    //                 *textMappingFile.get(),
+    //                 HajuErrorVisualizer::ErrorLevel::noError,
+    //                 currentFile.getFullPathName());
+    //     }
+    // }
+	// else
+	// {
+	// 	kbmMappingStructure = KBMMappingDataStructure();
 
-        errorVisualizer.setErrorLevel(
-            *textMappingFile.get(),
-            midiChannel > 0 ? HajuErrorVisualizer::ErrorLevel::warning : HajuErrorVisualizer::ErrorLevel::noError,
-            "File not found");
-	}
+    //     errorVisualizer.setErrorLevel(
+    //         *textMappingFile.get(),
+    //         midiChannel > 0 ? HajuErrorVisualizer::ErrorLevel::warning : HajuErrorVisualizer::ErrorLevel::noError,
+    //         "File not found");
+	// }
+    }
 
     // Enable or disable file fields
     if ( midiChannel > 0 )
@@ -319,4 +321,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

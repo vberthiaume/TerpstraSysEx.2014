@@ -8,23 +8,29 @@
 */
 
 #pragma once
-#include "MainComponent.h"
+#include <JuceHeader.h>
+
+#include "LumatoneMenu.h"
+#include "LumatoneEditorState.h"
+//class LumatoneEditorState;
 
 //==============================================================================
 /*
 This class implements the desktop window that contains an instance of
 our MainContentComponent class.
 */
-class MainWindow : public DocumentWindow, public Timer
+class MainWindow : public juce::DocumentWindow
+                 , public LumatoneEditorState
+                 , public juce::Timer
 {
 public:
-    MainWindow(ComponentBoundsConstrainer* constrainerIn);
+    MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdMgr);
 
     virtual ~MainWindow();
-    
+
     void closeButtonPressed() override;
 
-    BorderSize<int> getBorderThickness() override;
+    juce::BorderSize<int> getBorderThickness() override;
 
     /* Note: Be careful if you override any DocumentWindow methods - the base
     class uses a lot of them, so by overriding you might break its functionality.
@@ -45,18 +51,19 @@ public:
     void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
 
     void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
-    
+
     // Checks size of current display and updates constraint
     void updateBounds();
 
     void fixWindowPositionAndSize(bool setToDefault=false);
-    
+
     void timerCallback() override;
 
 private:
+    juce::ApplicationCommandManager* commandManager;
+    std::unique_ptr<Lumatone::Menu::MainMenuModel> menuModel;
+    std::unique_ptr<ComponentBoundsConstrainer> constrainer;
 
-    ComponentBoundsConstrainer* constrainer;
-    
     int maxWindowWidth = 0;
     int maxWindowHeight = 0;
 

@@ -18,9 +18,10 @@
 */
 
 //[Headers] You can add your own extra header files here...
+#include "LumatoneEditorLookAndFeel.h"
+
+#include "VelocityCurveDlgBase.h"
 #include "NoteOnOffVelocityCurveDialog.h"
-#include "ViewConstants.h"
-#include "Main.h"
 //[/Headers]
 
 #include "CurvesArea.h"
@@ -53,10 +54,11 @@ void CurvesArea::CurvesTabComponent::resized()
 //[/MiscUserDefs]
 
 //==============================================================================
-CurvesArea::CurvesArea ()
+CurvesArea::CurvesArea (const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("CurvesArea", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
-	showDeveloperMode = TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("DeveloperMode", false);
+	// showDeveloperMode = TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("DeveloperMode", false);
     //[/Constructor_pre]
 
     setName ("CurvesArea");
@@ -74,7 +76,7 @@ CurvesArea::CurvesArea ()
     curvesTab.reset (new CurvesTabComponent (juce::TabbedButtonBar::TabsAtTop));
     addAndMakeVisible (curvesTab.get());
     curvesTab->setTabBarDepth (30);
-    curvesTab->addTab (TRANS("Note Velocity"), juce::Colours::lightgrey, new NoteOnOffVelocityCurveDialog(), true);
+    curvesTab->addTab (TRANS("Note Velocity"), juce::Colours::lightgrey, new NoteOnOffVelocityCurveDialog(*this), true);
     curvesTab->setCurrentTabIndex (0);
 
     curvesTab->setBounds (8, 40, 464, 200);
@@ -88,9 +90,12 @@ CurvesArea::CurvesArea ()
 
 
     //[UserPreSize]
-    setDeveloperMode(showDeveloperMode);
+    setDeveloperMode(getInDeveloperMode());
 
-    labelWindowTitle->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
+    getEditorLookAndFeel().setColour(VelocityCurveBeam::beamColourId, Colour(0x66ff5e00));
+    getEditorLookAndFeel().setColour(VelocityCurveBeam::outlineColourId, Colour(0xffd7d9da));
+
+    labelWindowTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     labelWindowTitle->setColour(Label::backgroundColourId, Colour());
 
     curvesTab->setColour(TabbedComponent::ColourIds::outlineColourId, Colour());
@@ -176,9 +181,9 @@ void CurvesArea::buttonClicked (juce::Button* buttonThatWasClicked)
         //[UserButtonCode_btnDeveloperMode] -- add your button handler code here..
 		if (btnDeveloperMode->getToggleState())
 		{
-			curvesTab->addTab(TRANS("CC Fader"), juce::Colours::lightgrey, new FaderVelocityCurveDialog(), true);
-			curvesTab->addTab(TRANS("Aftertouch"), juce::Colours::lightgrey, new AftertouchVelocityCurveDialog(), true);
-			curvesTab->addTab(TRANS("Lumatouch"), juce::Colours::lightgrey, new LumatouchVelocityCurveDialog(), true);
+			curvesTab->addTab(TRANS("CC Fader"), juce::Colours::lightgrey, new FaderVelocityCurveDialog(*this), true);
+			curvesTab->addTab(TRANS("Aftertouch"), juce::Colours::lightgrey, new AftertouchVelocityCurveDialog(*this), true);
+			curvesTab->addTab(TRANS("Lumatouch"), juce::Colours::lightgrey, new LumatouchVelocityCurveDialog(*this), true);
 		}
 		else
 		{
@@ -194,7 +199,15 @@ void CurvesArea::buttonClicked (juce::Button* buttonThatWasClicked)
     //[/UserbuttonClicked_Post]
 }
 
+void CurvesArea::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
+{
+    LumatoneEditorState::handleStatePropertyChange(stateIn, property);
 
+    if (property == LumatoneEditorProperty::DeveloperModeOn)
+    {
+        setDeveloperMode(getInDeveloperMode());
+    }
+}
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
@@ -215,8 +228,8 @@ void CurvesArea::sendConfigToController()
 
 void CurvesArea::setDeveloperMode(bool devModeOn)
 {
-    showDeveloperMode = devModeOn;
-    btnDeveloperMode->setVisible(showDeveloperMode);
+    // showDeveloperMode = devModeOn;
+    btnDeveloperMode->setVisible(devModeOn);
     repaint();
 }
 
@@ -260,4 +273,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

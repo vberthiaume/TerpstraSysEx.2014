@@ -12,29 +12,31 @@
 
 #include "VelocityCurveDlgBase.h"
 
+class LumatoneEditorState;
+
 // Note on/on velocity curve dialog. Horizontal axis stands for ticks
 class NoteOnOffVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    NoteOnOffVelocityCurveDialog();
+    NoteOnOffVelocityCurveDialog(const LumatoneEditorState& stateIn);
 };
 
 class FaderVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    FaderVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::fader)
+    FaderVelocityCurveDialog(const LumatoneEditorState& stateIn) : VelocityCurveDlgBase(stateIn, LumatoneConfigTable::TableType::fader)
     {
     }
 };
 
 class AftertouchVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    AftertouchVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::afterTouch)
+    AftertouchVelocityCurveDialog(const LumatoneEditorState& stateIn) : VelocityCurveDlgBase(stateIn, LumatoneConfigTable::TableType::afterTouch)
     {
     }
 };
 
 class LumatouchVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    LumatouchVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::lumaTouch)
+    LumatouchVelocityCurveDialog(const LumatoneEditorState& stateIn) : VelocityCurveDlgBase(stateIn, LumatoneConfigTable::TableType::lumaTouch)
     {
     }
 };

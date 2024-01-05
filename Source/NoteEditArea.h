@@ -22,18 +22,17 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "ViewComponents.h"
-#include "./data/lumatone_layout.h"
-#include "ColourEditComponent.h"
+#include "LumatoneEditorState.h"
 
-#include "lumatone_geometry.h"
-#include "lumatone_tiling.h"
+#include "./lumatone_editor_library/mapping/lumatone_tiling.h"
+#include "./lumatone_editor_library/palettes/colour_selection_broadcaster.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
 
-#include "LumatoneEditorStyleCommon.h"
+class ColourViewComponent;
+class ColourTextEditor;
+class IsomorphicMassAssign;
 
-#include "SingleNoteAssign.h"
-#include "IsomorphicMassAssign.h"
-
+class LumatoneKeyEdit;
 //[/Headers]
 
 
@@ -46,13 +45,15 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class NoteEditArea  : public Component,
-                      public ChangeListener,
+class NoteEditArea  : public juce::Component,
+                      public LumatoneEditorState,
+                      public juce::ChangeListener,
+                      public LumatoneEditor::EditorListener,
                       public ColourSelectionBroadcaster
 {
 public:
     //==============================================================================
-    NoteEditArea ();
+    NoteEditArea(const LumatoneEditorState& stateIn);
     ~NoteEditArea() override;
 
     //==============================================================================
@@ -69,13 +70,13 @@ public:
 	// Fill key fields with values from a certain octaveboard subset
 	void setKeyFieldValues(const LumatoneBoard& keySet);
 
-	TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
+	juce::TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
 
-    ColourEditComponent* getColourEditComponent();
+    ColourViewComponent* getColourViewComponent();
 
     ColourTextEditor* getSingleNoteColourTextEditor();
 
-    IsomorphicMassAssign* getIsomorphicMassAssignPanel() { return dynamic_cast<IsomorphicMassAssign*>(editFunctionsTab->getTabContentComponent(1)); }
+    IsomorphicMassAssign* getIsomorphicMassAssignPanel();
 
 	void changeSingleKeySelection(int newSelection);
 
@@ -89,8 +90,15 @@ public:
     void resetOctaveSize(bool refreshAndResize=true);
 
     // ColourSelectionBroadcaster Implementation
-    Colour getSelectedColour() override;
+    juce::Colour getSelectedColour() override;
     void deselectColour() override {};
+
+
+    void completeMappingLoaded(LumatoneLayout mappingData) override;
+    void boardChanged(LumatoneBoard boardData) override;
+    void keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey) override;
+    void selectionChanged(juce::Array<MappedLumatoneKey> selection) override;
+
 
     //[/UserMethods]
 
@@ -112,19 +120,19 @@ private:
 	bool showIsomorphicMassAssign = false;
 
 	// Selector for octave boards
-	std::unique_ptr<TabbedButtonBar> octaveBoardSelectorTab;
+	std::unique_ptr<juce::TabbedButtonBar> octaveBoardSelectorTab;
 
 	// Editing single keys (of the selected 56-key set)
-	std::unique_ptr<TerpstraKeyEdit>	terpstraKeyFields[56];
+	std::unique_ptr<LumatoneKeyEdit>	terpstraKeyFields[56];
 
-    int					currentSingleKeySelection;
+    int	currentSingleKeySelection;
 
     // Key edit positioning
     LumatoneTiling lumatoneGeometry;
 
     //===========================================================================
     // Style Helpers
-    Colour backgroundColour = Colours::darkgrey;
+    juce::Colour backgroundColour = Colours::darkgrey;
 
     Rectangle<float> octaveTabsArea;
     Rectangle<float> contentBackground;

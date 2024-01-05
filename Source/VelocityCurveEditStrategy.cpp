@@ -36,7 +36,7 @@ VelocityCurveFreeDrawingStrategy::VelocityCurveFreeDrawingStrategy(
 {
 }
 
-bool VelocityCurveFreeDrawingStrategy::setEditConfig(int velocityTableValues[])
+bool VelocityCurveFreeDrawingStrategy::setEditConfig(const int velocityTableValues[])
 {
 	for (int x = 0; x < 128; x++)
 		velocityBeamTable[x]->setValue(velocityTableValues[x]);
@@ -145,7 +145,7 @@ VelocityCurveSegmentEditStrategyBase::VelocityCurveSegmentEditStrategyBase(
 	fixPointBeamHeights[127] = 127;
 }
 
-bool VelocityCurveSegmentEditStrategyBase::setEditConfig(int velocityTableValues[])
+bool VelocityCurveSegmentEditStrategyBase::setEditConfig(const int velocityTableValues[])
 {
 	for (int x = 0; x < 128; x++)
 		fixPointBeamHeights[x] = velocityTableValues[x];

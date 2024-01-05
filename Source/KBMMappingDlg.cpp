@@ -18,7 +18,7 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "ViewConstants.h"
+#include "./lumatone_editor_library/graphics/view_constants.h"
 //[/Headers]
 
 #include "KBMMappingDlg.h"
@@ -146,7 +146,7 @@ void KBMMappingDlg::resized()
     int labelHeight = round(height * 0.2f);
     int lblChannelWidth = round(width * 0.2f);
     int lblFileWidth = round(width * 0.3f);
-    
+
     lblChannel->setBounds(0, 0, lblChannelWidth, labelHeight);
     lblMappingFile->setBounds(lblChannel->getRight(), 0, lblFileWidth, labelHeight);
     lblChannel2->setBounds(lblMappingFile->getRight(), 0, lblChannelWidth, labelHeight);
@@ -251,4 +251,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

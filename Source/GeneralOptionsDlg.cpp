@@ -18,7 +18,11 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "Main.h"
+#include "LumatoneEditorLookAndFeel.h"
+
+#include "./lumatone_editor_library/device/lumatone_controller.h"
+
+#include "MainComponent.h"
 //[/Headers]
 
 #include "GeneralOptionsDlg.h"
@@ -28,7 +32,8 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-GeneralOptionsDlg::GeneralOptionsDlg ()
+GeneralOptionsDlg::GeneralOptionsDlg (const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("GeneralOptionsDialog", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
@@ -61,9 +66,9 @@ GeneralOptionsDlg::GeneralOptionsDlg ()
 
 
     //[UserPreSize]
-    labelGeneralSettingslTitle->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
+    labelGeneralSettingslTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
 
-    TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
+    // getLumatoneController()->addFirmwareListener(this);
     //[/UserPreSize]
 
     setSize (188, 96);
@@ -76,7 +81,7 @@ GeneralOptionsDlg::GeneralOptionsDlg ()
 GeneralOptionsDlg::~GeneralOptionsDlg()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-    TerpstraSysExApplication::getApp().getLumatoneController()->removeFirmwareListener(this);
+    // getLumatoneController()->removeFirmwareListener(this);
     //[/Destructor_pre]
 
     labelGeneralSettingslTitle = nullptr;
@@ -135,17 +140,17 @@ void GeneralOptionsDlg::buttonClicked (juce::Button* buttonThatWasClicked)
     if (buttonThatWasClicked == buttonAfterTouchActive.get())
     {
         //[UserButtonCode_buttonAfterTouchActive] -- add your button handler code here..
-		((MainContentComponent*)getParentComponent())->getMappingInEdit().afterTouchActive = buttonAfterTouchActive->getToggleState();
-		TerpstraSysExApplication::getApp().setHasChangesToSave(true);
-		TerpstraSysExApplication::getApp().getLumatoneController()->setAftertouchEnabled(buttonAfterTouchActive->getToggleState());
+		// ((MainContentComponent*)getParentComponent())->getMappingInEdit().afterTouchActive = buttonAfterTouchActive->getToggleState();
+		// TerpstraSysExApplication::getApp().setHasChangesToSave(true);
+        setAftertouchEnabled(buttonAfterTouchActive->getToggleState());
         //[/UserButtonCode_buttonAfterTouchActive]
     }
     else if (buttonThatWasClicked == buttonLightOnKeyStrokes.get())
     {
         //[UserButtonCode_buttonLightOnKeyStrokes] -- add your button handler code here..
-		((MainContentComponent*)getParentComponent())->getMappingInEdit().lightOnKeyStrokes = buttonLightOnKeyStrokes->getToggleState();
-		TerpstraSysExApplication::getApp().setHasChangesToSave(true);
-		TerpstraSysExApplication::getApp().getLumatoneController()->sendLightOnKeyStrokes(buttonLightOnKeyStrokes->getToggleState());
+		// ((MainContentComponent*)getParentComponent())->getMappingInEdit().lightOnKeyStrokes = buttonLightOnKeyStrokes->getToggleState();
+		// TerpstraSysExApplication::getApp().setHasChangesToSave(true);
+		setLightOnKeyStrokes(buttonLightOnKeyStrokes->getToggleState());
         //[/UserButtonCode_buttonLightOnKeyStrokes]
     }
 
@@ -158,22 +163,17 @@ void GeneralOptionsDlg::buttonClicked (juce::Button* buttonThatWasClicked)
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 void GeneralOptionsDlg::lookAndFeelChanged()
 {
-    auto lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-    if (lookAndFeel)
-    {
-        labelGeneralSettingslTitle->setColour(Label::ColourIds::textColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::LabelBlue));
-    }
+    labelGeneralSettingslTitle->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
 }
 
 void GeneralOptionsDlg::loadFromMapping()
 {
-	auto mappingInEdit = ((MainContentComponent*)getParentComponent())->getMappingInEdit();
-
-	buttonAfterTouchActive->setToggleState(mappingInEdit.afterTouchActive, juce::NotificationType::dontSendNotification);
-	buttonLightOnKeyStrokes->setToggleState(mappingInEdit.lightOnKeyStrokes, juce::NotificationType::dontSendNotification);
+	// auto mappingInEdit = ((MainContentComponent*)getParentComponent())->getMappingInEdit();
+	buttonAfterTouchActive->setToggleState(getAftertouchOn(), juce::NotificationType::dontSendNotification);
+	buttonLightOnKeyStrokes->setToggleState(getLightOnKeyStrokes(), juce::NotificationType::dontSendNotification);
 }
 
-void GeneralOptionsDlg::presetFlagsReceived(PresetFlags presetFlags)
+void GeneralOptionsDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
 {
     buttonAfterTouchActive->setToggleState(presetFlags.polyphonicAftertouch, dontSendNotification);
     buttonLightOnKeyStrokes->setToggleState(presetFlags.lightsOnKeystroke, dontSendNotification);
@@ -218,4 +218,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

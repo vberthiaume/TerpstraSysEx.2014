@@ -10,34 +10,35 @@
 
 #pragma once
 
-#include "AllKeysOverview.h"
-#include "ViewComponents.h"
-#include "./data/lumatone_layout.h"
-#include "LumatoneController.h"
-#include "MidiEditArea.h"
-#include "NoteEditArea.h"
-#include "GeneralOptionsDlg.h"
-#include "CurvesArea.h"
-#include "GlobalSettingsArea.h"
-#include "PedalSensitivityDlg.h"
-#include "LumatoneEditorLookAndFeel.h"
-#include "ColourPaletteWindow.h"
+#include "LumatoneEditorState.h"
 
+#include "./lumatone_editor_library/data/lumatone_layout.h"
+#include "./lumatone_editor_library/listeners/firmware_listener.h"
+#include "./lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
+class LumatoneKeyboardComponent;
+
+class MidiEditArea;
+class NoteEditArea;
+class GeneralOptionsDlg;
+class CurvesArea;
+class GlobalSettingsArea;
+class PedalSensitivityDlg;
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainContentComponent : public Component,
-							 public LumatoneEditor::FirmwareListener,
-							 public ChangeListener,
-							 public Button::Listener
+class MainContentComponent : public juce::Component
+						   , public LumatoneEditorState
+						   , public LumatoneEditor::FirmwareListener
+						   , public juce::ChangeListener
+						   , public juce::Button::Listener
 {
 public:
 	//==============================================================================
-	MainContentComponent(LumatoneLayout& mappingDataIn);
+	MainContentComponent(const LumatoneEditorState& stateIn);
 	~MainContentComponent();
 
 	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
@@ -48,28 +49,28 @@ public:
 	void deleteAll(bool withRefresh = true);
 
 	void getData(LumatoneLayout& newData);
-	LumatoneLayout&	getMappingInEdit() { return this->mappingData; }
+	// LumatoneLayout&	getMappingInEdit() { return getMapping; }
 
-	TabbedButtonBar* getOctaveBoardSelectorTab() { return  noteEditArea->getOctaveBoardSelectorTab(); }
+	juce::TabbedButtonBar* getOctaveBoardSelectorTab();
 	CurvesArea* getCurvesArea() { return curvesArea.get(); }
 
 	// Board edit operations
-	UndoableAction* createDeleteCurrentSectionAction();
+	juce::UndoableAction* createDeleteCurrentSectionAction();
 	bool copyCurrentSubBoardData();
-	UndoableAction* createPasteCurrentSectionAction();
-    UndoableAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
+	juce::UndoableAction* createPasteCurrentSectionAction();
+    juce::UndoableAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
     bool canPasteCopiedSubBoard() const;
 
 	bool setDeveloperMode(bool developerModeOn);
 
 	// Implementation of ChangeListener
-	void changeListenerCallback(ChangeBroadcaster *source) override;
+	void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
 	// Implementation of Button::Listener
-	void buttonClicked(Button* btn) override;
+	void buttonClicked(juce::Button* btn) override;
 
 	// GUI implementation
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
 
 	void refreshKeyDataFields();
@@ -97,7 +98,7 @@ public:
 
 	void lumatouchConfigReceived(const int* lumatouchData) override;
 
-	void firmwareRevisionReceived(FirmwareVersion version) override;
+	void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
 
 private:
     //==============================================================================
@@ -107,38 +108,29 @@ private:
 	// GUI components
 
 	// Midi devices and connection state
-	std::unique_ptr<MidiEditArea>		midiEditArea;
+	std::unique_ptr<MidiEditArea>			midiEditArea;
 
 	// Sets of 55/56 keys
-	std::unique_ptr<AllKeysOverview> allKeysOverview;
+	std::unique_ptr<LumatoneKeyboardComponent> 	allKeysOverview;
 
 	// Edit fields for setting key and button parameters, and edits for single keys
-	std::unique_ptr<NoteEditArea>	noteEditArea;
-
-	std::unique_ptr<GeneralOptionsDlg>	generalOptionsArea;
-
-	std::unique_ptr<CurvesArea> curvesArea;
-
-	std::unique_ptr<GlobalSettingsArea> globalSettingsArea;
-
-	std::unique_ptr<PedalSensitivityDlg> pedalSensitivityDlg;
+	std::unique_ptr<NoteEditArea>			noteEditArea;
+	std::unique_ptr<GeneralOptionsDlg>		generalOptionsArea;
+	std::unique_ptr<CurvesArea> 			curvesArea;
+	std::unique_ptr<GlobalSettingsArea> 	globalSettingsArea;
+	std::unique_ptr<PedalSensitivityDlg> 	pedalSensitivityDlg;
 
 	// Version signature in bottom left of window
-	std::unique_ptr<Label> lblAppName;
-
-	std::unique_ptr<Label> lblAppVersion;
-
-	//==============================================================================
-	// Data
-	LumatoneLayout&		mappingData;
+	std::unique_ptr<juce::Label> 					lblAppName;
+	std::unique_ptr<juce::Label> 					lblAppVersion;
 
 	// Buffer for copy/paste of sub board data
-	LumatoneBoard		copiedSubBoardData;
+	std::unique_ptr<LumatoneBoard>			copiedSubBoardData;
 
 	//==============================================================================
 	// Position and Size helpers
 
-    Rectangle<int> controlsArea;
+    juce::Rectangle<int> controlsArea;
 
     const float headerHeight                = 0.0776f;
 
@@ -165,8 +157,8 @@ private:
     const float settingsAreaY               = 0.546875f;
     const float settingsAreaHeight          = 0.148148f;
 
-    const Rectangle<float> generalSettingsBounds = { settingsColumnX, settingsAreaY, 0.17f, settingsAreaHeight };
-    const Rectangle<float>   pedalSettingsBounds = { 0.777778f,       settingsAreaY, 0.18f, settingsAreaHeight };
-    const Rectangle<float>      curvesAreaBounds = { settingsColumnX, 0.7174f,       0.3626f, 0.21f };
+    const juce::Rectangle<float> generalSettingsBounds = { settingsColumnX, settingsAreaY, 0.17f, settingsAreaHeight };
+    const juce::Rectangle<float>   pedalSettingsBounds = { 0.777778f,       settingsAreaY, 0.18f, settingsAreaHeight };
+    const juce::Rectangle<float>      curvesAreaBounds = { settingsColumnX, 0.7174f,       0.3626f, 0.21f };
 
 };

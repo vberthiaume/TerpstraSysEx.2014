@@ -9,12 +9,18 @@
 */
 
 #include "SettingsContainer.h"
-#include "../Main.h"
 
-void SettingsCategoryModel::paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
+#include "../LumatoneEditorLookAndFeel.h"
+
+#include "CalibrationDlg.h"
+#include "FirmwareDlg.h"
+#include "PresetSettingsDlg.h"
+#include "MidiSettingsDlg.h"
+
+void SettingsCategoryModel::paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected)
 {
-    Colour backgroundColour = (rowIsSelected) ? Colours::teal : Colour();
-    Rectangle<int> rowBounds(0, 0, width, height);
+    juce::Colour backgroundColour = (rowIsSelected) ? Colours::teal : juce::Colour();
+    juce::Rectangle<int> rowBounds(0, 0, width, height);
 
     if (rowIsSelected)
     {
@@ -23,8 +29,9 @@ void SettingsCategoryModel::paintListBoxItem(int rowNumber, Graphics& g, int wid
     }
 
     g.setColour(Colours::white);
-    g.setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium, height));
-    g.drawFittedText(categories[rowNumber], rowBounds.withLeft(8), Justification::left, 1, 1.0f);
+    // TODO
+    // g.setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium, height));
+    g.drawFittedText(categories[rowNumber], rowBounds.withLeft(8), juce::Justification::left, 1, 1.0f);
 }
 
 //=========================================================================
@@ -32,20 +39,20 @@ void SettingsCategoryModel::paintListBoxItem(int rowNumber, Graphics& g, int wid
 SettingsContainer::SettingsContainer()
     : Component("SettingsContainer"),
       model({
-        translate("Calibrate"), 
+        translate("Calibrate"),
         translate("Firmware"),
         translate("MIDI"),
         translate("Presets")
       })
-{ 
-    categoryList.reset(new ListBox("CategoryList"));
+{
+    categoryList.reset(new juce::ListBox("CategoryList"));
     categoryList->setModel(&model);
 
     addAndMakeVisible(categoryList.get());
     model.addChangeListener(this);
 
-    auto lastPanelIndex = TerpstraSysExApplication::getApp().getPropertiesFile()->getIntValue("LastSettingsPanel", 0);
-    categoryList->selectRow(lastPanelIndex);
+    // auto lastPanelIndex = TerpstraSysExApplication::getApp().getPropertiesFile()->getIntValue("LastSettingsPanel", 0);
+    // categoryList->selectRow(lastPanelIndex);
 }
 
 SettingsContainer::~SettingsContainer()
@@ -63,7 +70,7 @@ void SettingsContainer::paint(Graphics& g)
 void SettingsContainer::resized()
 {
     categoryList->setBounds(getLocalBounds().withRight(proportionOfWidth(0.2)));
-    
+
     if (settingsPanel.get())
     {
         settingsPanel->setBounds(getLocalBounds().withLeft(categoryList->getRight()).reduced(0.033333f));
@@ -72,8 +79,8 @@ void SettingsContainer::resized()
 
 void SettingsContainer::lookAndFeelChanged()
 {
-    setColour(ResizableWindow::ColourIds::backgroundColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
-    categoryList->setColour(ListBox::ColourIds::backgroundColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
+    //setColour(juce::ResizableWindow::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
+    //categoryList->setColour(juce::ListBox::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
 }
 void SettingsContainer::changeListenerCallback(ChangeBroadcaster* source)
 {
@@ -83,29 +90,30 @@ void SettingsContainer::changeListenerCallback(ChangeBroadcaster* source)
 
 void SettingsContainer::showPanel(int editorSettingCategory)
 {
-    Component* newPanel = nullptr;
-    switch (editorSettingCategory)
-    {
-    case LumatoneEditorSettingCategories::Calibration:
-        newPanel = new CalibrationDlg();
-        break;
+    // TODO
+   juce:: Component* newPanel = nullptr;
+    // switch (editorSettingCategory)
+    // {
+    // case LumatoneEditorSettingCategories::Calibration:
+    //     newPanel = new CalibrationDlg();
+    //     break;
 
-    case LumatoneEditorSettingCategories::Firmware:
-        newPanel = new FirmwareDlg();
-        break;
+    // case LumatoneEditorSettingCategories::Firmware:
+    //     newPanel = new FirmwareDlg();
+    //     break;
 
-    case LumatoneEditorSettingCategories::Midi:
-        newPanel = new MidiSettingsDlg();
-        break;
+    // case LumatoneEditorSettingCategories::Midi:
+    //     newPanel = new MidiSettingsDlg();
+    //     break;
 
-    case LumatoneEditorSettingCategories::Presets:
-        newPanel = new PresetSettingsDlg();
-        break;
-    }
+    // case LumatoneEditorSettingCategories::Presets:
+    //     newPanel = new PresetSettingsDlg();
+    //     break;
+    // }
 
     if (newPanel)
     {
-        TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastSettingsPanel", editorSettingCategory);
+        // TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastSettingsPanel", editorSettingCategory);
 
         removeChildComponent(settingsPanel.get());
         settingsPanel = nullptr;

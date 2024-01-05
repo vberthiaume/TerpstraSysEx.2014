@@ -20,8 +20,13 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../LumatoneController.h"
-#include "WheelsCalibrationComponent.h"
+
+#include "../LumatoneEditorState.h"
+#include "../lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
+#include "../lumatone_editor_library/listeners/firmware_listener.h"
+
+class WheelsCalibrationComponent;
+
 //[/Headers]
 
 
@@ -35,13 +40,14 @@
                                                                     //[/Comments]
 */
 class CalibrationDlg  : public juce::Component,
+                        public LumatoneEditorState,
                         public ChangeListener,
                         public LumatoneEditor::FirmwareListener,
                         public juce::Button::Listener
 {
 public:
     //==============================================================================
-    CalibrationDlg ();
+    CalibrationDlg (const LumatoneEditorState& stateIn);
     ~CalibrationDlg() override;
 
     //==============================================================================
@@ -56,9 +62,9 @@ public:
     //==============================================================================
     // LumatoneEditor::FirmwareListener Implementation
 
-    void calibratePitchModWheelAnswer(TerpstraMIDIAnswerReturnCode code) override;
-    
-    void wheelsCalibrationDataReceived(WheelsCalibrationData calibrationData) override;
+    void calibratePitchModWheelAnswer(LumatoneFirmware::ReturnCode code) override;
+
+    void wheelsCalibrationDataReceived(LumatoneFirmware::WheelsCalibrationData calibrationData) override;
 
 
     //[/UserMethods]
@@ -79,16 +85,16 @@ private:
 		calibrateModulationWheel
 	};
 
-	std::unique_ptr<TabbedButtonBar> calibrationSelectorTab;
+	std::unique_ptr<juce::TabbedButtonBar> calibrationSelectorTab;
     std::unique_ptr<WheelsCalibrationComponent> wheelsCalibrationComponent;
-    
+
     bool startCalibration = false;
 
-	String instructionText;
+	juce::String instructionText;
 
 	// Style Helpers
-	Rectangle<int> instructionsBounds;
-    Font instructionsFont;
+	juce::Rectangle<int> instructionsBounds;
+    juce::Font instructionsFont;
 	const float fontHeightInBounds = 0.125f;
 	const int generalRim = 12;
 
@@ -107,4 +113,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

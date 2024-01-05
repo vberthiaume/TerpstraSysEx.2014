@@ -21,9 +21,12 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
-#include "HajuLib/HajuErrorVisualizer.h"
-#include "ApplicationListeners.h"
-#include "LumatoneEditorLookAndFeel.h"
+
+#include "LumatoneEditorState.h"
+
+#include "./lumatone_editor_library/listeners/status_listener.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
+
 //[/Headers]
 
 
@@ -36,7 +39,8 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class MidiEditArea  : public Component,
+class MidiEditArea  : public juce::Component,
+                      public LumatoneEditorState,
                       public LumatoneEditor::StatusListener,
                       public LumatoneEditor::EditorListener,
                       public juce::ComboBox::Listener,
@@ -45,8 +49,10 @@ class MidiEditArea  : public Component,
 {
 public:
     //==============================================================================
-    MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn);
+    MidiEditArea (const LumatoneEditorState& stateIn);
     ~MidiEditArea() override;
+
+    bool isConnected() const;
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
@@ -59,18 +65,16 @@ public:
 
 	// Implementation of LumatoneEditor::StatusListener
     void connectionFailed() override;
-    void connectionEstablished(int inputDevice, int outputDevice) override;
-    void connectionLost() override;
+    void connectionStateChanged(ConnectionState state) override;
 
     // Implementation of LumatoneEditor::EditorListener
-    void editorModeChanged(sysExSendingMode editMode) override;
-
+    void editorModeChanged(EditorMode editModeIn);
 
     void timerCallback() override;
 
 private:
 
-    void setConnectivity(bool isConnected, String connectionStatus=String());
+    void setConnectivity(bool isConnected, juce::String connectionStatus=String());
 
 public:
     //[/UserMethods]
@@ -84,29 +88,20 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-	// Indices of the editModeSelector tab
-	enum midiEditMode
-	{
-		liveEditor = 0,
-		offlineEditor = 1
-	};
-
-    bool                        isConnected = false;
+    // bool                        isConnected = false;
     bool                        isWaitingForConnectionTest = false;
     bool                        isWaitingForUserChoice = false;
 
-    LumatoneEditorLookAndFeel&  lookAndFeel;
+    std::unique_ptr<juce::Label>      lumatoneLabel;
 
-    std::unique_ptr<Label>      lumatoneLabel;
+    std::unique_ptr<juce::TextButton> liveEditorBtn;
+    std::unique_ptr<juce::TextButton> offlineEditorBtn;
 
-    std::unique_ptr<TextButton> liveEditorBtn;
-    std::unique_ptr<TextButton> offlineEditorBtn;
+    std::unique_ptr<juce::Label>      pleaseConnectLabel;
+    std::unique_ptr<juce::Label>      offlineMsgLabel;
 
-    std::unique_ptr<Label>      pleaseConnectLabel;
-    std::unique_ptr<Label>      offlineMsgLabel;
-
-    std::unique_ptr<Component>  logomark;
-    Path                        logomarkPath;
+    std::unique_ptr<juce::Component>  logomark;
+    juce::Path                        logomarkPath;
 
     const int                   deviceRefreshTimeoutMs = 500;
 
@@ -115,14 +110,14 @@ private:
 
     //std::unique_ptr<AlertWindow>     alert;
 
-    FlexBox          ioAreaFlexBox;
+    juce::FlexBox          ioAreaFlexBox;
 
-    Rectangle<int>   lumatoneLabelBounds;
-    Rectangle<float> connectivityArea;
-    Rectangle<float> logomarkBounds;
-    Rectangle<float> ioBounds;
+    juce::Rectangle<int>   lumatoneLabelBounds;
+    juce::Rectangle<float> connectivityArea;
+    juce::Rectangle<float> logomarkBounds;
+    juce::Rectangle<float> ioBounds;
 
-    Array<Colour> connectedColours = { Colour(0xffd7002a), Colour(0xff84aea3) };
+    juce::Array<juce::Colour> connectedColours = { juce::Colour(0xffd7002a), juce::Colour(0xff84aea3) };
 
     //==============================================================================
     // Position & Size constants

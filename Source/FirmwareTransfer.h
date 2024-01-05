@@ -1,16 +1,15 @@
 /*
-  ==============================================================================
+==============================================================================
 
     FirmwareTransfer.h
     Created: 11 Feb 2021 2:36:11am
     Author:  Vincenzo
 
-  ==============================================================================
+==============================================================================
 */
 
 #pragma once
-#include "TerpstraMidiDriver.h"
-
+#include <JuceHeader.h>
 #define UPDATETIMEOUT 5000
 
 class FirmwareTransfer : public juce::ThreadWithProgressWindow
@@ -28,7 +27,7 @@ public:
         TransferBegin,              // File transfer started
         InstallBegin,               // Reboot request sent
         VerificationBegin,          // Sent GetFirmwareVersion sysex and waiting for answer
-        
+
         /* ERRORS */
         IntegrityErr    = -1,       // Firmware file integrity check is not successful
         StartupErr      = -2,       // Couldn't initialize libssh2 or open firmware file
@@ -42,18 +41,18 @@ public:
 
 public:
 
-    FirmwareTransfer(TerpstraMidiDriver& driverIn);
+    FirmwareTransfer();
     ~FirmwareTransfer();
 
-    bool   requestFirmwareUpdate(String firmwareFilePath);
+    bool   requestFirmwareUpdate(juce::String firmwareFilePath);
     bool   requestFirmwareDownloadAndUpdate(); // TODO - probably better moved elsewhere
 
     bool   isFirmwareUpdateAvailable() { return true; /*TODO*/ }
 
     // TODO - member should be filled on instantiation
-    String getCurrentFirmwareVersion() { return currentFirmwareVersion; }
+    juce::String getCurrentFirmwareVersion() { return currentFirmwareVersion; }
 
-    static String getLatestFirmwareVersion() { return ""; /*TODO*/ }
+    static juce::String getLatestFirmwareVersion() { return ""; /*TODO*/ }
 
     bool isDownloadInProgress() const { return downloadRequested; }
     bool isTransferInProgress() const { return transferRequested; }
@@ -68,11 +67,11 @@ public:
     void run() override;
 
     //=========================================================================
-    
+
 public:
 
     // TODO use error codes
-    static bool checkFirmwareFileIntegrity(String filePathIn);
+    static bool checkFirmwareFileIntegrity(juce::String filePathIn);
 
 
 public:
@@ -86,7 +85,7 @@ public:
     {
     public:
         virtual ~ProcessListener() {}
-        virtual void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, String msg)=0;
+        virtual void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, juce::String msg)=0;
     };
 
     void addTransferListener(ProcessListener* listenerIn) { listeners.add(listenerIn); }
@@ -106,7 +105,7 @@ private:
 
     // header only in .cpp
     //static int shutdownSSHSession(LIBSSH2_SESSION*, int, FILE*, int returnCode = 0);
-    //static int waitForSSHSocket(int, LIBSSH2_SESSION*); 
+    //static int waitForSSHSocket(int, LIBSSH2_SESSION*);
 
 private:
 
@@ -116,10 +115,9 @@ private:
 
 private:
 
-    TerpstraMidiDriver& midiDriver;
-    String currentFirmwareVersion;
+    juce::String currentFirmwareVersion;
 
-    String selectedFileToTransfer;
+    juce::String selectedFileToTransfer;
 
     bool downloadRequested = false;
     bool transferRequested = false;
@@ -133,58 +131,58 @@ private:
 
 public:
 
-    static String statusCodeToMessage(FirmwareTransfer::StatusCode statusCode)
+    static juce::String statusCodeToMessage(FirmwareTransfer::StatusCode statusCode)
     {
         switch (statusCode)
         {
         case FirmwareTransfer::StatusCode::Initialize:
-            return translate("Firmware update process initiated!");
+            return juce::translate("Firmware update process initiated!");
 
         case FirmwareTransfer::StatusCode::FileIntegrityCheck:
-            return translate("Checking integrity of firmware file...");
+            return juce::translate("Checking integrity of firmware file...");
 
         case FirmwareTransfer::StatusCode::SessionBegin:
-            return translate("Establishing connection to Lumatone...");
+            return juce::translate("Establishing connection to Lumatone...");
 
         case FirmwareTransfer::StatusCode::AuthBegin:
-            return translate("Providing credentials...");
+            return juce::translate("Providing credentials...");
 
         case FirmwareTransfer::StatusCode::TransferBegin:
-            return translate("Transferring firmware file...");
+            return juce::translate("Transferring firmware file...");
 
         case FirmwareTransfer::StatusCode::InstallBegin:
-            return translate("Rebooting device for installation");
+            return juce::translate("Rebooting device for installation");
 
         case FirmwareTransfer::StatusCode::VerificationBegin:
-            return translate("Installing update...");
+            return juce::translate("Installing update...");
 
         case FirmwareTransfer::StatusCode::IntegrityErr:
-            return translate("Error: Not a valid Lumatone firmware file");
+            return juce::translate("Error: Not a valid Lumatone firmware file");
 
         case FirmwareTransfer::StatusCode::StartupErr:
-            return translate("Error: Could not prepare device communication protool");
+            return juce::translate("Error: Could not prepare device communication protool");
 
         case FirmwareTransfer::StatusCode::HostConnectErr:
-            return translate("Error: Could not communicate with Lumatone"
-                             "\nPlease make sure you are connected over USB.");
+            return juce::translate("Error: Could not communicate with Lumatone"
+                                 "\nPlease make sure you are connected over USB.");
 
         case FirmwareTransfer::StatusCode::SessionEstErr:
-            return translate("Error: Could not verify connection with Lumatone");
+            return juce::translate("Error: Could not verify connection with Lumatone");
 
         case FirmwareTransfer::StatusCode::AuthErr:
-            return translate("Error: Authentication for Lumatone failed");
+            return juce::translate("Error: Authentication for Lumatone failed");
 
         case FirmwareTransfer::StatusCode::ChannelErr:
-            return translate("Error: Communication channel failure");
+            return juce::translate("Error: Communication channel failure");
 
         case FirmwareTransfer::StatusCode::ExecChnlErr:
-            return translate("Error: Could not request device reboot. Try rebooting your Lumatone.");
+            return juce::translate("Error: Could not request device reboot. Try rebooting your Lumatone.");
 
         case FirmwareTransfer::StatusCode::NoErr:
-            return translate("Please wait for your Lumatone to install the firmware.");
+            return juce::translate("Please wait for your Lumatone to install the firmware.");
 
         default:
-            return translate("Unspecified error.");
+            return juce::translate("Unspecified error.");
         }
     }
 

@@ -22,7 +22,9 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "LumatoneEditorStyleCommon.h"
+#include "LumatoneEditorState.h"
+
+#include "./lumatone_editor_library/listeners/firmware_listener.h"
 //[/Headers]
 
 
@@ -36,13 +38,14 @@
                                                                     //[/Comments]
 */
 class PedalSensitivityDlg  : public juce::Component,
+                             public LumatoneEditorState,
                              public LumatoneEditor::FirmwareListener,
                              public juce::Button::Listener,
                              public juce::Slider::Listener
 {
 public:
     //==============================================================================
-    PedalSensitivityDlg ();
+    PedalSensitivityDlg (const LumatoneEditorState& stateIn);
     ~PedalSensitivityDlg() override;
 
     //==============================================================================
@@ -53,8 +56,8 @@ public:
 	void lookAndFeelChanged() override;
 
     // LumatoneEditor::FirmwareListener implementation
-    void firmwareRevisionReceived(FirmwareVersion version) override;
-    void presetFlagsReceived(PresetFlags presetFlags) override;
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+    void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
     void expressionPedalSensitivityReceived(int sensitivity) override;
 
     //[/UserMethods]
@@ -90,4 +93,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

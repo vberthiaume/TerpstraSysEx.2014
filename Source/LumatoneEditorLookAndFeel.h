@@ -16,16 +16,15 @@
 #pragma once
 
 #include "LumatoneEditorStyleCommon.h"
-#include "LumatoneEditorFonts.h"
+#include "LumatoneEditorFontLibrary.h"
 
 class LumatoneEditorLookAndFeel : public LookAndFeel_V4
 {
 public:
 
-    LumatoneEditorLookAndFeel(
-        LumatoneEditorFonts::Library appFontsIn,
-        bool doImageCache = false
-    ) : appFonts(appFontsIn), compactWindowStyle(this)
+    LumatoneEditorLookAndFeel(const LumatoneEditorFontLibrary& appFontsIn, bool doImageCache = false)
+        : appFonts(appFontsIn)
+        , compactWindowStyle(this)
     {
         setupDefaultColours();
 
@@ -37,19 +36,19 @@ public:
 
     }
 
-    LumatoneEditorLookAndFeel(const LumatoneEditorLookAndFeel& lafCopy)
-        : appFonts(lafCopy.appFonts),
-          saveIconPath(lafCopy.saveIconPath),
-          arrowUpIconPath(lafCopy.arrowUpIconPath),
-          arrowDownIconPath(lafCopy.arrowDownIconPath),
-          compactWindowStyle(this)
-    {
-        setupDefaultColours();
-    }
+    // LumatoneEditorLookAndFeel(const LumatoneEditorLookAndFeel& lafCopy)
+    //     : appFonts(lafCopy.appFonts),
+    //       saveIconPath(lafCopy.saveIconPath),
+    //       arrowUpIconPath(lafCopy.arrowUpIconPath),
+    //       arrowDownIconPath(lafCopy.arrowDownIconPath),
+    //       compactWindowStyle(this)
+    // {
+    //     setupDefaultColours();
+    // }
 
-    Font getAppFont(LumatoneEditorFont fontIdIn)
+    Font getAppFont(LumatoneEditorFont fontIdIn, float heightIn=12.0f) const
     {
-        return appFonts[fontIdIn];
+        return appFonts.getFont(fontIdIn, heightIn);
     }
 
 public:
@@ -68,7 +67,7 @@ public:
         g.fillAll(findColour(LumatoneEditorColourIDs::MediumBackground));
 
         const float fontHeight = h * 0.5f;
-        const Font font = appFonts[LumatoneEditorFont::UniviaProBold].withHeight(fontHeight);
+        const Font font = getAppFont(LumatoneEditorFont::UniviaProBold, fontHeight);
         g.setFont(font);
 
         const float margin = (h - fontHeight) * 0.5f;
@@ -146,7 +145,7 @@ public:
             g.fillAll(parent->findColour(LumatoneEditorColourIDs::DarkBackground));
 
             g.setColour(parent->findColour(LumatoneEditorColourIDs::DescriptionText));
-            g.setFont(parent->appFonts[LumatoneEditorFont::GothamNarrowMedium].withHeight(h * 0.75f));
+            g.setFont(parent->getAppFont(LumatoneEditorFont::GothamNarrowMedium, h * 0.75f));
             g.drawFittedText(window.getName(), 0, 0, w, h, Justification::centred, 1, 1.0f);
         }
 
@@ -229,8 +228,7 @@ public:
         if (properties.contains(LumatoneEditorStyleIDs::fontOverride))
         {
             int overrideIndex = properties[LumatoneEditorStyleIDs::fontOverride];
-            if (overrideIndex >= 0 && overrideIndex < appFonts.size())
-                font = appFonts[overrideIndex].withHeight(l.getHeight());
+            font = getAppFont((LumatoneEditorFont) overrideIndex).withHeight(l.getHeight());
         }
 
         if (properties.contains(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle))
@@ -456,14 +454,13 @@ public:
             ? buttonHeight
             : buttonHeight / 1.75f;
 
-        Font font = appFonts[LumatoneEditorFont::GothamNarrowMedium].withHeight(fontHeight);
+        Font font = getAppFont(LumatoneEditorFont::GothamNarrowMedium, fontHeight);
 
         NamedValueSet& properties = btn.getProperties();
         if (properties.contains(LumatoneEditorStyleIDs::fontOverride))
         {
             int overrideIndex = properties[LumatoneEditorStyleIDs::fontOverride];
-            if (overrideIndex >= 0 && overrideIndex < appFonts.size())
-                font = appFonts[overrideIndex].withHeight(btn.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
+            font = getAppFont((LumatoneEditorFont)overrideIndex, btn.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
         }
 
         if (properties.contains(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle))
@@ -500,7 +497,7 @@ public:
         if (ticked)
         {
             g.setColour(tickColour);
-            g.setFont(appFonts[LumatoneEditorFont::GothamNarrowBold].withHeight(h).withHorizontalScale(1.333333f));
+            g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowBold, h).withHorizontalScale(1.333333f));
             g.drawFittedText("X", x, y, w, h, Justification::centred, 1, 1.0f);
         }
     }
@@ -515,7 +512,7 @@ public:
 #else
         float fontScalar = 1.125f;
 #endif
-        g.setFont(appFonts[LumatoneEditorFont::GothamNarrowMedium].withHeight(btn.getHeight() * fontScalar));
+        g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium, btn.getHeight() * fontScalar));
 
         Colour textColour = btn.findColour(ToggleButton::ColourIds::textColourId);
 
@@ -642,7 +639,7 @@ public:
             Label* label = new Label(sld.getName() + "_ValueLabel");
             label->setText(String(sld.getValue()), dontSendNotification);
             label->setJustificationType(Justification::centred);
-            label->setFont(appFonts[LumatoneEditorFont::GothamNarrowMedium]);
+            // label->setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
 
             Colour textColour = (sld.isEnabled())
                 ? findColour(LumatoneEditorColourIDs::DescriptionText)
@@ -663,7 +660,7 @@ public:
             Label* label = new Label(sld.getName() + "_ValueLabel");
             label->setText(String(sld.getValue()), dontSendNotification);
             label->setJustificationType(Justification::centred);
-            label->setFont(appFonts[LumatoneEditorFont::GothamNarrowMedium]);
+            label->setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
 
             if (sld.getProperties().contains(LumatoneEditorStyleIDs::fontHeightScalar))
                 label->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, sld.getProperties()[LumatoneEditorStyleIDs::fontHeightScalar]);
@@ -780,21 +777,20 @@ public:
         if (buttonW > 0)
         {
             g.setColour(textColour);
-            g.setFont(appFonts[LumatoneEditorFont::GothamNarrowLight].withHeight(buttonH * 0.5f).withHorizontalScale(2.0f));
+            g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowLight, buttonH * 0.5f).withHorizontalScale(2.0f));
             g.drawFittedText("v", realButtonX, 0, box.getHeight(), box.getHeight(), Justification::centred, 1);
         }
     }
 
     Font getComboBoxFont(ComboBox& box) override
     {
-        Font font = appFonts[LumatoneEditorFont::GothamNarrowMedium].withHeight(box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
+        Font font = getAppFont(LumatoneEditorFont::GothamNarrowMedium, box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
 
         NamedValueSet& properties = box.getProperties();
         if (properties.contains(LumatoneEditorStyleIDs::fontOverride))
         {
             int overrideIndex = properties[LumatoneEditorStyleIDs::fontOverride];
-            if (overrideIndex >= 0 && overrideIndex < appFonts.size())
-                font = appFonts[overrideIndex].withHeight(box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
+            font = getAppFont((LumatoneEditorFont)overrideIndex, box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
         }
 
         if (properties.contains(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle))
@@ -972,7 +968,7 @@ public:
 
     Font getPopupMenuFont() override
     {
-        return appFonts[LumatoneEditorFont::UniviaProBold];
+        return getAppFont(LumatoneEditorFont::UniviaProBold);
     }
 
     int getMenuWindowFlags() override
@@ -1008,7 +1004,7 @@ public:
         }
 
         g.setColour(findColour(LumatoneEditorColourIDs::ActiveText));
-        g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+        g.setFont(appFonts.getFont(LumatoneEditorFont::GothamNarrowMedium));
         g.drawFittedText(itemText, 0, 0, w, h, Justification::centred, 1);
 
     }
@@ -1047,7 +1043,7 @@ public:
 
     Font getTabButtonFont(TabBarButton& tbb, float height) override
     {
-        return appFonts[LumatoneEditorFont::GothamNarrowMedium].withHeight(height).withHorizontalScale(1.05f);
+        return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height).withHorizontalScale(1.05f);
     }
 
     void drawTabButtonText(TabBarButton& tbb, Graphics& g, bool isMouseOver, bool isMouseDown) override
@@ -1254,7 +1250,7 @@ private:
         LumatoneAssets::LoadAssets(LumatoneAssets::ID::LumatoneGraphic);
         LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeyShape);
         LumatoneAssets::LoadAssets(LumatoneAssets::ID::KeyShadow);
-            
+
         ImageCache::addImageToCache(ImageCache::getFromMemory(BinaryData::TrashCanIcon2x_png, BinaryData::TrashCanIcon2x_pngSize), (juce::int64)LumatoneAssets::ID::TrashCanIcon);
     }
 
@@ -1319,7 +1315,7 @@ private:
 
 private:
 
-    LumatoneEditorFonts::Library appFonts;
+    const LumatoneEditorFontLibrary& appFonts;
 
     Path saveIconPath;
     Path arrowUpIconPath;

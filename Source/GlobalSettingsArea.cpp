@@ -18,8 +18,11 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "Main.h"
-#include "Settings/CalibrationDlg.h"
+#include "LumatoneEditorLookAndFeel.h"
+
+#include "./Settings/SettingsContainer.h"
+
+#include "./lumatone_editor_library/device/lumatone_controller.h"
 //[/Headers]
 
 #include "GlobalSettingsArea.h"
@@ -29,7 +32,8 @@
 //[/MiscUserDefs]
 
 //==============================================================================
-GlobalSettingsArea::GlobalSettingsArea ()
+GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("GlobalSettingsArea", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
     //[/Constructor_pre]
@@ -77,25 +81,23 @@ GlobalSettingsArea::GlobalSettingsArea ()
 
 
     //[UserPreSize]
-    activeMacroButtonColourEdit.reset(new ColourEditComponent());
+    activeMacroButtonColourEdit.reset(new ColourViewComponent());
     addAndMakeVisible(activeMacroButtonColourEdit.get());
     activeMacroButtonColourEdit->addChangeListener(this);
 
-    inactiveMacroButtonColourEdit.reset(new ColourEditComponent());
+    inactiveMacroButtonColourEdit.reset(new ColourViewComponent());
     addAndMakeVisible(inactiveMacroButtonColourEdit.get());
     inactiveMacroButtonColourEdit->addChangeListener(this);
 
-    lblDeveloperMode.reset(new Label("DeveloperModeLabel", "Developer Mode"));
+    lblDeveloperMode.reset(new juce::Label("DeveloperModeLabel", "Developer Mode"));
     addChildComponent(lblDeveloperMode.get());
-    setDeveloperMode(TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("DeveloperMode", false));
+    setDeveloperMode(getInDeveloperMode());
 
+    lblPresetButtonColours->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    lblColourActiveMacroButton->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
+    lblPresetButtonColours->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
 
-    lblPresetButtonColours->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-    lblColourActiveMacroButton->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
-    lblPresetButtonColours->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-
-
-    TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
+    addStatusListener(this);
 
     buttonCalibrate->setEnabled(false);
 
@@ -111,7 +113,7 @@ GlobalSettingsArea::GlobalSettingsArea ()
 
 
 	// Set values according to the properties files
-	restoreStateFromPropertiesFile(TerpstraSysExApplication::getApp().getPropertiesFile());
+	// restoreStateFromPropertiesFile(TerpstraSysExApplication::getApp().getPropertiesFile());
     //[/Constructor]
 }
 
@@ -158,7 +160,7 @@ void GlobalSettingsArea::resized()
     float colourEditHeight = proportionOfHeight(controlsHeight);
     float controlY = proportionOfHeight((1 - controlsHeight) / 2.0f);
     float colourButtonWidth = colourEditHeight * colourButtonAspect;
-    Font colourLabelsFont = TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::FranklinGothic, colourEditHeight * 1.1f);
+    Font colourLabelsFont = getAppFonts().getFont(LumatoneEditorFont::FranklinGothic, colourEditHeight * 1.1f);
 
     lblColourInactiveMacroButton->setFont(colourLabelsFont);
     resizeLabelWithHeight(lblColourInactiveMacroButton.get(), colourEditHeight);
@@ -210,10 +212,10 @@ void GlobalSettingsArea::buttonClicked (juce::Button* buttonThatWasClicked)
         launchOptions.dialogBackgroundColour = Colour();
 
 		auto settingsDialog = launchOptions.launchAsync();
-        settingsDialog->setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel().compactWindowStyle);
+        settingsDialog->setLookAndFeel(static_cast<juce::LookAndFeel_V4*>(&getEditorLookAndFeel().compactWindowStyle));
         settingsDialog->centreWithSize(548, 240);
 
-        TerpstraSysExApplication::getApp().setOpenDialogWindow(settingsDialog);
+        // TerpstraSysExApplication::getApp().setOpenDialogWindow(settingsDialog);
 
         //[/UserButtonCode_buttonCalibrate]
     }
@@ -228,10 +230,10 @@ void GlobalSettingsArea::buttonClicked (juce::Button* buttonThatWasClicked)
 
 void GlobalSettingsArea::lookAndFeelChanged()
 {
-    lblPresetButtonColours->setColour(Label::ColourIds::textColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
+    lblPresetButtonColours->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
 
-    lblColourActiveMacroButton->setColour(Label::ColourIds::textColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    lblColourInactiveMacroButton->setColour(Label::ColourIds::textColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
+    lblColourActiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
+    lblColourInactiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
 
     buttonCalibrate->setColour(TextButton::ColourIds::buttonColourId, Colour(0xff383b3d));
     buttonCalibrate->setColour(TextButton::ColourIds::textColourOffId, Colour(0xffffffff));
@@ -242,12 +244,12 @@ void GlobalSettingsArea::changeListenerCallback(ChangeBroadcaster *source)
 	if (source == inactiveMacroButtonColourEdit.get())
 	{
 		String inactiveMacroButtonColour = inactiveMacroButtonColourEdit->getColourAsString();
-		TerpstraSysExApplication::getApp().getLumatoneController()->sendMacroButtonInactiveColour(inactiveMacroButtonColour);
+		getLumatoneController()->sendMacroButtonInactiveColour(inactiveMacroButtonColour);
 	}
 	else if (source == activeMacroButtonColourEdit.get())
 	{
 		String activeMacroButtonColour = activeMacroButtonColourEdit->getColourAsString();
-		TerpstraSysExApplication::getApp().getLumatoneController()->sendMacroButtonActiveColour(activeMacroButtonColour);
+		getLumatoneController()->sendMacroButtonActiveColour(activeMacroButtonColour);
 	}
 }
 
@@ -284,15 +286,15 @@ void GlobalSettingsArea::setDeveloperMode(bool devModeOn)
     repaint();
 }
 
-void GlobalSettingsArea::connectionEstablished(int inputDevice, int outputDevice)
+void GlobalSettingsArea::connectionStateChanged(ConnectionState state)
 {
-    buttonCalibrate->setEnabled(true);
+    buttonCalibrate->setEnabled(state == ConnectionState::ONLINE);
 }
 
-void GlobalSettingsArea::connectionLost()
-{
-    buttonCalibrate->setEnabled(false);
-}
+// void GlobalSettingsArea::connectionFaile()
+// {
+//     buttonCalibrate->setEnabled(false);
+// }
 
 //[/MiscUserCode]
 
@@ -339,4 +341,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

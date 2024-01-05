@@ -22,7 +22,7 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "HajuLib/HajuErrorVisualizer.h"
+// #include "HajuLib/HajuErrorVisualizer.h"
 #include "MappingLogic.h"
 //[/Headers]
 
@@ -36,14 +36,14 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class KBMForOneChannel  : public Component,
-                          public TextEditor::Listener,
+class KBMForOneChannel  : public juce::Component,
+                          public juce::TextEditor::Listener,
                           public juce::ComboBox::Listener,
                           public juce::Button::Listener
 {
 public:
     //==============================================================================
-    KBMForOneChannel (int		subDlgIndex, KBMFilesMappingLogic&	mappingLogic, int& periodSizeReference);
+    KBMForOneChannel (int subDlgIndex, KBMFilesMappingLogic& mappingLogic, int& periodSizeReference);
     ~KBMForOneChannel() override;
 
     //==============================================================================
@@ -70,7 +70,7 @@ private:
 	File	currentFile;
 	KBMMappingDataStructure kbmMappingStructure;
     KBMFilesMappingLogic*	pMappingLogic;
-    HajuErrorVisualizer     errorVisualizer;
+    // HajuErrorVisualizer     errorVisualizer;
    	int&    periodSize;
 
     FlexBox flexBox;

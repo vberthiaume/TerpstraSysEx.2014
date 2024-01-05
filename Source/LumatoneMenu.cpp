@@ -9,16 +9,16 @@
 */
 
 #include "LumatoneMenu.h"
-#include "Main.h"
+#include "./LumatoneEditorState.h"
 
 namespace Lumatone {
 	namespace Menu {
 
-		MainMenuModel::MainMenuModel(ApplicationCommandManager* commandManager)
+		MainMenuModel::MainMenuModel(const LumatoneEditorState& state, ApplicationCommandManager* commandManager)
+			: LumatoneEditorState("MainMenu", state)
 		{
 			theManager = commandManager;
 			setApplicationCommandManagerToWatch(commandManager);
-
 		}
 
 		StringArray MainMenuModel::getMenuBarNames()
@@ -37,7 +37,7 @@ namespace Lumatone {
 			menu.addSeparator();
 
 			PopupMenu recentFilesMenu;
-			TerpstraSysExApplication::getApp().getRecentFileList().createPopupMenuItems(recentFilesMenu, recentFilesBaseID, true, true);
+			getRecentFiles().createPopupMenuItems(recentFilesMenu, recentFilesBaseID, true, true);
 			menu.addSubMenu("Recent Files", recentFilesMenu);
 
 #if ! JUCE_MAC
@@ -81,7 +81,7 @@ namespace Lumatone {
 			if (menuItemID >= recentFilesBaseID && menuItemID < recentFilesBaseID + 100)
 			{
 				// open a file from the "recent files" menu
-				TerpstraSysExApplication::getApp().openRecentFile(menuItemID - recentFilesBaseID);
+				// TerpstraSysExApplication::getApp().openRecentFile(menuItemID - recentFilesBaseID);
 			}
 		}
 

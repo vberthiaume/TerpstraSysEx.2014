@@ -9,35 +9,41 @@
 */
 
 #pragma once
-#include "../LumatoneController.h"
+#include <JuceHeader.h>
 
-class PresetSettingsDlg : public Component,
-    protected Button::Listener,
-    protected LumatoneEditor::FirmwareListener
+#include "../LumatoneEditorState.h"
+
+#include "../lumatone_editor_library/listeners/firmware_listener.h"
+#include "../lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
+
+class PresetSettingsDlg : public Component
+                        , LumatoneEditorState
+                        , protected Button::Listener
+                        , protected LumatoneEditor::FirmwareListener
 
 {
 public:
 
-    PresetSettingsDlg();
+    PresetSettingsDlg(const LumatoneEditorState& stateIn);
     ~PresetSettingsDlg();
 
-    void paint(Graphics& g) override;
+    void paint(juce::Graphics& g) override;
 
     void resized() override;
 
-    void buttonClicked(Button* btn) override;
+    void buttonClicked(juce::Button* btn) override;
 
-    void setSupportedControls(FirmwareVersion version);
+    void setSupportedControls(LumatoneFirmware::Version version);
 
     //=========================================================================
     // LumatoneEditor::FirmwareListener implementation
 
-    void firmwareRevisionReceived(FirmwareVersion version) override;
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
 
 
 private:
 
-    std::unique_ptr<TextButton> resetPresetsBtn;
+    std::unique_ptr<juce::TextButton> resetPresetsBtn;
     FlexBox flexBox;
 
     // Style helpers

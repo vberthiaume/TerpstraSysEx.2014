@@ -18,62 +18,60 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "ViewConstants.h"
-#include "Main.h"
+#include "MidiEditArea.h"
+#include "LumatoneEditorLookAndFeel.h"
+#include "./lumatone_editor_library/device/lumatone_controller.h"
+#include "./lumatone_editor_library/graphics/view_constants.h"
 //[/Headers]
 
-#include "MidiEditArea.h"
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 
-// Index in edit mode tab coincides with sysExSendingMode. In case that changes in the future, modify this here.
-sysExSendingMode editModeTabIndexToMidiSysExSendingMode(int tabIndex) { return static_cast<sysExSendingMode>(tabIndex); }
-
 //[/MiscUserDefs]
 
 //==============================================================================
-MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
-    : lookAndFeel(lookAndFeelIn)
+MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("MidiEditArea", stateIn)
 {
     //[Constructor_pre] You can add your own custom stuff here..
 	setName("MidiEditArea");
 
-	lumatoneLabel.reset(new Label("LumatoneLabel", "lumatone"));
-	lumatoneLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-	lumatoneLabel->setColour(Label::ColourIds::textColourId, lookAndFeel.findColour(LumatoneEditorColourIDs::LabelPink));
+	lumatoneLabel.reset(new juce::Label("LumatoneLabel", "lumatone"));
+	lumatoneLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+	lumatoneLabel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
 	lumatoneLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(lumatoneLabel.get());
 
-	liveEditorBtn.reset(new TextButton("LiveEditorButton"));
-	lookAndFeel.setupRadioTextButton(*liveEditorBtn, 10, true);
+	liveEditorBtn.reset(new juce::TextButton("LiveEditorButton"));
+	getEditorLookAndFeel().setupRadioTextButton(*liveEditorBtn, 10, true);
 	liveEditorBtn->setButtonText(translate("LiveEditor"));
-	liveEditorBtn->setConnectedEdges(Button::ConnectedOnRight);
+	liveEditorBtn->setConnectedEdges(juce::Button::ConnectedOnRight);
 	liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::UniviaProBold);
 	liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editModeFontScalar);
 	addChildComponent(liveEditorBtn.get());
 	liveEditorBtn->addListener(this);
 
-	offlineEditorBtn.reset(new TextButton("OfflineEditorButton"));
-	lookAndFeel.setupRadioTextButton(*offlineEditorBtn, 10, false);
+	offlineEditorBtn.reset(new juce::TextButton("OfflineEditorButton"));
+	getEditorLookAndFeel().setupRadioTextButton(*offlineEditorBtn, 10, false);
 	offlineEditorBtn->setButtonText(translate("OfflineEditor"));
-	offlineEditorBtn->setConnectedEdges(Button::ConnectedOnLeft);
+	offlineEditorBtn->setConnectedEdges(juce::Button::ConnectedOnLeft);
 	offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::UniviaProBold);
 	offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editModeFontScalar);
 	addChildComponent(offlineEditorBtn.get());
 	offlineEditorBtn->addListener(this);
 
-	pleaseConnectLabel.reset(new Label("PleaseConnectLabel", translate("PleaseConnect")));
-	pleaseConnectLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-	pleaseConnectLabel->setColour(Label::ColourIds::textColourId, lookAndFeel.findColour(LumatoneEditorColourIDs::ActiveText));
+	pleaseConnectLabel.reset(new juce::Label("PleaseConnectLabel", translate("PleaseConnect")));
+	pleaseConnectLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+	pleaseConnectLabel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ActiveText));
 	addAndMakeVisible(*pleaseConnectLabel);
 
-	offlineMsgLabel.reset(new Label("DirectionsLabel", translate("OfflineMessage")));
-	offlineMsgLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::FranklinGothic));
-	offlineMsgLabel->setColour(Label::ColourIds::textColourId, lookAndFeel.findColour(LumatoneEditorColourIDs::DescriptionText));
+	offlineMsgLabel.reset(new juce::Label("DirectionsLabel", translate("OfflineMessage")));
+	offlineMsgLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
+	offlineMsgLabel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
 	addAndMakeVisible(*offlineMsgLabel);
 
-	logomark.reset(new Component());
+	logomark.reset(new juce::Component());
 	addAndMakeVisible(logomark.get());
 
 	logomarkPath = createLogomark();
@@ -134,19 +132,19 @@ MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
 
     //[UserPreSize]
 	cbMidiInput->getProperties().set(LumatoneEditorStyleIDs::popupMenuTargetWidth, 1);
-	cbMidiInput->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour, lookAndFeel.findColour(ComboBox::ColourIds::backgroundColourId).toString());
+	cbMidiInput->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour, getEditorLookAndFeel().findColour(ComboBox::ColourIds::backgroundColourId).toString());
 	cbMidiInput->setVisible(false);
 
 	cbMidiOutput->getProperties().set(LumatoneEditorStyleIDs::popupMenuTargetWidth, 1);
-	cbMidiOutput->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour, lookAndFeel.findColour(ComboBox::ColourIds::backgroundColourId).toString());
+	cbMidiOutput->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour, getEditorLookAndFeel().findColour(ComboBox::ColourIds::backgroundColourId).toString());
 	cbMidiOutput->setVisible(false);
 
-	lblConnectionState->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-	lblConnectionState->setColour(Label::ColourIds::textColourId, connectedColours[isConnected]);
+	lblConnectionState->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+	lblConnectionState->setColour(juce::Label::ColourIds::textColourId, connectedColours[isConnected()]);
     lblConnectionState->getProperties().set(LumatoneEditorStyleIDs::labelMaximumLineCount, 2);
 
-	lblEditMode->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
-	lblEditMode->setColour(Label::ColourIds::textColourId, lookAndFeel.findColour(LumatoneEditorColourIDs::LabelPink));
+	lblEditMode->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+	lblEditMode->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
 
 	offlineEditorBtn->setClickingTogglesState(true);
 	offlineEditorBtn->setRadioGroupId(10, dontSendNotification);
@@ -158,25 +156,25 @@ MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
 
 	btnAutoConnect->setClickingTogglesState(true);
 
-	ioAreaFlexBox.alignContent = FlexBox::AlignContent::center;
-	ioAreaFlexBox.alignItems = FlexBox::AlignItems::center;
-	ioAreaFlexBox.justifyContent = FlexBox::JustifyContent::spaceBetween;
+	ioAreaFlexBox.alignContent = juce::FlexBox::AlignContent::center;
+	ioAreaFlexBox.alignItems = juce::FlexBox::AlignItems::center;
+	ioAreaFlexBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
     //[/UserPreSize]
 
     setSize (1024, 48);
 
 
     //[Constructor] You can add your own custom stuff here..
-	TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
-    TerpstraSysExApplication::getApp().getLumatoneController()->addEditorListener(this);
-	auto inputs = TerpstraSysExApplication::getApp().getLumatoneController()->getMidiInputList();
-	auto outputs = TerpstraSysExApplication::getApp().getLumatoneController()->getMidiOutputList();
+	// getLumatoneController()->addStatusListener(this);
+    // getLumatoneController()->addEditorListener(this);
+	// auto inputs = getLumatoneController()->getMidiInputList();
+	// auto outputs = getLumatoneController()->getMidiOutputList();
 	refreshInputMenuAndSetSelected(0, dontSendNotification);
 	refreshOutputMenuAndSetSelected(0, dontSendNotification);
 	setConnectivity(false);
 
-    btnAutoConnect->setToggleState(TerpstraSysExApplication::getApp().getLumatoneController()->isDetectingLumatone(), sendNotificationSync);
-	
+    // btnAutoConnect->setToggleState(getLumatoneController()->isDetectingLumatone(), sendNotificationSync);
+
     //[/Constructor]
 }
 
@@ -199,8 +197,13 @@ MidiEditArea::~MidiEditArea()
 
     //[Destructor]. You can add your own custom destruction code here..
 	//deviceMonitor.stopThread(100);
-	TerpstraSysExApplication::getApp().getLumatoneController()->removeStatusListener(this);
+	// getLumatoneController()->removeStatusListener(this);
     //[/Destructor]
+}
+
+bool MidiEditArea::isConnected() const
+{
+	return getConnectionState() == ConnectionState::ONLINE;
 }
 
 //==============================================================================
@@ -212,21 +215,21 @@ void MidiEditArea::paint (juce::Graphics& g)
     g.fillAll (juce::Colour (0xffbad0de));
 
     //[UserPaint] Add your own custom painting code here..
-	g.fillAll(lookAndFeel.findColour(LumatoneEditorColourIDs::LightBackground));
+	g.fillAll(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
 
 	// Dark background for title and logomark
-	g.setColour(lookAndFeel.findColour(LumatoneEditorColourIDs::DarkBackground));
+	g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DarkBackground));
 	g.fillRect(lumatoneLabelBounds);
 	g.fillRect(connectivityArea);
 
 	// Rounded rect for device boxes
-	if (!isConnected)
+	if (!isConnected())
 	{
-		g.setColour(lookAndFeel.findColour(LumatoneEditorColourIDs::LightBackground));
+		g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
 		g.fillRoundedRectangle(ioBounds, roundToInt(getHeight() * controlBoundsCornerRadius));
 	}
 
-	g.setColour(connectedColours[(int)(isConnected && liveEditorBtn->getToggleState())]);
+	g.setColour(connectedColours[(int)(isConnected() && liveEditorBtn->getToggleState())]);
 	drawPathToFillBounds(g, logomarkPath, logomarkBounds);
     //[/UserPaint]
 }
@@ -254,7 +257,7 @@ void MidiEditArea::resized()
 	logomarkBounds.setSize(logomarkSize, logomarkSize);
 	logomarkBounds.setCentre(ioBounds.getRight() + roundToInt((getWidth() - ioBounds.getRight()) * 0.5f), roundToInt(h * 0.5f));
 
-	if (isConnected)
+	if (isConnected())
 	{
 		int lblHeight = roundToInt(h * editModeHeight);
 		resizeLabelWithHeight(lblEditMode.get(), lblHeight);
@@ -337,7 +340,7 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_cbMidiInput] -- add your combo box handling code here..
 		if (cbMidiInput->getSelectedItemIndex() >= 0)
-			TerpstraSysExApplication::getApp().getLumatoneController()->setMidiInput(cbMidiInput->getSelectedItemIndex());
+			getLumatoneController()->setMidiInput(cbMidiInput->getSelectedItemIndex());
 
 		if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
 		{
@@ -349,7 +352,7 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 		}
 		else
 		{
-			jassert(!isConnected);
+			jassert(!isConnected());
 			lblConnectionState->setText("Connecting...", NotificationType::dontSendNotification);
 		}
         //[/UserComboBoxCode_cbMidiInput]
@@ -358,7 +361,7 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_cbMidiOutput] -- add your combo box handling code here..
 		if (cbMidiOutput->getSelectedItemIndex() >= 0)
-			TerpstraSysExApplication::getApp().getLumatoneController()->setMidiOutput(cbMidiOutput->getSelectedItemIndex());
+			getLumatoneController()->setMidiOutput(cbMidiOutput->getSelectedItemIndex());
 
 		if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
 		{
@@ -370,8 +373,8 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
 		}
 		else
 		{
-			jassert(!isConnected);
-			lblConnectionState->setText("Connecting...", NotificationType::dontSendNotification);
+			jassert(!isConnected());
+			lblConnectionState->setText("Connecting...", juce::NotificationType::dontSendNotification);
 		}
         //[/UserComboBoxCode_cbMidiOutput]
     }
@@ -394,7 +397,7 @@ void MidiEditArea::buttonClicked (juce::Button* buttonThatWasClicked)
 
         if (btnAutoConnect->getToggleState())
 		{
-			TerpstraSysExApplication::getApp().getLumatoneController()->detectAndConnectToLumatone();
+			// getLumatoneController()->detectAndConnectToLumatone();
 			lblConnectionState->setText(translate("Searching for Lumatone..."), dontSendNotification);
 			//errorVisualizer.setErrorLevel(
 			//	*lblConnectionState.get(),
@@ -403,7 +406,7 @@ void MidiEditArea::buttonClicked (juce::Button* buttonThatWasClicked)
 		}
 		else
 		{
-			TerpstraSysExApplication::getApp().getLumatoneController()->stopAutoConnection();
+			// getLumatoneController()->stopAutoConnection();
 			lblConnectionState->setText(translate("Disconnected"), dontSendNotification);
 			startTimer(deviceRefreshTimeoutMs);
 		}
@@ -415,9 +418,8 @@ void MidiEditArea::buttonClicked (juce::Button* buttonThatWasClicked)
     //[UserbuttonClicked_Post]
 	else if (buttonThatWasClicked == liveEditorBtn.get())
 	{
-		auto sysExSendingMode = editModeTabIndexToMidiSysExSendingMode((int)!liveEditorBtn->getToggleState());
-
-		TerpstraSysExApplication::getApp().setEditMode(sysExSendingMode);
+		// auto sysExSendingMode = editModeTabIndexToMidiSysExSendingMode((int)!liveEditorBtn->getToggleState());
+		// TerpstraSysExApplication::getApp().setEditMode(sysExSendingMode);
 	}
     //[/UserbuttonClicked_Post]
 }
@@ -429,8 +431,8 @@ void MidiEditArea::buttonClicked (juce::Button* buttonThatWasClicked)
 void MidiEditArea::lookAndFeelChanged()
 {
 	connectedColours.clear();
-	connectedColours.add(getLookAndFeel().findColour(LumatoneEditorColourIDs::DisconnectedRed));
-	connectedColours.add(getLookAndFeel().findColour(LumatoneEditorColourIDs::ConnectedGreen));
+	connectedColours.add(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DisconnectedRed));
+	connectedColours.add(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ConnectedGreen));
 }
 
 void MidiEditArea::setConnectivity(bool isConnectedIn, String connectionStatus)
@@ -447,10 +449,9 @@ void MidiEditArea::setConnectivity(bool isConnectedIn, String connectionStatus)
 	liveEditorBtn->setVisible(isConnectedIn);
 	offlineEditorBtn->setVisible(isConnectedIn);
 
-	isConnected = isConnectedIn;
-	btnAutoConnect->setEnabled(!isConnected);
+	btnAutoConnect->setEnabled(!isConnectedIn);
 
-	if (isConnected)
+	if (isConnectedIn)
 	{
 		if (liveEditorBtn->getToggleState())
 		{
@@ -466,7 +467,7 @@ void MidiEditArea::setConnectivity(bool isConnectedIn, String connectionStatus)
 		}
 	}
 	else
-	{	
+	{
 		if (btnAutoConnect->getToggleState())
 		{
 			if (connectionStatus.isEmpty())
@@ -482,7 +483,7 @@ void MidiEditArea::setConnectivity(bool isConnectedIn, String connectionStatus)
 		}
 	}
 
-	lblConnectionState->setColour(Label::ColourIds::textColourId, connectedColours[isConnectedIn]);
+	lblConnectionState->setColour(juce::Label::ColourIds::textColourId, connectedColours[isConnectedIn]);
 
 	resized();
 	repaint();
@@ -495,56 +496,58 @@ void MidiEditArea::connectionFailed()
     //    *lblConnectionState.get(),
     //    HajuErrorVisualizer::ErrorLevel::error,
     //    "No answer...");
-	TerpstraSysExApplication::getApp().getLumatoneController()->setMidiInput(-1);
-	TerpstraSysExApplication::getApp().getLumatoneController()->setMidiOutput(-1);
+	// getLumatoneController()->setMidiInput(-1);
+	// getLumatoneController()->setMidiOutput(-1);
 }
-
-void MidiEditArea::connectionEstablished(int inputDevice, int outputDevice)
+void MidiEditArea::connectionStateChanged(ConnectionState state)
 {
-    if (inputDevice >= 0 && outputDevice >= 0)
-    {
-		refreshInputMenuAndSetSelected(inputDevice + 1, dontSendNotification);
-		refreshOutputMenuAndSetSelected(outputDevice + 1, dontSendNotification);
-        setConnectivity(true);
+	if (state == ConnectionState::ONLINE)
+	{
+		// if (inputDevice >= 0 && outputDevice >= 0)
+		// {
+		// 	refreshInputMenuAndSetSelected(inputDevice + 1, dontSendNotification);
+		// 	refreshOutputMenuAndSetSelected(outputDevice + 1, dontSendNotification);
+		// 	setConnectivity(true);
 
-		onOpenConnectionToDevice();
-    }
-    else
-    {
-		jassertfalse;
-    }
+		// 	onOpenConnectionToDevice();
+		// }
+		// else
+		// {
+		// 	jassertfalse;
+		// }
+	}
+	else if (state == ConnectionState::DISCONNECTED)
+	{
+		// Lost should only happen after connection is established
+		// jassert(isConnected);
 
+		// if (!btnAutoConnect->getToggleState())
+		// 	startTimer(deviceRefreshTimeoutMs);
+
+		// else
+		// {
+		// 	refreshInputMenuAndSetSelected(0, NotificationType::dontSendNotification);
+		// 	refreshOutputMenuAndSetSelected(0, NotificationType::sendNotificationAsync);
+		// }
+
+		// setConnectivity(false);
+	}
 	//deviceMonitor.intializeConnectionLossDetection();
 }
 
-void MidiEditArea::connectionLost()
+void MidiEditArea::editorModeChanged(EditorMode editModeIn)
 {
-	// Lost should only happen after connection is established
-	jassert(isConnected);
+	// editorMode = editModeIn;
 
-	if (!btnAutoConnect->getToggleState())
-		startTimer(deviceRefreshTimeoutMs);
-
-	else
+    switch (editModeIn)
     {
-        refreshInputMenuAndSetSelected(0, NotificationType::dontSendNotification);
-        refreshOutputMenuAndSetSelected(0, NotificationType::sendNotificationAsync);
-    }
-    
-    setConnectivity(false);
-}
-
-void MidiEditArea::editorModeChanged(sysExSendingMode editMode)
-{
-    switch (editMode)
-    {
-    case sysExSendingMode::liveEditor:
+    case EditorMode::ONLINE:
         liveEditorBtn->setToggleState(true, NotificationType::dontSendNotification);
-        if (TerpstraSysExApplication::getApp().getHasChangesToSave())
+        if (getHasChangesToSave())
             onOpenConnectionToDevice(translate("Switch to Live Mode with unsaved changes"));
         break;
 
-    case sysExSendingMode::offlineEditor:
+    case EditorMode::OFFLINE:
         offlineEditorBtn->setToggleState(true, NotificationType::dontSendNotification);
         lblConnectionState->setText(translate("Offline"), NotificationType::dontSendNotification);
         //errorVisualizer.setErrorLevel(
@@ -558,7 +561,7 @@ void MidiEditArea::editorModeChanged(sysExSendingMode editMode)
         break;
     }
 
-    lblConnectionState->setColour(Label::ColourIds::textColourId, connectedColours[(int)liveEditorBtn->getToggleState()]);
+    lblConnectionState->setColour(juce::Label::ColourIds::textColourId, connectedColours[(int)liveEditorBtn->getToggleState()]);
     repaint();
 }
 
@@ -575,7 +578,7 @@ void MidiEditArea::onOpenConnectionToDevice(String dialogTitle)
         DBG("Bad connection loop detected");
         return;
     }
-    
+
     isWaitingForUserChoice = true;
 
 	auto alertOptions = MessageBoxOptions().withTitle(dialogTitle)
@@ -585,20 +588,22 @@ void MidiEditArea::onOpenConnectionToDevice(String dialogTitle)
                                            .withButton("Send Editor Layout")
                                            .withButton("Keep Editing Offline")
                                            .withButton("Import From Lumatone");
-	
+
 	AlertWindow::showAsync(alertOptions, [&](int retc)
 		{
             isWaitingForUserChoice = false;
 
 			if (retc == 0) // Import
 			{
-				TerpstraSysExApplication::getApp().requestConfigurationFromDevice();
+				getLumatoneController()->sendGetCompleteMappingRequest();
+				// TerpstraSysExApplication::getApp().requestConfigurationFromDevice();
 				liveEditorBtn->setToggleState(true, NotificationType::sendNotification);
 				lblConnectionState->setText("Connected", NotificationType::dontSendNotification);
 			}
 			else if (retc == 1) // Send
 			{
-				TerpstraSysExApplication::getApp().sendCurrentConfigurationToDevice();
+				getLumatoneController()->sendCompleteMapping(*getMappingData(), true, false);
+				// TerpstraSysExApplication::getApp().sendCurrentConfigurationToDevice();
 				liveEditorBtn->setToggleState(true, NotificationType::sendNotification);
 				lblConnectionState->setText("Connected", NotificationType::dontSendNotification);
 			}
@@ -614,7 +619,7 @@ void MidiEditArea::refreshInputMenuAndSetSelected(int inputDeviceIndex, juce::No
 {
 	cbMidiInput->clear(NotificationType::dontSendNotification);
 	int i = 1;
-	for (auto device : TerpstraSysExApplication::getApp().getLumatoneController()->getMidiInputList())
+	for (auto device : getLumatoneController()->getMidiInputList())
 		cbMidiInput->addItem(device.name, i++);
 
 	if (inputDeviceIndex >= 0)
@@ -625,7 +630,7 @@ void MidiEditArea::refreshOutputMenuAndSetSelected(int outputDeviceIndex, juce::
 {
 	cbMidiOutput->clear(NotificationType::dontSendNotification);
 	int i = 1;
-	for (auto device : TerpstraSysExApplication::getApp().getLumatoneController()->getMidiOutputList())
+	for (auto device : getLumatoneController()->getMidiOutputList())
 		cbMidiOutput->addItem(device.name, i++);
 
 	if (outputDeviceIndex >= 0)
@@ -634,21 +639,21 @@ void MidiEditArea::refreshOutputMenuAndSetSelected(int outputDeviceIndex, juce::
 
 void MidiEditArea::timerCallback()
 {
-	if (isConnected)
+	if (isConnected())
 	{
 		stopTimer();
 	}
 	else
 	{
-		TerpstraSysExApplication::getApp().getLumatoneController()->refreshAvailableMidiDevices();
+		// getLumatoneController()->refreshAvailableMidiDevices();
 
 		refreshInputMenuAndSetSelected(
-			TerpstraSysExApplication::getApp().getLumatoneController()->getMidiInputIndex() + 1,
+			getLumatoneController()->getMidiInputIndex() + 1,
 			juce::NotificationType::dontSendNotification
 		);
 
 		refreshOutputMenuAndSetSelected(
-			TerpstraSysExApplication::getApp().getLumatoneController()->getMidiOutputIndex() + 1,
+			getLumatoneController()->getMidiOutputIndex() + 1,
 			juce::NotificationType::dontSendNotification
 		);
 	}
@@ -702,4 +707,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

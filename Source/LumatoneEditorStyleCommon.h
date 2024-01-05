@@ -12,7 +12,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "lumatone_assets.h"
+#include "./lumatone_editor_library/graphics/lumatone_assets.h"
 
 //==================================================================
 //

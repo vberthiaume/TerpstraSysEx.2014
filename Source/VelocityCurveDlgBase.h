@@ -24,7 +24,11 @@
 
 #include "VelocityCurveComponents.h"
 #include "VelocityCurveEditStrategy.h"
-#include "./data/lumatone_layout.h"
+
+#include "LumatoneEditorState.h"
+
+class LumatoneLayout;
+class LumatoneConfigTable;
 
 //[/Headers]
 
@@ -39,11 +43,12 @@ Describe your class and how it works here!
                                                                     //[/Comments]
 */
 class VelocityCurveDlgBase  : public Component,
+                              public LumatoneEditorState,
                               public juce::ComboBox::Listener
 {
 public:
     //==============================================================================
-    VelocityCurveDlgBase (LumatoneConfigTable::TableType typeValue);
+    VelocityCurveDlgBase (const LumatoneEditorState& stateIn, LumatoneConfigTable::TableType typeValue);
     ~VelocityCurveDlgBase() override;
 
     //==============================================================================
@@ -54,16 +59,16 @@ public:
 
 	virtual void sendVelocityTableToController();
 
-	void mouseMove(const MouseEvent &event);
-	void mouseDown(const MouseEvent &event);
-	void mouseDrag(const MouseEvent &event);
-	void mouseUp(const MouseEvent &event);
+	void mouseMove(const juce::MouseEvent &event);
+	void mouseDown(const juce::MouseEvent &event);
+	void mouseDrag(const juce::MouseEvent &event);
+	void mouseUp(const juce::MouseEvent &event);
 
 protected:
 	virtual float beamWidth(int xPos) { return getWidth() / 128.0f; }
 
-	LumatoneLayout*	getMappingInEdit();
-	LumatoneConfigTable* getConfigInEdit();
+	// LumatoneLayout*	getMappingInEdit();
+	const LumatoneConfigTable* getConfigInEdit() const;
 	VelocityCurveEditStrategyBase* getCurrentDrawingStrategy();
 
 public:
@@ -81,8 +86,8 @@ private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 	LumatoneConfigTable::TableType velocityCurveType;
 	//Path beamTableFrame;
-    Path beamTableContour;
-    Path beamTableGrid;
+    juce::Path beamTableContour;
+    juce::Path beamTableGrid;
 	std::unique_ptr<VelocityCurveBeam> velocityBeamTable[128];
 
 	VelocityCurveFreeDrawingStrategy freeDrawingStrategy;
@@ -91,9 +96,9 @@ private:
 
 	std::map<LumatoneConfigTable::DrawMode, VelocityCurveEditStrategyBase*> drawingStrategies;
 
-    ColourGradient beamColourGradient;
-    Colour backgroundColour;
-    Colour gridColour;
+    juce::ColourGradient beamColourGradient;
+    juce::Colour backgroundColour;
+    juce::Colour gridColour;
 
 protected:
     //[/UserVariables]

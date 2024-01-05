@@ -8,33 +8,69 @@
 */
 
 #include "MainWindow.h"
-#include "Main.h"
+#include "MainComponent.h"
 
-MainWindow::MainWindow(ComponentBoundsConstrainer* constrainerIn) : DocumentWindow("Lumatone Editor",
-    TerpstraSysExApplication::getApp().getLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground),
-    DocumentWindow::minimiseButton + DocumentWindow::closeButton),
-    constrainer(constrainerIn)
+#include "LumatoneEditorLookAndFeel.h"
+#include "./lumatone_editor_library/palettes/colour_palette_file.h"
+
+#include "./lumatone_editor_library/graphics/view_constants.h"
+
+MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdMgr)
+    : juce::DocumentWindow("Lumatone Editor", juce::Colours::black, juce::DocumentWindow::minimiseButton + juce::DocumentWindow::closeButton)
+    , LumatoneEditorState("MainWindow", stateIn)
+    , commandManager(cmdMgr)
 {
-    setContentOwned(new MainContentComponent(*TerpstraSysExApplication::getApp().getMappingData()), true);
-
+    // setContentOwned(new MainContentComponent(*TerpstraSysExApplication::getApp().getMappingData()), true);
+    setContentOwned(new MainContentComponent(stateIn), true);
     setResizable(true, true);
 #if JUCE_ANDROID
     setFullScreen(true);
 #else
+
+    setLookAndFeel(&getEditorLookAndFeel());
+
+    menuModel = std::make_unique<Lumatone::Menu::MainMenuModel>(*this, commandManager);
+
+#if JUCE_MAC
+    MenuBarModel::setMacMainMenu(menuModel.get());
+#else
+    setMenuBar(menuModel.get());
+    getMenuBarComponent()->getProperties().set(
+        LumatoneEditorStyleIDs::popupMenuBackgroundColour,
+        getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MenuBarBackground).toString()
+    );
+#endif
+
     // Window aspect ratio
+    constrainer.reset(new juce::ComponentBoundsConstrainer());
+    
     constrainer->setFixedAspectRatio(DEFAULTMAINWINDOWASPECT);
     constrainer->setMinimumSize(800, juce::roundToInt(800 / DEFAULTMAINWINDOWASPECT));
+    constrainer->setMaximumHeight(1000);
+    setConstrainer(constrainer.get());
 
-    setConstrainer(constrainer);
+    addKeyListener(commandManager->getKeyMappings());
     updateBounds();
+
     startTimer(2000);
 #endif
 
-    setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel());
+    // setLookAndFeel(stateIn.getEditorLookAndFeel());
+    // setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel());
 }
 
 MainWindow::~MainWindow()
 {
+    removeKeyListener(commandManager->getKeyMappings());
+
+#if JUCE_MAC
+    MenuBarModel::setMacMainMenu(nullptr);
+#else
+    setMenuBarComponent(nullptr);
+#endif
+
+    menuModel = nullptr;
+
     stopTimer();
     setConstrainer(nullptr);
 }
@@ -75,13 +111,13 @@ bool MainWindow::isOutOfHorizontalBounds() const
 void MainWindow::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
     // Save state of main window
-    propertiesFile->setValue("MainWindowState", getWindowStateAsString());
+    propertiesFile->setValue(LumatoneEditorProperty::MainWindowState, getWindowStateAsString());
     ((MainContentComponent*)(getContentComponent()))->saveStateToPropertiesFile(propertiesFile);
 }
 
 void MainWindow::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
 {
-    bool useSavedState = restoreWindowStateFromString(propertiesFile->getValue("MainWindowState"));
+    bool useSavedState = restoreWindowStateFromString(getProperty(LumatoneEditorProperty::MainWindowState));
 
     fixWindowPositionAndSize(!useSavedState);
 

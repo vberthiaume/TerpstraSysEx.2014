@@ -21,13 +21,18 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
+
 #include "MappingLogic.h"
 #include "IncrMidiNotesMapping.h"
 #include "KBMMappingDlg.h"
-#include "lumatone_geometry.h"
+
 #include "ScaleStructureController/ScaleStructureComponent.h"
 #include "ScaleStructureController/ScaleDesignWindow.h"
-#include "LumatoneEditorStyleCommon.h"
+
+#include "./lumatone_editor_library/mapping/lumatone_geometry.h"
+#include "./lumatone_editor_library/palettes/colour_selection_broadcaster.h"
+
+#include "LumatoneEditorState.h"
 //[/Headers]
 
 
@@ -40,7 +45,8 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class IsomorphicMassAssign  : public Component,
+class IsomorphicMassAssign  : public juce::Component,
+							  public LumatoneEditorState,
                               public MappingLogicBase::Listener,
                               public ScaleStructureComponent::Listener,
                               public ColourSelectionListener,
@@ -49,7 +55,7 @@ class IsomorphicMassAssign  : public Component,
 {
 public:
     //==============================================================================
-    IsomorphicMassAssign ();
+    IsomorphicMassAssign (const LumatoneEditorState& stateIn);
     ~IsomorphicMassAssign() override;
 
     //==============================================================================
@@ -106,7 +112,7 @@ private:
 
 	MappingLogicBase*			mappingLogic;
 	int							periodSize;
-	LumatoneGeometry		boardGeometry;
+	LumatoneGeometry			boardGeometry;
 	ScaleStructure				scaleStructure;
 
 	// Style helpers

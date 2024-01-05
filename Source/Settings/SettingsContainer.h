@@ -9,11 +9,7 @@
 */
 
 #pragma once
-#include "../LumatoneEditorLookAndFeel.h"
-#include "CalibrationDlg.h"
-#include "FirmwareDlg.h"
-#include "PresetSettingsDlg.h"
-#include "MidiSettingsDlg.h"
+#include <JuceHeader.h>
 
 typedef enum {
     Calibration = 0,
@@ -39,13 +35,13 @@ public:
     void paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override;
 
     void selectedRowsChanged(int lastRowSelected) override { sendChangeMessage(); }
-    
-    
+
+
 
     //=========================================================================
 private:
     Array<String> categories;
-    
+
 };
 
 class SettingsContainer : public Component, protected ChangeListener
@@ -66,7 +62,7 @@ public:
     void changeListenerCallback(ChangeBroadcaster* source) override;
 
     //=========================================================================
-    
+
     void showPanel(int editorSettingCategory);
 
 private:

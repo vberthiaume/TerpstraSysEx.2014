@@ -9,20 +9,20 @@
 */
 
 #include "PresetSettingsDlg.h"
-#include "../Main.h"
+#include "../lumatone_editor_library/device/lumatone_controller.h"
 
-PresetSettingsDlg::PresetSettingsDlg()
+PresetSettingsDlg::PresetSettingsDlg(const LumatoneEditorState& stateIn)
+    : LumatoneEditorState("PresetSettingsDlg", stateIn)
 {
     resetPresetsBtn.reset(new TextButton(
-        translate("Reset Presets To Factory Default"),
-        translate("Clear the mapping presets stored on the device and replace with factory mappings.")
+        juce::translate("Reset Presets To Factory Default"),
+        juce::translate("Clear the mapping presets stored on the device and replace with factory mappings.")
     ));
     addAndMakeVisible(resetPresetsBtn.get());
     resetPresetsBtn->addListener(this);
 
-    TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
-
-    setSupportedControls(TerpstraSysExApplication::getApp().getFirmwareVersion());
+    // getLumatoneController()->addFirmwareListener(this);
+    setSupportedControls(getFirmwareVersion());
 
     flexBox.justifyContent = FlexBox::JustifyContent::flexStart;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
@@ -30,7 +30,7 @@ PresetSettingsDlg::PresetSettingsDlg()
 
 PresetSettingsDlg::~PresetSettingsDlg()
 {
-    TerpstraSysExApplication::getApp().getLumatoneController()->removeFirmwareListener(this);
+    // getLumatoneController()->removeFirmwareListener(this);
     resetPresetsBtn = nullptr;
 }
 
@@ -41,13 +41,13 @@ void PresetSettingsDlg::paint(Graphics& g)
 
 void PresetSettingsDlg::resized()
 {
-    Font btnFont = getLookAndFeel().getTextButtonFont(*resetPresetsBtn.get(), buttonHeight);
+    juce::Font btnFont = getLookAndFeel().getTextButtonFont(*resetPresetsBtn.get(), buttonHeight);
 
     int btnWidth = btnFont.getStringWidth(resetPresetsBtn->getButtonText()) * 1.2f;
 
     flexBox.items.clear();
 
-    FlexItem btnItem = FlexItem().withWidth(btnWidth).withHeight(buttonHeight);
+    juce::FlexItem btnItem = juce::FlexItem().withWidth(btnWidth).withHeight(buttonHeight);
     btnItem.associatedComponent = resetPresetsBtn.get();
     flexBox.items.add(btnItem);
 
@@ -58,27 +58,26 @@ void PresetSettingsDlg::buttonClicked(Button* btn)
 {
     if (btn == resetPresetsBtn.get())
     {
-        TerpstraSysExApplication::getApp().getLumatoneController()->resetPresetsToFactoryDefault();
+        getLumatoneController()->resetPresetsToFactoryDefault();
     }
 }
 
-void PresetSettingsDlg::firmwareRevisionReceived(FirmwareVersion version)
+void PresetSettingsDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
     setSupportedControls(version);
 }
 
-void PresetSettingsDlg::setSupportedControls(FirmwareVersion version)
+void PresetSettingsDlg::setSupportedControls(LumatoneFirmware::Version version)
 {
-    FirmwareSupport support;
-    if (support.versionAcknowledgesCommand(version, RESET_DEFAULT_PRESETS))
+    if (getFirmwareSupport().versionAcknowledgesCommand(version, RESET_DEFAULT_PRESETS))
     {
         resetPresetsBtn->setEnabled(true);
-        resetPresetsBtn->setTooltip(translate("Clear the mapping presets stored on the device and replace with factory mappings."));
+        resetPresetsBtn->setTooltip(juce::translate("Clear the mapping presets stored on the device and replace with factory mappings."));
     }
     else
     {
         resetPresetsBtn->setEnabled(false);
-        resetPresetsBtn->setTooltip(translate("This feature is not supported by your Lumatone firmware version."));
+        resetPresetsBtn->setTooltip(juce::translate("This feature is not supported by your Lumatone firmware version."));
         // TODO: better approach for changing tooltips
     }
 }

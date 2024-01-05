@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 
+#include "LumatoneEditorState.h"
 
 namespace Lumatone {
 	namespace Menu {
@@ -37,10 +38,11 @@ namespace Lumatone {
 			aboutSysEx = 0x200400
 		};
 
-		class MainMenuModel : public MenuBarModel
+		class MainMenuModel : public juce::MenuBarModel
+							, public LumatoneEditorState
 		{
 		public:
-			MainMenuModel(ApplicationCommandManager* commandManager);
+			MainMenuModel(const LumatoneEditorState& stateIn, ApplicationCommandManager* commandManager);
 
 			virtual StringArray getMenuBarNames();
 			PopupMenu getMenuForIndex(int topLevelMenuIndex, const String& menuName);

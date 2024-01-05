@@ -1,0 +1,424 @@
+#include "application_state.h"
+#include "../device/lumatone_controller.h"
+#include "../color/colour_model.h"
+#include "../data/lumatone_context.h"
+
+#include "../listeners/status_listener.h"
+#include "../listeners/editor_listener.h"
+#include "../listeners/firmware_listener.h"
+#include "../listeners/midi_listener.h"
+
+juce::Array<juce::Identifier> getLumatoneApplicationProperties()
+{
+    juce::Array<juce::Identifier> properties;
+    properties.add(LumatoneApplicationProperty::ConnectionStateId);
+    // properties.add(LumatoneApplicationProperty::DetectDeviceIfDisconnected);
+    // properties.add(LumatoneApplicationProperty::CheckConnectionIfInactive);
+    properties.add(LumatoneApplicationProperty::LayoutContextIsSetId);
+    return properties;
+}
+
+LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn, juce::UndoManager *undoManagerIn)
+    : LumatoneState(nameIn, stateIn, undoManagerIn)
+{
+    layoutContext = std::make_shared<LumatoneContext>(*mappingData);
+	controller = std::make_shared<LumatoneController>(*this, driverIn, undoManagerIn);
+    colourModel = std::make_shared<LumatoneColourModel>();
+
+    editorListeners.reset(new juce::ListenerList<LumatoneEditor::EditorListener>());
+    statusListeners.reset(new juce::ListenerList<LumatoneEditor::StatusListener>());
+    firmwareListeners.reset(new juce::ListenerList<LumatoneEditor::FirmwareListener>());
+    midiListeners.reset(new juce::ListenerList<LumatoneEditor::MidiListener>());
+
+    loadStateProperties(stateIn);
+}
+
+// LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneState &stateIn, juce::UndoManager *undoManagerIn)
+//     : LumatoneState(nameIn, stateIn, undoManagerIn)
+// {
+//     colourModel = std::make_shared<LumatoneColourModel>();
+//     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
+//     loadStateProperties(state);
+// }
+
+LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn, juce::UndoManager *undoManagerIn)
+    : LumatoneState(nameIn, (const LumatoneState&)stateIn, undoManagerIn)
+    , layoutContext(stateIn.layoutContext)
+    , controller(stateIn.controller)
+    , colourModel(stateIn.colourModel)
+    , editorListeners(stateIn.editorListeners)
+    , statusListeners(stateIn.statusListeners)
+    , firmwareListeners(stateIn.firmwareListeners)
+    , midiListeners(stateIn.midiListeners)
+{
+    loadStateProperties(state);
+}
+
+LumatoneApplicationState::~LumatoneApplicationState()
+{
+    controller = nullptr;
+    colourModel = nullptr;
+    layoutContext = nullptr;
+}
+
+ConnectionState LumatoneApplicationState::getConnectionState() const
+{
+    return connectionState;
+}
+
+int LumatoneApplicationState::getMidiInputIndex() const
+{
+    return controller->getMidiInputIndex();
+}
+
+int LumatoneApplicationState::getMidiOutputIndex() const
+{
+    return controller->getMidiOutputIndex();
+}
+
+bool LumatoneApplicationState::sendSysExToDevice() const
+{
+    return connectionState == ConnectionState::ONLINE;
+}
+
+LumatoneController *LumatoneApplicationState::getLumatoneController() const
+{
+    return controller.get();
+}
+
+LumatoneColourModel *LumatoneApplicationState::getColourModel() const
+{
+    return colourModel.get();
+}
+
+const LumatoneContext *LumatoneApplicationState::getContext() const
+{
+    return contextIsSet ? layoutContext.get() : nullptr;
+}
+
+std::shared_ptr<LumatoneContext> LumatoneApplicationState::shareContext()
+{
+    return layoutContext;
+}
+
+juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree stateIn)
+{
+    juce::ValueTree newState = (stateIn.hasType(LumatoneStateProperty::StateTree))
+                             ? stateIn
+                             : juce::ValueTree(LumatoneStateProperty::StateTree);
+
+    // DBG("LumatoneApplicationState::loadStateProperties:\n" + newState.toXmlString());
+    for (auto property : getLumatoneApplicationProperties())
+    {
+        if (newState.hasProperty(property))
+            handleStatePropertyChange(newState, property);
+    }
+
+    LumatoneState::loadStateProperties(newState);
+
+    return newState;
+}
+
+void LumatoneApplicationState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
+{
+    if (property == LumatoneApplicationProperty::ConnectionStateId)
+    {
+        connectionState = ConnectionState((int)stateIn.getProperty(property, (int)ConnectionState::DISCONNECTED));
+    }
+    else if (property == LumatoneApplicationProperty::LayoutContextIsSetId)
+    {
+        contextIsSet = (bool)stateIn.getProperty(property, false);
+    }
+    else
+    {
+        LumatoneState::handleStatePropertyChange(stateIn, property);
+    }
+}
+
+LumatoneKeyContext LumatoneApplicationState::getKeyContext(int boardIndex, int keyIndex) const
+{
+    if (contextIsSet)
+    {
+        return layoutContext->getKeyContext(boardIndex, keyIndex);
+    }
+
+    MappedLumatoneKey key = MappedLumatoneKey(getKey(boardIndex, keyIndex), boardIndex, keyIndex);
+    return LumatoneKeyContext(key);
+}
+
+void LumatoneApplicationState::setContext(const LumatoneContext& contextIn)
+{
+    if (layoutContext.get() != nullptr)
+        clearContext();
+
+    *layoutContext = contextIn;
+    contextIsSet = true;
+
+    state.setPropertyExcludingListener(this, LumatoneApplicationProperty::LayoutContextIsSetId, contextIsSet, undoManager);
+}
+
+void LumatoneApplicationState::clearContext()
+{
+    *layoutContext = LumatoneContext(*mappingData);
+    contextIsSet = false;
+
+    state.setPropertyExcludingListener(this, LumatoneApplicationProperty::LayoutContextIsSetId, contextIsSet, undoManager);
+}
+
+void LumatoneApplicationState::setCompleteConfig(const LumatoneLayout &layoutIn)
+{
+    LumatoneState::setCompleteConfig(layoutIn);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendCurrentCompleteConfig();
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::completeMappingLoaded, *mappingData);
+}
+
+void LumatoneApplicationState::setLayout(const LumatoneLayout &layoutIn)
+{
+    LumatoneState::setLayout(layoutIn);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendCompleteMapping(layoutIn);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::completeMappingLoaded, *mappingData);
+}
+
+void LumatoneApplicationState::setBoard(const LumatoneBoard &boardIn, int boardId)
+{
+    LumatoneState::setBoard(boardIn, boardId);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendAllParamsOfBoard(boardId, &boardIn);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardId-1));
+}
+
+void LumatoneApplicationState::setKey(const LumatoneKey &keyIn, int boardId, int keyIndex)
+{
+    LumatoneState::setKey(keyIn, boardId, keyIndex);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendKeyParam(boardId, keyIndex, keyIn);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::keyChanged, boardId - 1, keyIndex, getKey(boardId-1, keyIndex));
+}
+
+void LumatoneApplicationState::setKeyConfig(const LumatoneKey& keyIn, int boardId, int keyIndex)
+{
+    LumatoneState::setKeyConfig(keyIn, boardId, keyIndex);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendKeyConfig(boardId, keyIndex, keyIn);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::keyChanged, boardId - 1, keyIndex, getKey(boardId - 1, keyIndex));
+}
+
+
+void LumatoneApplicationState::setKeyColour(juce::Colour colour, int boardId, int keyIndex)
+{
+    LumatoneState::setKeyColour(colour, boardId, keyIndex);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendKeyColourConfig(boardId, keyIndex, colour);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::keyChanged, boardId - 1, keyIndex, getKey(boardId - 1, keyIndex));
+}
+
+void LumatoneApplicationState::sendSelectionParam(const juce::Array<MappedLumatoneKey>& selection, bool signalEditorListeners, bool bufferKeyUpdates)
+{
+    LumatoneState::sendSelectionParam(selection);
+
+    for (auto mappedKey : selection)
+    {
+        controller->sendKeyParam(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
+        //sendKeyConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, (LumatoneKey)mappedKey, false, bufferKeyUpdates);
+    }
+
+    //if (signalEditorListeners)
+    editorListeners->call(&LumatoneEditor::EditorListener::selectionChanged, selection);
+}
+
+void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLumatoneKey>& selection, bool signalEditorListeners, bool bufferKeyUpdates)
+{
+    LumatoneState::sendSelectionColours(selection);
+
+    for (auto mappedKey : selection)
+    {
+        controller->sendKeyColourConfig(mappedKey.boardIndex, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
+        //sendKeyColourConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, (LumatoneKey)mappedKey, false, bufferKeyUpdates);
+    }
+
+    //if (signalEditorListeners)
+    editorListeners->call(&LumatoneEditor::EditorListener::selectionChanged, selection);
+}
+
+void LumatoneApplicationState::setAftertouchEnabled(bool enabled)
+{
+    LumatoneState::setAftertouchEnabled(enabled);
+
+    if (sendSysExToDevice())
+    {
+        controller->setAftertouchEnabled(enabled);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::aftertouchToggled, enabled);
+}
+
+void LumatoneApplicationState::setLightOnKeyStrokes(bool enabled)
+{
+    LumatoneState::setLightOnKeyStrokes(enabled);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendLightOnKeyStrokes(enabled);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::lightOnKeyStrokesChanged, enabled);
+}
+
+void LumatoneApplicationState::setInvertExpression(bool invert)
+{
+    LumatoneState::setInvertExpression(invert);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendInvertFootController(invert);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::invertFootControllerChanged, invert);
+}
+
+void LumatoneApplicationState::setInvertSustain(bool invert)
+{
+    LumatoneState::setInvertSustain(invert);
+    
+    if (sendSysExToDevice())
+    {
+        controller->invertSustainPedal(invert);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::invertSustainToggled, invert);
+}
+
+void LumatoneApplicationState::setExpressionSensitivity(juce::uint8 sensitivity)
+{
+    LumatoneState::setExpressionSensitivity(sensitivity);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendExpressionPedalSensivity(sensitivity);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::expressionPedalSensitivityChanged, sensitivity);
+}
+
+void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType type, const LumatoneConfigTable& table)
+{
+    LumatoneState::setConfigTable(type, table);
+
+    if (sendSysExToDevice())
+    {
+        controller->sendTableConfig(type, table.velocityValues);
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::configTableChanged, type, *mappingData->getConfigTable(type));
+}
+//
+//void LumatoneApplicationState::setVelocityIntervalTable(const LumatoneConfigTable& tableIn)
+//{
+//    LumatoneState::setVelocityIntervalTable(tableIn);
+//
+//    if (sendSysExToDevice())
+//    {
+//        controller->setVelocityIntervalTable(tableIn);
+//    }
+//}
+//
+//void LumatoneApplicationState::setNoteVelocityTable(const LumatoneConfigTable& tableIn)
+//{
+//    LumatoneState::setNoteVelocityTable(tableIn);
+//
+//    if (sendSysExToDevice())
+//    {
+//        controller->setNoteVelocityTable(tableIn);
+//    }
+//}
+//
+//void LumatoneApplicationState::setAftertouchTable(const LumatoneConfigTable& tableIn)
+//{
+//    LumatoneState::setAftertouchTable(tableIn);
+//
+//    if (sendSysExToDevice())
+//    {
+//        controller->setAftertouchTable(tableIn);
+//    }
+//}
+//
+//void LumatoneApplicationState::setLumatouchTable(const LumatoneConfigTable& tableIn)
+//{
+//    LumatoneState::setLumatouchTable(tableIn);
+//
+//    if (sendSysExToDevice())
+//    {
+//        controller->setLumatouchTable(tableIn);
+//    }
+//}
+
+bool LumatoneApplicationState::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
+{
+    return controller->performAction(action, undoable, newTransaction);
+}
+
+void LumatoneApplicationState::addStatusListener(LumatoneEditor::StatusListener* listenerIn)
+{
+    statusListeners->add(listenerIn);
+}
+
+void LumatoneApplicationState::removeStatusListener(LumatoneEditor::StatusListener* listenerIn)
+{
+    statusListeners->remove(listenerIn);
+}
+
+void LumatoneApplicationState::addEditorListener(LumatoneEditor::EditorListener* listenerIn)
+{
+    editorListeners->add(listenerIn);
+}
+
+void LumatoneApplicationState::removeEditorListener(LumatoneEditor::EditorListener* listenerIn)
+{
+    editorListeners->remove(listenerIn);
+}
+
+void LumatoneApplicationState::addFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn)
+{
+    firmwareListeners->add(listenerIn);
+}
+
+void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* listenerIn)
+{
+    midiListeners->remove(listenerIn);
+}
+
+void LumatoneApplicationState::addMidiListener(LumatoneEditor::MidiListener* listenerIn)
+{
+    midiListeners->add(listenerIn);
+}
+
+void LumatoneApplicationState::removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn)
+{
+    firmwareListeners->remove(listenerIn);
+}
