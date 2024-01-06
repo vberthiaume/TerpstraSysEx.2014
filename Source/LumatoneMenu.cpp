@@ -82,6 +82,7 @@ namespace Lumatone {
 			{
 				// open a file from the "recent files" menu
 				// TerpstraSysExApplication::getApp().openRecentFile(menuItemID - recentFilesBaseID);
+				openRecentFile(menuItemID - recentFilesBaseID);
 			}
 		}
 

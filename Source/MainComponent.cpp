@@ -371,7 +371,7 @@ void MainContentComponent::buttonClicked(Button* btn)
 	if (colourEdit)
 	{
 		// May be better asynchronous on a timer
-		// TerpstraSysExApplication::getApp().reloadColourPalettes();
+		// TerpstraSysExApplication::getApp().loadColourPalettesFromFile();
 
 		auto palettes = getColourPalettes();
 		ColourPaletteWindow* paletteWindow = new ColourPaletteWindow(palettes);

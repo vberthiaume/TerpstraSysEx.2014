@@ -47,14 +47,8 @@ TerpstraSysExApplication::TerpstraSysExApplication()
 	LocalisedStrings::setCurrentMappings(new LocalisedStrings(localisation, false));
 	LocalisedStrings::getCurrentMappings()->setFallback(new LocalisedStrings(BinaryData::engb_txt, false));
 
-	 reloadColourPalettes();
+	state.loadColourPalettesFromFile();
 }
-//
-//LumatoneFirmwareDriver& TerpstraSysExApplication::initializeDriver()
-//{
-//	firmwareDriver = new LumatoneFirmwareDriver(LumatoneFirmwareDriver::HostMode::Driver);
-//	return *firmwareDriver;
-//}
 
 //==============================================================================
 void TerpstraSysExApplication::initialise(const String& commandLine)
@@ -98,7 +92,7 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 
 
 	if (state.getCurrentFile().existsAsFile())
-		state.openFromCurrentFile();
+		state.resetToCurrentFile();
 }
 
 void TerpstraSysExApplication::shutdown()
@@ -106,14 +100,14 @@ void TerpstraSysExApplication::shutdown()
 	// Add your application's shutdown code here..
 
 	// Save documents directories (Future: provide option to change them and save after changed by user)
-	state.propertiesFile->setValue("UserDocumentsDirectory", state.getUserDocumentsDirectory().getFullPathName());
-	state.propertiesFile->setValue("UserMappingsDirectory", state.getUserMappingsDirectory().getFullPathName());
-	state.propertiesFile->setValue("UserPalettesDirectory", state.getUserPalettesDirectory().getFullPathName());
+	state.propertiesFile->setValue(LumatoneEditorProperty::UserDocumentsDirectory, state.getUserDocumentsDirectory().getFullPathName());
+	state.propertiesFile->setValue(LumatoneEditorProperty::UserMappingsDirectory, state.getUserMappingsDirectory().getFullPathName());
+	state.propertiesFile->setValue(LumatoneEditorProperty::UserPalettesDirectory, state.getUserPalettesDirectory().getFullPathName());
 
 	// Save recent files list
-	state.recentFiles.removeNonExistentFiles();
+	state.recentFiles->removeNonExistentFiles();
 	jassert(state.propertiesFile != nullptr);
-	state.propertiesFile->setValue("RecentFiles", state.recentFiles.toString());
+	state.propertiesFile->setValue(LumatoneEditorProperty::RecentFiles, state.recentFiles->toString());
 
 	// Save state of main window
 	mainWindow->saveStateToPropertiesFile(state.propertiesFile.get());
@@ -228,26 +222,14 @@ bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& pa
 	}
 
 	// if (success)
-		// reloadColourPalettes();
+		// loadColourPalettesFromFile();
 
 	return success;
 }
 
-void TerpstraSysExApplication::reloadColourPalettes()
+void TerpstraSysExApplication::loadPropertiesFile()
 {
-    auto directory = state.getUserPalettesDirectory();
-	auto foundPaletteFiles = directory.findChildFiles(juce::File::TypesOfFileToFind::findFiles, true, '*' + juce::String(PALETTEFILEEXTENSION));
 
-	juce::Array<LumatoneEditorColourPalette> newPalettes;
-
-	auto paletteSorter = LumatoneEditorPaletteSorter();
-	for (auto file : foundPaletteFiles)
-	{
-		LumatoneEditorColourPalette palette = LumatoneEditorColourPalette::loadFromFile(file);
-		newPalettes.addSorted(paletteSorter, palette);
-	}
-
-	state.setColourPalettes(newPalettes);
 }
 
 void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
@@ -416,12 +398,12 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 
 bool TerpstraSysExApplication::openSysExMapping()
 {
-	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.recentFiles.getFile(0).getParentDirectory(), "*.ltn;*.tsx");
+	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.recentFiles->getFile(0).getParentDirectory(), "*.ltn;*.tsx");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
-			state.currentFile = chooser.getResult();
-			state.openFromCurrentFile();
+			setCurrentFile(chooser.getResult());
+			state.resetToCurrentFile();
 		});
 
 	return true;
@@ -433,12 +415,11 @@ bool TerpstraSysExApplication::saveSysExMapping(std::function<void(bool success)
 		return saveSysExMappingAs(saveFileCallback);
 	else
 		return saveCurrentFile(saveFileCallback);
-
 }
 
 bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> saveFileCallback)
 {
-	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.recentFiles.getFile(0).getParentDirectory(), "*.ltn");
+	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.recentFiles->getFile(0).getParentDirectory(), "*.ltn");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
@@ -458,25 +439,15 @@ bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> save
 
 bool TerpstraSysExApplication::resetSysExMapping()
 {
-    // Clear file
     state.setCurrentFile(juce::File());
-
-	// Clear all edit fields
-	// ((MainContentComponent*)(mainWindow->getContentComponent()))->deleteAll();
-
-	//state.setHasChangesToSave(false);
-
-	// Clear undoable actions
-	// ToDo (?)
-	// undoManager.clearUndoHistory();
-
-
-	// Window title
-	// updateMainTitle();
-
+	updateMainTitle();
 	return true;
 }
 
+bool TerpstraSysExApplication::setCurrentFile(juce::File file)
+{
+	return state.setCurrentFile(file);
+}
 
 // Saves the current mapping to file, specified in state.getCurrentFile().
 bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)> saveFileCallback)
@@ -497,17 +468,8 @@ bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)>
 	// ToDo undo history?
 
 	// Add file to recent files list - or put it on top of the list
-	state.recentFiles.addFile(state.currentFile);
-
+	state.recentFiles->addFile(state.currentFile);
 	return retc;
-}
-
-// open a file from the "recent files" menu
-bool TerpstraSysExApplication::openRecentFile(int recentFileIndex)
-{
-	jassert(recentFileIndex >= 0 && recentFileIndex < state.recentFiles.getNumFiles());
-	state.currentFile = state.recentFiles.getFile(recentFileIndex);
-	return state.openFromCurrentFile();
 }
 
 bool TerpstraSysExApplication::deleteSubBoardData()
@@ -589,11 +551,6 @@ bool TerpstraSysExApplication::redo()
 		return false;
 }
 
-// LumatoneColourModel* TerpstraSysExApplication::getColourModel()
-// {
-// 	return &colourModel;
-// }
-
 bool TerpstraSysExApplication::toggleDeveloperMode()
 {
 	state.setDeveloperMode(!state.getInDeveloperMode());
@@ -602,12 +559,6 @@ bool TerpstraSysExApplication::toggleDeveloperMode()
 	// propertiesFile->setValue("DeveloperMode", newMode);
 	// return ((MainContentComponent*)(mainWindow->getContentComponent()))->state.setDeveloperMode(newMode);
 }
-
-// void TerpstraSysExApplication::state.setEditMode(EditorMode editMode)
-// {
-// 	state.setEditMode(editMode);
-//     // lumatoneController->setSysExSendingMode(editMode);
-// }
 
 // bool TerpstraSysExApplication::generalOptionsDialog()
 // {
@@ -737,7 +688,7 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 				{
 					// retc == 2: "No" -> no saving, overwrite
 					DBG("Overwriting current edits");
-					// setHasChangesToSave(false);
+					state.setHasChangesToSave(false);
 					requestConfigurationFromDevice();
 				}
 			})
@@ -773,14 +724,6 @@ void TerpstraSysExApplication::updateMainTitle()
 	mainWindow->setName(windowTitle);
 }
 
-// void TerpstraSysExApplication::setHasChangesToSave(bool value)
-// {
-	// if (value != hasCh)
-	// {
-		// hasChangesToSave = value;
-		// updateMainTitle();
-	// }
-// }
 //
 //https://forum.juce.com/t/closing-dialog-windows-on-shutdown/27326/6
 void TerpstraSysExApplication::setOpenDialogWindow(DialogWindow* dialogWindowIn)

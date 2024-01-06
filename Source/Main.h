@@ -43,15 +43,9 @@ public:
 	void systemRequestedQuit() override;
 	void anotherInstanceStarted(const String& commandLine) override;
 
-	// static TerpstraSysExApplication& getApp()
-	// {
-	// 	TerpstraSysExApplication* const app = dynamic_cast<TerpstraSysExApplication*> (JUCEApplication::getInstance());
-	// 	jassert(app != nullptr);
-	// 	return *app;
-	// }
+	void loadPropertiesFile();
 
 	// Menu functionality
-	//Lumatone::Menu::MainMenuModel* getMainMenu() { return menuModel.get(); }
 	void getAllCommands(Array <CommandID>& commands) override;
 	void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
 	bool perform(const InvocationInfo& info) override;
@@ -61,11 +55,10 @@ public:
 	bool saveSysExMappingAs(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 	bool resetSysExMapping();
 
+	bool setCurrentFile(juce::File file);
 	bool saveCurrentFile(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
-    bool openRecentFile(int recentFileIndex);
 
 	bool saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToPalette=juce::File());
-	void reloadColourPalettes();
 
 	bool deleteSubBoardData();
 	bool copySubBoardData();

@@ -34,7 +34,8 @@ namespace LumatoneEditorProperty
     static const juce::Identifier FirmwareUpdatePerformed = juce::Identifier("FirmwareUpdatePerformed");
 
     static const juce::Identifier ColourPalettes = juce::Identifier("ColourPalettes");
-
+    
+    static const juce::Identifier CurrentFile = juce::Identifier("CurrentFile");
     static const juce::Identifier RecentFiles = juce::Identifier("RecentFiles");
 
     static const juce::Identifier AutoConnectDevice = juce::Identifier("AutoConnectDevice");
@@ -79,7 +80,8 @@ public:
 
     LumatoneEditorLookAndFeel& getEditorLookAndFeel() { return *lookAndFeel; }
 
-    const juce::Array<LumatoneEditorColourPalette>& getColourPalettes() { return colourPalettes; }
+    //const juce::Array<LumatoneEditorColourPalette>& getColourPalettes() { return colourPalettes; }
+    const juce::Array<LumatoneEditorColourPalette>& getColourPalettes();
 
     const LumatoneEditorFontLibrary& getAppFonts() const { return *appFonts; }
 
@@ -88,7 +90,8 @@ public:
     // juce::PropertiesFile& getPropertiesFile() { return *propertiesFile; }
     juce::File getCurrentFile() const { return currentFile; }
 
-    juce::RecentlyOpenedFilesList getRecentFiles() const;
+    juce::RecentlyOpenedFilesList& getRecentFiles();
+
     juce::File getUserDocumentsDirectory() const;
     juce::File getUserMappingsDirectory() const;
     juce::File getUserPalettesDirectory() const;
@@ -97,20 +100,27 @@ public:
 	// Font getAppFont(LumatoneEditorFont fontIdIn, float height = 12.0f) { return appFonts.getFont(fontIdIn, height); }
 
 public:
-
-    bool sendSysExToDevice() const override;
+    bool doSendChangesToDevice() const override;
 
 protected:
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    bool resetToCurrentFile();
+    bool openRecentFile(int recentFileIndex);
+
+    void addPalette(const LumatoneEditorColourPalette& newPalette);
+    bool deletePaletteFile(juce::File pathToPalette);
+
+public:
+
+
+
 // Only main app should access these
 private:
     void setColourPalettes(const juce::Array<LumatoneEditorColourPalette>& palettesIn);
-    void addPalette(const LumatoneEditorColourPalette& newPalette);
-	bool deletePaletteFile(juce::File pathToPalette);
+    void loadColourPalettesFromFile();
 
-	bool openFromCurrentFile();
     bool setCurrentFile(juce::File fileToOpen);
 
     void setEditMode(EditorMode editMode);
@@ -130,10 +140,10 @@ private:
 
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
 	std::shared_ptr<LumatoneEditorLookAndFeel>      lookAndFeel;
-	juce::Array<LumatoneEditorColourPalette>        colourPalettes;
+	std::shared_ptr<juce::Array<LumatoneEditorColourPalette>>        colourPalettes;
 
 	juce::File                      currentFile;
-	juce::RecentlyOpenedFilesList	recentFiles;
+	std::shared_ptr<juce::RecentlyOpenedFilesList>	recentFiles;
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
