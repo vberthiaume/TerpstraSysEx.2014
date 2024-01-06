@@ -76,7 +76,7 @@ int LumatoneApplicationState::getMidiOutputIndex() const
     return controller->getMidiOutputIndex();
 }
 
-bool LumatoneApplicationState::sendSysExToDevice() const
+bool LumatoneApplicationState::doSendChangesToDevice() const
 {
     return connectionState == ConnectionState::ONLINE;
 }
@@ -169,7 +169,7 @@ void LumatoneApplicationState::setCompleteConfig(const LumatoneLayout &layoutIn)
 {
     LumatoneState::setCompleteConfig(layoutIn);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendCurrentCompleteConfig();
     }
@@ -190,7 +190,7 @@ void LumatoneApplicationState::setLayout(const LumatoneLayout &layoutIn)
 {
     LumatoneState::setLayout(layoutIn);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendCompleteMapping(layoutIn);
     }
@@ -202,7 +202,7 @@ void LumatoneApplicationState::setBoard(const LumatoneBoard &boardIn, int boardI
 {
     LumatoneState::setBoard(boardIn, boardId);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendAllParamsOfBoard(boardId, &boardIn);
     }
@@ -214,7 +214,7 @@ void LumatoneApplicationState::setKey(const LumatoneKey &keyIn, int boardId, int
 {
     LumatoneState::setKey(keyIn, boardId, keyIndex);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendKeyParam(boardId, keyIndex, keyIn);
     }
@@ -226,7 +226,7 @@ void LumatoneApplicationState::setKeyConfig(const LumatoneKey& keyIn, int boardI
 {
     LumatoneState::setKeyConfig(keyIn, boardId, keyIndex);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendKeyConfig(boardId, keyIndex, keyIn);
     }
@@ -239,7 +239,7 @@ void LumatoneApplicationState::setKeyColour(juce::Colour colour, int boardId, in
 {
     LumatoneState::setKeyColour(colour, boardId, keyIndex);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendKeyColourConfig(boardId, keyIndex, colour);
     }
@@ -279,7 +279,7 @@ void LumatoneApplicationState::setAftertouchEnabled(bool enabled)
 {
     LumatoneState::setAftertouchEnabled(enabled);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->setAftertouchEnabled(enabled);
     }
@@ -291,7 +291,7 @@ void LumatoneApplicationState::setLightOnKeyStrokes(bool enabled)
 {
     LumatoneState::setLightOnKeyStrokes(enabled);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendLightOnKeyStrokes(enabled);
     }
@@ -303,7 +303,7 @@ void LumatoneApplicationState::setInvertExpression(bool invert)
 {
     LumatoneState::setInvertExpression(invert);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendInvertFootController(invert);
     }
@@ -315,7 +315,7 @@ void LumatoneApplicationState::setInvertSustain(bool invert)
 {
     LumatoneState::setInvertSustain(invert);
     
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->invertSustainPedal(invert);
     }
@@ -327,7 +327,7 @@ void LumatoneApplicationState::setExpressionSensitivity(juce::uint8 sensitivity)
 {
     LumatoneState::setExpressionSensitivity(sensitivity);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendExpressionPedalSensivity(sensitivity);
     }
@@ -339,7 +339,7 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 {
     LumatoneState::setConfigTable(type, table);
 
-    if (sendSysExToDevice())
+    if (doSendChangesToDevice())
     {
         controller->sendTableConfig(type, table.velocityValues);
     }
@@ -351,7 +351,7 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //{
 //    LumatoneState::setVelocityIntervalTable(tableIn);
 //
-//    if (sendSysExToDevice())
+//    if (doSendChangesToDevice())
 //    {
 //        controller->setVelocityIntervalTable(tableIn);
 //    }
@@ -361,7 +361,7 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //{
 //    LumatoneState::setNoteVelocityTable(tableIn);
 //
-//    if (sendSysExToDevice())
+//    if (doSendChangesToDevice())
 //    {
 //        controller->setNoteVelocityTable(tableIn);
 //    }
@@ -371,7 +371,7 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //{
 //    LumatoneState::setAftertouchTable(tableIn);
 //
-//    if (sendSysExToDevice())
+//    if (doSendChangesToDevice())
 //    {
 //        controller->setAftertouchTable(tableIn);
 //    }
@@ -381,7 +381,7 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //{
 //    LumatoneState::setLumatouchTable(tableIn);
 //
-//    if (sendSysExToDevice())
+//    if (doSendChangesToDevice())
 //    {
 //        controller->setLumatouchTable(tableIn);
 //    }

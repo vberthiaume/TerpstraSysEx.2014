@@ -66,7 +66,7 @@ public:
     int getMidiInputIndex() const;
     int getMidiOutputIndex() const;
 
-    virtual bool sendSysExToDevice() const;
+    virtual bool doSendChangesToDevice() const;
 
     // Context Methods
     bool isContextSet() const { return contextIsSet; }
