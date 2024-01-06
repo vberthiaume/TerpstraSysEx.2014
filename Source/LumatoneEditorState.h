@@ -49,6 +49,12 @@ namespace LumatoneEditorProperty
 
     static const juce::Identifier MainWindowState = juce::Identifier("MainWindowState");
     static const juce::Identifier EditorMode = juce::Identifier("EditorMode");
+
+    static const juce::Identifier SingleNoteNoteSetActive = juce::Identifier("SingleNoteNoteSetActive");
+    static const juce::Identifier SingleNoteChannelSetActive = juce::Identifier("SingleNoteChannelSetActive");
+    static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
+    static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
+
 }
 
 enum class EditorMode

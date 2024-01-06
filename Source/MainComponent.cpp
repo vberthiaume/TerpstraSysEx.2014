@@ -119,7 +119,7 @@ void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesF
 	globalSettingsArea->saveStateToPropertiesFile(propertiesFile);
 }
 
-// Set the current mapping to be edited to the value passed in parameter
+// Set the currentSectionKey mapping to be edited to the value passed in parameter
 void MainContentComponent::setData(LumatoneLayout& newData, bool withRefresh)
 {
 	*mappingData = newData;
@@ -191,44 +191,44 @@ UndoableAction* MainContentComponent::createModifiedPasteCurrentSectionAction(Co
     if (currentSetSelectionIndex >= 0 && currentSetSelectionIndex < getNumBoards()
         && !copiedSubBoardData->isEmpty())
     {
-        auto modifiedSubBoardData = *copiedSubBoardData;
-        auto octaveSize = getOctaveBoardSize();
+        
+		auto modifiedSection = getBoard(currentSetSelectionIndex);
+		auto octaveSize = getOctaveBoardSize();
 
         for (int i = 0; i < octaveSize; i++)
         {
-            // LumatoneKey currentSectionKey = getKey(currentSetSelectionIndex, i);
-            // LumatoneKey modifiedKey = modifiedSubBoardData.getKey(i);
-            LumatoneKey modifiedKey = getKey(currentSetSelectionIndex, i);
+            LumatoneKey copiedKey = copiedSubBoardData->getKey(i);
+            LumatoneKey currentSectionKey = getKey(currentSetSelectionIndex, i);
 
             switch (commandID)
             {
             case Lumatone::Menu::commandIDs::pasteOctaveBoardNotes:
-                modifiedKey.setNoteOrCC(modifiedKey.getMidiNumber());
+                currentSectionKey.setNoteOrCC(copiedKey.getMidiNumber());
                 break;
 
             case Lumatone::Menu::commandIDs::pasteOctaveBoardChannels:
-                modifiedKey.setChannelNumber(modifiedKey.getMidiChannel());
+                currentSectionKey.setChannelNumber(copiedKey.getMidiChannel());
                 break;
 
             case Lumatone::Menu::commandIDs::pasteOctaveBoardColours:
-                modifiedKey.setColour(modifiedKey.getColour());
+                currentSectionKey.setColour(copiedKey.getColour());
                 break;
 
             case Lumatone::Menu::commandIDs::pasteOctaveBoardTypes:
-                modifiedKey.setKeyType(modifiedKey.getType());
-				modifiedKey.setDefaultCCFader(modifiedKey.isCCFaderDefault());
+                currentSectionKey.setKeyType(copiedKey.getType());
+				currentSectionKey.setDefaultCCFader(copiedKey.isCCFaderDefault());
                 break;
 
             default:
                 jassertfalse;
-				modifiedKey = modifiedSubBoardData.getKey(i);
+				currentSectionKey = copiedKey;
 				break;
             }
 
-            modifiedSubBoardData.setKey(modifiedKey, i);
+			modifiedSection.setKey(currentSectionKey, i);
         }
 
-        return new LumatoneEditAction::SectionEditAction(this, currentSetSelectionIndex, modifiedSubBoardData);
+        return new LumatoneEditAction::SectionEditAction(this, currentSetSelectionIndex, modifiedSection);
     }
     else
         return nullptr;
@@ -403,7 +403,7 @@ void MainContentComponent::buttonClicked(Button* btn)
 
 		// else, a preset button colour button was pressed
 		paletteWindow->listenToColourSelection(colourEdit);
-		// TODO: Set swatch # or custom colour as current colour
+		// TODO: Set swatch # or custom colour as currentSectionKey colour
 	}
 }
 

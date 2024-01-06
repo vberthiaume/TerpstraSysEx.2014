@@ -632,25 +632,25 @@ void SingleNoteAssign::onSetData(LumatoneLayout& newData)
 void SingleNoteAssign::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
 {
 	setNoteToggleButton->setToggleState(
-		propertiesFile->getBoolValue("SingleNoteNoteSetActive", true),
+		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteNoteSetActive, true),
 		juce::NotificationType::sendNotification);
 	setChannelToggleButton->setToggleState(
-		propertiesFile->getBoolValue("SingleNoteChannelSetActive", true),
+		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteChannelSetActive, true),
 		juce::NotificationType::sendNotification);
 	setColourToggleButton->setToggleState(
-		propertiesFile->getBoolValue("SingleNoteColourSetActive", true),
+		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteColourSetActive, true),
 		juce::NotificationType::sendNotification);
 	keyTypeToggleButton->setToggleState(
-		propertiesFile->getBoolValue("SingleNoteKeyTypeSetActive", true),
+		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, true),
 		juce::NotificationType::sendNotification);
 }
 
 void SingleNoteAssign::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
-	propertiesFile->setValue("SingleNoteNoteSetActive", setNoteToggleButton->getToggleState());
-	propertiesFile->setValue("SingleNoteChannelSetActive", setChannelToggleButton->getToggleState());
-	propertiesFile->setValue("SingleNoteColourSetActive", setColourToggleButton->getToggleState());
-	propertiesFile->setValue("SingleNoteKeyTypeSetActive", keyTypeToggleButton->getToggleState());
+	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteNoteSetActive, setNoteToggleButton->getToggleState());
+	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteChannelSetActive, setChannelToggleButton->getToggleState());
+	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteColourSetActive, setColourToggleButton->getToggleState());
+	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, keyTypeToggleButton->getToggleState());
 }
 
 void SingleNoteAssign::redrawCCFlipBtn()
