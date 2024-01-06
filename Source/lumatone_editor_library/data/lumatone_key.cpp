@@ -62,7 +62,7 @@ bool LumatoneKey::colourIsEqual(const LumatoneKey& compare) const
 
 void LumatoneKey::operator=(const LumatoneKey &keyToCopy)
 {
-    if (configIsEqual(keyToCopy))
+    if (*this == keyToCopy)
       return;
 
     keyType = keyToCopy.keyType;

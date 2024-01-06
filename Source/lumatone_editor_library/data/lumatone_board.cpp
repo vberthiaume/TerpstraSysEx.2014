@@ -31,6 +31,7 @@ LumatoneBoard::LumatoneBoard(LumatoneKeyType newKeyType, int numKeysIn, int boar
 LumatoneBoard::LumatoneBoard(const LumatoneBoard& copyBoard)
 {
     state = juce::ValueTree(LumatoneBoardProperty::State);
+    board_idx = copyBoard.board_idx;
     operator=(copyBoard);
 }
 

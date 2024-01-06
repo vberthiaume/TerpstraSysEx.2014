@@ -250,6 +250,7 @@ const LumatoneBoard& LumatoneLayout::getBoard(int index) const
 void LumatoneLayout::setBoard(const LumatoneBoard &boardIn, int boardIndex)
 {
     boards[boardIndex] = boardIn;
+    boards[boardIndex].board_idx = boardIndex;
 }
 
 const LumatoneKey& LumatoneLayout::getKey(int boardIndex, int keyIndex) const

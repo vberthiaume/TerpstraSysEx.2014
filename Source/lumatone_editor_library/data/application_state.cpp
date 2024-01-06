@@ -219,7 +219,7 @@ void LumatoneApplicationState::setKey(const LumatoneKey &keyIn, int boardId, int
         controller->sendKeyParam(boardId, keyIndex, keyIn);
     }
 
-    editorListeners->call(&LumatoneEditor::EditorListener::keyChanged, boardId - 1, keyIndex, getKey(boardId-1, keyIndex));
+    editorListeners->call(&LumatoneEditor::EditorListener::keyChanged, boardId - 1, keyIndex, getKey(boardId - 1, keyIndex));
 }
 
 void LumatoneApplicationState::setKeyConfig(const LumatoneKey& keyIn, int boardId, int keyIndex)
