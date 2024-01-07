@@ -78,7 +78,7 @@ public:
 	// bool aftertouchVelocityCurveDialog();
 
 	// void sendCurrentConfigurationToDevice();
-	void requestConfigurationFromDevice();
+	bool requestConfigurationFromDevice();
 
 	void updateMainTitle();
 

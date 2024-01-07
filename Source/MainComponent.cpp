@@ -32,7 +32,7 @@
 
 
 //==============================================================================
-MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn)
+MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager)
 	: LumatoneEditorState("MainComponent", stateIn)
 	, copiedSubBoardData(std::make_unique<LumatoneBoard>())
 {
@@ -65,10 +65,26 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn)
 	addAndMakeVisible(globalSettingsArea.get());
 	globalSettingsArea->listenToColourEditButtons(this);
 
-	// getLumatoneController()->addFirmwareListener(this);
+	// getLumatoneController()->addFirmwareListener(this
 
-	//lblAppName.reset(new Label("lblAppName", TerpstraSysExApplication::getApp().getApplicationName()));
-	lblAppName.reset(new Label("lblAppName", "lumatone editor"));
+	btnLoadFile.reset(new juce::TextButton("btnLoadFile"));
+	addAndMakeVisible(btnLoadFile.get());
+	btnLoadFile->setButtonText(TRANS("LoadFile"));
+	btnLoadFile->setCommandToTrigger(commandManager, Lumatone::Menu::openSysExMapping, true);
+
+	btnSaveFile.reset(new juce::TextButton("btnSaveFile"));
+	addAndMakeVisible(btnSaveFile.get());
+	btnSaveFile->setButtonText(TRANS("SaveFile"));
+	btnSaveFile->setCommandToTrigger(commandManager, Lumatone::Menu::saveSysExMappingAs, true);
+
+	btnImportFile.reset(new juce::TextButton("buttonReceive"));
+	addAndMakeVisible(btnImportFile.get());
+	btnImportFile->setTooltip(TRANS("ImportTooltip"));
+	btnImportFile->setButtonText(TRANS("Import from Lumatone"));
+	btnImportFile->setCommandToTrigger(commandManager, Lumatone::Menu::importSysExMapping, true);
+
+
+	lblAppName.reset(new Label("lblAppName", getApplicationName()));
 	lblAppName->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
 	lblAppName->setColour(Label::ColourIds::textColourId, Colour(0xff777777));
 	addAndMakeVisible(lblAppName.get());
@@ -77,6 +93,9 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn)
 	lblAppVersion->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
 	lblAppVersion->setColour(Label::ColourIds::textColourId, Colour(0xff777777));
 	addAndMakeVisible(lblAppVersion.get());
+
+
+	addStatusListener(this);
 
 	// Initial size
 	setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
@@ -87,6 +106,14 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn)
 	changeListenerCallback(noteEditArea->getOctaveBoardSelectorTab());
     noteEditArea->changeSingleKeySelection(0);
 
+	btnLoadFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::LoadIcon);
+	btnSaveFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::SaveIcon);
+	btnImportFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ArrowUp);
+	btnImportFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconPlacement, LumatoneEditorStyleIDs::TextButtonIconPlacement::RightOfText);
+
+	// Only enable when connected
+	btnImportFile->setEnabled(false);
+
     // Initialize mapping structure
     deleteAll();
 }
@@ -94,6 +121,10 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn)
 MainContentComponent::~MainContentComponent()
 {
     //TerpstraSysExApplication::getApp().getMidiDriver().removeListener(this);
+
+	btnLoadFile = nullptr;
+	btnSaveFile = nullptr;
+	btnImportFile = nullptr;
 
 	midiEditArea = nullptr;
 	allKeysOverview = nullptr;
@@ -243,8 +274,12 @@ bool MainContentComponent::setDeveloperMode(bool developerModeOn)
 {
 	curvesArea->setDeveloperMode(developerModeOn);
     globalSettingsArea->setDeveloperMode(developerModeOn);
-    // allKeysOverview->showDeveloperMode(developerModeOn);
 	return true;
+}
+
+void MainContentComponent::connectionStateChanged(ConnectionState state)
+{
+	btnImportFile->setEnabled(state == ConnectionState::ONLINE);
 }
 
 void MainContentComponent::octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData)
@@ -434,9 +469,25 @@ void MainContentComponent::resized()
 
 	// All keys overview/virtual keyboard playing
 	int newKeysOverviewAreaHeight = jmax(controlsArea.getY() - midiAreaHeight, MINIMALTERPSTRAKEYSETAREAHEIGHT);
-	int keyboardMarginTop = newKeysOverviewAreaHeight * 0.0625f;
-	int keyboardHeight = newKeysOverviewAreaHeight * 0.8f;
+	int keyboardMarginTop = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicMarginTop);
+	int keyboardHeight = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicH);
 	allKeysOverview->setBounds(0, midiAreaHeight + keyboardMarginTop, newWidth, keyboardHeight);
+
+	int btnHeight = roundToInt(getHeight() * fileButtonH);
+	int btnMargin = roundToInt(getWidth() * saveloadMarginW);
+	int saveLoadWidth = roundToInt(getWidth() * saveLoadW);
+	int btnY = allKeysOverview->getY() - roundToInt(getHeight() * btnYFromImageTop);
+
+	int halfWidthX = roundToInt(getWidth() * 0.5f);
+
+	btnLoadFile->setBounds(halfWidthX - btnMargin - saveLoadWidth, btnY, saveLoadWidth, btnHeight);
+	btnSaveFile->setBounds(halfWidthX + btnMargin, btnY, saveLoadWidth, btnHeight);
+
+	//octaveLineY = lumatoneBounds.getBottom() + roundToInt(getHeight() * octaveLineYRatio);
+
+	int importY = allKeysOverview->getY() - roundToInt(getHeight() * importYFromImageTop);
+	int importWidth = roundToInt(getWidth() * importW);
+	btnImportFile->setBounds(allKeysOverview->getRight() - importWidth, importY, importWidth, btnHeight);
 
 	// Edit function/single key field area
 	noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));

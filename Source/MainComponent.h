@@ -13,6 +13,7 @@
 #include "LumatoneEditorState.h"
 
 #include "./lumatone_editor_library/data/lumatone_layout.h"
+#include "./lumatone_editor_library/listeners/status_listener.h"
 #include "./lumatone_editor_library/listeners/firmware_listener.h"
 #include "./lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
@@ -32,13 +33,14 @@ class PedalSensitivityDlg;
 */
 class MainContentComponent : public juce::Component
 						   , public LumatoneEditorState
+						   , public LumatoneEditor::StatusListener
 						   , public LumatoneEditor::FirmwareListener
 						   , public juce::ChangeListener
 						   , public juce::Button::Listener
 {
 public:
 	//==============================================================================
-	MainContentComponent(const LumatoneEditorState& stateIn);
+	MainContentComponent(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager);
 	~MainContentComponent();
 
 	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
@@ -75,6 +77,9 @@ public:
 
 	void refreshKeyDataFields();
 	void refreshAllFields();
+
+	// Implementation of LumatoneEditor::StatusListener
+	void connectionStateChanged(ConnectionState state) override;
 
 	// Implementation of LumatoneEditor::FirmwareListener
 
@@ -120,6 +125,10 @@ private:
 	std::unique_ptr<GlobalSettingsArea> 	globalSettingsArea;
 	std::unique_ptr<PedalSensitivityDlg> 	pedalSensitivityDlg;
 
+	std::unique_ptr<juce::TextButton>		btnLoadFile;
+	std::unique_ptr<juce::TextButton>		btnSaveFile;
+	std::unique_ptr<juce::TextButton>		btnImportFile;
+
 	// Version signature in bottom left of window
 	std::unique_ptr<juce::Label> 					lblAppName;
 	std::unique_ptr<juce::Label> 					lblAppVersion;
@@ -142,6 +151,18 @@ private:
     const float assignHeight                = 0.44f;
 
     const float footerAreaY                 = 0.96f;
+
+	const float lumatoneGraphicMarginTop	= 0.1f;
+	const float lumatoneGraphicH			= 0.8f;
+
+	const float fileButtonH					= 0.025f;
+	const float importYFromImageTop			= 0.4f;
+	const float importW						= 0.1f;
+
+	const float btnYFromImageTop			= 0.02;
+	const float saveLoadW					= 0.08f;
+	const float saveloadMarginW				= 0.0034f;
+
 
     const float popupWidth                  = 0.4f;
     const float popupHeight                 = 0.333f;

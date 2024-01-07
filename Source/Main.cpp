@@ -241,6 +241,7 @@ void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
 		Lumatone::Menu::commandIDs::saveSysExMapping,
 		Lumatone::Menu::commandIDs::saveSysExMappingAs,
 		Lumatone::Menu::commandIDs::resetSysExMapping,
+		Lumatone::Menu::commandIDs::importSysExMapping,
 
 		Lumatone::Menu::commandIDs::deleteOctaveBoard,
 		Lumatone::Menu::commandIDs::copyOctaveBoard,
@@ -283,6 +284,11 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
 	case Lumatone::Menu::commandIDs::resetSysExMapping:
 		result.setInfo("New", "Start new mapping. Clear all edit fields, do not save current edits.", "File", 0);
 		result.addDefaultKeypress('n', ModifierKeys::commandModifier);
+		break;
+
+	case Lumatone::Menu::commandIDs::importSysExMapping:
+		result.setInfo("New", "Import mapping from device.", "File", 0);
+		result.addDefaultKeypress('i', ModifierKeys::commandModifier);
 		break;
 
 	case Lumatone::Menu::commandIDs::deleteOctaveBoard:
@@ -367,6 +373,8 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 		return saveSysExMappingAs();
 	case Lumatone::Menu::commandIDs::resetSysExMapping:
 		return resetSysExMapping();
+	case Lumatone::Menu::commandIDs::importSysExMapping:
+		return requestConfigurationFromDevice();
 
 	case Lumatone::Menu::commandIDs::deleteOctaveBoard:
 		return deleteSubBoardData();
@@ -654,7 +662,7 @@ bool TerpstraSysExApplication::toggleDeveloperMode()
 // }
 
 
-void TerpstraSysExApplication::requestConfigurationFromDevice()
+bool TerpstraSysExApplication::requestConfigurationFromDevice()
 {
 	// if editing operations were done that have not been saved, give the possibility to save them
 	if (state.getHasChangesToSave())
@@ -694,7 +702,7 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 			})
 		);
 
-		return;
+		return true;
 	}
 
 	resetSysExMapping();
@@ -711,6 +719,8 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 	state.getLumatoneController()->sendVelocityConfigRequest();
 	state.getLumatoneController()->sendFaderConfigRequest();
 	state.getLumatoneController()->sendAftertouchConfigRequest();
+
+	return true;
 }
 
 void TerpstraSysExApplication::updateMainTitle()

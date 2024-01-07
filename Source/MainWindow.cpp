@@ -21,7 +21,7 @@ MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationComm
     , commandManager(cmdMgr)
 {
     // setContentOwned(new MainContentComponent(*TerpstraSysExApplication::getApp().getMappingData()), true);
-    setContentOwned(new MainContentComponent(stateIn), true);
+    setContentOwned(new MainContentComponent(stateIn, cmdMgr), true);
     setResizable(true, true);
 #if JUCE_ANDROID
     setFullScreen(true);
