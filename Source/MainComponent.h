@@ -63,8 +63,6 @@ public:
     juce::UndoableAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
     bool canPasteCopiedSubBoard() const;
 
-	bool setDeveloperMode(bool developerModeOn);
-
 	// Implementation of ChangeListener
 	void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
@@ -104,6 +102,15 @@ public:
 	void lumatouchConfigReceived(const int* lumatouchData) override;
 
 	void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+
+	// Implementation of LumatoneState
+	void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
+
+
+private:
+
+	void updateDeveloperMode();
+
 
 private:
     //==============================================================================

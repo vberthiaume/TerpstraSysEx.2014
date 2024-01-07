@@ -86,7 +86,7 @@ public:
 
 	bool aboutTerpstraSysEx();
 
-	MainContentComponent* getMainContentComponent() const;
+	//MainContentComponent* getMainContentComponent() const;
 
 private:
 	LumatoneFirmwareDriver	firmwareDriver;

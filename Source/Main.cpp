@@ -29,12 +29,12 @@
 #include "LumatoneMenu.h"
 
 //==============================================================================
-
-MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
-{
-	jassert(mainWindow != nullptr);
-	return (MainContentComponent*)(mainWindow->getContentComponent());
-}
+//
+//MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
+//{
+//	jassert(mainWindow != nullptr);
+//	return (MainContentComponent*)(mainWindow->getContentComponent());
+//}
 
 TerpstraSysExApplication::TerpstraSysExApplication()
 	: firmwareDriver(LumatoneFirmwareDriver::HostMode::Driver)
@@ -513,7 +513,7 @@ bool TerpstraSysExApplication::pasteModifiedSubBoardData(CommandID commandID)
 bool TerpstraSysExApplication::canPasteSubBoardData() const
 {
     if (mainWindow != nullptr)
-        return getMainContentComponent()->canPasteCopiedSubBoard();
+        return ((MainContentComponent*)(mainWindow->getContentComponent()))->canPasteCopiedSubBoard();
     return false;
 }
 
@@ -562,7 +562,7 @@ bool TerpstraSysExApplication::redo()
 bool TerpstraSysExApplication::toggleDeveloperMode()
 {
 	state.setDeveloperMode(!state.getInDeveloperMode());
-	return state.getInDeveloperMode();
+	return true;
 	// bool newMode = !propertiesFile->getBoolValue("DeveloperMode");
 	// propertiesFile->setValue("DeveloperMode", newMode);
 	// return ((MainContentComponent*)(mainWindow->getContentComponent()))->state.setDeveloperMode(newMode);
@@ -726,7 +726,7 @@ bool TerpstraSysExApplication::requestConfigurationFromDevice()
 void TerpstraSysExApplication::updateMainTitle()
 {
 	String windowTitle("Lumatone Editor");
-
+	
 	if (!state.getCurrentFile().getFileName().isEmpty())
 		windowTitle << " - " << state.getCurrentFile().getFileName();
 	if (state.getHasChangesToSave())

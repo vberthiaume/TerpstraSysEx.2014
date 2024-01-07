@@ -270,11 +270,11 @@ bool MainContentComponent::canPasteCopiedSubBoard() const
     return !copiedSubBoardData->isEmpty();
 }
 
-bool MainContentComponent::setDeveloperMode(bool developerModeOn)
+void MainContentComponent::updateDeveloperMode()
 {
-	curvesArea->setDeveloperMode(developerModeOn);
-    globalSettingsArea->setDeveloperMode(developerModeOn);
-	return true;
+	// TODO This can just be implemented individually in handleStatePropertyChange
+	curvesArea->setDeveloperMode(inDeveloperMode);
+    globalSettingsArea->setDeveloperMode(inDeveloperMode);
 }
 
 void MainContentComponent::connectionStateChanged(ConnectionState state)
@@ -524,4 +524,18 @@ void MainContentComponent::refreshAllFields()
 	pedalSensitivityDlg->loadFromMapping();
 	curvesArea->loadFromMapping();
 	curvesArea->repaint();
+}
+
+
+void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
+{
+	if (property == LumatoneEditorProperty::DeveloperModeOn)
+	{
+		inDeveloperMode = (bool)stateIn[property];
+		updateDeveloperMode();
+	}
+	else
+	{
+		LumatoneApplicationState::handleStatePropertyChange(stateIn, property);
+	}
 }

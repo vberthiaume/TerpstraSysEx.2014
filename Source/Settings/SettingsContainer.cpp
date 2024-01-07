@@ -29,21 +29,23 @@ void SettingsCategoryModel::paintListBoxItem(int rowNumber, juce::Graphics& g, i
     }
 
     g.setColour(Colours::white);
-    // TODO
-    // g.setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium, height));
+
+    g.setFont(font.withHeight(height));
     g.drawFittedText(categories[rowNumber], rowBounds.withLeft(8), juce::Justification::left, 1, 1.0f);
 }
 
 //=========================================================================
 
-SettingsContainer::SettingsContainer()
-    : Component("SettingsContainer"),
-      model({
+SettingsContainer::SettingsContainer(const LumatoneEditorState& stateIn)
+    : Component("SettingsContainer")
+    , LumatoneEditorState("SettingsContainer", stateIn)
+    , model({
         translate("Calibrate"),
         translate("Firmware"),
         translate("MIDI"),
         translate("Presets")
-      })
+      }, stateIn.getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium)
+       )
 {
     categoryList.reset(new juce::ListBox("CategoryList"));
     categoryList->setModel(&model);
@@ -51,15 +53,14 @@ SettingsContainer::SettingsContainer()
     addAndMakeVisible(categoryList.get());
     model.addChangeListener(this);
 
-    // auto lastPanelIndex = TerpstraSysExApplication::getApp().getPropertiesFile()->getIntValue("LastSettingsPanel", 0);
-    // categoryList->selectRow(lastPanelIndex);
+    auto lastPanelIndex = (int)getProperty(LumatoneEditorProperty::LastSettingsPanel);
+    categoryList->selectRow(lastPanelIndex);
 }
 
 SettingsContainer::~SettingsContainer()
 {
     settingsPanel = nullptr;
     categoryList = nullptr;
-
 }
 
 void SettingsContainer::paint(Graphics& g)
@@ -79,8 +80,8 @@ void SettingsContainer::resized()
 
 void SettingsContainer::lookAndFeelChanged()
 {
-    //setColour(juce::ResizableWindow::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
-    //categoryList->setColour(juce::ListBox::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
+    setColour(juce::ResizableWindow::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
+    categoryList->setColour(juce::ListBox::ColourIds::backgroundColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
 }
 void SettingsContainer::changeListenerCallback(ChangeBroadcaster* source)
 {
@@ -90,36 +91,36 @@ void SettingsContainer::changeListenerCallback(ChangeBroadcaster* source)
 
 void SettingsContainer::showPanel(int editorSettingCategory)
 {
-    // TODO
-   juce:: Component* newPanel = nullptr;
-    // switch (editorSettingCategory)
-    // {
-    // case LumatoneEditorSettingCategories::Calibration:
-    //     newPanel = new CalibrationDlg();
-    //     break;
+    juce:: Component* newPanel = nullptr;
+    switch (editorSettingCategory)
+    {
+    case LumatoneEditorSettingCategories::Calibration:
+        newPanel = new CalibrationDlg(*this);
+        break;
 
-    // case LumatoneEditorSettingCategories::Firmware:
-    //     newPanel = new FirmwareDlg();
-    //     break;
+    case LumatoneEditorSettingCategories::Firmware:
+        newPanel = new FirmwareDlg(*this);
+        break;
 
-    // case LumatoneEditorSettingCategories::Midi:
-    //     newPanel = new MidiSettingsDlg();
-    //     break;
+    case LumatoneEditorSettingCategories::Midi:
+        newPanel = new MidiSettingsDlg(*this);
+        break;
 
-    // case LumatoneEditorSettingCategories::Presets:
-    //     newPanel = new PresetSettingsDlg();
-    //     break;
-    // }
+    case LumatoneEditorSettingCategories::Presets:
+        newPanel = new PresetSettingsDlg(*this);
+        break;
+    }
 
     if (newPanel)
     {
-        // TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastSettingsPanel", editorSettingCategory);
-
         removeChildComponent(settingsPanel.get());
         settingsPanel = nullptr;
         settingsPanel.reset(std::move(newPanel));
         addAndMakeVisible(settingsPanel.get());
         settingsPanel->setLookAndFeel(&getLookAndFeel());
+
+        state.setPropertyExcludingListener(this, LumatoneEditorProperty::LastSettingsPanel, editorSettingCategory, nullptr);
+
         resized();
     }
 }

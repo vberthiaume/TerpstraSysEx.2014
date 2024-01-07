@@ -11,6 +11,8 @@
 #pragma once
 #include <JuceHeader.h>
 
+#include "../LumatoneEditorState.h"
+
 typedef enum {
     Calibration = 0,
     Firmware    = 1,
@@ -22,7 +24,7 @@ class SettingsCategoryModel : public ListBoxModel, public ChangeBroadcaster
 {
 public:
 
-    SettingsCategoryModel(StringArray categoryNamesIn)
+    SettingsCategoryModel(StringArray categoryNamesIn, juce::Font fontIn) : font(fontIn)
     {
         for (auto name : categoryNamesIn)
         {
@@ -41,14 +43,16 @@ public:
     //=========================================================================
 private:
     Array<String> categories;
-
+    juce::Font font;
 };
 
-class SettingsContainer : public Component, protected ChangeListener
+class SettingsContainer : public Component
+                        , private LumatoneEditorState
+                        , protected ChangeListener
 {
 public:
 
-    SettingsContainer();
+    SettingsContainer(const LumatoneEditorState& stateIn);
 
     // Send change signal when destructed
     ~SettingsContainer();

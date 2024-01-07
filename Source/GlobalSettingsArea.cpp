@@ -47,8 +47,6 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblPresetButtonColours->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     lblPresetButtonColours->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
-    lblPresetButtonColours->setBounds (0, 8, 150, 24);
-
     lblColourInactiveMacroButton.reset (new juce::Label ("lblColourInactiveMacroButton",
                                                          TRANS("inactive")));
     addAndMakeVisible (lblColourInactiveMacroButton.get());
@@ -57,8 +55,6 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblColourInactiveMacroButton->setEditable (false, false, false);
     lblColourInactiveMacroButton->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     lblColourInactiveMacroButton->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-
-    lblColourInactiveMacroButton->setBounds (152, 32, 64, 24);
 
     lblColourActiveMacroButton.reset (new juce::Label ("lblColourActiveMacroButton",
                                                        TRANS("active")));
@@ -69,15 +65,11 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblColourActiveMacroButton->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     lblColourActiveMacroButton->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
-    lblColourActiveMacroButton->setBounds (152, 8, 56, 24);
-
     buttonCalibrate.reset (new juce::TextButton ("buttonCalibrate"));
     addAndMakeVisible (buttonCalibrate.get());
     buttonCalibrate->setTooltip (TRANS("Show controls for calibration, setting controller MIDI channels, and updating firmware"));
     buttonCalibrate->setButtonText (TRANS("Settings"));
     buttonCalibrate->addListener (this);
-
-    buttonCalibrate->setBounds (336, 8, 112, 24);
 
 
     //[UserPreSize]
@@ -197,7 +189,7 @@ void GlobalSettingsArea::buttonClicked (juce::Button* buttonThatWasClicked)
     {
         //[UserButtonCode_buttonCalibrate] -- add your button handler code here..
 
-		auto settingsComponent = new SettingsContainer();
+		auto settingsComponent = new SettingsContainer(*this);
         settingsComponent->setLookAndFeel(&getLookAndFeel());
 
 		DialogWindow::LaunchOptions launchOptions;

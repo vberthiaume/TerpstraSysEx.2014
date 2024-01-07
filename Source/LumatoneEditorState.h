@@ -55,6 +55,8 @@ namespace LumatoneEditorProperty
     static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
     static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
 
+    static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
+
 }
 
 enum class EditorMode
@@ -135,7 +137,7 @@ private:
     void setCalibrationMode(bool calibrationModeOn);
     void setDeveloperMode(bool developerModeOn);
 
-private:
+protected:
     bool hasChangesToSave = false;
     bool hasChangesToSend = false;
 	bool inCalibrationMode = false;
@@ -144,6 +146,7 @@ private:
 
     EditorMode editorMode = EditorMode::OFFLINE;
 
+private:
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
 	std::shared_ptr<LumatoneEditorLookAndFeel>      lookAndFeel;
 	std::shared_ptr<juce::Array<LumatoneEditorColourPalette>>        colourPalettes;
