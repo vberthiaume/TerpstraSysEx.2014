@@ -527,7 +527,7 @@ bool TerpstraSysExApplication::performUndoableAction(UndoableAction* editAction,
 		if (undoManager.perform(editAction))	// UndoManager will check for nullptr and also for disposing of the object
 		{
 			// setHasChangesToSave(true);
-			((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
+			//((MainContentComponent*)(mainWindow->getContentComponent()))->refreshAllFields();
 			return true;
 		}
 	}

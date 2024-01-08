@@ -43,7 +43,6 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
 	, currentSingleKeySelection(-1)
 {
     //[Constructor_pre] You can add your own custom stuff here..
-    // showIsomorphicMassAssign = TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("IsomorphicMassAssign", false);
     //[/Constructor_pre]
 
     setName ("NoteEditArea");
@@ -53,19 +52,14 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
     editFunctionsTab->addTab (TRANS("Manual Assign"), juce::Colours::lightgrey, new SingleNoteAssign(stateIn), true);
     editFunctionsTab->setCurrentTabIndex (0);
 
-    editFunctionsTab->setBounds (8, 48, 320, 422);
-
     labelWindowTitle.reset (new juce::Label ("labelWindowTitle",
                                              TRANS("Assign Keys")));
     addAndMakeVisible (labelWindowTitle.get());
-    labelWindowTitle->setFont (juce::Font (18.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
+	labelWindowTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     labelWindowTitle->setJustificationType (juce::Justification::centredLeft);
     labelWindowTitle->setEditable (false, false, false);
-    labelWindowTitle->setColour (juce::Label::textColourId, juce::Colour (0xff61acc8));
-    labelWindowTitle->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+	labelWindowTitle->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
     labelWindowTitle->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-
-    labelWindowTitle->setBounds (8, 8, 104, 24);
 
 
     //[UserPreSize]
@@ -75,10 +69,6 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
 	editFunctionsTab->setColour(TabbedComponent::ColourIds::outlineColourId, Colour());
 	editFunctionsTab->setColour(TabbedComponent::ColourIds::backgroundColourId, Colour());
 
-	labelWindowTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
-
-	if (showIsomorphicMassAssign)
-		editFunctionsTab->addTab(TRANS("Isomorphic Assign"), juce::Colours::lightgrey, new IsomorphicMassAssign(*this), true);
 
 	// Selector for octave boards
 	octaveBoardSelectorTab.reset(new TabbedButtonBar(TabbedButtonBar::Orientation::TabsAtTop));
@@ -108,6 +98,8 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
 	getEditorLookAndFeel().setColour(LumatoneKeyEdit::outlineColourId, Colour(0xffd7d9da));
 	getEditorLookAndFeel().setColour(LumatoneKeyEdit::selectedKeyOutlineId, Colour(0xfff7990d));
 
+	backgroundColour = getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlAreaBackground);
+
 	// First octaveboard selection, selection on first key: see MainComponent (Has to be done after change listener has been established)
 
 	auto singleNoteAssign = dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(0));
@@ -118,6 +110,10 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
 
 	addEditorListener(this);
 
+	showIsomorphicMassAssign = (bool)getProperty(LumatoneEditorProperty::IsomorphicMassAssign);
+	updateShowIsomorphicAssign();
+
+	refreshKeyFields();
     //[/Constructor]
 }
 
@@ -268,8 +264,9 @@ void NoteEditArea::mouseDown (const juce::MouseEvent& e)
 					{
 						// TerpstraSysExApplication::getApp().setHasChangesToSave(true);
 
+						// TODO
 						// Refresh key fields (all may be affected)
-						((MainContentComponent*)getParentComponent())->refreshKeyDataFields();
+						//((MainContentComponent*)getParentComponent())->refreshKeyDataFields();
 					}
 					break;
 				}
@@ -288,28 +285,20 @@ void NoteEditArea::mouseDown (const juce::MouseEvent& e)
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
-void NoteEditArea::lookAndFeelChanged()
-{
-	LookAndFeel& lookAndFeel = getLookAndFeel();
-	backgroundColour = lookAndFeel.findColour(LumatoneEditorColourIDs::ControlAreaBackground);
-	labelWindowTitle->setColour(Label::ColourIds::textColourId, lookAndFeel.findColour(LumatoneEditorColourIDs::LabelBlue));
-}
-
 void NoteEditArea::setControlsTopLeftPosition(int controlsAreaX, int controlsAreaY)
 {
 	setTopLeftPosition(controlsAreaX, controlsAreaY - octaveTabsArea.getHeight());
 }
 
-
-void NoteEditArea::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
-{
-	dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->restoreStateFromPropertiesFile(propertiesFile);
-
-	if (showIsomorphicMassAssign)
-		dynamic_cast<IsomorphicMassAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::IsomorphicMassAssignMode))->restoreStateFromPropertiesFile(propertiesFile);
-
-    resized();
-}
+//void NoteEditArea::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
+//{
+//	dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->restoreStateFromPropertiesFile(propertiesFile);
+//
+//	if (showIsomorphicMassAssign)
+//		dynamic_cast<IsomorphicMassAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::IsomorphicMassAssignMode))->restoreStateFromPropertiesFile(propertiesFile);
+//
+//    resized();
+//}
 
 void NoteEditArea::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
@@ -329,13 +318,12 @@ void NoteEditArea::changeListenerCallback(ChangeBroadcaster *source)
 		setKeyFieldValues(getBoard(setSelection));
 	}
 }
-
-
-void NoteEditArea::onSetData(LumatoneLayout& newData)
-{
-	// Add colours of the mapping to the colour combo box
-	return dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->onSetData(newData);
-}
+//
+//void NoteEditArea::onSetData(LumatoneLayout& newData)
+//{
+//	// Add colours of the mapping to the colour combo box
+//	//return dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->onSetData(newData);
+//}
 
 void NoteEditArea::setKeyFieldValues(const LumatoneBoard& keySet)
 {
@@ -443,6 +431,30 @@ void NoteEditArea::keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatone
 void NoteEditArea::selectionChanged(juce::Array<MappedLumatoneKey> selection)
 {
 	refreshKeyFields();
+}
+
+void NoteEditArea::updateShowIsomorphicAssign()
+{
+	bool showMode = showIsomorphicMassAssign || getInDeveloperMode();
+
+	if (showMode && editFunctionsTab->getNumTabs() == 1)
+	{
+		editFunctionsTab->addTab(TRANS("Isomorphic Assign"), juce::Colours::lightgrey, new IsomorphicMassAssign(*this), true);
+	}
+	else if (!showMode && editFunctionsTab->getNumTabs() == 2)
+	{
+		editFunctionsTab->removeTab(1);
+	}
+}
+
+void NoteEditArea::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
+{
+	LumatoneEditorState::handleStatePropertyChange(stateIn, property);
+
+	if (property == LumatoneEditorProperty::DeveloperModeOn)
+	{
+		updateShowIsomorphicAssign();
+	}
 }
 
 //[/MiscUserCode]

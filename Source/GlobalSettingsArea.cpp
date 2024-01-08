@@ -65,11 +65,11 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblColourActiveMacroButton->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     lblColourActiveMacroButton->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
-    buttonCalibrate.reset (new juce::TextButton ("buttonCalibrate"));
-    addAndMakeVisible (buttonCalibrate.get());
-    buttonCalibrate->setTooltip (TRANS("Show controls for calibration, setting controller MIDI channels, and updating firmware"));
-    buttonCalibrate->setButtonText (TRANS("Settings"));
-    buttonCalibrate->addListener (this);
+    settingsButton.reset (new juce::TextButton ("buttonCalibrate"));
+    addAndMakeVisible (settingsButton.get());
+    settingsButton->setTooltip (TRANS("Show controls for calibration, setting controller MIDI channels, and updating firmware"));
+    settingsButton->setButtonText (TRANS("Settings"));
+    settingsButton->addListener (this);
 
 
     //[UserPreSize]
@@ -91,7 +91,7 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
 
     addStatusListener(this);
 
-    buttonCalibrate->setEnabled(false);
+    settingsButton->setEnabled(false);
 
     /* We don't want a resize here
     /*
@@ -119,7 +119,7 @@ GlobalSettingsArea::~GlobalSettingsArea()
     lblPresetButtonColours = nullptr;
     lblColourInactiveMacroButton = nullptr;
     lblColourActiveMacroButton = nullptr;
-    buttonCalibrate = nullptr;
+    settingsButton = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -143,10 +143,10 @@ void GlobalSettingsArea::resized()
     // Build right-to-left
 
     int calbrateBtnHeight = roundToInt(getHeight() * calibrateHeight);
-    int calibrateWidth = getLookAndFeel().getTextButtonWidthToFitText(*buttonCalibrate, calbrateBtnHeight);
+    int calibrateWidth = getLookAndFeel().getTextButtonWidthToFitText(*settingsButton, calbrateBtnHeight);
 
-    buttonCalibrate->setSize(calibrateWidth, calbrateBtnHeight);
-    buttonCalibrate->setTopRightPosition(getWidth(), roundToInt((getHeight() - buttonCalibrate->getHeight()) * 0.5f));
+    settingsButton->setSize(calibrateWidth, calbrateBtnHeight);
+    settingsButton->setTopRightPosition(getWidth(), roundToInt((getHeight() - settingsButton->getHeight()) * 0.5f));
 
     float margin = roundToInt(getHeight() * 0.1f);
     float colourEditHeight = proportionOfHeight(controlsHeight);
@@ -156,7 +156,7 @@ void GlobalSettingsArea::resized()
 
     lblColourInactiveMacroButton->setFont(colourLabelsFont);
     resizeLabelWithHeight(lblColourInactiveMacroButton.get(), colourEditHeight);
-    lblColourInactiveMacroButton->setTopRightPosition(buttonCalibrate->getX() - margin, controlY);
+    lblColourInactiveMacroButton->setTopRightPosition(settingsButton->getX() - margin, controlY);
 
     inactiveMacroButtonColourEdit->setSize(colourButtonWidth, colourEditHeight);
     inactiveMacroButtonColourEdit->setTopRightPosition(lblColourInactiveMacroButton->getX() - margin, controlY);
@@ -185,7 +185,7 @@ void GlobalSettingsArea::buttonClicked (juce::Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == buttonCalibrate.get())
+    if (buttonThatWasClicked == settingsButton.get())
     {
         //[UserButtonCode_buttonCalibrate] -- add your button handler code here..
 
@@ -227,8 +227,8 @@ void GlobalSettingsArea::lookAndFeelChanged()
     lblColourActiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
     lblColourInactiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
 
-    buttonCalibrate->setColour(TextButton::ColourIds::buttonColourId, Colour(0xff383b3d));
-    buttonCalibrate->setColour(TextButton::ColourIds::textColourOffId, Colour(0xffffffff));
+    settingsButton->setColour(TextButton::ColourIds::buttonColourId, Colour(0xff383b3d));
+    settingsButton->setColour(TextButton::ColourIds::textColourOffId, Colour(0xffffffff));
 }
 
 void GlobalSettingsArea::changeListenerCallback(ChangeBroadcaster *source)
@@ -248,19 +248,19 @@ void GlobalSettingsArea::changeListenerCallback(ChangeBroadcaster *source)
 void GlobalSettingsArea::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
 {
 	inactiveMacroButtonColourEdit->setColour(
-		propertiesFile->getValue("InactiveMacroButtonColour", "000000"));
+		propertiesFile->getValue(LumatoneEditorProperty::InactiveMacroButtonColour, "000000"));
 
 	activeMacroButtonColourEdit->setColour(
-		propertiesFile->getValue("ActiveMacroButtonColour", "FFFFFF"));
+		propertiesFile->getValue(LumatoneEditorProperty::ActiveMacroButtonColour, "FFFFFF"));
 }
 
 void GlobalSettingsArea::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
 	String inactiveMacroButtonColour = inactiveMacroButtonColourEdit->getColourAsString();
-	propertiesFile->setValue("InactiveMacroButtonColour", inactiveMacroButtonColour);
+	propertiesFile->setValue(LumatoneEditorProperty::InactiveMacroButtonColour, inactiveMacroButtonColour);
 
 	String activeMacroButtonColour = activeMacroButtonColourEdit->getColourAsString();
-	propertiesFile->setValue("ActiveMacroButtonColour", activeMacroButtonColour);
+	propertiesFile->setValue(LumatoneEditorProperty::ActiveMacroButtonColour, activeMacroButtonColour);
 }
 
 void GlobalSettingsArea::listenToColourEditButtons(Button::Listener* listenerIn)
@@ -274,18 +274,18 @@ void GlobalSettingsArea::setDeveloperMode(bool devModeOn)
     showDeveloperMode = devModeOn;
     lblDeveloperMode->setVisible(showDeveloperMode);
     if (devModeOn)
-        buttonCalibrate->setEnabled(true);
+        settingsButton->setEnabled(true);
     repaint();
 }
 
 void GlobalSettingsArea::connectionStateChanged(ConnectionState state)
 {
-    buttonCalibrate->setEnabled(state == ConnectionState::ONLINE);
+    settingsButton->setEnabled(state == ConnectionState::ONLINE);
 }
 
 // void GlobalSettingsArea::connectionFaile()
 // {
-//     buttonCalibrate->setEnabled(false);
+//     settingsButton->setEnabled(false);
 // }
 
 //[/MiscUserCode]
@@ -321,7 +321,7 @@ BEGIN_JUCER_METADATA
          edBkgCol="0" labelText="active" editableSingleClick="0" editableDoubleClick="0"
          focusDiscardsChanges="0" fontname="Default font" fontsize="15.0"
          kerning="0.0" bold="0" italic="0" justification="33"/>
-  <TEXTBUTTON name="buttonCalibrate" id="47242594c34a8de9" memberName="buttonCalibrate"
+  <TEXTBUTTON name="settingsButton" id="47242594c34a8de9" memberName="settingsButton"
               virtualName="" explicitFocusOrder="0" pos="336 8 112 24" tooltip="Show controls for calibration, setting controller MIDI channels, and updating firmware"
               buttonText="Settings" connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>

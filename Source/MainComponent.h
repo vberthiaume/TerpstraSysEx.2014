@@ -14,7 +14,6 @@
 
 #include "./lumatone_editor_library/data/lumatone_layout.h"
 #include "./lumatone_editor_library/listeners/status_listener.h"
-#include "./lumatone_editor_library/listeners/firmware_listener.h"
 #include "./lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
 class LumatoneKeyboardComponent;
@@ -34,7 +33,6 @@ class PedalSensitivityDlg;
 class MainContentComponent : public juce::Component
 						   , public LumatoneEditorState
 						   , public LumatoneEditor::StatusListener
-						   , public LumatoneEditor::FirmwareListener
 						   , public juce::ChangeListener
 						   , public juce::Button::Listener
 {
@@ -43,15 +41,7 @@ public:
 	MainContentComponent(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager);
 	~MainContentComponent();
 
-	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
 	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
-
-	// Transfer of data
-	void setData(LumatoneLayout& newData, bool withRefresh = true);
-	void deleteAll(bool withRefresh = true);
-
-	void getData(LumatoneLayout& newData);
-	// LumatoneLayout&	getMappingInEdit() { return getMapping; }
 
 	juce::TabbedButtonBar* getOctaveBoardSelectorTab();
 	CurvesArea* getCurvesArea() { return curvesArea.get(); }
@@ -73,44 +63,21 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-	void refreshKeyDataFields();
-	void refreshAllFields();
+	//void refreshKeyDataFields();
+	//void refreshAllFields();
 
 	// Implementation of LumatoneEditor::StatusListener
 	void connectionStateChanged(ConnectionState state) override;
 
-	// Implementation of LumatoneEditor::FirmwareListener
 
-	void octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData) override;
+	//==============================================================================
+	// Implementation of LumatoneEditorState
 
-	void octaveChannelConfigReceived(int octaveIndex, const int* channelData) override;
-
-	void octaveNoteConfigReceived(int octaveIndex, const int* noteData) override;
-
-	void keyTypeConfigReceived(int octaveIndex, const int* keyTypeData) override;
-
-	void velocityConfigReceived(const int* velocityData) override;
-
-	void aftertouchConfigReceived(const int* aftertouchData) override;
-
-	void velocityIntervalConfigReceived(const int* velocityData) override;
-
-	void faderConfigReceived(const int* faderData) override;
-
-	void faderTypeConfigReceived(int octaveIndex, const int* faderTypeData) override;
-
-	void lumatouchConfigReceived(const int* lumatouchData) override;
-
-	void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
-
-	// Implementation of LumatoneState
 	void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
-
 
 private:
 
 	void updateDeveloperMode();
-
 
 private:
     //==============================================================================

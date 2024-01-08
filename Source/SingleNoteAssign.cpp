@@ -44,42 +44,30 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     noteAutoIncrButton->setButtonText (TRANS("Notes-Per-Click"));
     noteAutoIncrButton->addListener (this);
 
-    noteAutoIncrButton->setBounds (8, 232, 160, 24);
-
     channelAutoIncrButton.reset (new juce::ToggleButton ("channelAutoIncrButton"));
     addAndMakeVisible (channelAutoIncrButton.get());
     channelAutoIncrButton->setButtonText (TRANS("Channels, after Note #:"));
     channelAutoIncrButton->addListener (this);
-
-    channelAutoIncrButton->setBounds (8, 264, 160, 24);
 
     setNoteToggleButton.reset (new juce::ToggleButton ("setNoteToggleButton"));
     addAndMakeVisible (setNoteToggleButton.get());
     setNoteToggleButton->setButtonText (TRANS("Note # (0-127):"));
     setNoteToggleButton->addListener (this);
 
-    setNoteToggleButton->setBounds (8, 128, 112, 24);
-
     setChannelToggleButton.reset (new juce::ToggleButton ("setChannelToggleButton"));
     addAndMakeVisible (setChannelToggleButton.get());
     setChannelToggleButton->setButtonText (TRANS("Channel (1-16):"));
     setChannelToggleButton->addListener (this);
-
-    setChannelToggleButton->setBounds (8, 160, 112, 24);
 
     setColourToggleButton.reset (new juce::ToggleButton ("setColourToggleButton"));
     addAndMakeVisible (setColourToggleButton.get());
     setColourToggleButton->setButtonText (TRANS("Key Colour: "));
     setColourToggleButton->addListener (this);
 
-    setColourToggleButton->setBounds (8, 96, 112, 24);
-
     keyTypeToggleButton.reset (new juce::ToggleButton ("keyTypeToggleButton"));
     addAndMakeVisible (keyTypeToggleButton.get());
     keyTypeToggleButton->setButtonText (TRANS("Key type:"));
     keyTypeToggleButton->addListener (this);
-
-    keyTypeToggleButton->setBounds (8, 64, 112, 24);
 
     keyTypeCombo.reset (new juce::ComboBox ("keyTypeCombo"));
     addAndMakeVisible (keyTypeCombo.get());
@@ -93,8 +81,6 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     keyTypeCombo->addItem (TRANS("Disabled"), 4);
     keyTypeCombo->addListener (this);
 
-    keyTypeCombo->setBounds (120, 64, 192, 24);
-
     noteInput.reset (new juce::Slider ("noteInput"));
     addAndMakeVisible (noteInput.get());
     noteInput->setTooltip (TRANS("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
@@ -103,13 +89,9 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     noteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     noteInput->addListener (this);
 
-    noteInput->setBounds (120, 128, 112, 24);
-
     colourSubwindow.reset (new ColourViewComponent());
     addAndMakeVisible (colourSubwindow.get());
     colourSubwindow->setName ("colourSubwindow");
-
-    colourSubwindow->setBounds (120, 96, 56, 24);
 
     autoIncrementLabel.reset (new juce::Label ("autoIncrementLabel",
                                                TRANS("Auto-Increment")));
@@ -120,13 +102,11 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     autoIncrementLabel->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     autoIncrementLabel->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
-    autoIncrementLabel->setBounds (8, 204, 111, 24);
-
     colourTextEditor.reset (new ColourTextEditor ("colourTextEditor", "60aac5"));
     addAndMakeVisible (colourTextEditor.get());
     colourTextEditor->setName ("colourTextEditor");
+    getEditorLookAndFeel().setupTextEditor(*colourTextEditor);
 
-    colourTextEditor->setBounds (184, 96, 128, 24);
 
     channelInput.reset (new juce::Slider ("channelInput"));
     addAndMakeVisible (channelInput.get());
@@ -135,8 +115,6 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     channelInput->addListener (this);
 
-    channelInput->setBounds (120, 160, 112, 24);
-
     channelAutoIncrNoteInput.reset (new juce::Slider ("channelAutoIncrNoteInput"));
     addAndMakeVisible (channelAutoIncrNoteInput.get());
     channelAutoIncrNoteInput->setTooltip (TRANS("After reaching this note, the channel is incremented and the note is reset to 0."));
@@ -144,8 +122,6 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     channelAutoIncrNoteInput->setSliderStyle (juce::Slider::IncDecButtons);
     channelAutoIncrNoteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     channelAutoIncrNoteInput->addListener (this);
-
-    channelAutoIncrNoteInput->setBounds (176, 264, 112, 24);
 
 
     //[UserPreSize]
@@ -205,11 +181,11 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
 
 
     //[Constructor] You can add your own custom stuff here..
-	setNoteToggleButton->setToggleState(true, juce::NotificationType::sendNotification);
-	setChannelToggleButton->setToggleState(true, juce::NotificationType::sendNotification);
-	setColourToggleButton->setToggleState(true, juce::NotificationType::sendNotification);
-	keyTypeToggleButton->setToggleState(true, juce::NotificationType::sendNotification);
-	keyTypeCombo->setSelectedId(LumatoneKeyType::noteOnNoteOff);
+    setNoteToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteNoteSetActive), juce::NotificationType::sendNotification);
+    setChannelToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteChannelSetActive), juce::NotificationType::sendNotification);
+    setColourToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteColourSetActive), juce::NotificationType::sendNotification);
+    keyTypeToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive),juce::NotificationType::sendNotification);
+    keyTypeCombo->setSelectedId(LumatoneKeyType::noteOnNoteOff);
     //[/Constructor]
 }
 
@@ -559,14 +535,6 @@ void SingleNoteAssign::sliderValueChanged (juce::Slider* sliderThatWasMoved)
 
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-void SingleNoteAssign::lookAndFeelChanged()
-{
-    auto lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-    if (lookAndFeel)
-    {
-        lookAndFeel->setupTextEditor(*colourTextEditor);
-    }
-}
 
 void SingleNoteAssign::colourChangedCallback(ColourSelectionBroadcaster* source, Colour newColour)
 {
@@ -619,30 +587,6 @@ LumatoneAction* SingleNoteAssign::createEditAction(int setSelection, int keySele
 	}
 
 	return editAction;
-}
-
-void SingleNoteAssign::onSetData(LumatoneLayout& newData)
-{
-    // TODO: switch to palettes & active colour
-	//SortedSet<int> usedColours = newData.getUsedColours();
-	//for (int pos = 0; pos < usedColours.size(); pos++)
-	//	colourSubwindow->addColourToBox(usedColours[pos]);
-}
-
-void SingleNoteAssign::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
-{
-	setNoteToggleButton->setToggleState(
-		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteNoteSetActive, true),
-		juce::NotificationType::sendNotification);
-	setChannelToggleButton->setToggleState(
-		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteChannelSetActive, true),
-		juce::NotificationType::sendNotification);
-	setColourToggleButton->setToggleState(
-		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteColourSetActive, true),
-		juce::NotificationType::sendNotification);
-	keyTypeToggleButton->setToggleState(
-		propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, true),
-		juce::NotificationType::sendNotification);
 }
 
 void SingleNoteAssign::saveStateToPropertiesFile(PropertiesFile* propertiesFile)

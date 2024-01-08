@@ -58,17 +58,11 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
-	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
+	//void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
 	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
 
 	// Implementation of ChangeListener
 	void changeListenerCallback(ChangeBroadcaster *source) override;
-
-	// Things to be done when a new mapping is loaded. E. g. fill the colour combo box with the colours appearing in the mapping.
-	void onSetData(LumatoneLayout& newData);
-
-	// Fill key fields with values from a certain octaveboard subset
-	void setKeyFieldValues(const LumatoneBoard& keySet);
 
 	juce::TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
 
@@ -80,25 +74,13 @@ public:
 
 	void changeSingleKeySelection(int newSelection);
 
-	void refreshKeyFields();
-
-    void lookAndFeelChanged() override;
-
-    // Helper method for aligning the Octave Section TabbedButtonBar
-    void setControlsTopLeftPosition(int controlsAreaX, int controlsAreaY);
-
-    void resetOctaveSize(bool refreshAndResize=true);
 
     // ColourSelectionBroadcaster Implementation
     juce::Colour getSelectedColour() override;
     void deselectColour() override {};
 
-
-    void completeMappingLoaded(LumatoneLayout mappingData) override;
-    void boardChanged(LumatoneBoard boardData) override;
-    void keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey) override;
-    void selectionChanged(juce::Array<MappedLumatoneKey> selection) override;
-
+    // Helper method for aligning the Octave Section TabbedButtonBar
+    void setControlsTopLeftPosition(int controlsAreaX, int controlsAreaY);
 
     //[/UserMethods]
 
@@ -106,6 +88,29 @@ public:
     void resized() override;
     void mouseDown (const juce::MouseEvent& e) override;
 
+
+private:
+    void refreshKeyFields();
+    void resetOctaveSize(bool refreshAndResize = true);
+
+
+    // Things to be done when a new mapping is loaded. E. g. fill the colour combo box with the colours appearing in the mapping.
+    //void onSetData(LumatoneLayout& newData);
+
+    // Fill key fields with values from a certain octaveboard subset
+    void setKeyFieldValues(const LumatoneBoard& keySet);
+
+    void updateShowIsomorphicAssign();
+
+private:
+    // LumatoneEditor::EditorListener 
+    void completeMappingLoaded(LumatoneLayout mappingData) override;
+    void boardChanged(LumatoneBoard boardData) override;
+    void keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey) override;
+    void selectionChanged(juce::Array<MappedLumatoneKey> selection) override;
+
+    // LumatoneEditorState implementaiton
+    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier&  property) override;
 
 
 private:

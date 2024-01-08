@@ -122,8 +122,6 @@ void MainWindow::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
     fixWindowPositionAndSize(!useSavedState);
 
     setVisible(true);
-
-    ((MainContentComponent*)(getContentComponent()))->restoreStateFromPropertiesFile(propertiesFile);
 }
 
 void MainWindow::updateBounds()

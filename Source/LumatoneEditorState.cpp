@@ -204,6 +204,8 @@ juce::ValueTree LumatoneEditorState::loadStateProperties(juce::ValueTree stateIn
 
 void LumatoneEditorState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
 {
+    LumatoneApplicationState::handleStatePropertyChange(stateIn, property);
+
     if (property == LumatoneEditorProperty::HasChangesToSave)
     {
         hasChangesToSave = (bool)stateIn[property];
@@ -220,40 +222,17 @@ void LumatoneEditorState::handleStatePropertyChange(juce::ValueTree stateIn, con
     {
         firmwareUpdateWasPerformed = (bool)stateIn[property];
     }
-    else if (property == LumatoneEditorProperty::ColourPalettes)
-    {
-
-    }
     else if (property == LumatoneEditorProperty::CurrentFile)
     {
         currentFile = juce::File(stateIn[property]);
     }
-    else if (property == LumatoneEditorProperty::RecentFiles)
-    {
-    }
-    else if (property == LumatoneEditorProperty::UserDocumentsDirectory)
-    {
-
-    }
-    else if (property == LumatoneEditorProperty::UserMappingsDirectory)
-    {
-
-    }
-    else if (property == LumatoneEditorProperty::UserPalettesDirectory)
-    {
-
-    }
     else if (property == LumatoneEditorProperty::DeveloperModeOn)
     {
-
+        inDeveloperMode = (bool)stateIn[property];
     }
     else if (property == LumatoneEditorProperty::EditorMode)
     {
-
-    }
-    else
-    {
-        LumatoneApplicationState::handleStatePropertyChange(stateIn, property);
+        editorMode = EditorMode((int)stateIn[property]);
     }
 }
 

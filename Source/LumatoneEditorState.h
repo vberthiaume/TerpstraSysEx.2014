@@ -33,6 +33,9 @@ namespace LumatoneEditorProperty
     static const juce::Identifier InCalibrationMode = juce::Identifier("InCalibrationMode");
     static const juce::Identifier FirmwareUpdatePerformed = juce::Identifier("FirmwareUpdatePerformed");
 
+    static const juce::Identifier InactiveMacroButtonColour = juce::Identifier("InactiveMacroButtonColour");
+    static const juce::Identifier ActiveMacroButtonColour = juce::Identifier("ActiveMacroButtonColour");
+
     static const juce::Identifier ColourPalettes = juce::Identifier("ColourPalettes");
     
     static const juce::Identifier CurrentFile = juce::Identifier("CurrentFile");
@@ -54,6 +57,8 @@ namespace LumatoneEditorProperty
     static const juce::Identifier SingleNoteChannelSetActive = juce::Identifier("SingleNoteChannelSetActive");
     static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
     static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
+
+    static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
 
     static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
 

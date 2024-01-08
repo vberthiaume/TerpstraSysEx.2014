@@ -105,7 +105,7 @@ private:
     std::unique_ptr<juce::Label> lblPresetButtonColours;
     std::unique_ptr<juce::Label> lblColourInactiveMacroButton;
     std::unique_ptr<juce::Label> lblColourActiveMacroButton;
-    std::unique_ptr<juce::TextButton> buttonCalibrate;
+    std::unique_ptr<juce::TextButton> settingsButton;
 
 
     //==============================================================================

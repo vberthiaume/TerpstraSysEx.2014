@@ -57,12 +57,10 @@ public:
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
 	LumatoneAction* createEditAction(int setSelection, int keySelection);
-	void onSetData(LumatoneLayout& newData);
+	//void onSetData(LumatoneLayout& newData);
 
-	void restoreStateFromPropertiesFile(juce::PropertiesFile* propertiesFile);
+	//void restoreStateFromPropertiesFile(juce::PropertiesFile* propertiesFile);
 	void saveStateToPropertiesFile(juce::PropertiesFile* propertiesFile);
-
-    void lookAndFeelChanged() override;
 
     ColourViewComponent* getColourViewComponent() { return colourSubwindow.get(); }
     ColourTextEditor* getColourTextEditor() { return colourTextEditor.get(); }
