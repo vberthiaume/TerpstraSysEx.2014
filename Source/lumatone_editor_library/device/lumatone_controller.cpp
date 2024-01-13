@@ -13,6 +13,7 @@
 #include "lumatone_event_manager.h"
 #include "../actions/lumatone_action.h"
 #include "../lumatone_midi_driver/lumatone_midi_driver.h"
+#include "../listeners/editor_listener.h"
 
 LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& firmwareDriverIn, juce::UndoManager* undoManager)
     : LumatoneApplicationState("LumatoneController", stateIn, undoManager)
@@ -641,7 +642,7 @@ void LumatoneController::onConnectionConfirmed()
         sendGetFirmwareRevisionRequest();
     }
 
-    //statusListeners.call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
+    statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
 }
 
 // bool LumatoneController::loadLayoutFromFile(const juce::File& file)
@@ -700,78 +701,96 @@ void LumatoneController::pingResponseReceived(unsigned int pingValue)
 
 void LumatoneController::octaveColourConfigReceived(int boardId, juce::uint8 rgbFlag, const int* colourData)
 {
-    auto octaveSize = getOctaveBoardSize();
-    auto numBoards = getNumBoards();
+    LumatoneBoard editedBoard = getBoard(boardId - 1);
 
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < octaveSize; keyIndex++)
+    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
     {
-        LumatoneKey keyData = getKey(boardIndex, keyIndex);
         auto newValue = colourData[keyIndex];
 
+        juce::Colour colour = editedBoard.getKey(keyIndex).getColour();
         if (rgbFlag == 0)
         {
-            keyData.setColour(juce::Colour(newValue, keyData.getColour().getGreen(), keyData.getColour().getBlue()));
+            colour = juce::Colour(newValue, colour.getGreen(), colour.getBlue());
         }
         else if (rgbFlag == 1)
         {
-            keyData.setColour(juce::Colour(keyData.getColour().getRed(), newValue, keyData.getColour().getBlue()));
+            colour = juce::Colour(colour.getRed(), newValue, colour.getBlue());
         }
         else if (rgbFlag == 2)
         {
-            keyData.setColour(juce::Colour(keyData.getColour().getRed(), keyData.getColour().getGreen(), newValue));
+            colour = juce::Colour(colour.getRed(), colour.getGreen(), newValue);
         }
         else
         {
             jassertfalse;
         }
+
+        editedBoard.setKeyColour(colour, keyIndex);
     }
 
-    //editorListeners.call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
+    LumatoneState::setBoard(editedBoard, boardId);
+    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
 };
 
 
 void LumatoneController::octaveChannelConfigReceived(int boardId, const int* channelData)
 {
+    LumatoneBoard editedBoard = getBoard(boardId - 1);
+
     for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
     {
-        // Check channel values?
-        auto key = getKey(boardId-1, keyIndex);
-        key.setChannelNumber(channelData[keyIndex]);
-        LumatoneState::setKey(key, boardId, keyIndex);
-        // getEditKey(boardId-1, keyIndex)->channelNumber = channelData[keyIndex];
+        juce::uint8 ch = channelData[keyIndex];
+        if (ch == 0 || ch > 16)
+            ch = 1;
+
+        auto key = editedBoard.getKey(keyIndex);
+        key.setChannelNumber(ch);
+        editedBoard.setKeyConfig(key, keyIndex);
     }
 
-    //editorListeners.call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardId - 1));
+    LumatoneState::setBoard(editedBoard, boardId);
+    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
 }
 
 void LumatoneController::octaveNoteConfigReceived(int boardId, const int* noteData)
 {
+    LumatoneBoard editedBoard = getBoard(boardId - 1);
+
     for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
     {
-        auto key = getKey(boardId-1, keyIndex);
+        int note = noteData[keyIndex];
+        if (note < 0 || note > 127)
+            note = 0;
+
+        auto key = editedBoard.getKey(keyIndex);
         key.setNoteOrCC(noteData[keyIndex]);
-        LumatoneState::setKey(key, boardId, keyIndex);
-        // Check note values?
-        // getEditKey(boardId - 1, keyIndex)->noteNumber = noteData[keyIndex];
+        editedBoard.setKeyConfig(key, keyIndex);
     }
 
-    //editorListeners.call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardId - 1));
+    LumatoneState::setBoard(editedBoard, boardId);
+    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
 }
 
 void LumatoneController::keyTypeConfigReceived(int boardId, const int* keyTypeData)
 {
+    LumatoneBoard editedBoard = getBoard(boardId - 1);
+
     for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
     {
-        auto key = getKey(boardId-1, keyIndex);
-        key.setKeyType((LumatoneKeyType)keyTypeData[keyIndex]);
-        LumatoneState::setKey(key, boardId, keyIndex);
-        // Check note values?
-        // getEditKey(boardId - 1, keyIndex)->keyType = LumatoneKeyType(keyTypeData[keyIndex]);
+        auto type = LumatoneKeyType(keyTypeData[keyIndex]);
+
+        auto key = editedBoard.getKey(keyIndex);
+        key.setKeyType(type);
+        editedBoard.setKeyConfig(key, keyIndex);
     }
 
-    //editorListeners.call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardId - 1));
+    LumatoneState::setBoard(editedBoard, boardId);
+    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
+}
+
+void LumatoneController::macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour)
+{
+    
 }
 
 //void LumatoneController::loadRandomMapping(int testTimeoutMs,  int maxIterations, int i)

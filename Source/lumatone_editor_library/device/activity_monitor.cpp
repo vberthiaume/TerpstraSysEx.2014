@@ -12,6 +12,8 @@
 
 #include "../lumatone_midi_driver/lumatone_midi_driver.h"
 #include "../lumatone_midi_driver/firmware_sysex.h"
+#include "../listeners/status_listener.h"
+
 
 DeviceActivityMonitor::DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, LumatoneApplicationState stateIn)
     :   LumatoneApplicationState("DeviceActivityMonitor", stateIn)
@@ -263,7 +265,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
     if (isConnectionEstablished())
     {
         deviceDetectInProgress = false;
-        //statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
+        statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
 
         outputPingIds.clear();
 
@@ -284,7 +286,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
             waitingForResponse = false;
             startTimer(detectRoutineTimeoutMs);
 
-            //statusListeners.call(&LumatoneEditor::StatusListener::connectionFailed);
+            statusListeners->call(&LumatoneEditor::StatusListener::connectionFailed);
         }
         else
         {
@@ -338,7 +340,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
                 waitingForResponse = false;
                 startTimer(detectRoutineTimeoutMs);
 
-                //statusListeners.call(&LumatoneEditor::StatusListener::connectionFailed);
+                statusListeners->call(&LumatoneEditor::StatusListener::connectionFailed);
             }
         }
 
@@ -419,6 +421,7 @@ void DeviceActivityMonitor::handleResponse(int inputDeviceIndex, const juce::Mid
 
     if (cmd == PERIPHERAL_CALBRATION_DATA && !isConnectionEstablished())
     {
+        DBG("DAM: Unexpected calibration data received");
         sendCalibratePitchModOff = true;
         // startTimer(100);
         return;
@@ -451,6 +454,7 @@ void DeviceActivityMonitor::handleResponse(int inputDeviceIndex, const juce::Mid
                     if (!isConnectionEstablished())
                     {
                         sendCalibratePitchModOff = true;
+                        jassertfalse;
                     }
                 }
                 break;
@@ -566,7 +570,7 @@ void DeviceActivityMonitor::onDisconnection()
 
     waitingForResponse = false;
 
-    //juce::MessageManager::callAsync([&]() { statusListeners.call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::DISCONNECTED); });
+    statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::DISCONNECTED);
 
     if (detectDevicesIfDisconnected)
     {

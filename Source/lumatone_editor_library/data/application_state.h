@@ -48,6 +48,7 @@ class LumatoneFirmwareDriver;
 class LumatoneController;
 class LumatoneColourModel;
 class LumatoneAction;
+class DeviceActivityMonitor;
 
 class LumatoneApplicationState : public LumatoneState
 {
@@ -142,6 +143,9 @@ public:
     void addFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn);
     void removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn);
 
+    // Allow these to edit state and signal listeners
+    friend class LumatoneController;
+    friend class DeviceActivityMonitor;
 };
 
 #endif LUMATONE_APPLICATION_STATE_H

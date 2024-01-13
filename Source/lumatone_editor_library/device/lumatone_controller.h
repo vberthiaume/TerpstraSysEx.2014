@@ -237,6 +237,8 @@ protected:
     void octaveNoteConfigReceived(int octaveIndex, const int* noteData) override;
     void keyTypeConfigReceived(int boardId, const int* keyTypeData) override;
 
+    void macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour) override;
+
     //============================================================================
     // Test functions
 

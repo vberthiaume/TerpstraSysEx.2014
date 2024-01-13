@@ -21,13 +21,11 @@
 #include "../lumatone_midi_driver/firmware_driver_listener.h"
 
 #include "../data/application_state.h"
-#include "../listeners/status_listener.h"
 
 class LumatoneFirmwareDriver;
 
 class DeviceActivityMonitor : protected LumatoneApplicationState,
-                              public juce::Timer, 
-                              public LumatoneEditor::StatusEmitter,
+                              public juce::Timer,
                               protected LumatoneFirmwareDriverListener
 {
     
