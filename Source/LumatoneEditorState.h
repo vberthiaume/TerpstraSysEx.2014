@@ -98,7 +98,7 @@ public:
 
     const LumatoneEditorFontLibrary& getAppFonts() const { return *appFonts; }
 
-    juce::var getProperty(juce::Identifier propertyId) const;
+    juce::String getProperty(juce::Identifier propertyId, juce::String fallbackValue=juce::String()) const;
 
     // juce::PropertiesFile& getPropertiesFile() { return *propertiesFile; }
     juce::File getCurrentFile() const { return currentFile; }

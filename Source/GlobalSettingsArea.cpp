@@ -245,13 +245,10 @@ void GlobalSettingsArea::changeListenerCallback(ChangeBroadcaster *source)
 	}
 }
 
-void GlobalSettingsArea::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
+void GlobalSettingsArea::restoreStateFromPropertiesFile()
 {
-	inactiveMacroButtonColourEdit->setColour(
-		propertiesFile->getValue(LumatoneEditorProperty::InactiveMacroButtonColour, "000000"));
-
-	activeMacroButtonColourEdit->setColour(
-		propertiesFile->getValue(LumatoneEditorProperty::ActiveMacroButtonColour, "FFFFFF"));
+    inactiveMacroButtonColourEdit->setColour(getProperty(LumatoneEditorProperty::InactiveMacroButtonColour, "000000"));
+    activeMacroButtonColourEdit->setColour(getProperty(LumatoneEditorProperty::ActiveMacroButtonColour, "FFFFFF"));
 }
 
 void GlobalSettingsArea::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
@@ -281,6 +278,8 @@ void GlobalSettingsArea::setDeveloperMode(bool devModeOn)
 void GlobalSettingsArea::connectionStateChanged(ConnectionState state)
 {
     settingsButton->setEnabled(state == ConnectionState::ONLINE);
+    inactiveMacroButtonColourEdit->setEnabled(state == ConnectionState::ONLINE);
+    activeMacroButtonColourEdit->setEnabled(state == ConnectionState::ONLINE);
 }
 
 // void GlobalSettingsArea::connectionFaile()

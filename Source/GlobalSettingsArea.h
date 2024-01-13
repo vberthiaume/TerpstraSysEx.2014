@@ -54,7 +54,6 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
 	void changeListenerCallback(ChangeBroadcaster *source) override;
 
-	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
 	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
 
     void listenToColourEditButtons(Button::Listener* listenerIn);
@@ -74,7 +73,8 @@ public:
     void resized() override;
     void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
-
+private:
+    void restoreStateFromPropertiesFile();
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.

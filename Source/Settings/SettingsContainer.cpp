@@ -53,7 +53,7 @@ SettingsContainer::SettingsContainer(const LumatoneEditorState& stateIn)
     addAndMakeVisible(categoryList.get());
     model.addChangeListener(this);
 
-    auto lastPanelIndex = (int)getProperty(LumatoneEditorProperty::LastSettingsPanel);
+    auto lastPanelIndex = getProperty(LumatoneEditorProperty::LastSettingsPanel).getIntValue();
     categoryList->selectRow(lastPanelIndex);
 }
 

@@ -181,10 +181,10 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
 
 
     //[Constructor] You can add your own custom stuff here..
-    setNoteToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteNoteSetActive), juce::NotificationType::sendNotification);
-    setChannelToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteChannelSetActive), juce::NotificationType::sendNotification);
-    setColourToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteColourSetActive), juce::NotificationType::sendNotification);
-    keyTypeToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive),juce::NotificationType::sendNotification);
+    setNoteToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteNoteSetActive).getIntValue(), juce::NotificationType::sendNotification);
+    setChannelToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteChannelSetActive).getIntValue(), juce::NotificationType::sendNotification);
+    setColourToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteColourSetActive).getIntValue(), juce::NotificationType::sendNotification);
+    keyTypeToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive).getIntValue(), juce::NotificationType::sendNotification);
     keyTypeCombo->setSelectedId(LumatoneKeyType::noteOnNoteOff);
     //[/Constructor]
 }

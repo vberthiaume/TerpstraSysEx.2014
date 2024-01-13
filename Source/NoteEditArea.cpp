@@ -110,7 +110,7 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
 
 	addEditorListener(this);
 
-	showIsomorphicMassAssign = (bool)getProperty(LumatoneEditorProperty::IsomorphicMassAssign);
+	showIsomorphicMassAssign = getProperty(LumatoneEditorProperty::IsomorphicMassAssign).getIntValue();
 	updateShowIsomorphicAssign();
 
 	refreshKeyFields();

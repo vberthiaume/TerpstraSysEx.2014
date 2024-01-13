@@ -79,9 +79,9 @@ LumatoneEditorState::~LumatoneEditorState()
     appFonts = nullptr;
 }
 
-juce::var LumatoneEditorState::getProperty(juce::Identifier propertyId) const
+juce::String LumatoneEditorState::getProperty(juce::Identifier propertyId, juce::String fallbackValue) const
 {
-    return propertiesFile->getValue(propertyId.toString());
+    return propertiesFile->getValue(propertyId, fallbackValue);
 }
 
 juce::RecentlyOpenedFilesList& LumatoneEditorState::getRecentFiles()
