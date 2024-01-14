@@ -8,11 +8,11 @@ add_subdirectory($ENV{juce_DIR} subprojects/juce)
 juce_add_gui_app(
     LumatoneEditor
         PRODUCT_NAME "Lumatone Editor"
-        # VERSION "1.2.0"
-        # BUNDLE_ID "com.Lumatone.LumatoneEditor"
+        VERSION "1.2.0"
+        BUNDLE_ID "com.Lumatone.LumatoneEditor"
         # ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/Assets/PNG/AppIcon@1x.png"
         # ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/Assets/PNG/AppIcon@3x.png"
-        # DOCUMENT_EXTENSIONS "ltn"
+        DOCUMENT_EXTENSIONS "ltn"
         )
 juce_generate_juce_header(LumatoneEditor)
 
@@ -31,13 +31,23 @@ file(GLOB_RECURSE SourceCode
     )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    file(GLOB_RECURSE LibraryCode CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/include/*.h")
-    set(CryptoLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/bin/libcrypto-1_1-x64.dll")
-    set(SSHLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/bin/libssh2-x64.dll")
+    set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64")
+    set(LibraryInclude "${LibraryPath}/include")
+    set(LibraryCode "${LibraryInclude}/libssh2.h")
+    # set(CryptoLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/bin/libcrypto-1_1-x64.dll")
+    # set(SSHLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/bin/libssh2-x64.dll")
+
+    # add_library( CryptoLib SHARED IMPORTED )
+    # set_target_properties( CryptoLib PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libcrypto-1_1-x64.dll" )
+
+    add_library( SSHLib SHARED IMPORTED )
+    set_target_properties( SSHLib PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libssh2-x64.dll" )
+    set_target_properties( SSHLib PROPERTIES IMPORTED_IMPLIB "${LibraryPath}/lib/libssh2.dll.a" )
 endif()
 
 if (UNIX)
-    file(GLOB_RECURSE LibraryCode CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/include/*.h")
+    set(LibraryInclude "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/include")
+    set(LibraryCode "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/include/libssh2.h")
     file(READ
         CryptoLib
             "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/lib/libgpg-error.dylib"
@@ -45,6 +55,8 @@ if (UNIX)
         )
     file(READ SSHLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/lib/libssh2.dylib")
 endif()
+
+include_directories(${LibraryInclude})
 
 target_sources(
     LumatoneEditor
@@ -84,6 +96,13 @@ if (UNIX)
     )
 endif()
 
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    target_compile_definitions(LumatoneEditor
+        PRIVATE
+        SERVERHOST="192.168.7.2"
+    )
+endif()
+
 file(GLOB_RECURSE LibraryBinaryData
         CONFIGURE_DEPENDS
             "${CMAKE_CURRENT_SOURCE_DIR}/Source/lumatone_editor_library/assets/*"
@@ -106,8 +125,8 @@ target_link_libraries(LumatoneEditor
         juce::juce_audio_devices
         juce::juce_opengl
 
-        # ${CryptoLib}
-        # ${SSHLib}
+        # CryptoLib
+        SSHLib
 
     PUBLIC
         juce::juce_recommended_config_flags
