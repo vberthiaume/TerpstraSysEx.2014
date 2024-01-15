@@ -67,13 +67,13 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 			// Try to open a config file
 			if (File::isAbsolutePath(commandLineParameter))
 			{
-				state.currentFile = File(commandLineParameter);
+				state.setCurrentFile(juce::File(commandLineParameter));
 			}
 			else
 			{
 				// If file name is with quotes, try removing the quotes
 				if (commandLine.startsWithChar('"') && commandLine.endsWithChar('"'))
-					state.currentFile = File(commandLine.substring(1, commandLine.length() - 1));
+					state.setCurrentFile(juce::File(commandLine.substring(1, commandLine.length() - 1)));
 					//state.setCurrentFile(commandLine.substring(1, commandLine.length()-1));
 			}
 
@@ -85,10 +85,8 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 	commandManager.reset(new ApplicationCommandManager());
 	commandManager->registerAllCommandsForTarget(this);
 
-	boundsConstrainer = std::make_unique<ComponentBoundsConstrainer>();
-
 	mainWindow.reset(new MainWindow(state, commandManager.get()));
-	mainWindow->restoreStateFromPropertiesFile(state.propertiesFile.get());
+	mainWindow->restoreStateFromPropertiesFile(state.getPropertiesFile());
 
 
 	if (state.getCurrentFile().existsAsFile())
@@ -97,27 +95,13 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 
 void TerpstraSysExApplication::shutdown()
 {
-	// Add your application's shutdown code here..
-
-	// Save documents directories (Future: provide option to change them and save after changed by user)
-	state.propertiesFile->setValue(LumatoneEditorProperty::UserDocumentsDirectory, state.getUserDocumentsDirectory().getFullPathName());
-	state.propertiesFile->setValue(LumatoneEditorProperty::UserMappingsDirectory, state.getUserMappingsDirectory().getFullPathName());
-	state.propertiesFile->setValue(LumatoneEditorProperty::UserPalettesDirectory, state.getUserPalettesDirectory().getFullPathName());
-
-	// Save recent files list
-	state.recentFiles->removeNonExistentFiles();
-	jassert(state.propertiesFile != nullptr);
-	state.propertiesFile->setValue(LumatoneEditorProperty::RecentFiles, state.recentFiles->toString());
-
-	// Save state of main window
-	mainWindow->saveStateToPropertiesFile(state.propertiesFile.get());
-
-	state.propertiesFile->saveIfNeeded();
-	state.propertiesFile = nullptr;
-
 	LocalisedStrings::setCurrentMappings(nullptr);
 
-    mainWindow = nullptr;
+	// Save state of main window
+	//mainWindow->saveStateToPropertiesFile(state.propertiesFile.get());
+	mainWindow = nullptr;
+
+	state.savePropertiesFile();
 
 	if (state.firmwareUpdateCompleted())
 		FirmwareTransfer::exitLibSsh2();
@@ -174,58 +158,59 @@ void TerpstraSysExApplication::anotherInstanceStarted(const String& commandLine)
 	// this method is invoked, and the commandLine parameter tells you what
 	// the other instance's command-line arguments were.
 }
-
-bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& palette, File pathToFile)
-{
-	bool success = false;
-
-	if (palette.hasBeenModified())
-	{
-		ValueTree paletteNode = palette.toValueTree();
-
-		if (pathToFile == File())
-			pathToFile = File(palette.getPathToFile());
-
-        // If name changed, delete the old one
-        if (pathToFile.exists())
-        {
-            auto currentName = pathToFile.getFileName();
-            if (currentName != palette.getName())
-            {
-                pathToFile.deleteFile();
-            }
-        }
-
-		// New file
-		if (!pathToFile.existsAsFile())
-		{
-            String fileName = "UnnamedPalette";
-
-			if (palette.getName().isNotEmpty())
-                fileName = palette.getName();
-
-            pathToFile = state.getUserPalettesDirectory().getChildFile(fileName);
-
-			// Make sure filename is unique since saving happens automatically
-            // Sorry programmers, we're using cardinal numbers here, and the original is implicitly #1 ;)
-			int nameId = 1;
-			while (pathToFile.withFileExtension(PALETTEFILEEXTENSION).existsAsFile() && nameId < 999999)
-			{
-                auto fileNameToSave = fileName + "_" + String(++nameId);
-                pathToFile = state.getUserPalettesDirectory().getChildFile(fileNameToSave);
-			}
-		}
-
-		success = palette.saveToFile(pathToFile);
-
-		// TODO error handling?
-	}
-
-	// if (success)
-		// loadColourPalettesFromFile();
-
-	return success;
-}
+//
+//bool TerpstraSysExApplication::saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToFile)
+//{
+//	bool success = false;
+//
+//	if (palette.hasBeenModified())
+//	{
+//		ValueTree paletteNode = palette.toValueTree();
+//		
+//		// pathToFile is optional - default to path defined in palette
+//		if (pathToFile == File())
+//			pathToFile = File(palette.getPathToFile());
+//
+//        // If name changed, delete the old one
+//        if (pathToFile.exists())
+//        {
+//            auto currentName = pathToFile.getFileName();
+//            if (currentName != palette.getName())
+//            {
+//                pathToFile.deleteFile();
+//            }
+//        }
+//
+//		// New file
+//		if (!pathToFile.existsAsFile())
+//		{
+//            String fileName = "UnnamedPalette";
+//
+//			if (palette.getName().isNotEmpty())
+//                fileName = palette.getName();
+//
+//            pathToFile = state.getUserPalettesDirectory().getChildFile(fileName);
+//
+//			// Make sure filename is unique since saving happens automatically
+//            // Sorry programmers, we're using cardinal numbers here, and the original is implicitly #1 ;)
+//			int nameId = 1;
+//			while (pathToFile.withFileExtension(PALETTEFILEEXTENSION).existsAsFile() && nameId < 999999)
+//			{
+//                auto fileNameToSave = fileName + "_" + String(++nameId);
+//                pathToFile = state.getUserPalettesDirectory().getChildFile(fileNameToSave);
+//			}
+//		}
+//
+//		success = palette.saveToFile(pathToFile);
+//
+//		// TODO error handling?
+//	}
+//
+//	// if (success)
+//		// loadColourPalettesFromFile();
+//
+//	return success;
+//}
 
 void TerpstraSysExApplication::loadPropertiesFile()
 {
@@ -406,11 +391,11 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 
 bool TerpstraSysExApplication::openSysExMapping()
 {
-	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.recentFiles->getFile(0).getParentDirectory(), "*.ltn;*.tsx");
+	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.getRecentFiles().getFile(0).getParentDirectory(), "*.ltn;*.tsx");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
-			setCurrentFile(chooser.getResult());
+			state.setCurrentFile(chooser.getResult());
 			state.resetToCurrentFile();
 		});
 
@@ -427,11 +412,11 @@ bool TerpstraSysExApplication::saveSysExMapping(std::function<void(bool success)
 
 bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> saveFileCallback)
 {
-	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.recentFiles->getFile(0).getParentDirectory(), "*.ltn");
+	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.getRecentFiles().getFile(0).getParentDirectory(), "*.ltn");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
-			state.currentFile = chooser.getResult();
+			state.setCurrentFile(chooser.getResult());
 			bool saved = saveCurrentFile();
 			if (saved)
 			{
@@ -452,32 +437,12 @@ bool TerpstraSysExApplication::resetSysExMapping()
 	return true;
 }
 
-bool TerpstraSysExApplication::setCurrentFile(juce::File file)
-{
-	return state.setCurrentFile(file);
-}
-
 // Saves the current mapping to file, specified in state.getCurrentFile().
 bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)> saveFileCallback)
 {
-	if (state.getCurrentFile().existsAsFile())
-		state.getCurrentFile().deleteFile();
-	bool retc = state.getCurrentFile().create();
-	// XXX error handling
-
-    bool appendSuccess = true;
-	StringArray stringArray = state.getMappingData()->toStringArray();
-	for (int i = 0; i < stringArray.size(); i++)
-		appendSuccess = appendSuccess && state.getCurrentFile().appendText(stringArray[i] + "\n");
-
-	state.setHasChangesToSave(!appendSuccess);
-    saveFileCallback(appendSuccess);
-
-	// ToDo undo history?
-
-	// Add file to recent files list - or put it on top of the list
-	state.recentFiles->addFile(state.currentFile);
-	return retc;
+	bool success = state.saveMappingToFile(state.getCurrentFile());
+    saveFileCallback(success);
+	return success;
 }
 
 bool TerpstraSysExApplication::deleteSubBoardData()
@@ -696,7 +661,7 @@ bool TerpstraSysExApplication::requestConfigurationFromDevice()
 				{
 					// retc == 2: "No" -> no saving, overwrite
 					DBG("Overwriting current edits");
-					state.setHasChangesToSave(false);
+					//state.setHasChangesToSave(false);
 					requestConfigurationFromDevice();
 				}
 			})
@@ -770,7 +735,7 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 
 	DialogWindow::LaunchOptions options;
 	auto textDisplay = new TextEditor();
-	//textDisplay->setLookAndFeel(&lookAndFeel);
+	//textDisplay->setLookAndFeel(&state.getEditorLookAndFeel());
 	state.getEditorLookAndFeel().setupTextEditor(*textDisplay);
 	textDisplay->setMultiLine(true, true);
 	textDisplay->setText(m, dontSendNotification);

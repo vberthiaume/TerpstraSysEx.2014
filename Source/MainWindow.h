@@ -20,11 +20,11 @@ This class implements the desktop window that contains an instance of
 our MainContentComponent class.
 */
 class MainWindow : public juce::DocumentWindow
-                 , public LumatoneEditorState
+                 , public LumatoneEditorStateController
                  , public juce::Timer
 {
 public:
-    MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdMgr);
+    MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager);
 
     virtual ~MainWindow();
 

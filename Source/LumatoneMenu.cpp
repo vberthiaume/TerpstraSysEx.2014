@@ -14,8 +14,8 @@
 namespace Lumatone {
 	namespace Menu {
 
-		MainMenuModel::MainMenuModel(const LumatoneEditorState& state, ApplicationCommandManager* commandManager)
-			: LumatoneEditorState("MainMenu", state)
+		MainMenuModel::MainMenuModel(const LumatoneEditorState& state, juce::ApplicationCommandManager* commandManager)
+			: LumatoneEditorStateController("MainMenu", state)
 		{
 			theManager = commandManager;
 			setApplicationCommandManagerToWatch(commandManager);
@@ -81,7 +81,6 @@ namespace Lumatone {
 			if (menuItemID >= recentFilesBaseID && menuItemID < recentFilesBaseID + 100)
 			{
 				// open a file from the "recent files" menu
-				// TerpstraSysExApplication::getApp().openRecentFile(menuItemID - recentFilesBaseID);
 				openRecentFile(menuItemID - recentFilesBaseID);
 			}
 		}

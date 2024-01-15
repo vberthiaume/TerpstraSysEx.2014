@@ -40,7 +40,7 @@ namespace Lumatone {
 		};
 
 		class MainMenuModel : public juce::MenuBarModel
-							, public LumatoneEditorState
+							, public LumatoneEditorStateController
 		{
 		public:
 			MainMenuModel(const LumatoneEditorState& stateIn, ApplicationCommandManager* commandManager);

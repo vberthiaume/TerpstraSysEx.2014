@@ -21,8 +21,6 @@ class LumatoneEditorLookAndFeel;
 class LumatoneController;
 class LumatoneEditorColourPalette;
 
-class TerpstraSysExApplication;
-
 namespace LumatoneEditorProperty
 {
     static const juce::Identifier StateTree = juce::Identifier("LumatoneEditorState");
@@ -61,7 +59,7 @@ namespace LumatoneEditorProperty
     static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
 
     static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
-
+    static const juce::Identifier LastColourWindowTab = juce::Identifier("LastColourWindowTab");
 }
 
 enum class EditorMode
@@ -72,13 +70,15 @@ enum class EditorMode
 
 static juce::Array<juce::Identifier> GetLumatoneEditorProperties();
 
+class LumatoneEditorStateController;
+
 class LumatoneEditorState : public LumatoneApplicationState
 {
 public:
-
-    LumatoneEditorState(juce::String name,  LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn);
     LumatoneEditorState(juce::String name, const LumatoneEditorState& stateIn);
-
+protected:
+    LumatoneEditorState(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn);
+public:
     ~LumatoneEditorState() override;
 
     const juce::String getApplicationName() const { return ProjectInfo::projectName; }
@@ -93,14 +93,12 @@ public:
 
     LumatoneEditorLookAndFeel& getEditorLookAndFeel() { return *lookAndFeel; }
 
-    //const juce::Array<LumatoneEditorColourPalette>& getColourPalettes() { return colourPalettes; }
-    const juce::Array<LumatoneEditorColourPalette>& getColourPalettes();
+    virtual const juce::Array<LumatoneEditorColourPalette>& getColourPalettes();
 
     const LumatoneEditorFontLibrary& getAppFonts() const { return *appFonts; }
 
     juce::String getProperty(juce::Identifier propertyId, juce::String fallbackValue=juce::String()) const;
 
-    // juce::PropertiesFile& getPropertiesFile() { return *propertiesFile; }
     juce::File getCurrentFile() const { return currentFile; }
 
     juce::RecentlyOpenedFilesList& getRecentFiles();
@@ -109,8 +107,6 @@ public:
     juce::File getUserMappingsDirectory() const;
     juce::File getUserPalettesDirectory() const;
 
-    // RecentlyOpenedFilesList& getRecentFileList() { return *recentFiles; }
-	// Font getAppFont(LumatoneEditorFont fontIdIn, float height = 12.0f) { return appFonts.getFont(fontIdIn, height); }
 
 public:
     bool doSendChangesToDevice() const override;
@@ -119,28 +115,10 @@ protected:
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
-    bool resetToCurrentFile();
-    bool openRecentFile(int recentFileIndex);
-
-    void addPalette(const LumatoneEditorColourPalette& newPalette);
-    bool deletePaletteFile(juce::File pathToPalette);
-
-public:
-
-
-
-// Only main app should access these
-private:
-    void setColourPalettes(const juce::Array<LumatoneEditorColourPalette>& palettesIn);
-    void loadColourPalettesFromFile();
-
-    bool setCurrentFile(juce::File fileToOpen);
-
-    void setEditMode(EditorMode editMode);
-
-    void setHasChangesToSave(bool hasChangesToSave);
-    void setCalibrationMode(bool calibrationModeOn);
-    void setDeveloperMode(bool developerModeOn);
+    virtual void setHasChangesToSave(bool hasChangesToSave);
+    virtual void setCalibrationMode(bool calibrationModeOn);
+    virtual void setDeveloperMode(bool developerModeOn);
+    virtual void setEditMode(EditorMode editMode);
 
 protected:
     bool hasChangesToSave = false;
@@ -161,7 +139,37 @@ private:
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
-    friend class TerpstraSysExApplication;
+    friend class LumatoneEditorStateController;
 };
+
+class LumatoneEditorStateController : public LumatoneEditorState
+{
+public:
+    LumatoneEditorStateController(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn)
+        : LumatoneEditorState(name, driverIn, undoManagerIn) {}
+    LumatoneEditorStateController(juce::String name, const LumatoneEditorState& stateIn)
+        : LumatoneEditorState(name, stateIn) {}
+
+    const juce::Array<LumatoneEditorColourPalette>& getColourPalettes() override;
+
+    bool resetToCurrentFile();
+    bool openRecentFile(int recentFileIndex);
+
+    void addPalette(const LumatoneEditorColourPalette& newPalette);
+    bool deletePaletteFile(juce::File pathToPalette);
+
+    void setColourPalettes(const juce::Array<LumatoneEditorColourPalette>& palettesIn);
+    void loadColourPalettesFromFile();
+
+    bool setCurrentFile(juce::File fileToOpen);
+    bool saveMappingToFile(juce::File fileToSave);
+
+    juce::PropertiesFile* getPropertiesFile() const { return propertiesFile.get(); }
+    bool savePropertiesFile() const;
+
+    void setDeveloperMode(bool developerModeOn) override { LumatoneEditorState::setDeveloperMode(developerModeOn); }
+    void setEditMode(EditorMode editMode) override { LumatoneEditorState::setEditMode(editMode); }
+};
+
 
 #endif LUMATONE_EDITOR_STATE_H

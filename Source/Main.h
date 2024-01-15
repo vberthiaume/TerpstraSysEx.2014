@@ -55,10 +55,9 @@ public:
 	bool saveSysExMappingAs(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 	bool resetSysExMapping();
 
-	bool setCurrentFile(juce::File file);
 	bool saveCurrentFile(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 
-	bool saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToPalette=juce::File());
+	//bool saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToPalette=juce::File());
 
 	bool deleteSubBoardData();
 	bool copySubBoardData();
@@ -92,17 +91,15 @@ private:
 	LumatoneFirmwareDriver	firmwareDriver;
 	juce::UndoManager 		undoManager;
 
-	LumatoneEditorState		state;
+	LumatoneEditorStateController	state;
 
 	std::unique_ptr<DeviceActivityMonitor> activityMonitor;
 
 	std::unique_ptr<ApplicationCommandManager> commandManager;
 	
+	MainContentComponent* mainComponent;
 	std::unique_ptr<MainWindow> mainWindow;
 	std::unique_ptr<DialogWindow> dialogWindow;
-
-	std::unique_ptr<juce::ComponentBoundsConstrainer> boundsConstrainer;
-
 
 	juce::TooltipWindow		tooltipWindow;
 	std::unique_ptr<juce::FileChooser> fileChooser;

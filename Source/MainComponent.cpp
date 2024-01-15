@@ -23,7 +23,8 @@
 #include "GlobalSettingsArea.h"
 #include "PedalSensitivityDlg.h"
 
-#include "./lumatone_editor_library/palettes/colour_palette_window.h"
+#include "./ColourPaletteWindow.h"
+
 #include "./lumatone_editor_library/palettes/colour_edit_textbox.h"
 #include "./lumatone_editor_library/ui/keyboard_component.h"
 #include "./lumatone_editor_library/graphics/view_constants.h"
@@ -217,7 +218,7 @@ UndoableAction* MainContentComponent::createModifiedPasteCurrentSectionAction(Co
     if (currentSetSelectionIndex >= 0 && currentSetSelectionIndex < getNumBoards()
         && !copiedSubBoardData->isEmpty())
     {
-        
+
 		auto modifiedSection = getBoard(currentSetSelectionIndex);
 		auto octaveSize = getOctaveBoardSize();
 
@@ -404,7 +405,7 @@ void MainContentComponent::buttonClicked(Button* btn)
 		// TerpstraSysExApplication::getApp().loadColourPalettesFromFile();
 
 		auto palettes = getColourPalettes();
-		ColourPaletteWindow* paletteWindow = new ColourPaletteWindow(palettes);
+		ColourPaletteWindow* paletteWindow = new ColourPaletteWindow(*this);
 		paletteWindow->setSize(proportionOfWidth(popupWidth), proportionOfHeight(popupHeight));
 
         if (btn == noteEditArea->getColourViewComponent())
@@ -425,8 +426,8 @@ void MainContentComponent::buttonClicked(Button* btn)
 
 		Rectangle<int> componentArea = colourEdit->getScreenBounds().translated(-getScreenX(), -getScreenY());
 
-		CallOutBox::launchAsynchronously(
-			std::unique_ptr<Component>(paletteWindow),
+		juce::CallOutBox::launchAsynchronously(
+			std::unique_ptr<juce::Component>(paletteWindow),
 			componentArea,
 			this
 		);
@@ -440,7 +441,7 @@ void MainContentComponent::buttonClicked(Button* btn)
 void MainContentComponent::paint (Graphics& g)
 {
 	g.fillAll(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
-	
+
 	g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
 	g.fillRect(controlsArea);
 }

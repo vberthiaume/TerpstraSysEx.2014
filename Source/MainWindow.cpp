@@ -15,18 +15,17 @@
 
 #include "./lumatone_editor_library/graphics/view_constants.h"
 
-MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdMgr)
+MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdManager)
     : juce::DocumentWindow("Lumatone Editor", juce::Colours::black, juce::DocumentWindow::minimiseButton + juce::DocumentWindow::closeButton)
-    , LumatoneEditorState("MainWindow", stateIn)
-    , commandManager(cmdMgr)
+    , LumatoneEditorStateController("MainWindow", stateIn)
+    , commandManager(cmdManager)
 {
-    // setContentOwned(new MainContentComponent(*TerpstraSysExApplication::getApp().getMappingData()), true);
-    setContentOwned(new MainContentComponent(stateIn, cmdMgr), true);
+    setContentOwned(new MainContentComponent(*this, commandManager), true);
     setResizable(true, true);
+
 #if JUCE_ANDROID
     setFullScreen(true);
 #else
-
     setLookAndFeel(&getEditorLookAndFeel());
 
     menuModel = std::make_unique<Lumatone::Menu::MainMenuModel>(*this, commandManager);
@@ -54,9 +53,6 @@ MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationComm
 
     startTimer(2000);
 #endif
-
-    // setLookAndFeel(stateIn.getEditorLookAndFeel());
-    // setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel());
 }
 
 MainWindow::~MainWindow()
@@ -145,6 +141,8 @@ void MainWindow::updateBounds()
 
     if (isOutOfVerticalBounds())
         fixWindowPositionAndSize();
+
+    (LumatoneEditorProperty::MainWindowState, getWindowStateAsString());
 }
 
 void MainWindow::fixWindowPositionAndSize(bool setToDefault)
