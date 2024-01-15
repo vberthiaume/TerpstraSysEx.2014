@@ -20,10 +20,10 @@ class LumatoneKeyboardComponent;
 
 class MidiEditArea;
 class NoteEditArea;
-class GeneralOptionsDlg;
+class MappingSettingsComponent;
 class CurvesArea;
 class GlobalSettingsArea;
-class PedalSensitivityDlg;
+
 
 //==============================================================================
 /*
@@ -93,19 +93,21 @@ private:
 	std::unique_ptr<LumatoneKeyboardComponent> 	allKeysOverview;
 
 	// Edit fields for setting key and button parameters, and edits for single keys
-	std::unique_ptr<NoteEditArea>			noteEditArea;
-	std::unique_ptr<GeneralOptionsDlg>		generalOptionsArea;
+	std::unique_ptr<NoteEditArea>				noteEditArea;
+	std::unique_ptr<MappingSettingsComponent>	mappingSettingsComponent;
+	
 	std::unique_ptr<CurvesArea> 			curvesArea;
-	std::unique_ptr<GlobalSettingsArea> 	globalSettingsArea;
-	std::unique_ptr<PedalSensitivityDlg> 	pedalSensitivityDlg;
+	std::unique_ptr<GlobalSettingsArea>		globalSettingsArea;
+
+    std::unique_ptr<juce::TabbedComponent> 	sectionTabs;
 
 	std::unique_ptr<juce::TextButton>		btnLoadFile;
 	std::unique_ptr<juce::TextButton>		btnSaveFile;
 	std::unique_ptr<juce::TextButton>		btnImportFile;
 
 	// Version signature in bottom left of window
-	std::unique_ptr<juce::Label> 					lblAppName;
-	std::unique_ptr<juce::Label> 					lblAppVersion;
+	std::unique_ptr<juce::Label> 			lblAppName;
+	std::unique_ptr<juce::Label> 			lblAppVersion;
 
 	// Buffer for copy/paste of sub board data
 	std::unique_ptr<LumatoneBoard>			copiedSubBoardData;

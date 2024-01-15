@@ -18,10 +18,9 @@
 #include "NoteEditArea.h"
 #include "IsomorphicMassAssign.h"
 
-#include "GeneralOptionsDlg.h"
 #include "CurvesArea.h"
 #include "GlobalSettingsArea.h"
-#include "PedalSensitivityDlg.h"
+#include "MappingSettingsComponent.h"
 
 #include "./ColourPaletteWindow.h"
 
@@ -49,15 +48,10 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 	// Edit function area
 	noteEditArea.reset(new NoteEditArea(stateIn));
-	addAndMakeVisible(noteEditArea.get());
 	noteEditArea->getOctaveBoardSelectorTab()->addChangeListener(this);
 	noteEditArea->getColourViewComponent()->addListener(this); // Open up ColourPaletteWindow
 
-	generalOptionsArea.reset(new GeneralOptionsDlg(stateIn));
-	addAndMakeVisible(generalOptionsArea.get());
-
-	pedalSensitivityDlg.reset(new PedalSensitivityDlg(stateIn));
-	addAndMakeVisible(pedalSensitivityDlg.get());
+	mappingSettingsComponent = std::make_unique<MappingSettingsComponent>(stateIn);
 
 	curvesArea.reset(new CurvesArea(stateIn));
 	addAndMakeVisible(curvesArea.get());
@@ -66,7 +60,12 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	addAndMakeVisible(globalSettingsArea.get());
 	globalSettingsArea->listenToColourEditButtons(this);
 
-	// getLumatoneController()->addFirmwareListener(this
+	sectionTabs = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::TabsAtTop);
+	addAndMakeVisible(*sectionTabs);
+	sectionTabs->addTab("Key Editor", juce::Colour(), noteEditArea.get(), false);
+	sectionTabs->addTab("AutoGenerator", juce::Colour(), noteEditArea.get(), false);
+	sectionTabs->addTab("Advanced", juce::Colour(), noteEditArea.get(), false);
+	sectionTabs->addTab("Mapping Settings", juce::Colour(), mappingSettingsComponent.get(), false);
 
 	btnLoadFile.reset(new juce::TextButton("btnLoadFile"));
 	addAndMakeVisible(btnLoadFile.get());
@@ -127,14 +126,13 @@ MainContentComponent::~MainContentComponent()
 	btnSaveFile = nullptr;
 	btnImportFile = nullptr;
 
-	midiEditArea = nullptr;
-	allKeysOverview = nullptr;
+	globalSettingsArea = nullptr;
+	curvesArea = nullptr;
+	mappingSettingsComponent = nullptr;
 	noteEditArea = nullptr;
 
-	generalOptionsArea = nullptr;
-	curvesArea = nullptr;
-	globalSettingsArea = nullptr;
-	pedalSensitivityDlg = nullptr;
+	midiEditArea = nullptr;
+	allKeysOverview = nullptr;
 
 	lblAppName = nullptr;
 	lblAppVersion = nullptr;
@@ -486,11 +484,13 @@ void MainContentComponent::resized()
 	btnImportFile->setBounds(allKeysOverview->getRight() - importWidth, importY, importWidth, btnHeight);
 
 	// Edit function/single key field area
-	noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
-	noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
+	// noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
+	// noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
 
-	generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
-	pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
+	sectionTabs->setBounds(proportionOfWidth(assignMarginX), controlsArea.getY(), proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
+
+	// generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
+	// pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
 
 	curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
 

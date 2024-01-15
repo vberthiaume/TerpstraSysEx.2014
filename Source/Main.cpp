@@ -23,7 +23,6 @@
 #include "./lumatone_editor_library/graphics/view_constants.h"
 #include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
-#include "GeneralOptionsDlg.h"
 #include "VelocityCurveDlgBase.h"
 #include "NoteOnOffVelocityCurveDialog.h"
 #include "LumatoneMenu.h"
