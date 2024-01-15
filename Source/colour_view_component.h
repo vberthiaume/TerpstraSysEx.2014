@@ -20,8 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include <JuceHeader.h>
-#include "colour_selection_group.h"
+#include "./lumatone_editor_library/palettes/colour_selection_group.h"
 
 /*
 ==============================================================================
@@ -137,4 +136,3 @@ private:
 //[EndFile] You can add extra defines here...
 
 //[/EndFile]
-

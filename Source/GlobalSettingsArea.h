@@ -25,7 +25,7 @@
 #include "./LumatoneEditorState.h"
 
 #include "./lumatone_editor_library/listeners/status_listener.h"
-#include "./lumatone_editor_library/palettes/colour_view_component.h"
+#include "./colour_view_component.h"
 
 //[/Headers]
 

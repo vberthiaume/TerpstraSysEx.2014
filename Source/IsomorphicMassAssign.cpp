@@ -22,7 +22,7 @@
 
 #include "./lumatone_editor_library/graphics/view_constants.h"
 #include "./lumatone_editor_library/device/lumatone_controller.h"
-#include "./lumatone_editor_library/palettes/colour_palette_component.h"
+#include "./colour_palette_component.h"
 
 //[/Headers]
 
@@ -733,7 +733,8 @@ void IsomorphicMassAssign::colourChangedCallback(ColourSelectionBroadcaster* sou
             colourTable = newColours;
         }
 
-        mappingLogic->setColourTable(colourTable);
+        if (mappingLogic)
+            mappingLogic->setColourTable(colourTable);
     }
 }
 

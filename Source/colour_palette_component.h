@@ -12,10 +12,10 @@
 
 #include <JuceHeader.h>
 
-#include "./hex_group_palette.h"
-#include "./colour_selection_broadcaster.h"
+#include "./lumatone_editor_library/palettes/hex_group_palette.h"
+#include "./lumatone_editor_library/palettes/colour_selection_broadcaster.h"
 
-#include "./colour_palette_file.h"
+#include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
 // #include "LumatoneEditorStyleCommon.h"
 

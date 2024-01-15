@@ -27,7 +27,7 @@
 #include "./lumatone_editor_library/graphics/view_constants.h"
 
 #include "MainComponent.h"
-#include "./lumatone_editor_library/palettes/colour_view_component.h"
+#include "./colour_view_component.h"
 //[/Headers]
 
 #include "NoteEditArea.h"

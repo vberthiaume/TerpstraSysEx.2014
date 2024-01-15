@@ -10,14 +10,14 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-// #include "LumatoneEditorStyleCommon.h"
-
-#include "./colour_selection_group.h"
-#include "./colour_palette_file.h"
+#include "./lumatone_editor_library/palettes/colour_selection_group.h"
+#include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
 #include "./palette_selection_panel.h"
 
+#include "./LumatoneEditorState.h"
+
+class ColourSelectionGroup;
 class ColourPaletteComponent;
 
 class CustomPickerPanel;
@@ -26,12 +26,13 @@ class PaletteEditPanel;
 //==============================================================================
 /*
 */
-class ColourPaletteWindow  :    public juce::Component,
-                                public juce::ChangeListener,
-                                public ColourPalettesPanel::Listener
+class ColourPaletteWindow   : public juce::Component
+                            , private LumatoneEditorStateController
+                            , public juce::ChangeListener
+                            , public ColourPalettesPanel::Listener
 {
 public:
-    ColourPaletteWindow(juce::Array<LumatoneEditorColourPalette>& colourPalettesIn);
+    ColourPaletteWindow(const LumatoneEditorState& stateIn);
     ~ColourPaletteWindow() override;
 
     void resized() override;
@@ -56,13 +57,13 @@ public:
     /// Force a colour selector (added to the group) to be selected
     /// </summary>
     /// <param name="newSelector"></param>
-    void setCurrentColourSelector(ColourSelectionBroadcaster* newSelector) 
-    { 
+    void setCurrentColourSelector(ColourSelectionBroadcaster* newSelector)
+    {
         // This statement is kind of a kludge - vsicurella
         if (colourSelectorGroup->getIndexOfSelector(newSelector) < 0)
             colourSelectorGroup->addSelector(newSelector);
 
-        colourSelectorGroup->setCurrentSelector(newSelector); 
+        colourSelectorGroup->setCurrentSelector(newSelector);
     }
 
 private:
@@ -96,10 +97,10 @@ protected:
     void newPaletteRequested() override;
 
 private:
-    
+
     // LumatoneEditorLookAndFeel lookAndFeel;
 
-    juce::Array<LumatoneEditorColourPalette>& colourPalettes;
+    //juce::Array<LumatoneEditorColourPalette>& colourPalettes;
 
     std::unique_ptr<juce::TabbedComponent> colourToolTabs;
     std::unique_ptr<ColourPalettesPanel> palettePanel;

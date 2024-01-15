@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 #include "colour_palette_component.h"
-#include "../graphics/lumatone_assets.h"
+#include "lumatone_editor_library/graphics/lumatone_assets.h"
 
 //==============================================================================
 // ColourPaletteComponent Definitions

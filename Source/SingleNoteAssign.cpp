@@ -19,8 +19,8 @@
 
 //[Headers] You can add your own extra header files here...
 #include "./lumatone_editor_library/actions/edit_actions.h"
-#include "./lumatone_editor_library/palettes/colour_view_component.h"
 #include "./lumatone_editor_library/palettes/colour_edit_textbox.h"
+#include "./colour_view_component.h"
 
 #include "LumatoneEditorLookAndFeel.h"
 //[/Headers]

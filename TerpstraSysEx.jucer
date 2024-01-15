@@ -278,35 +278,19 @@
                 file="Source/lumatone_editor_library/palettes/colour_edit_textbox.cpp"/>
           <FILE id="hRCJ3T" name="colour_edit_textbox.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_edit_textbox.h"/>
-          <FILE id="Sdg1Ir" name="colour_palette_component.cpp" compile="1" resource="0"
-                file="Source/lumatone_editor_library/palettes/colour_palette_component.cpp"/>
-          <FILE id="VKvEwq" name="colour_palette_component.h" compile="0" resource="0"
-                file="Source/lumatone_editor_library/palettes/colour_palette_component.h"/>
           <FILE id="oRtRDD" name="colour_palette_file.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_palette_file.h"/>
-          <FILE id="MUxXl0" name="colour_palette_window.cpp" compile="1" resource="0"
-                file="Source/lumatone_editor_library/palettes/colour_palette_window.cpp"/>
-          <FILE id="NfMI7q" name="colour_palette_window.h" compile="0" resource="0"
-                file="Source/lumatone_editor_library/palettes/colour_palette_window.h"/>
           <FILE id="c6Drft" name="colour_picker_panel.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_picker_panel.h"/>
           <FILE id="IZE3lE" name="colour_selection_broadcaster.h" compile="0"
                 resource="0" file="Source/lumatone_editor_library/palettes/colour_selection_broadcaster.h"/>
           <FILE id="SPq6tv" name="colour_selection_group.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_selection_group.h"/>
-          <FILE id="SHADjT" name="colour_view_component.cpp" compile="1" resource="0"
-                file="Source/lumatone_editor_library/palettes/colour_view_component.cpp"/>
-          <FILE id="u2jCKR" name="colour_view_component.h" compile="0" resource="0"
-                file="Source/lumatone_editor_library/palettes/colour_view_component.h"/>
           <FILE id="vhL7UR" name="hex_group_palette.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/hex_group_palette.h"/>
           <FILE id="lJJ0O2" name="palette_base.h" compile="0" resource="0" file="Source/lumatone_editor_library/palettes/palette_base.h"/>
-          <FILE id="ZpsZN6" name="palette_edit_panel.h" compile="0" resource="0"
-                file="Source/lumatone_editor_library/palettes/palette_edit_panel.h"/>
           <FILE id="aqQkOU" name="palette_library.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/palette_library.h"/>
-          <FILE id="eu4alZ" name="palette_selection_panel.h" compile="0" resource="0"
-                file="Source/lumatone_editor_library/palettes/palette_selection_panel.h"/>
           <FILE id="CHSP62" name="polygon_palette.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/polygon_palette.h"/>
         </GROUP>
@@ -389,6 +373,22 @@
         <FILE id="SG0zUw" name="TuningTable.cpp" compile="1" resource="0" file="Source/tuning/TuningTable.cpp"/>
         <FILE id="x9HcnB" name="TuningTable.h" compile="0" resource="0" file="Source/tuning/TuningTable.h"/>
       </GROUP>
+      <FILE id="oC4FYT" name="colour_palette_component.h" compile="0" resource="0"
+            file="Source/colour_palette_component.h"/>
+      <FILE id="lPiQ0T" name="colour_view_component.cpp" compile="1" resource="0"
+            file="Source/colour_view_component.cpp"/>
+      <FILE id="vZjGZ0" name="colour_view_component.h" compile="0" resource="0"
+            file="Source/colour_view_component.h"/>
+      <FILE id="DWZ8H0" name="ColourPaletteWindow.cpp" compile="1" resource="0"
+            file="Source/ColourPaletteWindow.cpp"/>
+      <FILE id="JCf8U6" name="ColourPaletteWindow.h" compile="0" resource="0"
+            file="Source/ColourPaletteWindow.h"/>
+      <FILE id="yd8fdg" name="colour_palette_component.cpp" compile="1" resource="0"
+            file="Source/colour_palette_component.cpp"/>
+      <FILE id="B2WleS" name="palette_edit_panel.h" compile="0" resource="0"
+            file="Source/palette_edit_panel.h"/>
+      <FILE id="PX5dHz" name="palette_selection_panel.h" compile="0" resource="0"
+            file="Source/palette_selection_panel.h"/>
       <FILE id="R9fpSq" name="CurvesArea.cpp" compile="1" resource="0" file="Source/CurvesArea.cpp"/>
       <FILE id="TLyIga" name="CurvesArea.h" compile="0" resource="0" file="Source/CurvesArea.h"/>
       <FILE id="eQune0" name="FileBrowserComponent.h" compile="0" resource="0"

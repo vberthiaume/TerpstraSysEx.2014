@@ -8,28 +8,29 @@
   ==============================================================================
 */
 
-#include "colour_palette_window.h"
+#include "ColourPaletteWindow.h"
+
+#include "./lumatone_editor_library/palettes/colour_selection_group.h"
+#include "./lumatone_editor_library/palettes/colour_picker_panel.h"
 
 #include "./colour_palette_component.h"
-
-#include "./palette_selection_panel.h"
-#include "./colour_picker_panel.h"
 #include "./palette_edit_panel.h"
+
+#include "./LumatoneEditorLookAndFeel.h"
+
 
 //==============================================================================
 // ColourPaletteWindow Definitions
 
-ColourPaletteWindow::ColourPaletteWindow(juce::Array<LumatoneEditorColourPalette>& colourPalettesIn)
-    // : lookAndFeel(TerpstraSysExApplication::getApp().getLookAndFeel()),
-      : colourPalettes(colourPalettesIn)
+ColourPaletteWindow::ColourPaletteWindow(const LumatoneEditorState& stateIn)
+    : LumatoneEditorStateController("ColourPaletteWindow", stateIn)
 {
-    // setLookAndFeel(&lookAndFeel);
-    
     setName("ColourPaletteWindow");
+    setLookAndFeel(&getEditorLookAndFeel());
 
     colourSelectorGroup.reset(new ColourSelectionGroup());
-    
-    palettePanel.reset(new ColourPalettesPanel(colourPalettes, colourSelectorGroup.get()));
+
+    palettePanel.reset(new ColourPalettesPanel(getColourPalettes(), colourSelectorGroup.get()));
     palettePanel->addListener(this);
 
     palettePanelViewport.reset(new juce::Viewport("PalettePanelViewport"));
@@ -46,26 +47,26 @@ ColourPaletteWindow::ColourPaletteWindow(juce::Array<LumatoneEditorColourPalette
     colourToolTabs->addTab(juce::translate("ColourPalettes"), juce::Colour(), palettePanelViewport.get(), false);
     colourToolTabs->addTab(juce::translate("CustomPicker"), juce::Colour(), customPickerPanel.get(), false);
     colourToolTabs->setColour(juce::TabbedComponent::ColourIds::outlineColourId, juce::Colour());
-    // colourToolTabs->getTabbedButtonBar().getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.9f);
+    colourToolTabs->getTabbedButtonBar().getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.9f);
     addAndMakeVisible(*colourToolTabs);
-    
-    const int firstTabIndex = 0;//; TerpstraSysExApplication::getApp().getPropertiesFile()->getIntValue("LastColourPopupTabIndex");
+
+    const int firstTabIndex = getProperty(LumatoneEditorProperty::LastColourWindowTab, "0").getIntValue();
     colourToolTabs->setCurrentTabIndex(firstTabIndex);
     colourToolTabs->getTabbedButtonBar().addChangeListener(this);
 }
 
 ColourPaletteWindow::~ColourPaletteWindow()
-{ 
+{
     paletteEditPanel        = nullptr;
     colourToolTabs          = nullptr;
-    
+
     colourSelectorGroup->removeSelector(customPickerPanel.get());
     customPickerPanel       = nullptr;
-    
+
     palettePanelViewport    = nullptr;
     palettePanel            = nullptr;
     colourSelectorGroup     = nullptr;
-    
+
     setLookAndFeel(nullptr);
 }
 
@@ -77,13 +78,13 @@ void ColourPaletteWindow::resized()
     if (paletteEditPanel.get())
         paletteEditPanel->setBounds(getLocalBounds());
 
-    palettePanel->rebuildPanel(colourPalettes, palettePanelViewport->getMaximumVisibleWidth());
+    palettePanel->rebuildPanel(getColourPalettes(), palettePanelViewport->getMaximumVisibleWidth());
 }
 
 void ColourPaletteWindow::startEditingPalette(int paletteIndexIn, int selectedSwatchIndex)
 {
     paletteIndexEditing = paletteIndexIn;
-    paletteEditPanel.reset(new PaletteEditPanel(colourPalettes[paletteIndexIn]));
+    paletteEditPanel.reset(new PaletteEditPanel(*this, LumatoneEditorState::getColourPalettes()[paletteIndexIn]));
     paletteEditPanel->setBounds(getLocalBounds());
     paletteEditPanel->setLookAndFeel(&getLookAndFeel());
     addAndMakeVisible(*paletteEditPanel);
@@ -96,36 +97,47 @@ void ColourPaletteWindow::startEditingPalette(int paletteIndexIn, int selectedSw
 
 void ColourPaletteWindow::duplicatePalette(int paletteIndexIn)
 {
-    auto copiedPalette = colourPalettes[paletteIndexIn].clone();
+    auto colourPalettes = getColourPalettes();
+    auto copiedPalette = getColourPalettes()[paletteIndexIn].clone();
+    
+    if (! copiedPalette.saveToFile())
+        return; // TODO
+
     colourPalettes.insert(paletteIndexIn + 1, copiedPalette);
-    // TerpstraSysExApplication::getApp().saveColourPalette(copiedPalette);
+    setColourPalettes(colourPalettes);
+
     palettePanel->rebuildPanel(colourPalettes);
 }
 
 void ColourPaletteWindow::removePalette(int paletteIndexToRemove)
 {
     // Remove loaded colour palette
-    juce::String deletedPalette = colourPalettes[paletteIndexToRemove].getPathToFile();
+    auto colourPalettes = getColourPalettes();
+    auto deletedPalette = colourPalettes[paletteIndexToRemove];
+    
+    if (!deletedPalette.deleteFile())
+        return; // TODO
+
     colourPalettes.remove(paletteIndexToRemove);
 
-    // TerpstraSysExApplication::getApp().deletePaletteFile(deletedPalette);
+    setColourPalettes(colourPalettes);
 
     palettePanel->rebuildPanel(colourPalettes);
 }
 
 void ColourPaletteWindow::editPaletteRequested(int paletteIndex, int selectedSwatchIndex)
 {
-    if (paletteIndex >= 0 && paletteIndex < colourPalettes.size())
+    if (paletteIndex >= 0 && paletteIndex < getColourPalettes().size())
     {
         startEditingPalette(paletteIndex, selectedSwatchIndex);
     }
     else
-        jassert(true); // Something bad happened!   
+        jassert(true); // Something bad happened!
 }
 
 void ColourPaletteWindow::clonePaletteRequested(int paletteIndex)
 {
-    if (paletteIndex >= 0 && paletteIndex < colourPalettes.size())
+    if (paletteIndex >= 0 && paletteIndex < getColourPalettes().size())
     {
         duplicatePalette(paletteIndex);
     }
@@ -135,7 +147,7 @@ void ColourPaletteWindow::clonePaletteRequested(int paletteIndex)
 
 void ColourPaletteWindow::deletePaletteRequested(int paletteIndex)
 {
-    if (paletteIndex >= 0 && paletteIndex < colourPalettes.size())
+    if (paletteIndex >= 0 && paletteIndex < getColourPalettes().size())
     {
         removePalette(paletteIndex);
     }
@@ -146,7 +158,13 @@ void ColourPaletteWindow::deletePaletteRequested(int paletteIndex)
 void ColourPaletteWindow::newPaletteRequested()
 {
     paletteEditingIsNew = true;
-    colourPalettes.insert(0, LumatoneEditorColourPalette());
+
+    auto colourPalettes = getColourPalettes();
+    auto newPalette = LumatoneEditorColourPalette();
+    newPalette.saveToFile();
+    colourPalettes.insert(0, newPalette);
+    
+    setColourPalettes(colourPalettes);
     startEditingPalette(0, 0);
 }
 
@@ -157,21 +175,23 @@ void ColourPaletteWindow::changeListenerCallback(juce::ChangeBroadcaster* source
     {
         if (paletteEditPanel->wasSaveRequested())
         {
-            if (paletteIndexEditing >= 0 && paletteIndexEditing < colourPalettes.size())
+            if (paletteIndexEditing >= 0 && paletteIndexEditing < getColourPalettes().size())
             {
+                auto colourPalettes = getColourPalettes();
                 auto palette = colourPalettes.getReference(paletteIndexEditing);
                 palette.setColours(paletteEditPanel->getCurrentPalette());
 
                 juce::String newName = paletteEditPanel->getPaletteName();
                 palette.setName(newName);
 
-                // TerpstraSysExApplication::getApp().saveColourPalette(palette);
+                palette.saveToFile();
+                setColourPalettes(colourPalettes);
             }
             else
                 jassert(true); // Something bad happened!
 
 
-            palettePanel->rebuildPanel(colourPalettes);
+            palettePanel->rebuildPanel(getColourPalettes());
         }
         else if (paletteEditingIsNew)
             removePalette(paletteIndexEditing);
@@ -180,10 +200,10 @@ void ColourPaletteWindow::changeListenerCallback(juce::ChangeBroadcaster* source
         paletteEditingIsNew = false;
         paletteEditPanel = nullptr;
     }
-    
+
     else if (source == &colourToolTabs->getTabbedButtonBar())
     {
         const int newTab = colourToolTabs->getCurrentTabIndex();
-        // TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastColourPopupTabIndex", newTab);
+        getPropertiesFile()->setValue(LumatoneEditorProperty::LastColourWindowTab, juce::String(newTab));
     }
 }

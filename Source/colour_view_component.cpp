@@ -18,7 +18,7 @@
 */
 
 //[Headers] You can add your own extra header files here...
-#include "../graphics/view_constants.h"
+#include "./lumatone_editor_library/graphics/view_constants.h"
 //[/Headers]
 
 #include "colour_view_component.h"
@@ -311,4 +311,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

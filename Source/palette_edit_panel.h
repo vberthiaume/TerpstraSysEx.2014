@@ -11,21 +11,26 @@
 #ifndef LUMATONE_PALETTE_EDIT_PANEL_H
 #define LUMATONE_PALETTE_EDIT_PANEL_H
 
+
 #include "./colour_palette_component.h"
+#include "LumatoneEditorLookAndFeel.h"
+#include "LumatoneEditorState.h"
 
 //==============================================================================
 /*
 *   Colour palette edtior panel
 */
 class PaletteEditPanel : public juce::Component
+                       , private LumatoneEditorState
                        , public juce::Button::Listener
                        , public juce::Label::Listener
                        , public juce::ChangeBroadcaster
 {
 public:
 
-    PaletteEditPanel(const LumatoneEditorColourPalette& paletteIn)
-        : colourPalette(paletteIn)
+    PaletteEditPanel(const LumatoneEditorState& stateIn, const LumatoneEditorColourPalette& paletteIn)
+        : LumatoneEditorState("PaletteEditPanel", stateIn)
+        , colourPalette(paletteIn)
     {
         colourPicker.reset(new juce::ColourSelector(
             juce::ColourSelector::ColourSelectorOptions::editableColour
@@ -49,7 +54,7 @@ public:
         paletteNameEditor->addListener(this);
         paletteNameEditor->setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour());
         paletteNameEditor->setText(colourPalette.getName(), juce::dontSendNotification);
-        // paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::labelMaximumLineCount, 3);
+        paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::labelMaximumLineCount, 3);
         addAndMakeVisible(*paletteNameEditor);
         labelTextChanged(paletteNameEditor.get()); // force update
 
@@ -82,7 +87,7 @@ public:
 
         auto labelText = editPaletteLabel->getText() + " ";
         int labelWidth = editPaletteLabel->getFont().getStringWidth(labelText);
-        // resizeLabelWithHeight(editPaletteLabel.get(), proportionOfHeight(editPaletteHeight));
+        resizeLabelWithHeight(editPaletteLabel.get(), proportionOfHeight(editPaletteHeight));
         editPaletteLabel->setSize(labelWidth, proportionOfHeight(editPaletteHeight));
         editPaletteLabel->setCentrePosition(leftCenter, juce::roundToInt(editPaletteLabel->getHeight() * 0.5f + proportionOfHeight(editPaletteLabelY)));
 
@@ -103,26 +108,13 @@ public:
             juce::Point<int>(juce::roundToInt(leftMargin), paletteControl->getBottom()),
             juce::Point<int>(colourPicker->getX() - leftMargin, saveButton->getY())
             ));
-        // paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editPaletteLabel->getHeight() / (float)paletteNameEditor->getHeight());
+        paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editPaletteLabel->getHeight() / (float)paletteNameEditor->getHeight());
 
-        //if (lookAndFeel)
-        //{
-        //    Font labelFont = (paletteUnnamed)
-        //        ? lookAndFeel->getAppFont(LumatoneEditorFont::UniviaProBold)
-        //        : lookAndFeel->getAppFont(LumatoneEditorFont::GothamNarrowMedium);
-
-        //    paletteNameEditor->setFont(labelFont);
-        //}
-
+        juce::Font labelFont = (paletteUnnamed)
+            ? getAppFonts().getFont(LumatoneEditorFont::UniviaProBold)
+            : getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium);
+        paletteNameEditor->setFont(labelFont);
     }
-
-    // void lookAndFeelChanged() override
-    // {
-    //     lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-    //     if (lookAndFeel)
-    //     {
-    //     }
-    // }
 
     //==============================================================================
 
@@ -149,8 +141,8 @@ public:
             {
                 paletteUnnamed = false;
                 colourPalette.setName(paletteNameEditor->getText());
-                // paletteNameEditor->getProperties().remove(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle);
-                // paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::GothamNarrowMedium);
+                 paletteNameEditor->getProperties().remove(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle);
+                 paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::GothamNarrowMedium);
             }
 
             else if (nameIsEmpty && !paletteUnnamed)
@@ -161,8 +153,8 @@ public:
             if (paletteUnnamed)
             {
                 paletteNameEditor->setText("unnamed", juce::NotificationType::dontSendNotification);
-                // paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle, "Italic");
-                // paletteNameEditor->getProperties().remove(LumatoneEditorStyleIDs::fontOverride);
+                paletteNameEditor->getProperties().set(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle, "Italic");
+                paletteNameEditor->getProperties().remove(LumatoneEditorStyleIDs::fontOverride);
             }
 
             //resized();
@@ -210,8 +202,6 @@ private:
     std::unique_ptr<juce::Label>          paletteNameEditor;
     std::unique_ptr<juce::TextButton>     saveButton;
     std::unique_ptr<juce::TextButton>     cancelButton;
-
-    // LumatoneEditorLookAndFeel*      lookAndFeel = nullptr;
 
     bool saveRequested = false;
 

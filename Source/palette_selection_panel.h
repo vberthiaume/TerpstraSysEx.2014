@@ -32,7 +32,7 @@ public:
         newPaletteBtn->setButtonText(juce::translate("NewPalette"));
         // newPaletteBtn->getProperties().set(LumatoneEditorStyleIDs::textButtonHyperlinkFlag, 1);
         newPaletteBtn->onClick = [&] { listeners.call(&ColourPalettesPanel::Listener::newPaletteRequested); };
-        
+
     };
 
     ~ColourPalettesPanel()
@@ -62,9 +62,9 @@ public:
         return height;
     }
 
-    void paint(juce::Graphics& g) override 
+    void paint(juce::Graphics& g) override
     {
-        //Draws rectangles around items and margins 
+        //Draws rectangles around items and margins
         //for (auto item : dbgItems)
         //{
         //    g.setColour(Colours::red);
@@ -101,7 +101,7 @@ public:
         }
 
         flexBox.performLayout(viewportBounds);
-        
+
         float bottomMarginControlHeight = juce::roundToInt(viewportBounds.proportionOfWidth(btmMarginCtrlScalar));
         float bottomMarginControlSpace  = (bottomMargin - bottomMarginControlHeight) * 0.5f;
 
@@ -185,7 +185,7 @@ public:
 
         controlGroups.clear();
         paletteLabels.clear();
-        
+
         allPalettes = juce::Array<ColourPaletteComponent*>(newPalette.get());
 
         // Palettes with colour
