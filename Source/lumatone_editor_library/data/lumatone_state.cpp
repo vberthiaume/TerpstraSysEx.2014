@@ -39,8 +39,8 @@ LumatoneState::LumatoneState(juce::String nameIn, juce::ValueTree stateIn, juce:
     state.appendChild(layoutState, nullptr);
 }
 
-LumatoneState::LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy, juce::UndoManager* undoManagerIn)
-    : LumatoneState(nameIn, stateToCopy.state, undoManagerIn)
+LumatoneState::LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy)
+    : LumatoneState(nameIn, stateToCopy.state, stateToCopy.undoManager)
 {
     mappingData = stateToCopy.mappingData;
     midiKeyMap = stateToCopy.midiKeyMap;

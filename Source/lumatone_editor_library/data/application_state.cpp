@@ -22,7 +22,7 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
     : LumatoneState(nameIn, stateIn, undoManagerIn)
 {
     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
-	controller = std::make_shared<LumatoneController>(*this, driverIn, undoManagerIn);
+	controller = std::make_shared<LumatoneController>(*this, driverIn);
     colourModel = std::make_shared<LumatoneColourModel>();
 
     editorListeners.reset(new juce::ListenerList<LumatoneEditor::EditorListener>());
@@ -41,8 +41,8 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
 //     loadStateProperties(state);
 // }
 
-LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn, juce::UndoManager *undoManagerIn)
-    : LumatoneState(nameIn, (const LumatoneState&)stateIn, undoManagerIn)
+LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn)
+    : LumatoneState(nameIn, (const LumatoneState&)stateIn)
     , layoutContext(stateIn.layoutContext)
     , controller(stateIn.controller)
     , colourModel(stateIn.colourModel)

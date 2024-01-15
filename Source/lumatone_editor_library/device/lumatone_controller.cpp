@@ -15,8 +15,8 @@
 #include "../lumatone_midi_driver/lumatone_midi_driver.h"
 #include "../listeners/editor_listener.h"
 
-LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& firmwareDriverIn, juce::UndoManager* undoManager)
-    : LumatoneApplicationState("LumatoneController", stateIn, undoManager)
+LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& firmwareDriverIn)
+    : LumatoneApplicationState("LumatoneController", stateIn)
     , LumatoneApplicationMidiController(stateIn, firmwareDriverIn)
     , firmwareDriver(firmwareDriverIn)
     , updateBuffer(firmwareDriverIn, stateIn)
@@ -644,17 +644,6 @@ void LumatoneController::onConnectionConfirmed()
 
     statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
 }
-
-// bool LumatoneController::loadLayoutFromFile(const juce::File& file)
-// {
-//     const bool loaded = LumatoneState::loadLayoutFromFile(file);
-//     if (loaded)
-//     {
-//         sendCompleteMapping(*mappingData, true, false);
-//     }
-
-//     return loaded;
-// }
 
 void LumatoneController::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
 {

@@ -54,7 +54,7 @@ class LumatoneApplicationState : public LumatoneState
 {
 public:
     LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
-    LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState& stateIn, juce::UndoManager* undoManager=nullptr);
+    LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState& stateIn);
 
     virtual ~LumatoneApplicationState();
 

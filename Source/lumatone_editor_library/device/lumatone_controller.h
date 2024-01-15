@@ -34,7 +34,7 @@ class LumatoneController :  private LumatoneApplicationState
 {
 public:
 
-    LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& firmwareDriverIn, juce::UndoManager* undoManager);
+    LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& firmwareDriverIn);
     ~LumatoneController() override;
 
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;

@@ -40,7 +40,7 @@ class LumatoneState : public LumatoneStateBase
 public:
 
     LumatoneState(juce::String nameIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
-    LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy, juce::UndoManager* undoManagerIn=nullptr);
+    LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy);
 
     virtual ~LumatoneState() override;
 
