@@ -40,7 +40,7 @@ public:
     
 public:
 
-    DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, const LumatoneApplicationState& stateIn);
+    DeviceActivityMonitor(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver* midiDriverIn);
     ~DeviceActivityMonitor() override;
 
     DetectConnectionMode getMode() const { return deviceConnectionMode; }

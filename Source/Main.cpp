@@ -40,8 +40,6 @@ TerpstraSysExApplication::TerpstraSysExApplication()
 	: firmwareDriver(LumatoneFirmwareDriver::HostMode::Driver)
 	, state("LumatoneEditor", firmwareDriver, &undoManager)
 {
-	activityMonitor.reset(new DeviceActivityMonitor(&firmwareDriver, state));
-
 	// Localisation
 	String localisation = getLocalisation(SystemStats::getDisplayLanguage());
 	LocalisedStrings::setCurrentMappings(new LocalisedStrings(localisation, false));
@@ -106,7 +104,6 @@ void TerpstraSysExApplication::shutdown()
 	if (state.firmwareUpdateCompleted())
 		FirmwareTransfer::exitLibSsh2();
 
-	activityMonitor = nullptr;
 	//delete firmwareDriver;
 
 //	commandManager = nullptr;

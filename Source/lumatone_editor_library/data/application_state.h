@@ -142,6 +142,7 @@ public:
 private:
     std::shared_ptr<LumatoneContext> layoutContext;
 	std::shared_ptr<LumatoneController> controller;
+    std::shared_ptr<DeviceActivityMonitor> activityMonitor;
     std::shared_ptr<LumatoneColourModel> colourModel;
 
     bool contextIsSet = false;

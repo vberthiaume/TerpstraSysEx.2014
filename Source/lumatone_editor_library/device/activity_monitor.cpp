@@ -15,7 +15,7 @@
 #include "../listeners/status_listener.h"
 
 
-DeviceActivityMonitor::DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, const LumatoneApplicationState& stateIn)
+DeviceActivityMonitor::DeviceActivityMonitor(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver* midiDriverIn)
     :   LumatoneApplicationStateController("DeviceActivityMonitor", stateIn)
     ,   midiDriver(midiDriverIn)
 {

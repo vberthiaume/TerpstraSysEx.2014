@@ -1,5 +1,6 @@
 #include "application_state.h"
 #include "../device/lumatone_controller.h"
+#include "../device/activity_monitor.h"
 #include "../color/colour_model.h"
 #include "../data/lumatone_context.h"
 
@@ -28,6 +29,7 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
 
     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
 	controller = std::make_shared<LumatoneController>(*this, driverIn);
+    activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, &driverIn);
     colourModel = std::make_shared<LumatoneColourModel>();
 
     loadStateProperties(stateIn);
@@ -49,6 +51,7 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const Lu
     , midiListeners(stateIn.midiListeners)
     , layoutContext(stateIn.layoutContext)
     , controller(stateIn.controller)
+    , activityMonitor(stateIn.activityMonitor)
     , colourModel(stateIn.colourModel)
 {
     loadStateProperties(state);
@@ -56,9 +59,10 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const Lu
 
 LumatoneApplicationState::~LumatoneApplicationState()
 {
+    layoutContext = nullptr;
+    activityMonitor = nullptr;
     controller = nullptr;
     colourModel = nullptr;
-    layoutContext = nullptr;
 }
 
 ConnectionState LumatoneApplicationState::getConnectionState() const
@@ -254,7 +258,6 @@ void LumatoneApplicationState::sendSelectionParam(const juce::Array<MappedLumato
     for (auto mappedKey : selection)
     {
         controller->sendKeyParam(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
-        //sendKeyConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, (LumatoneKey)mappedKey, false, bufferKeyUpdates);
     }
 
     //if (signalEditorListeners)
@@ -268,7 +271,6 @@ void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLuma
     for (auto mappedKey : selection)
     {
         controller->sendKeyColourConfig(mappedKey.boardIndex, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
-        //sendKeyColourConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, (LumatoneKey)mappedKey, false, bufferKeyUpdates);
     }
 
     //if (signalEditorListeners)
