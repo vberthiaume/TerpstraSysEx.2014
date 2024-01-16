@@ -15,8 +15,8 @@
 #include "../listeners/status_listener.h"
 
 
-DeviceActivityMonitor::DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, LumatoneApplicationState stateIn)
-    :   LumatoneApplicationState("DeviceActivityMonitor", stateIn)
+DeviceActivityMonitor::DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, const LumatoneApplicationState& stateIn)
+    :   LumatoneApplicationStateController("DeviceActivityMonitor", stateIn)
     ,   midiDriver(midiDriverIn)
 {
     // detectDevicesIfDisconnected = getBoolProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, true);
@@ -265,7 +265,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
     if (isConnectionEstablished())
     {
         deviceDetectInProgress = false;
-        statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
+        getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
 
         outputPingIds.clear();
 
@@ -286,7 +286,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
             waitingForResponse = false;
             startTimer(detectRoutineTimeoutMs);
 
-            statusListeners->call(&LumatoneEditor::StatusListener::connectionFailed);
+            getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionFailed);
         }
         else
         {
@@ -340,7 +340,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
                 waitingForResponse = false;
                 startTimer(detectRoutineTimeoutMs);
 
-                statusListeners->call(&LumatoneEditor::StatusListener::connectionFailed);
+                getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionFailed);
             }
         }
 
@@ -570,7 +570,7 @@ void DeviceActivityMonitor::onDisconnection()
 
     waitingForResponse = false;
 
-    statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::DISCONNECTED);
+    getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::DISCONNECTED);
 
     if (detectDevicesIfDisconnected)
     {

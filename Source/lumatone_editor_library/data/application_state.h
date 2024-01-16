@@ -50,13 +50,14 @@ class LumatoneColourModel;
 class LumatoneAction;
 class DeviceActivityMonitor;
 
+class LumatoneApplicationStateController;
 class LumatoneApplicationState : public LumatoneState
 {
 public:
     LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
     LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState& stateIn);
 
-    virtual ~LumatoneApplicationState();
+    virtual ~LumatoneApplicationState() override;
 
     LumatoneController* getLumatoneController() const;
     LumatoneColourModel* getColourModel() const;
@@ -113,12 +114,6 @@ protected:
 private:
     ConnectionState connectionState = ConnectionState::DISCONNECTED;
 
-    std::shared_ptr<LumatoneContext> layoutContext;
-	std::shared_ptr<LumatoneController> controller;
-    std::shared_ptr<LumatoneColourModel> colourModel;
-
-    bool contextIsSet = false;
-
 private:
     std::shared_ptr<juce::ListenerList<LumatoneEditor::StatusListener>> statusListeners;
 public:
@@ -143,9 +138,35 @@ public:
     void addFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn);
     void removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn);
 
-    // Allow these to edit state and signal listeners
-    friend class LumatoneController;
-    friend class DeviceActivityMonitor;
+
+private:
+    std::shared_ptr<LumatoneContext> layoutContext;
+	std::shared_ptr<LumatoneController> controller;
+    std::shared_ptr<LumatoneColourModel> colourModel;
+
+    bool contextIsSet = false;
+
+//================================================================================
+
+    friend class LumatoneApplicationStateController;
+};
+
+class LumatoneApplicationStateController : public LumatoneApplicationState
+{
+public:
+    LumatoneApplicationStateController(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr)
+        : LumatoneApplicationState(nameIn, driverIn, stateIn, undoManager) {}
+    LumatoneApplicationStateController(juce::String nameIn, const LumatoneApplicationState& stateIn)
+        : LumatoneApplicationState(nameIn, stateIn) {}
+
+protected:
+    virtual void setConnectionState(ConnectionState newState, bool sendNotification=true);
+
+    juce::ListenerList<LumatoneEditor::EditorListener>* getEditorListeners() const { return editorListeners.get(); }
+    juce::ListenerList<LumatoneEditor::StatusListener>* getStatusListeners() const { return statusListeners.get(); }
+    juce::ListenerList<LumatoneEditor::FirmwareListener>* getFirmwareListeners() const { return firmwareListeners.get(); }
+    juce::ListenerList<LumatoneEditor::MidiListener>* getMidiListeners() const { return midiListeners.get(); }
+    
 };
 
 #endif LUMATONE_APPLICATION_STATE_H

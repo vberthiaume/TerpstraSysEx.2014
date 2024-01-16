@@ -21,14 +21,14 @@ juce::Array<juce::Identifier> getLumatoneApplicationProperties()
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn, juce::UndoManager *undoManagerIn)
     : LumatoneState(nameIn, stateIn, undoManagerIn)
 {
+    editorListeners = std::make_shared<juce::ListenerList<LumatoneEditor::EditorListener>>();
+    statusListeners = std::make_shared<juce::ListenerList<LumatoneEditor::StatusListener>>();
+    firmwareListeners = std::make_shared<juce::ListenerList<LumatoneEditor::FirmwareListener>>();
+    midiListeners = std::make_shared<juce::ListenerList<LumatoneEditor::MidiListener>>();
+
     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
 	controller = std::make_shared<LumatoneController>(*this, driverIn);
     colourModel = std::make_shared<LumatoneColourModel>();
-
-    editorListeners.reset(new juce::ListenerList<LumatoneEditor::EditorListener>());
-    statusListeners.reset(new juce::ListenerList<LumatoneEditor::StatusListener>());
-    firmwareListeners.reset(new juce::ListenerList<LumatoneEditor::FirmwareListener>());
-    midiListeners.reset(new juce::ListenerList<LumatoneEditor::MidiListener>());
 
     loadStateProperties(stateIn);
 }
@@ -43,13 +43,13 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
 
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn)
     : LumatoneState(nameIn, (const LumatoneState&)stateIn)
-    , layoutContext(stateIn.layoutContext)
-    , controller(stateIn.controller)
-    , colourModel(stateIn.colourModel)
     , editorListeners(stateIn.editorListeners)
     , statusListeners(stateIn.statusListeners)
     , firmwareListeners(stateIn.firmwareListeners)
     , midiListeners(stateIn.midiListeners)
+    , layoutContext(stateIn.layoutContext)
+    , controller(stateIn.controller)
+    , colourModel(stateIn.colourModel)
 {
     loadStateProperties(state);
 }
@@ -417,9 +417,9 @@ void LumatoneApplicationState::addFirmwareListener(LumatoneEditor::FirmwareListe
     firmwareListeners->add(listenerIn);
 }
 
-void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* listenerIn)
+void LumatoneApplicationState::removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn)
 {
-    midiListeners->remove(listenerIn);
+    firmwareListeners->remove(listenerIn);
 }
 
 void LumatoneApplicationState::addMidiListener(LumatoneEditor::MidiListener* listenerIn)
@@ -427,7 +427,15 @@ void LumatoneApplicationState::addMidiListener(LumatoneEditor::MidiListener* lis
     midiListeners->add(listenerIn);
 }
 
-void LumatoneApplicationState::removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn)
+void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* listenerIn)
 {
-    firmwareListeners->remove(listenerIn);
+    midiListeners->remove(listenerIn);
+}
+
+void LumatoneApplicationStateController::setConnectionState(ConnectionState newState, bool sendNotification)
+{
+    connectionState = newState;
+    state.setPropertyExcludingListener(this, LumatoneApplicationProperty::ConnectionStateId, juce::var((int)connectionState), nullptr);
+    if (sendNotification)
+        statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, connectionState);
 }

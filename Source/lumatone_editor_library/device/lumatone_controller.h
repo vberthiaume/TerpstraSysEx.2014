@@ -26,7 +26,7 @@ class LumatoneAction;
 // Helper class for parsing and comparing (todo) firmware versions
 
 
-class LumatoneController :  private LumatoneApplicationState
+class LumatoneController :  private LumatoneApplicationStateController
                          ,  public LumatoneApplicationMidiController
                          ,  public LumatoneEditor::StatusListener
                          ,  protected LumatoneEditor::FirmwareListener

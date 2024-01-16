@@ -35,7 +35,7 @@ juce::Array<juce::Identifier> GetLumatoneEditorProperty()
 
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager *undoManagerIn)
-    : LumatoneApplicationState("LumatoneEditor", driverIn, juce::ValueTree(), undoManagerIn)
+    : LumatoneApplicationStateController("LumatoneEditor", driverIn, juce::ValueTree(), undoManagerIn)
 {
     appFonts = std::make_shared<LumatoneEditorFontLibrary>();
     lookAndFeel = std::make_shared<LumatoneEditorLookAndFeel>(*appFonts, true);
@@ -62,11 +62,11 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriv
 }
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditorState &stateIn)
-    : LumatoneApplicationState(name, stateIn)
+    : LumatoneApplicationStateController(name, stateIn)
     , appFonts(stateIn.appFonts)
     , lookAndFeel(stateIn.lookAndFeel)
-    , propertiesFile(stateIn.propertiesFile)
     , recentFiles(stateIn.recentFiles)
+    , propertiesFile(stateIn.propertiesFile)
     , colourPalettes(stateIn.colourPalettes)
 {
 }

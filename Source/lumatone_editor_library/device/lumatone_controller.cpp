@@ -16,7 +16,7 @@
 #include "../listeners/editor_listener.h"
 
 LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& firmwareDriverIn)
-    : LumatoneApplicationState("LumatoneController", stateIn)
+    : LumatoneApplicationStateController("LumatoneController", stateIn)
     , LumatoneApplicationMidiController(stateIn, firmwareDriverIn)
     , firmwareDriver(firmwareDriverIn)
     , updateBuffer(firmwareDriverIn, stateIn)
@@ -36,21 +36,8 @@ LumatoneController::~LumatoneController()
 juce::ValueTree LumatoneController::loadStateProperties(juce::ValueTree stateIn)
 {
     LumatoneApplicationState::loadStateProperties(stateIn);
-    //editorListeners.call(&LumatoneEditor::EditorListener::completeMappingLoaded, *getMappingData());
     return state;
 }
-
-// void LumatoneController::setContext(const LumatoneContext& contextIn)
-// {
-//     LumatoneApplicationState::setContext(contextIn);
-//     editorListeners.call(&LumatoneEditor::EditorListener::contextChanged, layoutContext.get());
-// }
-
-// void LumatoneController::clearContext()
-// {
-//     LumatoneApplicationState::clearContext();
-//     editorListeners.call(&LumatoneEditor::EditorListener::contextChanged, nullptr);
-// }
 
 void LumatoneController::connectionStateChanged(ConnectionState newState)
 {
@@ -149,9 +136,6 @@ void LumatoneController::sendAllParamsOfBoard(int boardId, const LumatoneBoard* 
         LumatoneKey key = boardData->getKey(keyIndex);
         sendKeyParam(boardId, keyIndex, key, false, bufferKeyUpdates);
     }
-
-    //if (signalEditorListeners)
-    //    editorListeners.call(&LumatoneEditor::EditorListener::boardChanged, *boardData);
 }
 
 void LumatoneController::sendCompleteMapping(const LumatoneLayout& mappingData, bool signalEditorListeners, bool bufferKeyUpdates)
@@ -160,9 +144,6 @@ void LumatoneController::sendCompleteMapping(const LumatoneLayout& mappingData, 
         sendAllParamsOfBoard(boardId, &mappingData.getBoard(boardId - 1), false, bufferKeyUpdates);
 
     clearContext();
-
-    //if (signalEditorListeners)
-    //    editorListeners.call(&LumatoneEditor::EditorListener::completeMappingLoaded, mappingData);
 }
 
 void LumatoneController::sendCurrentCompleteConfig(bool signalEditorListeners)
@@ -275,9 +256,6 @@ void LumatoneController::sendKeyParam(int boardId, int keyIndex, LumatoneKey key
     // Default CC polarity = 1, Inverted CC polarity = 0
     sendKeyConfig(boardId, keyIndex, keyData, false, bufferKeyUpdates);
     sendKeyColourConfig(boardId, keyIndex, keyData, false, bufferKeyUpdates);
-
-    //if (signalEditorListeners)
-    //    editorListeners.call(&LumatoneEditor::EditorListener::keyChanged, boardId - 1, keyIndex, keyData);
 }
 
 // Send configuration of a certain look up table
@@ -339,9 +317,6 @@ void LumatoneController::sendKeyConfig(int boardId, int keyIndex, const Lumatone
         updateBuffer.sendKeyConfig(boardId, keyIndex, keyData);
     else
         firmwareDriver.sendKeyFunctionParameters(boardId, keyIndex, keyData.getMidiNumber(), keyData.getMidiChannel(), keyData.getType(), keyData.isCCFaderDefault());
-
-    //if (signalEditorListeners)
-    //    editorListeners.call(&LumatoneEditor::EditorListener::keyConfigChanged, boardId - 1, keyIndex, keyData);
 }
 
 void LumatoneController::sendKeyColourConfig(int boardId, int keyIndex, juce::Colour colour, bool signalEditorListeners, bool bufferKeyUpdates)
@@ -355,9 +330,6 @@ void LumatoneController::sendKeyColourConfig(int boardId, int keyIndex, juce::Co
         else
             firmwareDriver.sendKeyLightParameters_Version_1_0_0(boardId, keyIndex, colour.getRed() / 2, colour.getGreen() / 2, colour.getBlue() / 2);
     }
-
-    //if (signalEditorListeners)
-        //editorListeners.call(&LumatoneEditor::EditorListener::keyColourChanged, boardId - 1, keyIndex, colour);
 }
 
 void LumatoneController::sendKeyColourConfig(int boardId, int keyIndex, const LumatoneKey& keyColourConfig, bool signalEditorListeners, bool bufferKeyUpdates)
@@ -371,7 +343,6 @@ void LumatoneController::sendExpressionPedalSensivity(unsigned char value)
 {
     setExpressionSensitivity(value);
     firmwareDriver.sendExpressionPedalSensivity(value);
-    //editorListeners.call(&LumatoneEditor::EditorListener::expressionPedalSensitivityChanged, value);
 }
 
 // Send parametrization of foot controller
@@ -379,7 +350,6 @@ void LumatoneController::sendInvertFootController(bool value)
 {
     setInvertExpression(value);
     firmwareDriver.sendInvertFootController(value);
-    //editorListeners.call(&LumatoneEditor::EditorListener::invertFootControllerChanged, value);
 }
 
 // Colour for macro button in active state
@@ -390,7 +360,6 @@ void LumatoneController::sendMacroButtonActiveColour(juce::String colourAsString
         firmwareDriver.sendMacroButtonActiveColour(c.getRed(), c.getGreen(), c.getBlue());
     else
         firmwareDriver.sendMacroButtonActiveColour_Version_1_0_0(c.getRed(), c.getGreen(), c.getBlue());
-    //editorListeners.call(&LumatoneEditor::EditorListener::macroButtonActiveColourChagned, c);
 }
 
 // Colour for macro button in inactive state
@@ -401,21 +370,18 @@ void LumatoneController::sendMacroButtonInactiveColour(juce::String colourAsStri
         firmwareDriver.sendMacroButtonInactiveColour(c.getRed(), c.getGreen(), c.getBlue());
     else
         firmwareDriver.sendMacroButtonInactiveColour_Version_1_0_0(c.getRed(), c.getGreen(), c.getBlue());
-    //editorListeners.call(&LumatoneEditor::EditorListener::macroButtonInactiveColourChanged, c);
 }
 
 // Send parametrization of light on keystrokes
 void LumatoneController::sendLightOnKeyStrokes(bool value)
 {
     firmwareDriver.sendLightOnKeyStrokes(value);
-    //editorListeners.call(&LumatoneEditor::EditorListener::lightOnKeyStrokesChanged, value);
 }
 
 // Send a value for a velocity lookup table
 void LumatoneController::sendVelocityConfig(const juce::uint8 velocityTable[])
 {
     firmwareDriver.sendVelocityConfig(velocityTable);
-    //editorListeners.call(&LumatoneEditor::EditorListener::tableChanged, LumatoneConfigTable::TableType::velocityInterval, velocityTable, VELOCITYINTERVALTABLESIZE);
 }
 
 // Save velocity config to EEPROM
@@ -432,7 +398,6 @@ void LumatoneController::resetVelocityConfig()
 void LumatoneController::setFaderConfig(const juce::uint8 faderTable[])
 {
     firmwareDriver.sendFaderConfig(faderTable);
-    //editorListeners.call(&LumatoneEditor::EditorListener::tableChanged, LumatoneConfigTable::TableType::fader, faderTable, VELOCITYINTERVALTABLESIZE);
 }
 
 void LumatoneController::resetFaderConfig()
@@ -453,7 +418,6 @@ void LumatoneController::startCalibrateAftertouch()
 void LumatoneController::setAftertouchConfig(const juce::uint8 aftertouchTable[])
 {
     firmwareDriver.sendAftertouchConfig(aftertouchTable);
-    //editorListeners.call(&LumatoneEditor::EditorListener::tableChanged, LumatoneConfigTable::TableType::afterTouch, aftertouchTable, VELOCITYINTERVALTABLESIZE);
 }
 
 void LumatoneController::resetAftertouchConfig()
@@ -541,7 +505,6 @@ void LumatoneController::setCalibratePitchModWheel(bool startCalibration)
 void LumatoneController::setLumatouchConfig(const juce::uint8 lumatouchTable[])
 {
     firmwareDriver.setLumatouchConfig(lumatouchTable);
-    //editorListeners.call(&LumatoneEditor::EditorListener::tableChanged, LumatoneConfigTable::TableType::lumaTouch, lumatouchTable, VELOCITYINTERVALTABLESIZE);
 }
 
 void LumatoneController::resetLumatouchConfig()
@@ -642,7 +605,7 @@ void LumatoneController::onConnectionConfirmed()
         sendGetFirmwareRevisionRequest();
     }
 
-    statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
+    setConnectionState(ConnectionState::ONLINE);
 }
 
 void LumatoneController::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
@@ -718,9 +681,8 @@ void LumatoneController::octaveColourConfigReceived(int boardId, juce::uint8 rgb
     }
 
     LumatoneState::setBoard(editedBoard, boardId);
-    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
-};
-
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
+}
 
 void LumatoneController::octaveChannelConfigReceived(int boardId, const int* channelData)
 {
@@ -738,7 +700,7 @@ void LumatoneController::octaveChannelConfigReceived(int boardId, const int* cha
     }
 
     LumatoneState::setBoard(editedBoard, boardId);
-    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
 }
 
 void LumatoneController::octaveNoteConfigReceived(int boardId, const int* noteData)
@@ -757,7 +719,7 @@ void LumatoneController::octaveNoteConfigReceived(int boardId, const int* noteDa
     }
 
     LumatoneState::setBoard(editedBoard, boardId);
-    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
 }
 
 void LumatoneController::keyTypeConfigReceived(int boardId, const int* keyTypeData)
@@ -774,7 +736,7 @@ void LumatoneController::keyTypeConfigReceived(int boardId, const int* keyTypeDa
     }
 
     LumatoneState::setBoard(editedBoard, boardId);
-    editorListeners->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, editedBoard);
 }
 
 void LumatoneController::macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour)

@@ -72,7 +72,7 @@ static juce::Array<juce::Identifier> GetLumatoneEditorProperties();
 
 class LumatoneEditorStateController;
 
-class LumatoneEditorState : public LumatoneApplicationState
+class LumatoneEditorState : public LumatoneApplicationStateController
 {
 public:
     LumatoneEditorState(juce::String name, const LumatoneEditorState& stateIn);
@@ -130,6 +130,13 @@ protected:
     EditorMode editorMode = EditorMode::OFFLINE;
 
 private:
+    using LumatoneApplicationStateController::setConnectionState;
+    using LumatoneApplicationStateController::getEditorListeners;
+    using LumatoneApplicationStateController::getStatusListeners;
+    using LumatoneApplicationStateController::getFirmwareListeners;
+    using LumatoneApplicationStateController::getMidiListeners;
+    
+private:
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
 	std::shared_ptr<LumatoneEditorLookAndFeel>      lookAndFeel;
 	std::shared_ptr<juce::Array<LumatoneEditorColourPalette>>        colourPalettes;
@@ -139,7 +146,7 @@ private:
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
-    friend class LumatoneEditorStateController;
+    friend class LumatoneEditorStateController; 
 };
 
 class LumatoneEditorStateController : public LumatoneEditorState
@@ -169,6 +176,13 @@ public:
 
     void setDeveloperMode(bool developerModeOn) override { LumatoneEditorState::setDeveloperMode(developerModeOn); }
     void setEditMode(EditorMode editMode) override { LumatoneEditorState::setEditMode(editMode); }
+
+protected:
+    using LumatoneApplicationStateController::setConnectionState;
+    using LumatoneApplicationStateController::getEditorListeners;
+    using LumatoneApplicationStateController::getStatusListeners;
+    using LumatoneApplicationStateController::getFirmwareListeners;
+    using LumatoneApplicationStateController::getMidiListeners;
 };
 
 
