@@ -16,6 +16,11 @@ bool LumatoneStateBase::writeToPropertiesFile()
     return false;
 }
 
+void LumatoneStateBase::setStateProperty(const juce::Identifier &id, juce::var value)
+{
+    state.setPropertyExcludingListener(this, id, value, nullptr);
+}
+
 bool LumatoneStateBase::getBoolProperty(const juce::Identifier key, bool fallback) const
 {
     auto prop = state.getProperty(key, juce::var((bool)fallback));
