@@ -33,6 +33,8 @@
 //==============================================================================
 MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
     : LumatoneEditorState("MidiEditArea", stateIn)
+	, LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
+	, LumatoneApplicationState::DeviceController(static_cast<LumatoneApplicationState&>(*this))
 {
     //[Constructor_pre] You can add your own custom stuff here..
 	setName("MidiEditArea");
@@ -44,22 +46,38 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	addAndMakeVisible(lumatoneLabel.get());
 
 	liveEditorBtn.reset(new juce::TextButton("LiveEditorButton"));
-	getEditorLookAndFeel().setupRadioTextButton(*liveEditorBtn, 10, true);
+	getEditorLookAndFeel().setupRadioTextButton(*liveEditorBtn, 10, false);
 	liveEditorBtn->setButtonText(translate("LiveEditor"));
 	liveEditorBtn->setConnectedEdges(juce::Button::ConnectedOnRight);
 	liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::UniviaProBold);
 	liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editModeFontScalar);
 	addChildComponent(liveEditorBtn.get());
-	liveEditorBtn->addListener(this);
+	// liveEditorBtn->addListener(this);
+	liveEditorBtn->onClick = [&]()
+	{
+		if (liveEditorBtn->getToggleState())
+		{
+			setEditMode(EditorMode::ONLINE);
+			editModeChangedCallback();
+		}
+	};
 
 	offlineEditorBtn.reset(new juce::TextButton("OfflineEditorButton"));
-	getEditorLookAndFeel().setupRadioTextButton(*offlineEditorBtn, 10, false);
+	getEditorLookAndFeel().setupRadioTextButton(*offlineEditorBtn, 10, true);
 	offlineEditorBtn->setButtonText(translate("OfflineEditor"));
 	offlineEditorBtn->setConnectedEdges(juce::Button::ConnectedOnLeft);
 	offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::UniviaProBold);
 	offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editModeFontScalar);
 	addChildComponent(offlineEditorBtn.get());
-	offlineEditorBtn->addListener(this);
+	// offlineEditorBtn->addListener(this);
+	offlineEditorBtn->onClick = [&]()
+	{
+		if (offlineEditorBtn->getToggleState())
+		{
+			setEditMode(EditorMode::OFFLINE);
+			editModeChangedCallback();
+		}
+	};
 
 	pleaseConnectLabel.reset(new juce::Label("PleaseConnectLabel", translate("PleaseConnect")));
 	pleaseConnectLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
@@ -117,8 +135,10 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
     addAndMakeVisible (btnAutoConnect.get());
     btnAutoConnect->setTooltip (juce::translate("Toggle between automatic or manual connection to Lumatone"));
     btnAutoConnect->setButtonText (juce::translate("auto"));
-    btnAutoConnect->addListener (this);
-
+	btnAutoConnect->onClick = [&]()
+	{
+		toggleAutoConnection();
+	};
 
     //[UserPreSize]
 	cbMidiInput->getProperties().set(LumatoneEditorStyleIDs::popupMenuTargetWidth, 1);
@@ -153,15 +173,13 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 
     //[Constructor] You can add your own custom stuff here..
 
-	// auto inputs = getLumatoneController()->getMidiInputList();
-	// auto outputs = getLumatoneController()->getMidiOutputList();
 	refreshInputMenuAndSetSelected(0, dontSendNotification);
 	refreshOutputMenuAndSetSelected(0, dontSendNotification);
 	setConnectivity(false);
 
 	addEditorListener(this);
 	addStatusListener(this);
-    // btnAutoConnect->setToggleState(getLumatoneController()->isDetectingLumatone(), sendNotificationSync);
+    btnAutoConnect->setToggleState(isAutoConnectionEnabled(), sendNotificationSync);
 
     //[/Constructor]
 }
@@ -328,7 +346,7 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_cbMidiInput] -- add your combo box handling code here..
 		if (cbMidiInput->getSelectedItemIndex() >= 0)
-			getLumatoneController()->setMidiInput(cbMidiInput->getSelectedItemIndex());
+			setMidiInput(cbMidiInput->getSelectedItemIndex());
 
 		if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
 		{
@@ -349,7 +367,7 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     {
         //[UserComboBoxCode_cbMidiOutput] -- add your combo box handling code here..
 		if (cbMidiOutput->getSelectedItemIndex() >= 0)
-			getLumatoneController()->setMidiOutput(cbMidiOutput->getSelectedItemIndex());
+			setMidiOutput(cbMidiOutput->getSelectedItemIndex());
 
 		if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
 		{
@@ -370,49 +388,6 @@ void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
     //[UsercomboBoxChanged_Post]
     //[/UsercomboBoxChanged_Post]
 }
-
-void MidiEditArea::buttonClicked (juce::Button* buttonThatWasClicked)
-{
-    //[UserbuttonClicked_Pre]
-
-    //[/UserbuttonClicked_Pre]
-
-    if (buttonThatWasClicked == btnAutoConnect.get())
-    {
-        //[UserButtonCode_btnAutoConnect] -- add your button handler code here..
-		cbMidiInput->setVisible(!btnAutoConnect->getToggleState());
-		cbMidiOutput->setVisible(!btnAutoConnect->getToggleState());
-
-        if (btnAutoConnect->getToggleState())
-		{
-			// getLumatoneController()->detectAndConnectToLumatone();
-			lblConnectionState->setText(translate("Searching for Lumatone..."), dontSendNotification);
-			//errorVisualizer.setErrorLevel(
-			//	*lblConnectionState.get(),
-			//	HajuErrorVisualizer::ErrorLevel::error,
-			//	translate("Waiting for response from connected devices..."));
-		}
-		else
-		{
-			// getLumatoneController()->stopAutoConnection();
-			lblConnectionState->setText(translate("Disconnected"), dontSendNotification);
-			startTimer(deviceRefreshTimeoutMs);
-		}
-
-		resized();
-        //[/UserButtonCode_btnAutoConnect]
-    }
-
-    //[UserbuttonClicked_Post]
-	else if (buttonThatWasClicked == liveEditorBtn.get())
-	{
-		// auto sysExSendingMode = editModeTabIndexToMidiSysExSendingMode((int)!liveEditorBtn->getToggleState());
-		// TerpstraSysExApplication::getApp().setEditMode(sysExSendingMode);
-	}
-    //[/UserbuttonClicked_Post]
-}
-
-
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
@@ -476,6 +451,51 @@ void MidiEditArea::setConnectivity(bool isConnectedIn, juce::String connectionSt
 	resized();
 }
 
+void MidiEditArea::toggleAutoConnection()
+{
+	cbMidiInput->setVisible(!btnAutoConnect->getToggleState());
+	cbMidiOutput->setVisible(!btnAutoConnect->getToggleState());
+
+	setAutoConnectionEnabled(btnAutoConnect->getToggleState());
+	
+	if (btnAutoConnect->getToggleState())
+	{
+		lblConnectionState->setText(translate("Searching for Lumatone..."), dontSendNotification);
+		//errorVisualizer.setErrorLevel(
+		//	*lblConnectionState.get(),
+		//	HajuErrorVisualizer::ErrorLevel::error,
+		//	translate("Waiting for response from connected devices..."));
+	}
+	else
+	{
+		// getLumatoneController()->stopAutoConnection();
+		lblConnectionState->setText(translate("Disconnected"), dontSendNotification);
+		startTimer(deviceRefreshTimeoutMs);
+	}
+
+	resized();
+}
+
+void MidiEditArea::editModeChangedCallback()
+{
+	if (getEditorMode() == EditorMode::ONLINE)
+	{
+		liveEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
+		lblConnectionState->setText("Connected", juce::NotificationType::dontSendNotification);
+		
+		if (getHasChangesToSave())
+            onOpenConnectionToDevice(translate("Switch to Live Mode with unsaved changes"));
+	}
+	else
+	{
+		offlineEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
+		lblConnectionState->setText("Offline", juce::NotificationType::dontSendNotification);
+	}
+	
+	lblConnectionState->setColour(juce::Label::ColourIds::textColourId, connectedColours[(int)liveEditorBtn->getToggleState()]);
+    repaint();
+}
+
 void MidiEditArea::connectionFailed()
 {
 	setConnectivity(false, "No answer");
@@ -492,8 +512,8 @@ void MidiEditArea::connectionStateChanged(ConnectionState state)
 	{
 		// if (inputDevice >= 0 && outputDevice >= 0)
 		// {
-		// 	refreshInputMenuAndSetSelected(inputDevice + 1, dontSendNotification);
-		// 	refreshOutputMenuAndSetSelected(outputDevice + 1, dontSendNotification);
+			refreshInputMenuAndSetSelected(getMidiInputIndex() + 1, dontSendNotification);
+			refreshOutputMenuAndSetSelected(getMidiOutputIndex() + 1, dontSendNotification);
 			setConnectivity(true);
 
 			onOpenConnectionToDevice();
@@ -519,32 +539,29 @@ void MidiEditArea::connectionStateChanged(ConnectionState state)
 
 void MidiEditArea::editorModeChanged(EditorMode editModeIn)
 {
-	// editorMode = editModeIn;
+    // switch (editModeIn)
+    // {
+    // case EditorMode::ONLINE:
+    //     liveEditorBtn->setToggleState(true, juce::NotificationType::dontSendNotification);
+    //     if (getHasChangesToSave())
+    //         onOpenConnectionToDevice(translate("Switch to Live Mode with unsaved changes"));
+    //     break;
 
-    switch (editModeIn)
-    {
-    case EditorMode::ONLINE:
-        liveEditorBtn->setToggleState(true, juce::NotificationType::dontSendNotification);
-        if (getHasChangesToSave())
-            onOpenConnectionToDevice(translate("Switch to Live Mode with unsaved changes"));
-        break;
+    // case EditorMode::OFFLINE:
+    //     offlineEditorBtn->setToggleState(true, juce::NotificationType::dontSendNotification);
+    //     lblConnectionState->setText(translate("Offline"), juce::NotificationType::dontSendNotification);
+    //     //errorVisualizer.setErrorLevel(
+    //     //    *lblConnectionState.get(),
+    //     //    HajuErrorVisualizer::ErrorLevel::noError,
+    //     //    "Offline");
+    //     break;
 
-    case EditorMode::OFFLINE:
-        offlineEditorBtn->setToggleState(true, juce::NotificationType::dontSendNotification);
-        lblConnectionState->setText(translate("Offline"), juce::NotificationType::dontSendNotification);
-        //errorVisualizer.setErrorLevel(
-        //    *lblConnectionState.get(),
-        //    HajuErrorVisualizer::ErrorLevel::noError,
-        //    "Offline");
-        break;
+    // default:
+    //     jassertfalse;
+    //     break;
+    // }
 
-    default:
-        jassertfalse;
-        break;
-    }
-
-    lblConnectionState->setColour(juce::Label::ColourIds::textColourId, connectedColours[(int)liveEditorBtn->getToggleState()]);
-    repaint();
+	editModeChangedCallback();
 }
 
 void MidiEditArea::onOpenConnectionToDevice(juce::String dialogTitle)
@@ -577,23 +594,21 @@ void MidiEditArea::onOpenConnectionToDevice(juce::String dialogTitle)
 
 		if (retc == 0) // Import
 		{
-			getLumatoneController()->sendGetCompleteMappingRequest();
-			// TerpstraSysExApplication::getApp().requestConfigurationFromDevice();
-			liveEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
-			lblConnectionState->setText("Connected", juce::NotificationType::dontSendNotification);
+			// TODO non getLumatoneController call
+			LumatoneEditorState::Controller::requestCompleteConfigFromDevice();
+			setEditMode(EditorMode::ONLINE);
 		}
 		else if (retc == 1) // Send
 		{
-			getLumatoneController()->sendCompleteMapping(*getMappingData(), true, false);
-			// TerpstraSysExApplication::getApp().sendCurrentConfigurationToDevice();
-			liveEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
-			lblConnectionState->setText("Connected", juce::NotificationType::dontSendNotification);
+			LumatoneEditorState::setCompleteConfig(*getMappingData());
+			setEditMode(EditorMode::ONLINE);
 		}
 		else if (retc == 2) // Offline
 		{
-			offlineEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
-			lblConnectionState->setText("Offline", juce::NotificationType::dontSendNotification);
+			setEditMode(EditorMode::OFFLINE);
 		}
+
+		editModeChangedCallback();
 	});
 }
 
@@ -601,7 +616,7 @@ void MidiEditArea::refreshInputMenuAndSetSelected(int inputDeviceIndex, juce::No
 {
 	cbMidiInput->clear(juce::NotificationType::dontSendNotification);
 	int i = 1;
-	for (auto device : getLumatoneController()->getMidiInputList())
+	for (auto device : getMidiInputList())
 		cbMidiInput->addItem(device.name, i++);
 
 	if (inputDeviceIndex >= 0)
@@ -612,7 +627,7 @@ void MidiEditArea::refreshOutputMenuAndSetSelected(int outputDeviceIndex, juce::
 {
 	cbMidiOutput->clear(juce::NotificationType::dontSendNotification);
 	int i = 1;
-	for (auto device : getLumatoneController()->getMidiOutputList())
+	for (auto device : getMidiOutputList())
 		cbMidiOutput->addItem(device.name, i++);
 
 	if (outputDeviceIndex >= 0)
@@ -627,15 +642,13 @@ void MidiEditArea::timerCallback()
 	}
 	else
 	{
-		// getLumatoneController()->refreshAvailableMidiDevices();
-
 		refreshInputMenuAndSetSelected(
-			getLumatoneController()->getMidiInputIndex() + 1,
+			getMidiInputIndex() + 1,
 			juce::NotificationType::dontSendNotification
 		);
 
 		refreshOutputMenuAndSetSelected(
-			getLumatoneController()->getMidiOutputIndex() + 1,
+			getMidiOutputIndex() + 1,
 			juce::NotificationType::dontSendNotification
 		);
 	}

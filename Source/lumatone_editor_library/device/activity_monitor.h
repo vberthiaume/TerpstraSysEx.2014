@@ -24,9 +24,10 @@
 
 class LumatoneFirmwareDriver;
 
-class DeviceActivityMonitor : protected LumatoneApplicationStateController,
-                              public juce::Timer,
-                              protected LumatoneFirmwareDriverListener
+class DeviceActivityMonitor : protected LumatoneApplicationState
+                            , protected LumatoneApplicationState::DeviceController
+                            , public juce::Timer
+                            , protected LumatoneFirmwareDriverListener
 {
     
 public:

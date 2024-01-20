@@ -39,13 +39,14 @@
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class MidiEditArea  : public juce::Component,
-                      public LumatoneEditorState,
-                      public LumatoneEditor::StatusListener,
-                      public LumatoneEditor::EditorListener,
-                      public juce::ComboBox::Listener,
-                      public juce::Button::Listener,
-                      public juce::Timer
+class MidiEditArea  : public juce::Component
+                    , public LumatoneEditorState
+                    , private LumatoneEditorState::Controller
+                    , private LumatoneApplicationState::DeviceController
+                    , public LumatoneEditor::StatusListener
+                    , public LumatoneEditor::EditorListener
+                    , public juce::ComboBox::Listener
+                    , public juce::Timer
 {
 public:
     //==============================================================================
@@ -73,8 +74,11 @@ public:
     void timerCallback() override;
 
 private:
-
     void setConnectivity(bool isConnected, juce::String connectionStatus=String());
+
+    void toggleAutoConnection();
+
+    void editModeChangedCallback();
 
 public:
     //[/UserMethods]
@@ -82,13 +86,9 @@ public:
     void paint (juce::Graphics& g) override;
     void resized() override;
     void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
-    void buttonClicked (juce::Button* buttonThatWasClicked) override;
-
-
 
 private:
-    //[UserVariables]   -- You can add your own custom variables in this section.
-    // bool                        isConnected = false;
+
     bool                        isWaitingForConnectionTest = false;
     bool                        isWaitingForUserChoice = false;
 

@@ -233,7 +233,18 @@ FirmwareSupport::Error LumatoneEventManager::handleFirmwareRevisionResponse(cons
         return errorCode;
 
     auto version = LumatoneFirmware::Version(major, minor, revision);
-    setLumatoneVersion(getFirmwareSupport().getReleaseVersion(version), true);
+    auto releaseVersion = getFirmwareSupport().getReleaseVersion(version);
+    switch (releaseVersion)
+    {
+    case LumatoneFirmware::ReleaseVersion::VERSION_55_KEYS:
+        mappingData->setOctaveBoardSize(55);
+        break;
+    default:
+        mappingData->setOctaveBoardSize(56);
+        break;
+    }
+
+    setLumatoneVersion(releaseVersion, true);
 
     DBG("Firmware version is: " + version.toString());
     firmwareListeners.call(&LumatoneEditor::FirmwareListener::firmwareRevisionReceived, version);
