@@ -119,13 +119,13 @@ juce::ValueTree LumatoneKey::getState() const
 
 void LumatoneKey::updateState()
 {
-    juce::ValueTree newState(LumatoneKeyProperty::State);
-    newState.setProperty(LumatoneKeyProperty::Type, keyType, nullptr);
-    newState.setProperty(LumatoneKeyProperty::Colour, colour.toString(), nullptr);
-    newState.setProperty(LumatoneKeyProperty::MidiNote, noteNumber, nullptr);
-    newState.setProperty(LumatoneKeyProperty::MidiChnl, channelNumber, nullptr);
-    newState.setProperty(LumatoneKeyProperty::DefaultCCFader, ccFaderDefault, nullptr);
-    state.copyPropertiesFrom(newState, nullptr);
+    // juce::ValueTree newState(LumatoneKeyProperty::State);
+    state.setProperty(LumatoneKeyProperty::Type, keyType, nullptr);
+    state.setProperty(LumatoneKeyProperty::Colour, colour.toString(), nullptr);
+    state.setProperty(LumatoneKeyProperty::MidiNote, noteNumber, nullptr);
+    state.setProperty(LumatoneKeyProperty::MidiChnl, channelNumber, nullptr);
+    state.setProperty(LumatoneKeyProperty::DefaultCCFader, ccFaderDefault, nullptr);
+    // state.copyPropertiesFrom(newState, nullptr);
 }
 
 void LumatoneKey::refreshFromState()

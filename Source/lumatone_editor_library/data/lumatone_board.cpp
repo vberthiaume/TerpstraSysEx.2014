@@ -48,8 +48,7 @@ LumatoneBoard::LumatoneBoard(juce::ValueTree stateIn)
 void LumatoneBoard::operator=(const LumatoneBoard& copyBoard)
 {
     numKeys = copyBoard.numKeys;
-    state.copyPropertiesAndChildrenFrom(copyBoard.state, nullptr);
-
+    
     for (int i = 0; i < numKeys; i++)
     {
         theKeys[i] = copyBoard.getKey(i);
