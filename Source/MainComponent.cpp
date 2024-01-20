@@ -176,7 +176,7 @@ TabbedButtonBar *MainContentComponent::getOctaveBoardSelectorTab()
 	return  noteEditArea->getOctaveBoardSelectorTab();
 }
 
-UndoableAction* MainContentComponent::createDeleteCurrentSectionAction()
+LumatoneAction* MainContentComponent::createDeleteCurrentSectionAction()
 {
 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
 	if (currentSetSelection >= 0 && currentSetSelection < getOctaveBoardSize())
@@ -200,7 +200,7 @@ bool MainContentComponent::copyCurrentSubBoardData()
 		return false;
 }
 
-UndoableAction* MainContentComponent::createPasteCurrentSectionAction()
+LumatoneAction* MainContentComponent::createPasteCurrentSectionAction()
 {
 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
 	if (currentSetSelection >= 0 && currentSetSelection < getNumBoards()
@@ -212,7 +212,7 @@ UndoableAction* MainContentComponent::createPasteCurrentSectionAction()
 		return nullptr;
 }
 
-UndoableAction* MainContentComponent::createModifiedPasteCurrentSectionAction(CommandID commandID)
+LumatoneAction* MainContentComponent::createModifiedPasteCurrentSectionAction(CommandID commandID)
 {
     auto currentSetSelectionIndex = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
     if (currentSetSelectionIndex >= 0 && currentSetSelectionIndex < getNumBoards()

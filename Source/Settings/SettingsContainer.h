@@ -47,7 +47,7 @@ private:
 };
 
 class SettingsContainer : public Component
-                        , private LumatoneEditorState
+                        , public LumatoneEditorState
                         , protected ChangeListener
 {
 public:

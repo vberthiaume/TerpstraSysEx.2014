@@ -35,7 +35,7 @@ juce::Array<juce::Identifier> GetLumatoneEditorProperty()
 
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager *undoManagerIn)
-    : LumatoneApplicationStateController("LumatoneEditor", driverIn, juce::ValueTree(), undoManagerIn)
+    : LumatoneApplicationState("LumatoneEditor", driverIn, juce::ValueTree(), undoManagerIn)
 {
     appFonts = std::make_shared<LumatoneEditorFontLibrary>();
     lookAndFeel = std::make_shared<LumatoneEditorLookAndFeel>(*appFonts, true);
@@ -62,7 +62,7 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriv
 }
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditorState &stateIn)
-    : LumatoneApplicationStateController(name, stateIn)
+    : LumatoneApplicationState(name, stateIn)
     , appFonts(stateIn.appFonts)
     , lookAndFeel(stateIn.lookAndFeel)
     , recentFiles(stateIn.recentFiles)
@@ -158,22 +158,7 @@ juce::File LumatoneEditorState::getUserPalettesDirectory() const
 void LumatoneEditorState::setHasChangesToSave(bool hasChangesToSaveIn)
 {
     hasChangesToSave = hasChangesToSaveIn;
-    state.setPropertyExcludingListener(this, LumatoneEditorProperty::HasChangesToSave, hasChangesToSave, nullptr);
-}
-
-void LumatoneEditorState::setCalibrationMode(bool calibrationModeOn)
-{
-    calibrationModeOn = calibrationModeOn;
-    getLumatoneController()->setCalibratePitchModWheel(calibrationModeOn);
-    // writeBoolProperty(LumatoneEditorProperty::InCalibrationMode, calibrationModeOn, nullptr);
-    state.setPropertyExcludingListener(this, LumatoneEditorProperty::InCalibrationMode, calibrationModeOn, nullptr);
-}
-
-void LumatoneEditorState::setDeveloperMode(bool developerModeOn)
-{
-    inDeveloperMode = developerModeOn;
-    // writeBoolProperty(LumatoneEditorProperty::DeveloperModeOn, inDeveloperMode, undoManager);
-    state.setPropertyExcludingListener(this, LumatoneEditorProperty::DeveloperModeOn, inDeveloperMode, undoManager);
+    setStateProperty(LumatoneEditorProperty::HasChangesToSave, hasChangesToSave);
 }
 
 bool LumatoneEditorState::doSendChangesToDevice() const
@@ -181,10 +166,10 @@ bool LumatoneEditorState::doSendChangesToDevice() const
     return LumatoneApplicationState::doSendChangesToDevice() && editorMode == EditorMode::ONLINE;
 }
 
-void LumatoneEditorState::setEditMode(EditorMode editMode)
+void LumatoneEditorState::Controller::setEditMode(EditorMode editMode)
 {
-    editorMode = editMode;
-    state.setPropertyExcludingListener(this, LumatoneEditorProperty::EditorMode, (int)editorMode, nullptr);
+    editorState.editorMode = editMode;
+    editorState.setStateProperty(LumatoneEditorProperty::EditorMode, (int)editorState.editorMode);
 }
 
 juce::ValueTree LumatoneEditorState::loadStateProperties(juce::ValueTree stateIn)
@@ -241,14 +226,16 @@ void LumatoneEditorState::handleStatePropertyChange(juce::ValueTree stateIn, con
     }
 }
 
-void LumatoneEditorStateController::setColourPalettes(const juce::Array<LumatoneEditorColourPalette> &palettesIn)
+void LumatoneEditorState::Controller::setColourPalettes(const juce::Array<LumatoneEditorColourPalette> &palettesIn)
 {
-    *colourPalettes = palettesIn;
+    *editorState.colourPalettes = palettesIn;
+    // TODO
+    // editorState.setPropertyExcludingListener(this, LumatoneEditorProperty::ColourPalettes, "", nullptr);
 }
 
-void LumatoneEditorStateController::loadColourPalettesFromFile()
+void LumatoneEditorState::Controller::loadColourPalettesFromFile()
 {
-    auto directory = getUserPalettesDirectory();
+    auto directory = editorState.getUserPalettesDirectory();
     auto foundPaletteFiles = directory.findChildFiles(juce::File::TypesOfFileToFind::findFiles, true, '*' + juce::String(PALETTEFILEEXTENSION));
 
     juce::Array<LumatoneEditorColourPalette> newPalettes;
@@ -263,20 +250,14 @@ void LumatoneEditorStateController::loadColourPalettesFromFile()
     setColourPalettes(newPalettes);
 }
 
-const juce::Array<LumatoneEditorColourPalette>& LumatoneEditorStateController::getColourPalettes()
+void LumatoneEditorState::Controller::addPalette(const LumatoneEditorColourPalette &newPalette)
 {
-    loadColourPalettesFromFile();
-    return LumatoneEditorState::getColourPalettes();
-}
-
-void LumatoneEditorStateController::addPalette(const LumatoneEditorColourPalette &newPalette)
-{
-    colourPalettes->add(newPalette);
+    editorState.colourPalettes->add(newPalette);
     // TODO
-    state.setPropertyExcludingListener(this, LumatoneEditorProperty::ColourPalettes, "", nullptr);
+    // editorState.setPropertyExcludingListener(this, LumatoneEditorProperty::ColourPalettes, "", nullptr);
 }
 
-bool LumatoneEditorStateController::deletePaletteFile(juce::File pathToPalette)
+bool LumatoneEditorState::Controller::deletePaletteFile(juce::File pathToPalette)
 {
 	bool success = false;
 
@@ -288,23 +269,34 @@ bool LumatoneEditorStateController::deletePaletteFile(juce::File pathToPalette)
 	return success;
 }
 
-// Open a SysEx mapping from the file specified in currentFile
-bool LumatoneEditorStateController::resetToCurrentFile()
+bool LumatoneEditorState::Controller::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
 {
-    if (getCurrentFile().getFullPathName().isEmpty())
+    if (LumatoneApplicationState::Controller::performAction(action, undoable, newTransaction))
     {
-        // Replace with blank file
-		LumatoneLayout defaultLayout;
-        setCompleteConfig(defaultLayout);
-        setHasChangesToSave(false);
+        setHasChangesToSave(true);
         return true;
     }
 
-    if (getCurrentFile().existsAsFile())
+    return false;
+}
+
+// Open a SysEx mapping from the file specified in currentFile
+bool LumatoneEditorState::Controller::resetToCurrentFile()
+{
+    if (editorState.getCurrentFile().getFullPathName().isEmpty())
+    {
+        // Replace with blank file
+		LumatoneLayout defaultLayout;
+        editorState.setCompleteConfig(defaultLayout);
+        editorState.setHasChangesToSave(false);
+        return true;
+    }
+
+    if (editorState.getCurrentFile().existsAsFile())
 	{
 		// XXX StringArray format: platform-independent?
 		juce::StringArray stringArray;
-		getCurrentFile().readLines(stringArray);
+		editorState.getCurrentFile().readLines(stringArray);
 		LumatoneLayout keyMapping(stringArray);
 
 		// ((MainContentComponent*)(mainWindow->getContentComponent()))->setData(keyMapping);
@@ -314,45 +306,51 @@ bool LumatoneEditorStateController::resetToCurrentFile()
 		// updateMainTitle();
 
 		// Send configuration to controller, if connected
-		// controller->sendCurrentCompleteConfig();
+        editorState.setCompleteConfig(keyMapping);
 
-        setCompleteConfig(keyMapping);
 		// Mark file as unchanged
-		setHasChangesToSave(false);
+        editorState.setHasChangesToSave(false);
 
-		// Clear undo history
-		// undoManager.clearUndoHistory();
+        // Clear undo history
+		editorState.undoManager->clearUndoHistory();
 
 		// Add file to recent files list
-		recentFiles->addFile(currentFile);
+		editorState.recentFiles->addFile(editorState.currentFile);
 
 		return true;
 	}
 
 	// Show error message
-	AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Open File Error", "The file " + getCurrentFile().getFullPathName() + " could not be opened.");
+	AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Open File Error", "The file " + editorState.getCurrentFile().getFullPathName() + " could not be opened.");
 
 	// XXX Update Window title in any case? Make file name empty/make data empty in case of error?
 	return false;
 }
 
-bool LumatoneEditorStateController::setCurrentFile(File fileToOpen)
+bool LumatoneEditorState::Controller::setCurrentFile(File fileToOpen)
 {
-    currentFile = fileToOpen;
-    state.setPropertyExcludingListener(this, LumatoneEditorProperty::CurrentFile, currentFile.getFullPathName(), nullptr);
+    editorState.currentFile = fileToOpen;
+    // editorState.setPropertyExcludingListener(this, LumatoneEditorProperty::CurrentFile, editorState.currentFile.getFullPathName(), nullptr);
     return resetToCurrentFile();
 }
 
 // open a file from the "recent files" menu
-bool LumatoneEditorStateController::openRecentFile(int recentFileIndex)
+bool LumatoneEditorState::Controller::openRecentFile(int recentFileIndex)
 {
-    jassert(recentFileIndex >= 0 && recentFileIndex < recentFiles->getNumFiles());
-    return setCurrentFile(recentFiles->getFile(recentFileIndex));
+    jassert(recentFileIndex >= 0 && recentFileIndex < editorState.recentFiles->getNumFiles());
+    return setCurrentFile(editorState.recentFiles->getFile(recentFileIndex));
 }
 
-bool LumatoneEditorStateController::saveMappingToFile(juce::File fileToSave)
+bool LumatoneEditorState::Controller::requestCompleteConfigFromDevice()
 {
-    juce::StringArray stringArray = getMappingData()->toStringArray();
+    setHasChangesToSave(false);
+    editorState.undoManager->clearUndoHistory();
+    LumatoneApplicationState::Controller::requestCompleteConfigFromDevice();
+}
+
+bool LumatoneEditorState::Controller::saveMappingToFile(juce::File fileToSave)
+{
+    juce::StringArray stringArray = editorState.getMappingData()->toStringArray();
     juce::String fileText = stringArray.joinIntoString("\n");
 
     bool success = false;
@@ -360,12 +358,12 @@ bool LumatoneEditorStateController::saveMappingToFile(juce::File fileToSave)
     if (fileToSave.existsAsFile())
         success = fileToSave.replaceWithText(fileText, false, false);
     
-    else if (fileToSave.create().ok)
+    else if (fileToSave.create().ok())
     {
         success = fileToSave.appendText(fileText, false, false);
     }
 
-    if (success && getCurrentFile() != fileToSave)
+    if (success && editorState.getCurrentFile() != fileToSave)
     {
         // TODO skip certain updates?
         setCurrentFile(fileToSave);
@@ -374,7 +372,7 @@ bool LumatoneEditorStateController::saveMappingToFile(juce::File fileToSave)
     return success;
 }
 
-bool LumatoneEditorStateController::savePropertiesFile() const
+bool LumatoneEditorState::Controller::savePropertiesFile() const
 {
     // TODO Save documents directories (Future: provide option to change them and save after changed by user)
     //propertiesFile->setValue(LumatoneEditorProperty::UserDocumentsDirectory, getUserDocumentsDirectory().getFullPathName());
@@ -382,10 +380,25 @@ bool LumatoneEditorStateController::savePropertiesFile() const
     //propertiesFile->setValue(LumatoneEditorProperty::UserPalettesDirectory, getUserPalettesDirectory().getFullPathName());
 
     // Save recent files list
-    recentFiles->removeNonExistentFiles();
-    jassert(propertiesFile != nullptr);
-    propertiesFile->setValue(LumatoneEditorProperty::RecentFiles, recentFiles->toString());
+    editorState.recentFiles->removeNonExistentFiles();
+    jassert(editorState.propertiesFile != nullptr);
+    editorState.propertiesFile->setValue(LumatoneEditorProperty::RecentFiles, editorState.recentFiles->toString());
 
-    return propertiesFile->saveIfNeeded();
+    return editorState.propertiesFile->saveIfNeeded();
+}
+
+void LumatoneEditorState::Controller::setCalibrationMode(bool calibrationModeOn)
+{
+    editorState.inCalibrationMode = calibrationModeOn;
+    editorState.getLumatoneController()->setCalibratePitchModWheel(calibrationModeOn);
+    // writeBoolProperty(LumatoneEditorProperty::InCalibrationMode, calibrationModeOn, nullptr);
+    editorState.setStateProperty(LumatoneEditorProperty::InCalibrationMode, editorState.inCalibrationMode);
+}
+
+void LumatoneEditorState::Controller::setDeveloperMode(bool developerModeOn)
+{
+    editorState.inDeveloperMode = developerModeOn;
+    // writeBoolProperty(LumatoneEditorProperty::DeveloperModeOn, inDeveloperMode, undoManager);
+    editorState.setStateProperty(LumatoneEditorProperty::DeveloperModeOn, editorState.inDeveloperMode);
 }
 

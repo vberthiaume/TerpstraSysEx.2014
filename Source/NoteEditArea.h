@@ -47,6 +47,7 @@ class LumatoneKeyEdit;
 */
 class NoteEditArea  : public juce::Component,
                       public LumatoneEditorState,
+                      public LumatoneEditorState::Controller,
                       public juce::ChangeListener,
                       public LumatoneEditor::EditorListener,
                       public ColourSelectionBroadcaster
@@ -77,7 +78,7 @@ public:
 
     // ColourSelectionBroadcaster Implementation
     juce::Colour getSelectedColour() override;
-    void deselectColour() override {};
+    void deselectColour() override {}
 
     // Helper method for aligning the Octave Section TabbedButtonBar
     void setControlsTopLeftPosition(int controlsAreaX, int controlsAreaY);
@@ -104,9 +105,9 @@ private:
 
 private:
     // LumatoneEditor::EditorListener 
-    void completeMappingLoaded(LumatoneLayout mappingData) override;
-    void boardChanged(LumatoneBoard boardData) override;
-    void keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey) override;
+    void completeMappingLoaded(const LumatoneLayout& mappingData) override;
+    void boardChanged(const LumatoneBoard& boardData) override;
+    void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;
     void selectionChanged(juce::Array<MappedLumatoneKey> selection) override;
 
     // LumatoneEditorState implementaiton

@@ -3,11 +3,14 @@
 #include "../device/activity_monitor.h"
 #include "../color/colour_model.h"
 #include "../data/lumatone_context.h"
+#include "../actions/lumatone_action.h"
 
 #include "../listeners/status_listener.h"
 #include "../listeners/editor_listener.h"
 #include "../listeners/firmware_listener.h"
 #include "../listeners/midi_listener.h"
+
+#include "../lumatone_midi_driver/lumatone_midi_driver.h"
 
 juce::Array<juce::Identifier> getLumatoneApplicationProperties()
 {
@@ -21,6 +24,7 @@ juce::Array<juce::Identifier> getLumatoneApplicationProperties()
 
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn, juce::UndoManager *undoManagerIn)
     : LumatoneState(nameIn, stateIn, undoManagerIn)
+    , firmwareDriver(driverIn)
 {
     editorListeners = std::make_shared<juce::ListenerList<LumatoneEditor::EditorListener>>();
     statusListeners = std::make_shared<juce::ListenerList<LumatoneEditor::StatusListener>>();
@@ -45,6 +49,7 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
 
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn)
     : LumatoneState(nameIn, (const LumatoneState&)stateIn)
+    , firmwareDriver(stateIn.firmwareDriver)
     , editorListeners(stateIn.editorListeners)
     , statusListeners(stateIn.statusListeners)
     , firmwareListeners(stateIn.firmwareListeners)
@@ -72,12 +77,17 @@ ConnectionState LumatoneApplicationState::getConnectionState() const
 
 int LumatoneApplicationState::getMidiInputIndex() const
 {
-    return controller->getMidiInputIndex();
+    return firmwareDriver.getMidiInputIndex();
 }
 
 int LumatoneApplicationState::getMidiOutputIndex() const
 {
-    return controller->getMidiOutputIndex();
+    return firmwareDriver.getMidiOutputIndex();
+}
+
+bool LumatoneApplicationState::isAutoConnectionEnabled() const
+{
+    return activityMonitor->willDetectDeviceIfDisconnected();
 }
 
 bool LumatoneApplicationState::doSendChangesToDevice() const
@@ -103,6 +113,25 @@ const LumatoneContext *LumatoneApplicationState::getContext() const
 std::shared_ptr<LumatoneContext> LumatoneApplicationState::shareContext()
 {
     return layoutContext;
+}
+
+bool LumatoneApplicationState::performLumatoneAction(LumatoneAction *action, bool undoable, bool newTransaction)
+{
+    if (action == nullptr)
+        return false;
+
+    if (undoable)
+    {
+        if (undoManager == nullptr)
+            return false;
+
+        if (newTransaction)
+            undoManager->beginNewTransaction();
+
+        return undoManager->perform((juce::UndoableAction*)action, action->getName());
+    }
+
+    return action->perform();
 }
 
 juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree stateIn)
@@ -389,9 +418,9 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //    }
 //}
 
-bool LumatoneApplicationState::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
+bool LumatoneApplicationState::Controller::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
 {
-    return controller->performAction(action, undoable, newTransaction);
+    return appState.performLumatoneAction(action, undoable, newTransaction);
 }
 
 void LumatoneApplicationState::addStatusListener(LumatoneEditor::StatusListener* listenerIn)
@@ -434,10 +463,70 @@ void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* 
     midiListeners->remove(listenerIn);
 }
 
-void LumatoneApplicationStateController::setConnectionState(ConnectionState newState, bool sendNotification)
+bool LumatoneApplicationState::Controller::requestCompleteConfigFromDevice()
 {
-    connectionState = newState;
-    state.setPropertyExcludingListener(this, LumatoneApplicationProperty::ConnectionStateId, juce::var((int)connectionState), nullptr);
+    if (appState.connectionState != ConnectionState::ONLINE)
+        return false;
+
+    // Request MIDI channel, MIDI note, colour and key type config for all keys
+	appState.controller->sendGetCompleteMappingRequest();
+
+	// General options
+	appState.controller->requestPresetFlags();
+	appState.controller->requestExpressionPedalSensitivity();
+
+	// Velocity curve config
+	appState.controller->sendVelocityIntervalConfigRequest();
+	appState.controller->sendVelocityConfigRequest();
+	appState.controller->sendFaderConfigRequest();
+	appState.controller->sendAftertouchConfigRequest();
+
+    return true;
+}
+
+bool LumatoneApplicationState::Controller::requestMappingFromDevice()
+{
+    if (appState.connectionState != ConnectionState::ONLINE)
+        return false;
+
+    appState.controller->sendGetCompleteMappingRequest();
+    return true;
+}
+
+void LumatoneApplicationState::DeviceController::setConnectionState(ConnectionState newState, bool sendNotification)
+{
+    deviceAppState.connectionState = newState;
+    deviceAppState.setStateProperty(LumatoneApplicationProperty::ConnectionStateId, juce::var((int)deviceAppState.connectionState));
     if (sendNotification)
-        statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, connectionState);
+        getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionStateChanged, deviceAppState.connectionState);
+}
+
+void LumatoneApplicationState::DeviceController::setAutoConnectionEnabled(bool enabled)
+{
+    deviceAppState.activityMonitor->setDetectDeviceIfDisconnected(enabled);
+    deviceAppState.activityMonitor->setCheckForInactivity(enabled);
+}
+
+juce::Array<juce::MidiDeviceInfo> LumatoneApplicationState::DeviceController::getMidiInputList()
+{
+    return deviceAppState.firmwareDriver.getMidiInputList();
+}
+
+juce::Array<juce::MidiDeviceInfo> LumatoneApplicationState::DeviceController::getMidiOutputList()
+{
+    return deviceAppState.firmwareDriver.getMidiOutputList();
+}
+
+void LumatoneApplicationState::DeviceController::setMidiInput(int deviceIndex, bool test)
+{
+    auto deviceInfo = getMidiInputList()[deviceIndex];
+    deviceAppState.setStateProperty(LumatoneApplicationProperty::LastInputDeviceId, deviceInfo.identifier);
+    deviceAppState.controller->setDriverMidiInput(deviceIndex, test);
+}
+
+void LumatoneApplicationState::DeviceController::setMidiOutput(int deviceIndex, bool test)
+{
+    auto deviceInfo = getMidiOutputList()[deviceIndex];
+    deviceAppState.setStateProperty(LumatoneApplicationProperty::LastOutputDeviceId, deviceInfo.identifier);
+    deviceAppState.controller->setDriverMidiOutput(deviceIndex, test);
 }

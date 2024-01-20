@@ -108,7 +108,6 @@ void LumatoneState::setConnectedSerialNumber(juce::String serialNumberIn)
         connectedSerialNumber,
         undoManager);
 
-    // numBoards = 5;
 
     if (connectedSerialNumber == SERIAL_55_KEYS)
     {
@@ -126,18 +125,6 @@ void LumatoneState::setLumatoneVersion(LumatoneFirmware::ReleaseVersion versionI
 {
     determinedVersion = versionIn;
 
-    // numBoards = 5;
-
-    switch (determinedVersion)
-    {
-    case LumatoneFirmware::ReleaseVersion::VERSION_55_KEYS:
-        mappingData->setOctaveBoardSize(55);
-        break;
-    default:
-        mappingData->setOctaveBoardSize(56);
-        break;
-    }
-
     if (writeToState)
     {
         state.setPropertyExcludingListener(
@@ -150,7 +137,8 @@ void LumatoneState::setLumatoneVersion(LumatoneFirmware::ReleaseVersion versionI
 
 void LumatoneState::setCompleteConfig(const LumatoneLayout &layoutIn)
 {
-    *mappingData = layoutIn;
+    if (mappingData.get() != &layoutIn)
+        *mappingData = layoutIn;
 }
 
 void LumatoneState::setLayout(const LumatoneLayout &layoutIn)

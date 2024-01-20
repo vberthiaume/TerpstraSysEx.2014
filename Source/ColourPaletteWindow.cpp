@@ -23,12 +23,15 @@
 // ColourPaletteWindow Definitions
 
 ColourPaletteWindow::ColourPaletteWindow(const LumatoneEditorState& stateIn)
-    : LumatoneEditorStateController("ColourPaletteWindow", stateIn)
+    : LumatoneEditorState("ColourPaletteWindow", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
 {
     setName("ColourPaletteWindow");
     setLookAndFeel(&getEditorLookAndFeel());
 
     colourSelectorGroup.reset(new ColourSelectionGroup());
+
+    loadColourPalettesFromFile();
 
     palettePanel.reset(new ColourPalettesPanel(getColourPalettes(), colourSelectorGroup.get()));
     palettePanel->addListener(this);

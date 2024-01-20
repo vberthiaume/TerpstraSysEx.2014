@@ -26,7 +26,7 @@ class MainContentComponent;
 class DeviceActivityMonitor;
 
 //==============================================================================
-class TerpstraSysExApplication 	: public juce::JUCEApplication
+class TerpstraSysExApplication 	: public juce::JUCEApplication, private LumatoneEditorState::Controller
 {
 public:
 	//==============================================================================
@@ -43,6 +43,7 @@ public:
 
 	void loadPropertiesFile();
 
+	//==============================================================================
 	// Menu functionality
 	void getAllCommands(juce::Array <juce::CommandID>& commands) override;
 	void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
@@ -63,7 +64,6 @@ public:
     bool pasteModifiedSubBoardData(juce::CommandID commandID);
     bool canPasteSubBoardData() const;
 
-	bool performUndoableAction(juce::UndoableAction* editAction, bool newTransaction=true);
 	bool undo();
 	bool redo();
 
@@ -74,20 +74,20 @@ public:
 	// bool faderVelocityCurveDialog();
 	// bool aftertouchVelocityCurveDialog();
 
-	// void sendCurrentConfigurationToDevice();
-	bool requestConfigurationFromDevice();
+	bool aboutTerpstraSysEx();
 
-	void updateMainTitle();
+	//==============================================================================
+private:
+	bool onRequestDeviceConfig();
 
 	void setOpenDialogWindow(juce::DialogWindow* dialogWindowIn);
-
-	bool aboutTerpstraSysEx();
 
 private:
 	LumatoneFirmwareDriver	firmwareDriver;
 	juce::UndoManager 		undoManager;
 
-	LumatoneEditorStateController	state;
+	LumatoneEditorState		state;
+
 	std::unique_ptr<ApplicationCommandManager> commandManager;
 	
 	MainContentComponent* mainComponent;

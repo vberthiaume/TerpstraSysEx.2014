@@ -12,7 +12,6 @@
 
 #include "LumatoneMenu.h"
 #include "LumatoneEditorState.h"
-//class LumatoneEditorState;
 
 //==============================================================================
 /*
@@ -20,13 +19,14 @@ This class implements the desktop window that contains an instance of
 our MainContentComponent class.
 */
 class MainWindow : public juce::DocumentWindow
-                 , public LumatoneEditorStateController
-                 , public juce::Timer
+                 , public LumatoneEditorState
+                 , private LumatoneEditorState::Controller
+                 , private juce::Timer
 {
 public:
     MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager);
 
-    virtual ~MainWindow();
+    virtual ~MainWindow() override;
 
     void closeButtonPressed() override;
 
@@ -58,6 +58,12 @@ public:
     void fixWindowPositionAndSize(bool setToDefault=false);
 
     void timerCallback() override;
+
+    void updateTitle();
+
+private:
+
+    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property) override;
 
 private:
     juce::ApplicationCommandManager* commandManager;

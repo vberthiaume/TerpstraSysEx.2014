@@ -17,7 +17,8 @@
 
 MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdManager)
     : juce::DocumentWindow("Lumatone Editor", juce::Colours::black, juce::DocumentWindow::minimiseButton + juce::DocumentWindow::closeButton)
-    , LumatoneEditorStateController("MainWindow", stateIn)
+    , LumatoneEditorState("MainWindow", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , commandManager(cmdManager)
 {
     setContentOwned(new MainContentComponent(*this, commandManager), true);
@@ -176,4 +177,27 @@ void MainWindow::timerCallback()
     verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f);
 
     updateBounds();
+}
+
+void MainWindow::updateTitle()
+{
+    juce::String windowTitle("Lumatone Editor");
+	
+	if (!getCurrentFile().getFileName().isEmpty())
+		windowTitle << " - " << getCurrentFile().getFileName();
+        
+	if (getHasChangesToSave())
+		windowTitle << "*";
+
+	setName(windowTitle);
+}
+
+void MainWindow::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
+{
+    LumatoneEditorState::handleStatePropertyChange(stateIn, property);
+
+    if (property == LumatoneEditorProperty::HasChangesToSave)
+    {
+        updateTitle();
+    }
 }

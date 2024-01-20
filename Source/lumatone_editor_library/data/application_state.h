@@ -25,8 +25,8 @@ namespace LumatoneEditor
 namespace LumatoneApplicationProperty
 {
     // Device Management
-    // static const juce::Identifier DetectDeviceIfDisconnected = juce::Identifier("DetectDeviceIfDisconnected");
-    // static const juce::Identifier CheckConnectionIfInactive = juce::Identifier("CheckConnectionIfInactive");
+    static const juce::Identifier DetectDeviceIfDisconnected = juce::Identifier("DetectDeviceIfDisconnected");
+    static const juce::Identifier CheckConnectionIfInactive = juce::Identifier("CheckConnectionIfInactive");
 
     static const juce::Identifier DetectDevicesTimeout = juce::Identifier("DetectDevicesTimeout");
     static const juce::Identifier LastInputDeviceId = juce::Identifier("LastInputDeviceId");
@@ -50,7 +50,6 @@ class LumatoneColourModel;
 class LumatoneAction;
 class DeviceActivityMonitor;
 
-class LumatoneApplicationStateController;
 class LumatoneApplicationState : public LumatoneState
 {
 public:
@@ -66,6 +65,8 @@ public:
     ConnectionState getConnectionState() const;
     int getMidiInputIndex() const;
     int getMidiOutputIndex() const;
+
+    bool isAutoConnectionEnabled() const;
 
     virtual bool doSendChangesToDevice() const;
 
@@ -103,8 +104,8 @@ public:
     //void setAftertouchTable(const LumatoneConfigTable& tableIn) override;
     //void setLumatouchTable(const LumatoneConfigTable& tableIn) override;
 
-    virtual bool performAction(LumatoneAction* action, bool undoable = true, bool newTransaction = true);
-
+private:
+    bool performLumatoneAction(LumatoneAction* action, bool undoable = true, bool newTransaction = true);
 
 protected:
     virtual juce::ValueTree loadStateProperties(juce::ValueTree stateIn);
@@ -140,6 +141,8 @@ public:
 
 
 private:
+    LumatoneFirmwareDriver& firmwareDriver;
+
     std::shared_ptr<LumatoneContext> layoutContext;
 	std::shared_ptr<LumatoneController> controller;
     std::shared_ptr<DeviceActivityMonitor> activityMonitor;
@@ -148,26 +151,53 @@ private:
     bool contextIsSet = false;
 
 //================================================================================
-
-    friend class LumatoneApplicationStateController;
-};
-
-class LumatoneApplicationStateController : public LumatoneApplicationState
-{
 public:
-    LumatoneApplicationStateController(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr)
-        : LumatoneApplicationState(nameIn, driverIn, stateIn, undoManager) {}
-    LumatoneApplicationStateController(juce::String nameIn, const LumatoneApplicationState& stateIn)
-        : LumatoneApplicationState(nameIn, stateIn) {}
+    class Controller
+    {
+    public:
+        Controller(LumatoneApplicationState& stateIn)
+            : appState(stateIn) {}
 
-protected:
-    virtual void setConnectionState(ConnectionState newState, bool sendNotification=true);
+    virtual bool requestCompleteConfigFromDevice();
+    virtual bool requestMappingFromDevice();
 
-    juce::ListenerList<LumatoneEditor::EditorListener>* getEditorListeners() const { return editorListeners.get(); }
-    juce::ListenerList<LumatoneEditor::StatusListener>* getStatusListeners() const { return statusListeners.get(); }
-    juce::ListenerList<LumatoneEditor::FirmwareListener>* getFirmwareListeners() const { return firmwareListeners.get(); }
-    juce::ListenerList<LumatoneEditor::MidiListener>* getMidiListeners() const { return midiListeners.get(); }
-    
+    virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
+
+    protected:
+        juce::ListenerList<LumatoneEditor::EditorListener>* getEditorListeners() const { return appState.editorListeners.get(); }
+        juce::ListenerList<LumatoneEditor::StatusListener>* getStatusListeners() const { return appState.statusListeners.get(); }
+        juce::ListenerList<LumatoneEditor::FirmwareListener>* getFirmwareListeners() const { return appState.firmwareListeners.get(); }
+        juce::ListenerList<LumatoneEditor::MidiListener>* getMidiListeners() const { return appState.midiListeners.get(); }
+
+    private:
+        LumatoneApplicationState& appState;
+    };
+
+    class DeviceController : protected Controller
+    {
+    public:
+        DeviceController(LumatoneApplicationState& stateIn)
+            : Controller(stateIn)
+            , deviceAppState(stateIn) {}
+
+        juce::Array<juce::MidiDeviceInfo> getMidiInputList();
+        juce::Array<juce::MidiDeviceInfo> getMidiOutputList();
+
+    protected:
+        virtual void setMidiInput(int deviceIndex, bool test = true);
+        virtual void setMidiOutput(int deviceIndex, bool test = true);
+
+        void setConnectionState(ConnectionState newState, bool sendNotification=true);
+
+        void setAutoConnectionEnabled(bool enabled);
+
+    private:
+        LumatoneApplicationState& deviceAppState;
+    };
+
+private:
+    friend class Controller;
+    friend class DeviceController;
 };
 
-#endif LUMATONE_APPLICATION_STATE_H
+#endif // LUMATONE_APPLICATION_STATE_H
