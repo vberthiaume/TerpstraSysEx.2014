@@ -14,9 +14,9 @@ public:
     virtual ~EditorListener() {}
     
     // App Actions
-    virtual void completeMappingLoaded(LumatoneLayout mappingData) {}
-    virtual void boardChanged(LumatoneBoard boardData) {}
-    virtual void keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey) {}
+    virtual void completeMappingLoaded(const LumatoneLayout& mappingData) {}
+    virtual void boardChanged(const LumatoneBoard& boardData) {}
+    virtual void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) {}
 
     virtual void selectionChanged(juce::Array<MappedLumatoneKey> selection) {}
 
@@ -28,7 +28,7 @@ public:
 
 
     // Firmware Actions
-    virtual void keyConfigChanged(int boardIndex, int keyIndex, LumatoneKey keyData) {}
+    virtual void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) {}
     virtual void keyColourChanged(int boardIndex, int keyIndex, juce::Colour keyColour) {}
 
     virtual void expressionPedalSensitivityChanged(unsigned char value) {}

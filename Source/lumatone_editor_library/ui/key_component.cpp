@@ -16,6 +16,9 @@ LumatoneKeyDisplay::LumatoneKeyDisplay(int newBoardIndex, int newKeyIndex, const
     : LumatoneKeyContext(keyDataIn, newBoardIndex, newKeyIndex)
     , Component("LumatoneKeyDisplay_" + LumatoneKeyCoord::toString(newBoardIndex, newKeyIndex))
 {
+    boardIndex = newBoardIndex;
+    keyIndex = newKeyIndex;
+    
     renderMode = LumatoneComponentRenderMode::GraphicInteractive;
     clearUiState();
 }
@@ -218,36 +221,16 @@ void LumatoneKeyDisplay::endDrag()
     }
 }
 
-// const LumatoneKey* LumatoneKeyDisplay::getKeyData() const
-// {
-//     return &keyData;
-// }
-
-// juce::Colour LumatoneKeyDisplay::getKeyColour() const
-// {
-
-// }
-
-void LumatoneKeyDisplay::setLumatoneKey(const LumatoneKey& lumatoneKey, int boardIdx, int keyIdx)
-{
-    auto thisKey = static_cast<LumatoneKey*>(this);
-    *thisKey = lumatoneKey;
-
-    boardIndex = boardIdx;
-    keyIndex = keyIdx;
-    // repaint();
-}
-
-void LumatoneKeyDisplay::setDisplayColour(const juce::Colour& colourIn)
-{
-    LumatoneKey::setColour(colourIn);
-    // redrawRender();
-}
-
 void LumatoneKeyDisplay::setKeyGraphics(juce::Image& colourGraphicIn, juce::Image& shadowGraphicIn)
 {
     colourGraphic = colourGraphicIn;
     shadowGraphic = shadowGraphicIn;
+}
+
+void LumatoneKeyDisplay::setLumatoneKey(const LumatoneKey &lumatoneKey, juce::Colour displayColour)
+{
+    LumatoneKey::operator=(lumatoneKey);
+    LumatoneKey::setColour(displayColour);
 }
 
 void LumatoneKeyDisplay::setSelected(bool selected)
