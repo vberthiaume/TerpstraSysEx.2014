@@ -742,6 +742,11 @@ void LumatoneFirmwareDriver::sendGetExpressionPedalSensitivity()
     sendSysExRequest(0, GET_EXPRESSION_PEDAL_SENSITIVIY);
 }
 
+void LumatoneFirmwareDriver::sendGetMacroLightIntensity()
+{
+    sendSysExRequest(0, GET_MACRO_LIGHT_INTENSITY);
+}
+
 /*
 ==============================================================================
 Low-level SysEx calls
