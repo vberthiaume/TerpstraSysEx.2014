@@ -720,6 +720,28 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 	return true;
 }
 
+//void LumatoneController::loadRandomMapping(int testTimeoutMs,  int maxIterations, int i)
+//{
+//    auto dir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("Lumatone Editor").getChildFile("Mappings");
+//    auto mappings = dir.findChildFiles(juce::File::TypesOfFileToFind::findFiles, true);
+//    auto numfiles = mappings.size();
+//    auto r = juce::Random();
+//
+//    auto fileIndex = r.nextInt(numfiles-1);
+//    auto file = mappings[fileIndex];
+//
+//    if (file.exists() && file.hasFileExtension(".ltn"))
+//    {
+//        DBG("Found " + juce::String(numfiles) + " files, loading " + file.getFileName());
+//        juce::MessageManager::callAsync([file]() { TerpstraSysExApplication::getApp().setCurrentFile(file); });
+//    }
+//
+////    if (i < maxIterations)
+////        Timer::callAfterDelay(testTimeoutMs, [&]() { loadRandomMapping(testTimeoutMs, maxIterations, i + 1); });
+////    else
+////        DBG("Finished random mappings test.");
+//}
+
 //==============================================================================
 // This macro generates the main() routine that launches the app.
 START_JUCE_APPLICATION(TerpstraSysExApplication)

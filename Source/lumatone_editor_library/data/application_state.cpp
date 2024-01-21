@@ -134,6 +134,30 @@ bool LumatoneApplicationState::performLumatoneAction(LumatoneAction *action, boo
     return action->perform();
 }
 
+void LumatoneApplicationState::setInactiveMacroButtonColour(juce::Colour buttonColour)
+{
+    LumatoneState::setInactiveMacroButtonColour(buttonColour);
+
+    if (doSendChangesToDevice())
+    {
+        controller->sendMacroButtonInactiveColour(buttonColour.toString());
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::macroButtonInactiveColourChanged, buttonColour);
+}
+
+void LumatoneApplicationState::setActiveMacroButtonColour(juce::Colour buttonColour)
+{
+    LumatoneState::setInactiveMacroButtonColour(buttonColour);
+
+    if (doSendChangesToDevice())
+    {
+        controller->sendMacroButtonInactiveColour(buttonColour.toString());
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::macroButtonActiveColourChanged, buttonColour);
+}
+
 juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree stateIn)
 {
     juce::ValueTree newState = (stateIn.hasType(LumatoneStateProperty::StateTree))
@@ -468,9 +492,20 @@ bool LumatoneApplicationState::Controller::requestCompleteConfigFromDevice()
     if (appState.connectionState != ConnectionState::ONLINE)
         return false;
 
-    // Request MIDI channel, MIDI note, colour and key type config for all keys
-	appState.controller->sendGetCompleteMappingRequest();
+    requestSettingsFromDevice();
+    requestMappingFromDevice();
 
+    return true;
+}
+
+bool LumatoneApplicationState::Controller::requestSettingsFromDevice()
+{
+    if (appState.connectionState != ConnectionState::ONLINE)
+        return false;
+
+    // Macro button colours
+    appState.controller->requestMacroButtonColours();
+    
 	// General options
 	appState.controller->requestPresetFlags();
 	appState.controller->requestExpressionPedalSensitivity();
@@ -489,8 +524,19 @@ bool LumatoneApplicationState::Controller::requestMappingFromDevice()
     if (appState.connectionState != ConnectionState::ONLINE)
         return false;
 
+    // Request MIDI channel, MIDI note, colour and key type config for all keys
     appState.controller->sendGetCompleteMappingRequest();
     return true;
+}
+
+void LumatoneApplicationState::Controller::setInactiveMacroButtonColour(juce::Colour buttonColour)
+{
+    appState.setInactiveMacroButtonColour(buttonColour);
+}
+
+void LumatoneApplicationState::Controller::setActiveMacroButtonColour(juce::Colour buttonColour)
+{
+    appState.setActiveMacroButtonColour(buttonColour);
 }
 
 void LumatoneApplicationState::DeviceController::setConnectionState(ConnectionState newState, bool sendNotification)

@@ -99,13 +99,13 @@ public:
     
     virtual void setConfigTable(LumatoneConfigTable::TableType type, const LumatoneConfigTable& table) override;
 
-    //void setVelocityIntervalTable(const LumatoneConfigTable& table) override;
-    //void setNoteVelocityTable(const LumatoneConfigTable& tableIn) override;
-    //void setAftertouchTable(const LumatoneConfigTable& tableIn) override;
-    //void setLumatouchTable(const LumatoneConfigTable& tableIn) override;
-
 private:
     bool performLumatoneAction(LumatoneAction* action, bool undoable = true, bool newTransaction = true);
+
+
+protected:
+    virtual void setInactiveMacroButtonColour(juce::Colour buttonColour) override;
+    virtual void setActiveMacroButtonColour(juce::Colour buttonColour) override;
 
 protected:
     virtual juce::ValueTree loadStateProperties(juce::ValueTree stateIn);
@@ -158,8 +158,12 @@ public:
         Controller(LumatoneApplicationState& stateIn)
             : appState(stateIn) {}
 
-    virtual bool requestCompleteConfigFromDevice();
+    virtual bool requestSettingsFromDevice();
     virtual bool requestMappingFromDevice();
+    virtual bool requestCompleteConfigFromDevice();
+
+    void setInactiveMacroButtonColour(juce::Colour buttonColour);
+    void setActiveMacroButtonColour(juce::Colour buttonColour);
 
     virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
 
