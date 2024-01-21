@@ -143,7 +143,7 @@ MainContentComponent::~MainContentComponent()
 void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
 	noteEditArea->saveStateToPropertiesFile(propertiesFile);
-	globalSettingsArea->saveStateToPropertiesFile(propertiesFile);
+	// globalSettingsArea->saveStateToPropertiesFile(propertiesFile);
 }
 
 // Set the currentSectionKey mapping to be edited to the value passed in parameter

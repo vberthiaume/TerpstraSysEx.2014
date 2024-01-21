@@ -201,6 +201,9 @@ public:
     // Get sensitivity setting of expression pedal
     void requestExpressionPedalSensitivity();
 
+    // Get preset button light colours
+    void requestMacroButtonColours();
+
 private:
     // juce::ValueTree::Listener implementation
 
@@ -208,20 +211,13 @@ private:
 
 protected:
     //============================================================================
-    // LumatoneEditor::FirmwareListener implementation
+    // LumatoneEditor::FirmwareListener implementation - use to establish device connection
 
     void serialIdentityReceived(const int* serialBytes) override;
 
     void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
 
     void pingResponseReceived(unsigned int pingValue) override;
-
-    void octaveColourConfigReceived(int boardId, juce::uint8 rgbFlag, const int* colourData) override;
-    void octaveChannelConfigReceived(int octaveIndex, const int* channelData) override;
-    void octaveNoteConfigReceived(int octaveIndex, const int* noteData) override;
-    void keyTypeConfigReceived(int boardId, const int* keyTypeData) override;
-
-    void macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour) override;
 
     //============================================================================
     // Test functions

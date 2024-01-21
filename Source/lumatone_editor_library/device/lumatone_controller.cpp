@@ -556,6 +556,12 @@ void LumatoneController::requestExpressionPedalSensitivity()
         firmwareDriver.sendGetExpressionPedalSensitivity();
 }
 
+void LumatoneController::requestMacroButtonColours()
+{
+    if (firmwareSupport.versionAcknowledgesCommand(getLumatoneVersion(), GET_MACRO_LIGHT_INTENSITY))
+        firmwareDriver.sendGetMacroLightIntensity();
+}
+
 bool LumatoneController::connectionConfirmed() const
 {
     return firmwareDriver.hasDevicesDefined() && currentDevicePairConfirmed;
@@ -637,114 +643,3 @@ void LumatoneController::pingResponseReceived(unsigned int pingValue)
         setConnectionState(ConnectionState::ONLINE);
     }
 }
-
-void LumatoneController::octaveColourConfigReceived(int boardId, juce::uint8 rgbFlag, const int* colourData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        auto newValue = colourData[keyIndex];
-
-        juce::Colour colour = getKey(boardIndex, keyIndex).getColour();
-        if (rgbFlag == 0)
-        {
-            colour = juce::Colour(newValue, colour.getGreen(), colour.getBlue());
-        }
-        else if (rgbFlag == 1)
-        {
-            colour = juce::Colour(colour.getRed(), newValue, colour.getBlue());
-        }
-        else if (rgbFlag == 2)
-        {
-            colour = juce::Colour(colour.getRed(), colour.getGreen(), newValue);
-        }
-        else
-        {
-            jassertfalse;
-        }
-
-        LumatoneState::setKeyColour(colour, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneController::octaveChannelConfigReceived(int boardId, const int* channelData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        juce::uint8 ch = channelData[keyIndex];
-        if (ch == 0 || ch > 16)
-            ch = 1;
-
-        auto key = getKey(boardIndex, keyIndex);
-        key.setChannelNumber(ch);
-        LumatoneState::setKeyConfig(key, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneController::octaveNoteConfigReceived(int boardId, const int* noteData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        int note = noteData[keyIndex];
-        if (note < 0 || note > 127)
-            note = 0;
-
-        auto key = getKey(boardIndex, keyIndex);
-        key.setNoteOrCC(noteData[keyIndex]);
-        LumatoneState::setKeyConfig(key, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneController::keyTypeConfigReceived(int boardId, const int* keyTypeData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        auto type = LumatoneKeyType(keyTypeData[keyIndex]);
-
-        auto key = getKey(boardIndex, keyIndex);
-        key.setKeyType(type);
-        LumatoneState::setKeyConfig(key, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneController::macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour)
-{
-    
-}
-
-//void LumatoneController::loadRandomMapping(int testTimeoutMs,  int maxIterations, int i)
-//{
-//    auto dir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userDocumentsDirectory).getChildFile("Lumatone Editor").getChildFile("Mappings");
-//    auto mappings = dir.findChildFiles(juce::File::TypesOfFileToFind::findFiles, true);
-//    auto numfiles = mappings.size();
-//    auto r = juce::Random();
-//
-//    auto fileIndex = r.nextInt(numfiles-1);
-//    auto file = mappings[fileIndex];
-//
-//    if (file.exists() && file.hasFileExtension(".ltn"))
-//    {
-//        DBG("Found " + juce::String(numfiles) + " files, loading " + file.getFileName());
-//        juce::MessageManager::callAsync([file]() { TerpstraSysExApplication::getApp().setCurrentFile(file); });
-//    }
-//
-////    if (i < maxIterations)
-////        Timer::callAfterDelay(testTimeoutMs, [&]() { loadRandomMapping(testTimeoutMs, maxIterations, i + 1); });
-////    else
-////        DBG("Finished random mappings test.");
-//}

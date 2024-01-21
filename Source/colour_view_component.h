@@ -94,7 +94,7 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
 	//void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
-	void setColour(juce::String colourAsString);
+	void setColour(juce::String colourAsString, bool sendChangeMessage = true);
 	juce::String getColourAsString();
 	int getColourAsNumber();
     juce::Colour getColourAsObject();

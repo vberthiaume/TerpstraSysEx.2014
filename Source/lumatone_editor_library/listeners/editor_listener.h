@@ -34,7 +34,7 @@ public:
     virtual void expressionPedalSensitivityChanged(unsigned char value) {}
     virtual void invertFootControllerChanged(bool inverted) {}
     
-    virtual void macroButtonActiveColourChagned(juce::Colour colour) {}
+    virtual void macroButtonActiveColourChanged(juce::Colour colour) {}
     virtual void macroButtonInactiveColourChanged(juce::Colour colour) {}
     
     virtual void lightOnKeyStrokesChanged(bool lightOn) {}
