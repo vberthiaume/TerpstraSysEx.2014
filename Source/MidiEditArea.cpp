@@ -52,7 +52,6 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::UniviaProBold);
 	liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editModeFontScalar);
 	addChildComponent(liveEditorBtn.get());
-	// liveEditorBtn->addListener(this);
 	liveEditorBtn->onClick = [&]()
 	{
 		if (liveEditorBtn->getToggleState())
@@ -69,7 +68,6 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontOverride, LumatoneEditorFont::UniviaProBold);
 	offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, editModeFontScalar);
 	addChildComponent(offlineEditorBtn.get());
-	// offlineEditorBtn->addListener(this);
 	offlineEditorBtn->onClick = [&]()
 	{
 		if (offlineEditorBtn->getToggleState())
@@ -78,6 +76,10 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 			editModeChangedCallback();
 		}
 	};
+
+    // liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.6f);
+    // offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.6f);
+
 
 	pleaseConnectLabel.reset(new juce::Label("PleaseConnectLabel", translate("PleaseConnect")));
 	pleaseConnectLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
@@ -93,16 +95,19 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	addAndMakeVisible(logomark.get());
 
 	logomarkPath = createLogomark();
-    //[/Constructor_pre]
 
     cbMidiInput.reset (new juce::ComboBox ("cbMidiInput"));
     addAndMakeVisible (cbMidiInput.get());
     cbMidiInput->setTooltip (juce::translate("Receives answers to sent SysEx commands and the current configuration from controller "));
     cbMidiInput->setEditableText (false);
     cbMidiInput->setJustificationType (juce::Justification::centredLeft);
-    cbMidiInput->setTextWhenNothingSelected (juce::translate("Select MIDI Input"));
+    // cbMidiInput->setTextWhenNothingSelected (juce::translate("Select MIDI Input"));
+    cbMidiInput->setTextWhenNothingSelected ("pick something ya dummy");
     cbMidiInput->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
-    cbMidiInput->addListener (this);
+    cbMidiInput->onChange = [&]()
+	{
+		midiInputChangedCallback();
+	};
 
     cbMidiOutput.reset (new juce::ComboBox ("cbMidiOutput"));
     addAndMakeVisible (cbMidiOutput.get());
@@ -111,7 +116,10 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
     cbMidiOutput->setJustificationType (juce::Justification::centredLeft);
     cbMidiOutput->setTextWhenNothingSelected (juce::translate("Select MIDI Output"));
     cbMidiOutput->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
-    cbMidiOutput->addListener (this);
+	cbMidiOutput->onChange = [&]()
+	{
+		midiOutputChangedCallback();
+	};
 
     lblConnectionState.reset (new juce::Label ("lblConnectionState",
                                                juce::translate("Disconnected")));
@@ -139,8 +147,14 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	{
 		toggleAutoConnection();
 	};
+	btnAutoConnect->setClickingTogglesState(true);
 
-    //[UserPreSize]
+
+	// Set up styles
+
+	connectedColours.add(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DisconnectedRed));
+	connectedColours.add(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ConnectedGreen));
+
 	cbMidiInput->getProperties().set(LumatoneEditorStyleIDs::popupMenuTargetWidth, 1);
 	cbMidiInput->getProperties().set(LumatoneEditorStyleIDs::popupMenuBackgroundColour, getEditorLookAndFeel().findColour(ComboBox::ColourIds::backgroundColourId).toString());
 	cbMidiInput->setVisible(false);
@@ -156,55 +170,34 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	lblEditMode->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
 	lblEditMode->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
 
-	offlineEditorBtn->setClickingTogglesState(true);
-	offlineEditorBtn->setRadioGroupId(10, dontSendNotification);
-	liveEditorBtn->setClickingTogglesState(true);
-	liveEditorBtn->setRadioGroupId(10, dontSendNotification);
-	liveEditorBtn->setToggleState(true, dontSendNotification);
-    liveEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.6f);
-    offlineEditorBtn->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.6f);
-
-	btnAutoConnect->setClickingTogglesState(true);
-
 	ioAreaFlexBox.alignContent = juce::FlexBox::AlignContent::center;
 	ioAreaFlexBox.alignItems = juce::FlexBox::AlignItems::center;
 	ioAreaFlexBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
-    //[/UserPreSize]
 
-    //[Constructor] You can add your own custom stuff here..
 
-	refreshInputMenuAndSetSelected(0, dontSendNotification);
-	refreshOutputMenuAndSetSelected(0, dontSendNotification);
+	refreshInputMenuAndSetSelected(-1, dontSendNotification);
+	refreshOutputMenuAndSetSelected(-1, dontSendNotification);
 	setConnectivity(false);
 
 	addEditorListener(this);
 	addStatusListener(this);
     btnAutoConnect->setToggleState(isAutoConnectionEnabled(), sendNotificationSync);
 
-    //[/Constructor]
 }
 
 MidiEditArea::~MidiEditArea()
 {
-    //[Destructor_pre]. You can add your own custom destruction code here..
 	liveEditorBtn = nullptr;
 	offlineEditorBtn = nullptr;
 	offlineMsgLabel = nullptr;
 	pleaseConnectLabel = nullptr;
 	logomark = nullptr;
-    //[/Destructor_pre]
 
     cbMidiInput = nullptr;
     cbMidiOutput = nullptr;
     lblConnectionState = nullptr;
     lblEditMode = nullptr;
     btnAutoConnect = nullptr;
-
-
-    //[Destructor]. You can add your own custom destruction code here..
-	//deviceMonitor.stopThread(100);
-	// getLumatoneController()->removeStatusListener(this);
-    //[/Destructor]
 }
 
 bool MidiEditArea::isConnected() const
@@ -215,12 +208,8 @@ bool MidiEditArea::isConnected() const
 //==============================================================================
 void MidiEditArea::paint (juce::Graphics& g)
 {
-    //[UserPrePaint] Add your own custom painting code here..
-    //[/UserPrePaint]
-
     g.fillAll (juce::Colour (0xffbad0de));
 
-    //[UserPaint] Add your own custom painting code here..
 	g.fillAll(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
 
 	// Dark background for title and logomark
@@ -237,17 +226,12 @@ void MidiEditArea::paint (juce::Graphics& g)
 
 	g.setColour(connectedColours[(int)(isConnected() && liveEditorBtn->getToggleState())]);
 	drawPathToFillBounds(g, logomarkPath, logomarkBounds);
-    //[/UserPaint]
 }
 
 void MidiEditArea::resized()
 {
-    //[UserPreResize] Add your own custom resize code here..
 	float w = getWidth();
 	float h = getHeight();
-    //[/UserPreResize]
-
-    //[UserResized] Add your own custom resize handling here..
 
 	lumatoneLabelBounds = getBounds().withRight(roundToInt(w * lumatoneLabelAreaWidth));
 	resizeLabelWithWidth(lumatoneLabel.get(), lumatoneLabelBounds.proportionOfWidth(lumatoneLabelWidthInArea));
@@ -301,13 +285,18 @@ void MidiEditArea::resized()
 		ioAreaFlexBox.items.clear();
 		ioAreaFlexBox.items.add(juce::FlexItem(*btnAutoConnect).withFlex(0).withWidth(controlHeight * 1.6f).withHeight(controlHeight));
 
+		int deviceBoxWidth = roundToInt(ioBounds.getWidth() * midiDeviceControlBoundsWidth);
+
 		if (btnAutoConnect->getToggleState())
 		{
 			lblConnectionState->setJustificationType(juce::Justification::centredLeft);
+
+			// Make sure these are never 0 size
+			cbMidiInput->setSize(deviceBoxWidth, controlHeight);
+			cbMidiOutput->setSize(deviceBoxWidth, controlHeight);
 		}
 		else
 		{
-			int deviceBoxWidth = roundToInt(ioBounds.getWidth() * midiDeviceControlBoundsWidth);
 			ioAreaFlexBox.items.add(juce::FlexItem(*cbMidiInput).withFlex(0).withWidth(deviceBoxWidth).withHeight(controlHeight));
 			ioAreaFlexBox.items.add(juce::FlexItem(*cbMidiOutput).withFlex(0).withWidth(deviceBoxWidth).withHeight(controlHeight));
 
@@ -334,68 +323,6 @@ void MidiEditArea::resized()
 		offlineMsgLabel->setSize(connectivityArea.getX() - pleaseConnectLabel->getX(), roundToInt(h * connectionDirectionsHeight));
 		offlineMsgLabel->setFont(offlineMsgLabel->getFont().withHeight(offlineMsgLabel->getHeight()));
 	}
-    //[/UserResized]
-}
-
-void MidiEditArea::comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged)
-{
-    //[UsercomboBoxChanged_Pre]
-    //[/UsercomboBoxChanged_Pre]
-
-    if (comboBoxThatHasChanged == cbMidiInput.get())
-    {
-        //[UserComboBoxCode_cbMidiInput] -- add your combo box handling code here..
-		if (cbMidiInput->getSelectedItemIndex() >= 0)
-			setMidiInput(cbMidiInput->getSelectedItemIndex());
-
-		if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
-		{
-			setConnectivity(false);
-			//errorVisualizer.setErrorLevel(
-			//	*lblConnectionState.get(),
-			//	HajuErrorVisualizer::ErrorLevel::error,
-			//	translate("Select both a MIDI input and output"));
-		}
-		else
-		{
-			jassert(!isConnected());
-			lblConnectionState->setText("Connecting...", juce::NotificationType::dontSendNotification);
-		}
-        //[/UserComboBoxCode_cbMidiInput]
-    }
-    else if (comboBoxThatHasChanged == cbMidiOutput.get())
-    {
-        //[UserComboBoxCode_cbMidiOutput] -- add your combo box handling code here..
-		if (cbMidiOutput->getSelectedItemIndex() >= 0)
-			setMidiOutput(cbMidiOutput->getSelectedItemIndex());
-
-		if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
-		{
-			setConnectivity(false);
-			//errorVisualizer.setErrorLevel(
-			//	*lblConnectionState.get(),
-			//	HajuErrorVisualizer::ErrorLevel::error,
-			//	translate("Select both a MIDI input and output"));
-		}
-		else
-		{
-			jassert(!isConnected());
-			lblConnectionState->setText("Connecting...", juce::NotificationType::dontSendNotification);
-		}
-        //[/UserComboBoxCode_cbMidiOutput]
-    }
-
-    //[UsercomboBoxChanged_Post]
-    //[/UsercomboBoxChanged_Post]
-}
-
-//[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
-
-void MidiEditArea::lookAndFeelChanged()
-{
-	connectedColours.clear();
-	connectedColours.add(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DisconnectedRed));
-	connectedColours.add(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ConnectedGreen));
 }
 
 void MidiEditArea::setConnectivity(bool isConnectedIn, juce::String connectionStatus)
@@ -457,18 +384,13 @@ void MidiEditArea::toggleAutoConnection()
 	cbMidiOutput->setVisible(!btnAutoConnect->getToggleState());
 
 	setAutoConnectionEnabled(btnAutoConnect->getToggleState());
-	
+
 	if (btnAutoConnect->getToggleState())
 	{
 		lblConnectionState->setText(translate("Searching for Lumatone..."), dontSendNotification);
-		//errorVisualizer.setErrorLevel(
-		//	*lblConnectionState.get(),
-		//	HajuErrorVisualizer::ErrorLevel::error,
-		//	translate("Waiting for response from connected devices..."));
 	}
 	else
 	{
-		// getLumatoneController()->stopAutoConnection();
 		lblConnectionState->setText(translate("Disconnected"), dontSendNotification);
 		startTimer(deviceRefreshTimeoutMs);
 	}
@@ -482,7 +404,7 @@ void MidiEditArea::editModeChangedCallback()
 	{
 		liveEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
 		lblConnectionState->setText("Connected", juce::NotificationType::dontSendNotification);
-		
+
 		if (getHasChangesToSave())
             onOpenConnectionToDevice(translate("Switch to Live Mode with unsaved changes"));
 	}
@@ -491,9 +413,41 @@ void MidiEditArea::editModeChangedCallback()
 		offlineEditorBtn->setToggleState(true, juce::NotificationType::sendNotification);
 		lblConnectionState->setText("Offline", juce::NotificationType::dontSendNotification);
 	}
-	
+
 	lblConnectionState->setColour(juce::Label::ColourIds::textColourId, connectedColours[(int)liveEditorBtn->getToggleState()]);
     repaint();
+}
+
+void MidiEditArea::midiInputChangedCallback()
+{
+	if (cbMidiInput->getSelectedItemIndex() >= 0)
+		setMidiInput(cbMidiInput->getSelectedItemIndex());
+
+	if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
+	{
+		setConnectivity(false);
+	}
+	else
+	{
+		jassert(!isConnected());
+		lblConnectionState->setText("Connecting...", juce::NotificationType::dontSendNotification);
+	}
+}
+
+void MidiEditArea::midiOutputChangedCallback()
+{
+	if (cbMidiOutput->getSelectedItemIndex() >= 0)
+		setMidiOutput(cbMidiOutput->getSelectedItemIndex());
+
+	if (cbMidiInput->getSelectedItemIndex() < 0 || cbMidiOutput->getSelectedItemIndex() < 0)
+	{
+		setConnectivity(false);
+	}
+	else
+	{
+		jassert(!isConnected());
+		lblConnectionState->setText("Connecting...", juce::NotificationType::dontSendNotification);
+	}
 }
 
 void MidiEditArea::connectionFailed()
@@ -506,31 +460,26 @@ void MidiEditArea::connectionFailed()
 	// getLumatoneController()->setMidiInput(-1);
 	// getLumatoneController()->setMidiOutput(-1);
 }
+
 void MidiEditArea::connectionStateChanged(ConnectionState state)
 {
 	if (state == ConnectionState::ONLINE)
 	{
-		// if (inputDevice >= 0 && outputDevice >= 0)
-		// {
-			refreshInputMenuAndSetSelected(getMidiInputIndex() + 1, dontSendNotification);
-			refreshOutputMenuAndSetSelected(getMidiOutputIndex() + 1, dontSendNotification);
-			setConnectivity(true);
+		refreshInputMenuAndSetSelected(getMidiInputIndex(), dontSendNotification);
+		refreshOutputMenuAndSetSelected(getMidiOutputIndex(), dontSendNotification);
+		setConnectivity(true);
 
-			onOpenConnectionToDevice();
-		// }
+		onOpenConnectionToDevice();
 	}
 	else if (state == ConnectionState::DISCONNECTED)
 	{
-		// Lost should only happen after connection is established
-		// jassert(isConnected);
-
 		if (!btnAutoConnect->getToggleState())
 			startTimer(deviceRefreshTimeoutMs);
 
 		else
 		{
-			refreshInputMenuAndSetSelected(0, juce::NotificationType::dontSendNotification);
-			refreshOutputMenuAndSetSelected(0, juce::NotificationType::sendNotificationAsync);
+			refreshInputMenuAndSetSelected(-1, juce::NotificationType::dontSendNotification);
+			refreshOutputMenuAndSetSelected(-1, juce::NotificationType::sendNotificationAsync);
 		}
 
 		setConnectivity(false);
@@ -539,28 +488,6 @@ void MidiEditArea::connectionStateChanged(ConnectionState state)
 
 void MidiEditArea::editorModeChanged(EditorMode editModeIn)
 {
-    // switch (editModeIn)
-    // {
-    // case EditorMode::ONLINE:
-    //     liveEditorBtn->setToggleState(true, juce::NotificationType::dontSendNotification);
-    //     if (getHasChangesToSave())
-    //         onOpenConnectionToDevice(translate("Switch to Live Mode with unsaved changes"));
-    //     break;
-
-    // case EditorMode::OFFLINE:
-    //     offlineEditorBtn->setToggleState(true, juce::NotificationType::dontSendNotification);
-    //     lblConnectionState->setText(translate("Offline"), juce::NotificationType::dontSendNotification);
-    //     //errorVisualizer.setErrorLevel(
-    //     //    *lblConnectionState.get(),
-    //     //    HajuErrorVisualizer::ErrorLevel::noError,
-    //     //    "Offline");
-    //     break;
-
-    // default:
-    //     jassertfalse;
-    //     break;
-    // }
-
 	editModeChangedCallback();
 }
 
@@ -643,12 +570,12 @@ void MidiEditArea::timerCallback()
 	else
 	{
 		refreshInputMenuAndSetSelected(
-			getMidiInputIndex() + 1,
+			cbMidiInput->getSelectedId(),
 			juce::NotificationType::dontSendNotification
 		);
 
 		refreshOutputMenuAndSetSelected(
-			getMidiOutputIndex() + 1,
+			cbMidiOutput->getSelectedId(),
 			juce::NotificationType::dontSendNotification
 		);
 	}

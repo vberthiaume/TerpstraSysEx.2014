@@ -45,7 +45,6 @@ class MidiEditArea  : public juce::Component
                     , private LumatoneApplicationState::DeviceController
                     , public LumatoneEditor::StatusListener
                     , public LumatoneEditor::EditorListener
-                    , public juce::ComboBox::Listener
                     , public juce::Timer
 {
 public:
@@ -53,11 +52,13 @@ public:
     MidiEditArea (const LumatoneEditorState& stateIn);
     ~MidiEditArea() override;
 
-    bool isConnected() const;
+public:
+
+    void paint (juce::Graphics& g) override;
+    void resized() override;
 
     //==============================================================================
-    //[UserMethods]     -- You can add your own custom methods in this section.
-    void lookAndFeelChanged() override;
+    bool isConnected() const;
 
 	void onOpenConnectionToDevice(String dialogTitle = "");
 
@@ -80,18 +81,11 @@ private:
 
     void editModeChangedCallback();
 
-public:
-    //[/UserMethods]
+    void midiInputChangedCallback();
+    void midiOutputChangedCallback();
 
-    void paint (juce::Graphics& g) override;
-    void resized() override;
-    void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
 
 private:
-
-    bool                        isWaitingForConnectionTest = false;
-    bool                        isWaitingForUserChoice = false;
-
     std::unique_ptr<juce::Label>      lumatoneLabel;
 
     std::unique_ptr<juce::TextButton> liveEditorBtn;
@@ -103,12 +97,11 @@ private:
     std::unique_ptr<juce::Component>  logomark;
     juce::Path                        logomarkPath;
 
-    const int                   deviceRefreshTimeoutMs = 500;
+    bool isWaitingForUserChoice = false;
+    const int deviceRefreshTimeoutMs = 500;
 
     //==============================================================================
     // Helpers
-
-    //std::unique_ptr<AlertWindow>     alert;
 
     juce::FlexBox          ioAreaFlexBox;
 
@@ -117,7 +110,7 @@ private:
     juce::Rectangle<float> logomarkBounds;
     juce::Rectangle<float> ioBounds;
 
-    juce::Array<juce::Colour> connectedColours = { juce::Colour(0xffd7002a), juce::Colour(0xff84aea3) };
+    juce::Array<juce::Colour> connectedColours;
 
     //==============================================================================
     // Position & Size constants
