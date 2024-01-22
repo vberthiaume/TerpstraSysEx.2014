@@ -345,7 +345,7 @@ bool LumatoneEditorState::Controller::requestCompleteConfigFromDevice()
 {
     setHasChangesToSave(false);
     editorState.undoManager->clearUndoHistory();
-    LumatoneApplicationState::Controller::requestCompleteConfigFromDevice();
+    return LumatoneApplicationState::Controller::requestCompleteConfigFromDevice();
 }
 
 bool LumatoneEditorState::Controller::saveMappingToFile(juce::File fileToSave)
@@ -357,7 +357,7 @@ bool LumatoneEditorState::Controller::saveMappingToFile(juce::File fileToSave)
 
     if (fileToSave.existsAsFile())
         success = fileToSave.replaceWithText(fileText, false, false);
-    
+
     else if (fileToSave.create().ok())
     {
         success = fileToSave.appendText(fileText, false, false);
@@ -401,4 +401,3 @@ void LumatoneEditorState::Controller::setDeveloperMode(bool developerModeOn)
     // writeBoolProperty(LumatoneEditorProperty::DeveloperModeOn, inDeveloperMode, undoManager);
     editorState.setStateProperty(LumatoneEditorProperty::DeveloperModeOn, editorState.inDeveloperMode);
 }
-

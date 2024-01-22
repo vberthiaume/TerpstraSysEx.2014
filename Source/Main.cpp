@@ -164,7 +164,7 @@ void TerpstraSysExApplication::anotherInstanceStarted(const String& commandLine)
 //	if (palette.hasBeenModified())
 //	{
 //		ValueTree paletteNode = palette.toValueTree();
-//		
+//
 //		// pathToFile is optional - default to path defined in palette
 //		if (pathToFile == File())
 //			pathToFile = File(palette.getPathToFile());
@@ -272,6 +272,8 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
 	case Lumatone::Menu::commandIDs::importSysExMapping:
 		result.setInfo("Import", "Import mapping from device.", "File", 0);
 		result.addDefaultKeypress('i', ModifierKeys::commandModifier);
+		if (state.getConnectionState() != ConnectionState::ONLINE)
+			result.setActive(false);
 		break;
 
 	case Lumatone::Menu::commandIDs::deleteOctaveBoard:

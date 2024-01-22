@@ -103,6 +103,8 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     settingsButton->setColour(TextButton::ColourIds::buttonColourId, Colour(0xff383b3d));
     settingsButton->setColour(TextButton::ColourIds::textColourOffId, Colour(0xffffffff));
 
+    connectionStateChanged(getConnectionState());
+
     /* We don't want a resize here
     /*
     //[/UserPreSize]
