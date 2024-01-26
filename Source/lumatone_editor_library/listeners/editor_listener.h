@@ -20,6 +20,8 @@ public:
 
     virtual void selectionChanged(juce::Array<MappedLumatoneKey> selection) {}
 
+    virtual void newFileLoaded(juce::File file) {}
+
     //virtual void tableChanged(LumatoneConfigTable::TableType type, const juce::uint8* table, int tableSize) {}
 
     virtual void contextChanged(LumatoneContext* context) {}

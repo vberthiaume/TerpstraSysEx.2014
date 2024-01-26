@@ -128,7 +128,7 @@ private:
 	juce::File                      currentFile;
 	std::shared_ptr<juce::RecentlyOpenedFilesList>	recentFiles;
 
-    std::shared_ptr<juce::PropertiesFile>   propertiesFile; // TODO move to state base?
+    std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
 //================================================================================
 public:
@@ -144,7 +144,7 @@ public:
         bool resetToCurrentFile();
         bool openRecentFile(int recentFileIndex);
 
-        virtual bool requestCompleteConfigFromDevice();
+        virtual bool requestCompleteConfigFromDevice() override;
 
         void addPalette(const LumatoneEditorColourPalette& newPalette);
         bool deletePaletteFile(juce::File pathToPalette);
@@ -157,6 +157,11 @@ public:
 
         juce::PropertiesFile* getPropertiesFile() const { return editorState.propertiesFile.get(); }
         bool savePropertiesFile() const;
+
+        // Sets a property in the juce::PropertyFile and saves it to file
+        void savePropertyBoolValue(const juce::Identifier& id, bool value);
+        void savePropertyIntValue(const  juce::Identifier& id, int value);
+        void savePropertyStringValue(const  juce::Identifier& id, juce::String value);
 
         void setHasChangesToSave(bool hasChanges) { editorState.setHasChangesToSave(hasChanges); }
         void setCalibrationMode(bool calibrationModeOn);

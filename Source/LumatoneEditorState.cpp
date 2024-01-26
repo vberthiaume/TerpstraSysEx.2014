@@ -14,6 +14,7 @@
 #include "./KeyEditComponent.h"
 
 #include "./lumatone_editor_library/device/lumatone_controller.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
 
 juce::Array<juce::Identifier> GetLumatoneEditorProperty()
 {
@@ -283,6 +284,8 @@ bool LumatoneEditorState::Controller::performAction(LumatoneAction *action, bool
 // Open a SysEx mapping from the file specified in currentFile
 bool LumatoneEditorState::Controller::resetToCurrentFile()
 {
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::newFileLoaded, editorState.getCurrentFile());
+
     if (editorState.getCurrentFile().getFullPathName().isEmpty())
     {
         // Replace with blank file
@@ -298,12 +301,6 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
 		juce::StringArray stringArray;
 		editorState.getCurrentFile().readLines(stringArray);
 		LumatoneLayout keyMapping(stringArray);
-
-		// ((MainContentComponent*)(mainWindow->getContentComponent()))->setData(keyMapping);
-
-        // TODO FIX
-		// Window title
-		// updateMainTitle();
 
 		// Send configuration to controller, if connected
         editorState.setCompleteConfig(keyMapping);
@@ -330,7 +327,7 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
 bool LumatoneEditorState::Controller::setCurrentFile(File fileToOpen)
 {
     editorState.currentFile = fileToOpen;
-    // editorState.setPropertyExcludingListener(this, LumatoneEditorProperty::CurrentFile, editorState.currentFile.getFullPathName(), nullptr);
+    editorState.state.setPropertyExcludingListener(&editorState, LumatoneEditorProperty::CurrentFile, editorState.currentFile.getFullPathName(), nullptr);
     return resetToCurrentFile();
 }
 
@@ -387,17 +384,35 @@ bool LumatoneEditorState::Controller::savePropertiesFile() const
     return editorState.propertiesFile->saveIfNeeded();
 }
 
+void LumatoneEditorState::Controller::savePropertyBoolValue(const juce::Identifier &id, bool value)
+{
+    editorState.propertiesFile->setValue(id.toString(), juce::var(value));
+    savePropertiesFile();
+}
+
+void LumatoneEditorState::Controller::savePropertyIntValue(const juce::Identifier &id, int value)
+{
+    editorState.propertiesFile->setValue(id.toString(), juce::var(value));
+    savePropertiesFile();
+}
+
+void LumatoneEditorState::Controller::savePropertyStringValue(const juce::Identifier &id, juce::String value)
+{
+    editorState.propertiesFile->setValue(id.toString(), juce::var(value));
+    savePropertiesFile();
+}
+
 void LumatoneEditorState::Controller::setCalibrationMode(bool calibrationModeOn)
 {
     editorState.inCalibrationMode = calibrationModeOn;
     editorState.getLumatoneController()->setCalibratePitchModWheel(calibrationModeOn);
-    // writeBoolProperty(LumatoneEditorProperty::InCalibrationMode, calibrationModeOn, nullptr);
     editorState.setStateProperty(LumatoneEditorProperty::InCalibrationMode, editorState.inCalibrationMode);
+    savePropertyBoolValue(LumatoneEditorProperty::InCalibrationMode, calibrationModeOn);
 }
 
 void LumatoneEditorState::Controller::setDeveloperMode(bool developerModeOn)
 {
     editorState.inDeveloperMode = developerModeOn;
-    // writeBoolProperty(LumatoneEditorProperty::DeveloperModeOn, inDeveloperMode, undoManager);
     editorState.setStateProperty(LumatoneEditorProperty::DeveloperModeOn, editorState.inDeveloperMode);
+    savePropertyBoolValue(LumatoneEditorProperty::DeveloperModeOn, developerModeOn);
 }

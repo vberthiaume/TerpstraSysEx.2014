@@ -10,8 +10,17 @@
 #pragma once
 #include <JuceHeader.h>
 
-#include "LumatoneMenu.h"
 #include "LumatoneEditorState.h"
+
+#include "./lumatone_editor_library/listeners/editor_listener.h"
+
+namespace Lumatone
+{
+    namespace Menu
+    {
+        class MainMenuModel;
+    }
+}
 
 //==============================================================================
 /*
@@ -21,6 +30,7 @@ our MainContentComponent class.
 class MainWindow : public juce::DocumentWindow
                  , public LumatoneEditorState
                  , private LumatoneEditorState::Controller
+                 , private LumatoneEditor::EditorListener
                  , private juce::Timer
 {
 public:
@@ -60,6 +70,9 @@ public:
     void timerCallback() override;
 
     void updateTitle();
+
+    // LumatoneEditor::EditorListener implementation
+    void newFileLoaded(juce::File file) override;
 
 private:
 
