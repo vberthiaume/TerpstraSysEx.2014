@@ -16,8 +16,6 @@ juce::Array<juce::Identifier> getLumatoneApplicationProperties()
 {
     juce::Array<juce::Identifier> properties;
     properties.add(LumatoneApplicationProperty::ConnectionStateId);
-    // properties.add(LumatoneApplicationProperty::DetectDeviceIfDisconnected);
-    // properties.add(LumatoneApplicationProperty::CheckConnectionIfInactive);
     properties.add(LumatoneApplicationProperty::LayoutContextIsSetId);
     return properties;
 }
@@ -190,6 +188,17 @@ void LumatoneApplicationState::handleStatePropertyChange(juce::ValueTree stateIn
     {
         LumatoneState::handleStatePropertyChange(stateIn, property);
     }
+}
+
+void LumatoneApplicationState::loadPropertiesFile(juce::PropertiesFile *properties)
+{
+    LumatoneState::loadPropertiesFile(properties);
+
+    setStateProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, properties->getBoolValue(LumatoneApplicationProperty::DetectDeviceIfDisconnected.toString(), true));
+    setStateProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, properties->getBoolValue(LumatoneApplicationProperty::CheckConnectionIfInactive.toString(), true));
+
+    setStateProperty(LumatoneApplicationProperty::LastInputDeviceId, properties->getValue(LumatoneApplicationProperty::LastInputDeviceId.toString(), juce::String()));
+    setStateProperty(LumatoneApplicationProperty::LastOutputDeviceId, properties->getValue(LumatoneApplicationProperty::LastOutputDeviceId.toString(), juce::String()));
 }
 
 LumatoneKeyContext LumatoneApplicationState::getKeyContext(int boardIndex, int keyIndex) const

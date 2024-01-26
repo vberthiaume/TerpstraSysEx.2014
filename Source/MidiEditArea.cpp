@@ -101,8 +101,7 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
     cbMidiInput->setTooltip (juce::translate("Receives answers to sent SysEx commands and the current configuration from controller "));
     cbMidiInput->setEditableText (false);
     cbMidiInput->setJustificationType (juce::Justification::centredLeft);
-    // cbMidiInput->setTextWhenNothingSelected (juce::translate("Select MIDI Input"));
-    cbMidiInput->setTextWhenNothingSelected ("pick something ya dummy");
+    cbMidiInput->setTextWhenNothingSelected (juce::translate("Select MIDI Input"));
     cbMidiInput->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
     cbMidiInput->onChange = [&]()
 	{
@@ -143,11 +142,11 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
     addAndMakeVisible (btnAutoConnect.get());
     btnAutoConnect->setTooltip (juce::translate("Toggle between automatic or manual connection to Lumatone"));
     btnAutoConnect->setButtonText (juce::translate("auto"));
+	btnAutoConnect->setClickingTogglesState(true);
 	btnAutoConnect->onClick = [&]()
 	{
-		toggleAutoConnection();
+		onAutoConnectionChanged();
 	};
-	btnAutoConnect->setClickingTogglesState(true);
 
 
 	// Set up styles
@@ -181,8 +180,11 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 
 	addEditorListener(this);
 	addStatusListener(this);
-    btnAutoConnect->setToggleState(isAutoConnectionEnabled(), sendNotificationSync);
 
+    // btnAutoConnect->setToggleState(isAutoConnectionEnabled(), sendNotificationSync);
+	bool enableAutoConnection = getBoolProperty(LumatoneEditorProperty::AutoConnectDevice, true);
+    btnAutoConnect->setToggleState(enableAutoConnection, dontSendNotification);
+	onAutoConnectionChanged();
 }
 
 MidiEditArea::~MidiEditArea()
@@ -378,14 +380,19 @@ void MidiEditArea::setConnectivity(bool isConnectedIn, juce::String connectionSt
 	resized();
 }
 
-void MidiEditArea::toggleAutoConnection()
+void MidiEditArea::onAutoConnectionChanged()
 {
-	cbMidiInput->setVisible(!btnAutoConnect->getToggleState());
-	cbMidiOutput->setVisible(!btnAutoConnect->getToggleState());
+	bool isAuto = btnAutoConnect->getToggleState();
+	bool isNotAuto = !isAuto;
 
-	setAutoConnectionEnabled(btnAutoConnect->getToggleState());
+	savePropertyBoolValue(LumatoneEditorProperty::AutoConnectDevice, isAuto);
 
-	if (btnAutoConnect->getToggleState())
+	cbMidiInput->setVisible(isNotAuto);
+	cbMidiOutput->setVisible(isNotAuto);
+
+	setAutoConnectionEnabled(isAuto);
+
+	if (isAuto)
 	{
 		lblConnectionState->setText(translate("Searching for Lumatone..."), dontSendNotification);
 	}

@@ -10,12 +10,6 @@
 
 #include "state_base.h"
 
-bool LumatoneStateBase::writeToPropertiesFile()
-{
-    // todo
-    return false;
-}
-
 void LumatoneStateBase::setStateProperty(const juce::Identifier &id, juce::var value)
 {
     state.setPropertyExcludingListener(this, id, value, nullptr);
@@ -37,21 +31,6 @@ juce::String LumatoneStateBase::getStringProperty(const juce::Identifier key, ju
 {
     auto prop = state.getProperty(key, juce::var(fallback));
     return prop.toString();
-}
-
-void LumatoneStateBase::writeBoolProperty(const juce::Identifier key, bool value, juce::UndoManager* undo)
-{
-    state.setPropertyExcludingListener(this, key, value, undo);
-}
-
-void LumatoneStateBase::writeIntProperty(const juce::Identifier key, int value, juce::UndoManager* undo )
-{
-    state.setPropertyExcludingListener(this, key, value, undo);
-}
-
-void LumatoneStateBase::writeStringProperty(const juce::Identifier key, juce::String value, juce::UndoManager* undo)
-{
-    state.setPropertyExcludingListener(this, key, value, undo);
 }
 
 void LumatoneStateBase::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier &property)

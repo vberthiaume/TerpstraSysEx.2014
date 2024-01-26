@@ -16,6 +16,20 @@
 #include "./lumatone_editor_library/device/lumatone_controller.h"
 #include "./lumatone_editor_library/listeners/editor_listener.h"
 
+
+static juce::File getDefaultUserDocumentsDirectory()
+{
+    return File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("Lumatone Editor");
+}
+static juce::File getDefaultUserMappingsDirectory()
+{
+    return getDefaultUserDocumentsDirectory().getChildFile("Mappings");
+}
+static juce::File getDefaultUserPalettesDirectory()
+{
+    return getDefaultUserDocumentsDirectory().getChildFile("Palettes");
+}
+
 juce::Array<juce::Identifier> GetLumatoneEditorProperty()
 {
     juce::Array<juce::Identifier> properties;
@@ -41,23 +55,7 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriv
     appFonts = std::make_shared<LumatoneEditorFontLibrary>();
     lookAndFeel = std::make_shared<LumatoneEditorLookAndFeel>(*appFonts, true);
 
-    juce::PropertiesFile::Options options;
-    options.applicationName = "LumatoneSetup";
-    options.filenameSuffix = "settings";
-    options.osxLibrarySubFolder = "Application Support";
-#if JUCE_LINUX
-    options.folderName = "~/.config/LumatoneSetup";
-#else
-    options.folderName = "LumatoneSetup";
-#endif
-
-    propertiesFile = std::make_shared<juce::PropertiesFile>(options);
-    DBG(propertiesFile->createXml("LumatoneEditorSettings")->toString());
-    jassert(propertiesFile != nullptr);
-
-    recentFiles = std::make_shared<juce::RecentlyOpenedFilesList>();
-    recentFiles->restoreFromString(propertiesFile->getValue(LumatoneEditorProperty::RecentFiles));
-    recentFiles->removeNonExistentFiles();
+    loadPropertiesFile(nullptr);
 
     colourPalettes = std::make_shared<juce::Array<LumatoneEditorColourPalette>>();
 }
@@ -227,6 +225,56 @@ void LumatoneEditorState::handleStatePropertyChange(juce::ValueTree stateIn, con
     }
 }
 
+void LumatoneEditorState::loadPropertiesFile(juce::PropertiesFile *propertiesIn)
+{
+    juce::PropertiesFile::Options options;
+    options.applicationName = "LumatoneSetup";
+    options.filenameSuffix = "settings";
+    options.osxLibrarySubFolder = "Application Support";
+#if JUCE_LINUX
+    options.folderName = "~/.config/LumatoneSetup";
+#else
+    options.folderName = "LumatoneSetup";
+#endif
+
+    propertiesFile = std::make_shared<juce::PropertiesFile>(options);
+    DBG(propertiesFile->createXml("LumatoneEditorSettings")->toString());
+    jassert(propertiesFile != nullptr);
+
+    recentFiles = std::make_shared<juce::RecentlyOpenedFilesList>();
+    recentFiles->restoreFromString(propertiesFile->getValue(LumatoneEditorProperty::RecentFiles));
+    recentFiles->removeNonExistentFiles();
+
+    LumatoneApplicationState::loadPropertiesFile(propertiesFile.get());
+
+    setStateProperty(LumatoneEditorProperty::UserDocumentsDirectory, propertiesFile->getValue(LumatoneEditorProperty::UserDocumentsDirectory.toString(), getDefaultUserDocumentsDirectory().getFullPathName()));
+    setStateProperty(LumatoneEditorProperty::UserMappingsDirectory, propertiesFile->getValue(LumatoneEditorProperty::UserMappingsDirectory.toString(), getDefaultUserMappingsDirectory().getFullPathName()));
+    setStateProperty(LumatoneEditorProperty::UserPalettesDirectory, propertiesFile->getValue(LumatoneEditorProperty::UserPalettesDirectory.toString(), getDefaultUserPalettesDirectory().getFullPathName()));
+    setStateProperty(LumatoneEditorProperty::RecentFiles, propertiesFile->getValue(LumatoneEditorProperty::RecentFiles.toString(), juce::String()));
+    setStateProperty(LumatoneEditorProperty::MainWindowState, propertiesFile->getValue(LumatoneEditorProperty::MainWindowState.toString(), juce::String()));
+    
+    setStateProperty(LumatoneEditorProperty::AutoConnectDevice, propertiesFile->getBoolValue(LumatoneEditorProperty::AutoConnectDevice.toString(), true));
+
+    setStateProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive.toString(), true));
+    setStateProperty(LumatoneEditorProperty::SingleNoteNoteSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteNoteSetActive.toString(), true));
+    setStateProperty(LumatoneEditorProperty::SingleNoteChannelSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteChannelSetActive.toString(), true));
+    setStateProperty(LumatoneEditorProperty::SingleNoteColourSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteColourSetActive.toString(), true));
+    setStateProperty(LumatoneEditorProperty::SingleNoteCCFaderIsDefault, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteCCFaderIsDefault.toString(), false));
+    setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncNoteActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteAutoIncNoteActive.toString(), true));
+    setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteAutoIncChannelActive.toString(), true));
+    setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes, propertiesFile->getIntValue(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes.toString(), 127));
+
+    setStateProperty(LumatoneEditorProperty::IsomorphicMassAssign, propertiesFile->getBoolValue(LumatoneEditorProperty::IsomorphicMassAssign.toString(), false));
+
+    setStateProperty(LumatoneEditorProperty::LastSettingsPanel, propertiesFile->getIntValue(LumatoneEditorProperty::LastSettingsPanel.toString(), 1));
+    setStateProperty(LumatoneEditorProperty::LastColourWindowTab, propertiesFile->getIntValue(LumatoneEditorProperty::LastColourWindowTab.toString(), 1));
+    setStateProperty(LumatoneEditorProperty::LastFirmwareBinPath, propertiesFile->getValue(LumatoneEditorProperty::LastFirmwareBinPath.toString()
+        , juce::File::getSpecialLocation(juce::File::SpecialLocationType::userHomeDirectory).getFullPathName()
+        ));
+
+    setStateProperty(LumatoneEditorProperty::DeveloperModeOn, propertiesFile->getBoolValue(LumatoneEditorProperty::DeveloperModeOn, false));
+}
+
 void LumatoneEditorState::Controller::setColourPalettes(const juce::Array<LumatoneEditorColourPalette> &palettesIn)
 {
     *editorState.colourPalettes = palettesIn;
@@ -327,7 +375,7 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
 bool LumatoneEditorState::Controller::setCurrentFile(File fileToOpen)
 {
     editorState.currentFile = fileToOpen;
-    editorState.state.setPropertyExcludingListener(&editorState, LumatoneEditorProperty::CurrentFile, editorState.currentFile.getFullPathName(), nullptr);
+    editorState.setStateProperty(LumatoneEditorProperty::CurrentFile, editorState.currentFile.getFullPathName());
     return resetToCurrentFile();
 }
 
@@ -388,18 +436,21 @@ void LumatoneEditorState::Controller::savePropertyBoolValue(const juce::Identifi
 {
     editorState.propertiesFile->setValue(id.toString(), juce::var(value));
     savePropertiesFile();
+    editorState.setStateProperty(id, juce::var(value));
 }
 
 void LumatoneEditorState::Controller::savePropertyIntValue(const juce::Identifier &id, int value)
 {
     editorState.propertiesFile->setValue(id.toString(), juce::var(value));
     savePropertiesFile();
+    editorState.setStateProperty(id, juce::var(value));
 }
 
 void LumatoneEditorState::Controller::savePropertyStringValue(const juce::Identifier &id, juce::String value)
 {
     editorState.propertiesFile->setValue(id.toString(), juce::var(value));
     savePropertiesFile();
+    editorState.setStateProperty(id, juce::var(value));
 }
 
 void LumatoneEditorState::Controller::setCalibrationMode(bool calibrationModeOn)

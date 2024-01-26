@@ -119,6 +119,8 @@ protected:
 
     virtual void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    virtual void loadPropertiesFile(juce::PropertiesFile* properties) override;
+
 public:
     static juce::Array<juce::Identifier> getLumatoneStateProperties();
 

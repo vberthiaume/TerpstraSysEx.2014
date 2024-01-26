@@ -112,6 +112,8 @@ protected:
 
     virtual void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    virtual void loadPropertiesFile(juce::PropertiesFile* properties) override;
+
 private:
     ConnectionState connectionState = ConnectionState::DISCONNECTED;
 

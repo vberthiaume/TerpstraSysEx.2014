@@ -34,10 +34,8 @@
 //==============================================================================
 SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     : LumatoneEditorState("SingleNoteAssign", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
 {
-    //[Constructor_pre] You can add your own custom stuff here..
-    //[/Constructor_pre]
-
     setName ("SingleNoteAssign");
     noteAutoIncrButton.reset (new juce::ToggleButton ("noteAutoIncrButton"));
     addAndMakeVisible (noteAutoIncrButton.get());
@@ -175,25 +173,19 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
                              FlexBox::JustifyContent::flexStart));
     }
 
-    //[/UserPreSize]
-
-    setSize (320, 400);
-
-
-    //[Constructor] You can add your own custom stuff here..
-    setNoteToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteNoteSetActive).getIntValue(), juce::NotificationType::sendNotification);
-    setChannelToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteChannelSetActive).getIntValue(), juce::NotificationType::sendNotification);
-    setColourToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteColourSetActive).getIntValue(), juce::NotificationType::sendNotification);
-    keyTypeToggleButton->setToggleState(getProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive).getIntValue(), juce::NotificationType::sendNotification);
+    setNoteToggleButton->setToggleState(getBoolProperty(LumatoneEditorProperty::SingleNoteNoteSetActive, true), juce::NotificationType::sendNotification);
+    setChannelToggleButton->setToggleState(getBoolProperty(LumatoneEditorProperty::SingleNoteChannelSetActive, true), juce::NotificationType::sendNotification);
+    setColourToggleButton->setToggleState(getBoolProperty(LumatoneEditorProperty::SingleNoteColourSetActive, true), juce::NotificationType::sendNotification);
+    keyTypeToggleButton->setToggleState(getBoolProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, true), juce::NotificationType::sendNotification);
+    noteAutoIncrButton->setToggleState(getBoolProperty(LumatoneEditorProperty::SingleNoteAutoIncNoteActive, true), juce::NotificationType::sendNotification);
+    channelAutoIncrButton->setToggleState(getBoolProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelActive, true), juce::NotificationType::sendNotification);
+    channelAutoIncrNoteInput->setValue(getIntProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes, true), juce::NotificationType::sendNotification);
     keyTypeCombo->setSelectedId(LumatoneKeyType::noteOnNoteOff);
-    //[/Constructor]
 }
 
 SingleNoteAssign::~SingleNoteAssign()
 {
-    //[Destructor_pre]. You can add your own custom destruction code here..
 	colourSubwindow = nullptr;
-    //[/Destructor_pre]
 
     noteAutoIncrButton = nullptr;
     channelAutoIncrButton = nullptr;
@@ -217,12 +209,6 @@ SingleNoteAssign::~SingleNoteAssign()
 //==============================================================================
 void SingleNoteAssign::paint (juce::Graphics& g)
 {
-    //[UserPrePaint] Add your own custom painting code here..
-    //[/UserPrePaint]
-
-    g.fillAll (juce::Colour (0xffbad0de));
-
-    //[UserPaint] Add your own custom painting code here..
     g.fillAll(Colour(0xff212626));
 
     Rectangle<float> bottomPart = getLocalBounds().toFloat().withTrimmedTop(instructionsAreaBounds.getBottom());
@@ -428,6 +414,8 @@ void SingleNoteAssign::buttonClicked (juce::Button* buttonThatWasClicked)
     if (buttonThatWasClicked == noteAutoIncrButton.get())
     {
         //[UserButtonCode_noteAutoIncrButton] -- add your button handler code here..
+        bool fieldActive = noteAutoIncrButton->getToggleState();
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteAutoIncNoteActive, fieldActive);
         //[/UserButtonCode_noteAutoIncrButton]
     }
     else if (buttonThatWasClicked == channelAutoIncrButton.get())
@@ -435,6 +423,7 @@ void SingleNoteAssign::buttonClicked (juce::Button* buttonThatWasClicked)
         //[UserButtonCode_channelAutoIncrButton] -- add your button handler code here..
         bool fieldActive = channelAutoIncrButton->getToggleState();
         channelAutoIncrNoteInput->setEnabled(fieldActive);
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteAutoIncChannelActive, fieldActive);
         //[/UserButtonCode_channelAutoIncrButton]
     }
     else if (buttonThatWasClicked == setNoteToggleButton.get())
@@ -443,6 +432,7 @@ void SingleNoteAssign::buttonClicked (juce::Button* buttonThatWasClicked)
 		bool fieldActive = setNoteToggleButton->getToggleState();
 		noteInput->setEnabled(fieldActive);
 		noteAutoIncrButton->setEnabled(fieldActive);
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteNoteSetActive, fieldActive);
         //[/UserButtonCode_setNoteToggleButton]
     }
     else if (buttonThatWasClicked == setChannelToggleButton.get())
@@ -452,6 +442,7 @@ void SingleNoteAssign::buttonClicked (juce::Button* buttonThatWasClicked)
 		channelInput->setEnabled(fieldActive);
 		channelAutoIncrButton->setEnabled(fieldActive);
 		channelAutoIncrNoteInput->setEnabled(fieldActive);
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteChannelSetActive, fieldActive);
         //[/UserButtonCode_setChannelToggleButton]
     }
     else if (buttonThatWasClicked == setColourToggleButton.get())
@@ -460,6 +451,7 @@ void SingleNoteAssign::buttonClicked (juce::Button* buttonThatWasClicked)
 		bool fieldActive = setColourToggleButton->getToggleState();
 		colourSubwindow->setEnabled(fieldActive);
         colourTextEditor->setEnabled(fieldActive);
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteColourSetActive, fieldActive);
         //[/UserButtonCode_setColourToggleButton]
     }
     else if (buttonThatWasClicked == keyTypeToggleButton.get())
@@ -467,12 +459,15 @@ void SingleNoteAssign::buttonClicked (juce::Button* buttonThatWasClicked)
         //[UserButtonCode_keyTypeToggleButton] -- add your button handler code here..
 		bool fieldActive = keyTypeToggleButton->getToggleState();
 		keyTypeCombo->setEnabled(fieldActive);
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, fieldActive);
         //[/UserButtonCode_keyTypeToggleButton]
     }
 
     //[UserbuttonClicked_Post]
     else if (buttonThatWasClicked == ccFaderIsDefault.get())
     {
+		bool fieldActive = ccFaderIsDefault->getToggleState();
+        savePropertyBoolValue(LumatoneEditorProperty::SingleNoteCCFaderIsDefault, fieldActive);
     }
     //[/UserbuttonClicked_Post]
 }
@@ -525,6 +520,8 @@ void SingleNoteAssign::sliderValueChanged (juce::Slider* sliderThatWasMoved)
     else if (sliderThatWasMoved == channelAutoIncrNoteInput.get())
     {
         //[UserSliderCode_channelAutoIncrNoteInput] -- add your slider handling code here..
+        int numNotes = channelAutoIncrNoteInput->getValue();
+        savePropertyIntValue(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes, numNotes);
         //[/UserSliderCode_channelAutoIncrNoteInput]
     }
 
@@ -589,13 +586,14 @@ LumatoneAction* SingleNoteAssign::createEditAction(int setSelection, int keySele
 	return editAction;
 }
 
-void SingleNoteAssign::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
-{
-	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteNoteSetActive, setNoteToggleButton->getToggleState());
-	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteChannelSetActive, setChannelToggleButton->getToggleState());
-	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteColourSetActive, setColourToggleButton->getToggleState());
-	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, keyTypeToggleButton->getToggleState());
-}
+// void SingleNoteAssign::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
+// {
+// 	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteNoteSetActive, setNoteToggleButton->getToggleState());
+// 	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteChannelSetActive, setChannelToggleButton->getToggleState());
+// 	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteColourSetActive, setColourToggleButton->getToggleState());
+// 	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, keyTypeToggleButton->getToggleState());
+// 	propertiesFile->setValue(LumatoneEditorProperty::SingleNoteAutoIncChannelActive, channelAutoIncrButton->getToggleState());
+// }
 
 void SingleNoteAssign::redrawCCFlipBtn()
 {

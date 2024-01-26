@@ -38,7 +38,7 @@ DeviceActivityMonitor::~DeviceActivityMonitor()
 void DeviceActivityMonitor::setDetectDeviceIfDisconnected(bool doDetection)
 {
     detectDevicesIfDisconnected = doDetection;
-    writeBoolProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, detectDevicesIfDisconnected);
+    setStateProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, detectDevicesIfDisconnected);
 
     if (!detectDevicesIfDisconnected)
     {
@@ -54,7 +54,7 @@ void DeviceActivityMonitor::setDetectDeviceIfDisconnected(bool doDetection)
 void DeviceActivityMonitor::setCheckForInactivity(bool monitorActivity)
 {
     checkConnectionOnInactivity = monitorActivity;
-    writeBoolProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, checkConnectionOnInactivity);
+    setStateProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, checkConnectionOnInactivity);
 
     if (checkConnectionOnInactivity && isConnectionEstablished())
     {

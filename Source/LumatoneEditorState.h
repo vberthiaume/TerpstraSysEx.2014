@@ -52,11 +52,16 @@ namespace LumatoneEditorProperty
     static const juce::Identifier SingleNoteChannelSetActive = juce::Identifier("SingleNoteChannelSetActive");
     static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
     static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
+    static const juce::Identifier SingleNoteAutoIncNoteActive = juce::Identifier("SingleNoteAutoIncNoteActive");
+    static const juce::Identifier SingleNoteAutoIncChannelActive = juce::Identifier("SingleNoteAutoIncChannelActive");
+    static const juce::Identifier SingleNoteAutoIncChannelAfterNumNotes = juce::Identifier("SingleNoteAutoIncChannelAfterNumNotes");
+    static const juce::Identifier SingleNoteCCFaderIsDefault = juce::Identifier("SingleNoteCCFaderIsDefault");
 
     static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
 
     static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
     static const juce::Identifier LastColourWindowTab = juce::Identifier("LastColourWindowTab");
+    static const juce::Identifier LastFirmwareBinPath = juce::Identifier("LastFirmwareBinPath");
 }
 
 enum class EditorMode
@@ -108,6 +113,8 @@ public:
 protected:
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
+
+    void loadPropertiesFile(juce::PropertiesFile* properties);
 
     void setHasChangesToSave(bool hasChangesToSave);
 

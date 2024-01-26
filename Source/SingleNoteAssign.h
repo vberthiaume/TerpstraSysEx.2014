@@ -41,13 +41,14 @@ class LumatoneAction;
     Describe your class and how it works here!
                                                                     //[/Comments]
 */
-class SingleNoteAssign  : public juce::Component,
-                          public LumatoneEditorState,
-                          public ColourSelectionListener,
-                          public TextEditor::Listener,
-                          public juce::Button::Listener,
-                          public juce::ComboBox::Listener,
-                          public juce::Slider::Listener
+class SingleNoteAssign  : public juce::Component
+                        , public ColourSelectionListener
+                        , private LumatoneEditorState
+                        , private LumatoneEditorState::Controller
+                        , private TextEditor::Listener
+                        , private juce::Button::Listener
+                        , private juce::ComboBox::Listener
+                        , private juce::Slider::Listener
 {
 public:
     //==============================================================================
@@ -55,12 +56,9 @@ public:
     ~SingleNoteAssign() override;
 
     //==============================================================================
-    //[UserMethods]     -- You can add your own custom methods in this section.
 	LumatoneAction* createEditAction(int setSelection, int keySelection);
-	//void onSetData(LumatoneLayout& newData);
 
-	//void restoreStateFromPropertiesFile(juce::PropertiesFile* propertiesFile);
-	void saveStateToPropertiesFile(juce::PropertiesFile* propertiesFile);
+	// void saveStateToPropertiesFile(juce::PropertiesFile* propertiesFile);
 
     ColourViewComponent* getColourViewComponent() { return colourSubwindow.get(); }
     ColourTextEditor* getColourTextEditor() { return colourTextEditor.get(); }
@@ -68,18 +66,15 @@ public:
     void colourChangedCallback(ColourSelectionBroadcaster* source, Colour newColour) override;
 
     void redrawCCFlipBtn();
-    //[/UserMethods]
 
+    //==============================================================================
     void paint (juce::Graphics& g) override;
     void resized() override;
     void buttonClicked (juce::Button* buttonThatWasClicked) override;
     void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
     void sliderValueChanged (juce::Slider* sliderThatWasMoved) override;
 
-
-
 private:
-    //[UserVariables]   -- You can add your own custom variables in this section.
     //==============================================================================
     // Style Helpers
     int roundedCornerSize;
