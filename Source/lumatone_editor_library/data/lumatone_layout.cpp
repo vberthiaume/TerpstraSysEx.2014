@@ -213,6 +213,10 @@ LumatoneLayout::LumatoneLayout(int numBoardsIn, int octaveBoardSizeIn, bool init
     , octaveBoardSize(octaveBoardSizeIn)
 {
     state = juce::ValueTree(LumatoneConfigProperty::State);
+
+    for (int i = 0; i < numBoards; i++)
+        boards[i].board_idx = i;
+
     clearAll(initWithNotes);
 }
 

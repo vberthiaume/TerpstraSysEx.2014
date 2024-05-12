@@ -30,9 +30,14 @@ namespace LumatoneStateProperty
 
     static const juce::Identifier MappingData = juce::Identifier("MappingData");
 
+    static const juce::Identifier LightsOnAfterKeystroke = juce::Identifier("LightsOnAfterKeystroke");
+    static const juce::Identifier AftertouchEnabled = juce::Identifier("AftertouchEnabled");
     static const juce::Identifier InvertExpression = juce::Identifier("InvertExpression");
     static const juce::Identifier InvertSustain = juce::Identifier("InvertSustain");
     static const juce::Identifier ExpressionSensitivity = juce::Identifier("ExpressionSensitivity");
+
+    static const juce::Identifier InactiveMacroButtonColour = juce::Identifier("InactiveMacroButtonColour");
+    static const juce::Identifier ActiveMacroButtonColour = juce::Identifier("ActiveMacroButtonColour");
 };
 
 class LumatoneState : public LumatoneStateBase
@@ -41,6 +46,7 @@ public:
 
     LumatoneState(juce::String nameIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
     LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy);
+    LumatoneState(const LumatoneState& stateIn);
 
     virtual ~LumatoneState() override;
 
@@ -82,6 +88,9 @@ public:
 
     virtual void setConfigTable(LumatoneConfigTable::TableType type, const LumatoneConfigTable& table);
 
+    virtual void setInactiveMacroButtonColour(juce::Colour buttonColour);
+    virtual void setActiveMacroButtonColour(juce::Colour buttonColour);
+
 public:
     // Layout Helpers
     int getNumBoards() const { return mappingData->getNumBoards(); }
@@ -92,6 +101,9 @@ public:
     bool getInvertExpression() const { return mappingData->getInvertExpression(); }
     bool getInvertSustain() const { return mappingData->getInvertSustain(); }
     int getExpressionSensitivity() const { return mappingData->getExpressionSensitivity(); }
+
+    juce::Colour getInactiveMacroButtonColour() const { return inactiveMacroButtonColour; }
+    juce::Colour getActiveMacroButtonColour() const { return activeMacroButtonColour; }
 
 protected:
     void setConnectedSerialNumber(juce::String serialNumberIn);
@@ -107,6 +119,8 @@ protected:
 
     virtual void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    virtual void loadPropertiesFile(juce::PropertiesFile* properties) override;
+
 public:
     static juce::Array<juce::Identifier> getLumatoneStateProperties();
 
@@ -119,15 +133,17 @@ protected:
     std::shared_ptr<LumatoneLayout> mappingData;
     std::shared_ptr<LumatoneOutputMap> midiKeyMap;
 
-
 private:
     juce::String connectedSerialNumber = juce::String();
 
     LumatoneFirmware::ReleaseVersion     determinedVersion;
     LumatoneFirmware::Version             firmwareVersion;
     LumatoneFirmware::Version             incomingVersion;
+
+    juce::Colour    inactiveMacroButtonColour;
+    juce::Colour    activeMacroButtonColour;
 };
 
 
 
-#endif LUMATONE_STATE_H
+#endif // LUMATONE_STATE_H

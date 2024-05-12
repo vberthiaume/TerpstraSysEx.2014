@@ -40,6 +40,7 @@
 //==============================================================================
 NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
     : LumatoneEditorState("NoteEditArea", stateIn)
+	, LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
 	, currentSingleKeySelection(-1)
 {
     //[Constructor_pre] You can add your own custom stuff here..
@@ -302,7 +303,7 @@ void NoteEditArea::setControlsTopLeftPosition(int controlsAreaX, int controlsAre
 
 void NoteEditArea::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
-	dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->saveStateToPropertiesFile(propertiesFile);
+	// dynamic_cast<SingleNoteAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::SingleNoteAssignMode))->saveStateToPropertiesFile(propertiesFile);
 
 	if (showIsomorphicMassAssign)
 		dynamic_cast<IsomorphicMassAssign*>(editFunctionsTab->getTabContentComponent(noteEditMode::IsomorphicMassAssignMode))->saveStateToPropertiesFile(propertiesFile);
@@ -413,17 +414,17 @@ Colour NoteEditArea::getSelectedColour()
 	return Colour();
 }
 
-void NoteEditArea::completeMappingLoaded(LumatoneLayout mappingData)
+void NoteEditArea::completeMappingLoaded(const LumatoneLayout& mappingData)
 {
 	refreshKeyFields();
 }
 
-void NoteEditArea::boardChanged(LumatoneBoard boardData)
+void NoteEditArea::boardChanged(const LumatoneBoard& boardData)
 {
 	refreshKeyFields();
 }
 
-void NoteEditArea::keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey)
+void NoteEditArea::keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey)
 {
 	refreshKeyFields();
 }

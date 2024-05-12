@@ -15,12 +15,13 @@
 #include "../listeners/status_listener.h"
 
 
-DeviceActivityMonitor::DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, LumatoneApplicationState stateIn)
+DeviceActivityMonitor::DeviceActivityMonitor(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver* midiDriverIn)
     :   LumatoneApplicationState("DeviceActivityMonitor", stateIn)
+    ,   LumatoneApplicationState::DeviceController(static_cast<LumatoneApplicationState&>(*this))
     ,   midiDriver(midiDriverIn)
 {
-    // detectDevicesIfDisconnected = getBoolProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, true);
-    // checkConnectionOnInactivity = getBoolProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, true);
+    detectDevicesIfDisconnected = getBoolProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, true);
+    checkConnectionOnInactivity = getBoolProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, true);
     responseTimeoutMs = getIntProperty(LumatoneApplicationProperty::DetectDevicesTimeout, detectRoutineTimeoutMs);
 
     midiDriver->addDriverListener(this);
@@ -37,7 +38,7 @@ DeviceActivityMonitor::~DeviceActivityMonitor()
 void DeviceActivityMonitor::setDetectDeviceIfDisconnected(bool doDetection)
 {
     detectDevicesIfDisconnected = doDetection;
-    // writeBoolProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, detectDevicesIfDisconnected);
+    setStateProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, detectDevicesIfDisconnected);
 
     if (!detectDevicesIfDisconnected)
     {
@@ -53,7 +54,7 @@ void DeviceActivityMonitor::setDetectDeviceIfDisconnected(bool doDetection)
 void DeviceActivityMonitor::setCheckForInactivity(bool monitorActivity)
 {
     checkConnectionOnInactivity = monitorActivity;
-    // writeBoolProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, checkConnectionOnInactivity);
+    setStateProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, checkConnectionOnInactivity);
 
     if (checkConnectionOnInactivity && isConnectionEstablished())
     {
@@ -265,8 +266,6 @@ void DeviceActivityMonitor::checkDetectionStatus()
     if (isConnectionEstablished())
     {
         deviceDetectInProgress = false;
-        statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::ONLINE);
-
         outputPingIds.clear();
 
         if (checkConnectionOnInactivity)
@@ -286,7 +285,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
             waitingForResponse = false;
             startTimer(detectRoutineTimeoutMs);
 
-            statusListeners->call(&LumatoneEditor::StatusListener::connectionFailed);
+            getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionFailed);
         }
         else
         {
@@ -340,7 +339,7 @@ void DeviceActivityMonitor::checkDetectionStatus()
                 waitingForResponse = false;
                 startTimer(detectRoutineTimeoutMs);
 
-                statusListeners->call(&LumatoneEditor::StatusListener::connectionFailed);
+                getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionFailed);
             }
         }
 
@@ -570,7 +569,7 @@ void DeviceActivityMonitor::onDisconnection()
 
     waitingForResponse = false;
 
-    statusListeners->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::DISCONNECTED);
+    getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionStateChanged, ConnectionState::DISCONNECTED);
 
     if (detectDevicesIfDisconnected)
     {
@@ -618,6 +617,8 @@ void DeviceActivityMonitor::establishConnection(int inputIndex, int outputIndex)
 
         DBG("\tPlugin host mode.");
     }
+
+    setConnectionState(ConnectionState::ONLINE);
 
     startTimer(threadDelayMs);
 }

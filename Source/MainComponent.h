@@ -47,10 +47,10 @@ public:
 	CurvesArea* getCurvesArea() { return curvesArea.get(); }
 
 	// Board edit operations
-	juce::UndoableAction* createDeleteCurrentSectionAction();
+	LumatoneAction* createDeleteCurrentSectionAction();
 	bool copyCurrentSubBoardData();
-	juce::UndoableAction* createPasteCurrentSectionAction();
-    juce::UndoableAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
+	LumatoneAction* createPasteCurrentSectionAction();
+    LumatoneAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
     bool canPasteCopiedSubBoard() const;
 
 	// Implementation of ChangeListener

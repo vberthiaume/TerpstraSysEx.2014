@@ -31,9 +31,6 @@ namespace LumatoneEditorProperty
     static const juce::Identifier InCalibrationMode = juce::Identifier("InCalibrationMode");
     static const juce::Identifier FirmwareUpdatePerformed = juce::Identifier("FirmwareUpdatePerformed");
 
-    static const juce::Identifier InactiveMacroButtonColour = juce::Identifier("InactiveMacroButtonColour");
-    static const juce::Identifier ActiveMacroButtonColour = juce::Identifier("ActiveMacroButtonColour");
-
     static const juce::Identifier ColourPalettes = juce::Identifier("ColourPalettes");
     
     static const juce::Identifier CurrentFile = juce::Identifier("CurrentFile");
@@ -55,11 +52,16 @@ namespace LumatoneEditorProperty
     static const juce::Identifier SingleNoteChannelSetActive = juce::Identifier("SingleNoteChannelSetActive");
     static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
     static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
+    static const juce::Identifier SingleNoteAutoIncNoteActive = juce::Identifier("SingleNoteAutoIncNoteActive");
+    static const juce::Identifier SingleNoteAutoIncChannelActive = juce::Identifier("SingleNoteAutoIncChannelActive");
+    static const juce::Identifier SingleNoteAutoIncChannelAfterNumNotes = juce::Identifier("SingleNoteAutoIncChannelAfterNumNotes");
+    static const juce::Identifier SingleNoteCCFaderIsDefault = juce::Identifier("SingleNoteCCFaderIsDefault");
 
     static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
 
     static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
     static const juce::Identifier LastColourWindowTab = juce::Identifier("LastColourWindowTab");
+    static const juce::Identifier LastFirmwareBinPath = juce::Identifier("LastFirmwareBinPath");
 }
 
 enum class EditorMode
@@ -70,15 +72,12 @@ enum class EditorMode
 
 static juce::Array<juce::Identifier> GetLumatoneEditorProperties();
 
-class LumatoneEditorStateController;
-
 class LumatoneEditorState : public LumatoneApplicationState
 {
 public:
-    LumatoneEditorState(juce::String name, const LumatoneEditorState& stateIn);
-protected:
     LumatoneEditorState(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn);
-public:
+    LumatoneEditorState(juce::String name, const LumatoneEditorState& stateIn);
+
     ~LumatoneEditorState() override;
 
     const juce::String getApplicationName() const { return ProjectInfo::projectName; }
@@ -107,6 +106,8 @@ public:
     juce::File getUserMappingsDirectory() const;
     juce::File getUserPalettesDirectory() const;
 
+    juce::File getLastOpenedMappingsDirectory() const;
+
 
 public:
     bool doSendChangesToDevice() const override;
@@ -115,10 +116,9 @@ protected:
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
-    virtual void setHasChangesToSave(bool hasChangesToSave);
-    virtual void setCalibrationMode(bool calibrationModeOn);
-    virtual void setDeveloperMode(bool developerModeOn);
-    virtual void setEditMode(EditorMode editMode);
+    void loadPropertiesFile(juce::PropertiesFile* properties);
+
+    void setHasChangesToSave(bool hasChangesToSave);
 
 protected:
     bool hasChangesToSave = false;
@@ -128,7 +128,7 @@ protected:
 	bool firmwareUpdateWasPerformed = false;
 
     EditorMode editorMode = EditorMode::OFFLINE;
-
+    
 private:
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
 	std::shared_ptr<LumatoneEditorLookAndFeel>      lookAndFeel;
@@ -139,37 +139,51 @@ private:
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
-    friend class LumatoneEditorStateController;
-};
-
-class LumatoneEditorStateController : public LumatoneEditorState
-{
+//================================================================================
 public:
-    LumatoneEditorStateController(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn)
-        : LumatoneEditorState(name, driverIn, undoManagerIn) {}
-    LumatoneEditorStateController(juce::String name, const LumatoneEditorState& stateIn)
-        : LumatoneEditorState(name, stateIn) {}
+    class Controller : protected LumatoneApplicationState::Controller
+    {
+    public:
+        Controller(LumatoneEditorState& stateIn)
+            : LumatoneApplicationState::Controller(stateIn)
+            , editorState(stateIn) {}
 
-    const juce::Array<LumatoneEditorColourPalette>& getColourPalettes() override;
+        bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true) override;
 
-    bool resetToCurrentFile();
-    bool openRecentFile(int recentFileIndex);
+        bool resetToCurrentFile();
+        bool openRecentFile(int recentFileIndex);
 
-    void addPalette(const LumatoneEditorColourPalette& newPalette);
-    bool deletePaletteFile(juce::File pathToPalette);
+        virtual bool requestCompleteConfigFromDevice() override;
 
-    void setColourPalettes(const juce::Array<LumatoneEditorColourPalette>& palettesIn);
-    void loadColourPalettesFromFile();
+        void addPalette(const LumatoneEditorColourPalette& newPalette);
+        bool deletePaletteFile(juce::File pathToPalette);
 
-    bool setCurrentFile(juce::File fileToOpen);
-    bool saveMappingToFile(juce::File fileToSave);
+        void setColourPalettes(const juce::Array<LumatoneEditorColourPalette>& palettesIn);
+        void loadColourPalettesFromFile();
 
-    juce::PropertiesFile* getPropertiesFile() const { return propertiesFile.get(); }
-    bool savePropertiesFile() const;
+        bool setCurrentFile(juce::File fileToOpen);
+        bool saveMappingToFile(juce::File fileToSave);
 
-    void setDeveloperMode(bool developerModeOn) override { LumatoneEditorState::setDeveloperMode(developerModeOn); }
-    void setEditMode(EditorMode editMode) override { LumatoneEditorState::setEditMode(editMode); }
+        juce::PropertiesFile* getPropertiesFile() const { return editorState.propertiesFile.get(); }
+        bool savePropertiesFile() const;
+
+        // Sets a property in the juce::PropertyFile and saves it to file
+        void savePropertyBoolValue(const juce::Identifier& id, bool value);
+        void savePropertyIntValue(const  juce::Identifier& id, int value);
+        void savePropertyStringValue(const  juce::Identifier& id, juce::String value);
+
+        void setHasChangesToSave(bool hasChanges) { editorState.setHasChangesToSave(hasChanges); }
+        void setCalibrationMode(bool calibrationModeOn);
+        void setDeveloperMode(bool developerModeOn);
+        void setEditMode(EditorMode editMode);
+
+    private:
+        LumatoneEditorState& editorState;
+    };
+    
+private:
+    friend class LumatoneEditorStateController; 
 };
 
 
-#endif LUMATONE_EDITOR_STATE_H
+#endif // LUMATONE_EDITOR_STATE_H

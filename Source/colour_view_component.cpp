@@ -241,7 +241,7 @@ void ColourViewComponent::paintButton(juce::Graphics& g, bool shouldDrawButtonAs
     g.drawFittedText(getButtonText(), getLocalBounds(), juce::Justification::centred, 1);
 }
 
-void ColourViewComponent::setColour(juce::String colourAsString)
+void ColourViewComponent::setColour(juce::String colourAsString, bool sendChange)
 {
 	//jassert(colourCombo != nullptr);
 
@@ -254,7 +254,8 @@ void ColourViewComponent::setColour(juce::String colourAsString)
     repaint();
 
     // Notify parent that value has changed and can be sent to MIDI controller
-    sendChangeMessage();
+    if (sendChange)
+        sendChangeMessage();
 }
 
 juce::String ColourViewComponent::getColourAsString()

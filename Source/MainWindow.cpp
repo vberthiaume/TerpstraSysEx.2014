@@ -10,6 +10,8 @@
 #include "MainWindow.h"
 #include "MainComponent.h"
 
+#include "LumatoneMenu.h"
+
 #include "LumatoneEditorLookAndFeel.h"
 #include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
@@ -17,7 +19,8 @@
 
 MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdManager)
     : juce::DocumentWindow("Lumatone Editor", juce::Colours::black, juce::DocumentWindow::minimiseButton + juce::DocumentWindow::closeButton)
-    , LumatoneEditorStateController("MainWindow", stateIn)
+    , LumatoneEditorState("MainWindow", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , commandManager(cmdManager)
 {
     setContentOwned(new MainContentComponent(*this, commandManager), true);
@@ -51,12 +54,15 @@ MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationComm
     addKeyListener(commandManager->getKeyMappings());
     updateBounds();
 
+    addEditorListener(this);
+
     startTimer(2000);
 #endif
 }
 
 MainWindow::~MainWindow()
 {
+    removeEditorListener(this);
     removeKeyListener(commandManager->getKeyMappings());
 
 #if JUCE_MAC
@@ -176,4 +182,32 @@ void MainWindow::timerCallback()
     verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f);
 
     updateBounds();
+}
+
+void MainWindow::updateTitle()
+{
+    juce::String windowTitle("Lumatone Editor");
+	
+	if (getCurrentFile().getFileName().isNotEmpty())
+		windowTitle << " - " << getCurrentFile().getFileName();
+        
+	if (getHasChangesToSave())
+		windowTitle << "*";
+
+	setName(windowTitle);
+}
+
+void MainWindow::newFileLoaded(juce::File file)
+{
+    updateTitle();
+}
+
+void MainWindow::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
+{
+    LumatoneEditorState::handleStatePropertyChange(stateIn, property);
+
+    if (property == LumatoneEditorProperty::HasChangesToSave)
+    {
+        updateTitle();
+    }
 }

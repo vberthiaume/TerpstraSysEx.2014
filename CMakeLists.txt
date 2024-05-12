@@ -34,11 +34,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64")
     set(LibraryInclude "${LibraryPath}/include")
     set(LibraryCode "${LibraryInclude}/libssh2.h")
-    # set(CryptoLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/bin/libcrypto-1_1-x64.dll")
-    # set(SSHLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64/bin/libssh2-x64.dll")
-
-    # add_library( CryptoLib SHARED IMPORTED )
-    # set_target_properties( CryptoLib PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libcrypto-1_1-x64.dll" )
 
     add_library( SSHLib SHARED IMPORTED )
     set_target_properties( SSHLib PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libssh2-x64.dll" )
@@ -46,14 +41,12 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif()
 
 if (UNIX)
-    set(LibraryInclude "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/include")
-    set(LibraryCode "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/include/libssh2.h")
-    file(READ
-        CryptoLib
-            "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/lib/libgpg-error.dylib"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/lib/libgcrypt.dylib"
-        )
-    file(READ SSHLib "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac/lib/libssh2.dylib")
+    set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
+    set(LibraryInclude "${LibraryPath}/include")
+    set(LibraryCode "${LibraryInclude}/libssh2.h")
+    
+    add_library(SSHLib SHARED IMPORTED)
+    set_target_properties( SSHLib PROPERTIES IMPORTED_LOCATION "${LibraryPath}/lib/libssh2.dylib")
 endif()
 
 include_directories(${LibraryInclude})
@@ -133,3 +126,18 @@ target_link_libraries(LumatoneEditor
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
     )
+
+# if (APPLE)
+#     add_custom_command(
+#         LumatoneEditor ${JUCE_PRODUCT_NAME} POST_BUILD
+#         COMMAND
+#             ${CMAKE_COMMAND} -E copy
+#             "${LibraryPath}/lib/libssh2.dylib"
+#             "$<TARGET_FILE_DIR:${JUCE_PRODUCT_NAME}>/../Resources/libssh2.dylib"
+#     )
+#     add_custom_command(
+#         LumatoneEditor ${JUCE_PRODUCT_NAME} POST_BUILD
+#         COMMAND install_name_tool -change @rpath/libssh2.dylib @loader_path/../Frameworks/libssh2.dylib $<TARGET_FILE:${JUCE_PRODUCT_NAME}>
+#     )
+# endif()
+

@@ -22,7 +22,6 @@
 
 #include "./Settings/SettingsContainer.h"
 
-#include "./lumatone_editor_library/device/lumatone_controller.h"
 //[/Headers]
 
 #include "GlobalSettingsArea.h"
@@ -76,10 +75,12 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     activeMacroButtonColourEdit.reset(new ColourViewComponent());
     addAndMakeVisible(activeMacroButtonColourEdit.get());
     activeMacroButtonColourEdit->addChangeListener(this);
+    activeMacroButtonColourEdit->setColour(getActiveMacroButtonColour().toString(), false);
 
     inactiveMacroButtonColourEdit.reset(new ColourViewComponent());
     addAndMakeVisible(inactiveMacroButtonColourEdit.get());
     inactiveMacroButtonColourEdit->addChangeListener(this);
+    inactiveMacroButtonColourEdit->setColour(getInactiveMacroButtonColour().toString(), false);
 
     lblDeveloperMode.reset(new juce::Label("DeveloperModeLabel", "Developer Mode"));
     addChildComponent(lblDeveloperMode.get());
@@ -90,8 +91,19 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblPresetButtonColours->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
 
     addStatusListener(this);
+    addEditorListener(this);
 
     settingsButton->setEnabled(false);
+
+    lblPresetButtonColours->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
+
+    lblColourActiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
+    lblColourInactiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
+
+    settingsButton->setColour(TextButton::ColourIds::buttonColourId, Colour(0xff383b3d));
+    settingsButton->setColour(TextButton::ColourIds::textColourOffId, Colour(0xffffffff));
+
+    connectionStateChanged(getConnectionState());
 
     /* We don't want a resize here
     /*
@@ -124,6 +136,16 @@ GlobalSettingsArea::~GlobalSettingsArea()
 
     //[Destructor]. You can add your own custom destruction code here..
     //[/Destructor]
+}
+
+void GlobalSettingsArea::macroButtonInactiveColourChanged(juce::Colour colour)
+{
+    inactiveMacroButtonColourEdit->setColour(colour.toString(), false);
+}
+
+void GlobalSettingsArea::macroButtonActiveColourChanged(juce::Colour colour)
+{
+    activeMacroButtonColourEdit->setColour(colour.toString(), false);
 }
 
 //==============================================================================
@@ -220,44 +242,16 @@ void GlobalSettingsArea::buttonClicked (juce::Button* buttonThatWasClicked)
 
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 
-void GlobalSettingsArea::lookAndFeelChanged()
-{
-    lblPresetButtonColours->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
-
-    lblColourActiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    lblColourInactiveMacroButton->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-
-    settingsButton->setColour(TextButton::ColourIds::buttonColourId, Colour(0xff383b3d));
-    settingsButton->setColour(TextButton::ColourIds::textColourOffId, Colour(0xffffffff));
-}
-
 void GlobalSettingsArea::changeListenerCallback(ChangeBroadcaster *source)
 {
 	if (source == inactiveMacroButtonColourEdit.get())
 	{
-		String inactiveMacroButtonColour = inactiveMacroButtonColourEdit->getColourAsString();
-		getLumatoneController()->sendMacroButtonInactiveColour(inactiveMacroButtonColour);
+        setInactiveMacroButtonColour(inactiveMacroButtonColourEdit->getColourAsObject());
 	}
 	else if (source == activeMacroButtonColourEdit.get())
 	{
-		String activeMacroButtonColour = activeMacroButtonColourEdit->getColourAsString();
-		getLumatoneController()->sendMacroButtonActiveColour(activeMacroButtonColour);
+        setActiveMacroButtonColour(activeMacroButtonColourEdit->getColourAsObject());
 	}
-}
-
-void GlobalSettingsArea::restoreStateFromPropertiesFile()
-{
-    inactiveMacroButtonColourEdit->setColour(getProperty(LumatoneEditorProperty::InactiveMacroButtonColour, "000000"));
-    activeMacroButtonColourEdit->setColour(getProperty(LumatoneEditorProperty::ActiveMacroButtonColour, "FFFFFF"));
-}
-
-void GlobalSettingsArea::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
-{
-	String inactiveMacroButtonColour = inactiveMacroButtonColourEdit->getColourAsString();
-	propertiesFile->setValue(LumatoneEditorProperty::InactiveMacroButtonColour, inactiveMacroButtonColour);
-
-	String activeMacroButtonColour = activeMacroButtonColourEdit->getColourAsString();
-	propertiesFile->setValue(LumatoneEditorProperty::ActiveMacroButtonColour, activeMacroButtonColour);
 }
 
 void GlobalSettingsArea::listenToColourEditButtons(Button::Listener* listenerIn)

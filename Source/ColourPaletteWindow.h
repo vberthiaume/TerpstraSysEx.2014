@@ -27,7 +27,8 @@ class PaletteEditPanel;
 /*
 */
 class ColourPaletteWindow   : public juce::Component
-                            , private LumatoneEditorStateController
+                            , public LumatoneEditorState
+                            , private LumatoneEditorState::Controller
                             , public juce::ChangeListener
                             , public ColourPalettesPanel::Listener
 {

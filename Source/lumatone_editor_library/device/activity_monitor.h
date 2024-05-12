@@ -24,9 +24,10 @@
 
 class LumatoneFirmwareDriver;
 
-class DeviceActivityMonitor : protected LumatoneApplicationState,
-                              public juce::Timer,
-                              protected LumatoneFirmwareDriverListener
+class DeviceActivityMonitor : protected LumatoneApplicationState
+                            , protected LumatoneApplicationState::DeviceController
+                            , public juce::Timer
+                            , protected LumatoneFirmwareDriverListener
 {
     
 public:
@@ -40,7 +41,7 @@ public:
     
 public:
 
-    DeviceActivityMonitor(LumatoneFirmwareDriver* midiDriverIn, LumatoneApplicationState stateIn);
+    DeviceActivityMonitor(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver* midiDriverIn);
     ~DeviceActivityMonitor() override;
 
     DetectConnectionMode getMode() const { return deviceConnectionMode; }

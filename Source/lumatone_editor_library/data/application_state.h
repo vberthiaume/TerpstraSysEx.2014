@@ -25,8 +25,8 @@ namespace LumatoneEditor
 namespace LumatoneApplicationProperty
 {
     // Device Management
-    // static const juce::Identifier DetectDeviceIfDisconnected = juce::Identifier("DetectDeviceIfDisconnected");
-    // static const juce::Identifier CheckConnectionIfInactive = juce::Identifier("CheckConnectionIfInactive");
+    static const juce::Identifier DetectDeviceIfDisconnected = juce::Identifier("DetectDeviceIfDisconnected");
+    static const juce::Identifier CheckConnectionIfInactive = juce::Identifier("CheckConnectionIfInactive");
 
     static const juce::Identifier DetectDevicesTimeout = juce::Identifier("DetectDevicesTimeout");
     static const juce::Identifier LastInputDeviceId = juce::Identifier("LastInputDeviceId");
@@ -56,7 +56,7 @@ public:
     LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
     LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState& stateIn);
 
-    virtual ~LumatoneApplicationState();
+    virtual ~LumatoneApplicationState() override;
 
     LumatoneController* getLumatoneController() const;
     LumatoneColourModel* getColourModel() const;
@@ -65,6 +65,8 @@ public:
     ConnectionState getConnectionState() const;
     int getMidiInputIndex() const;
     int getMidiOutputIndex() const;
+
+    bool isAutoConnectionEnabled() const;
 
     virtual bool doSendChangesToDevice() const;
 
@@ -97,27 +99,23 @@ public:
     
     virtual void setConfigTable(LumatoneConfigTable::TableType type, const LumatoneConfigTable& table) override;
 
-    //void setVelocityIntervalTable(const LumatoneConfigTable& table) override;
-    //void setNoteVelocityTable(const LumatoneConfigTable& tableIn) override;
-    //void setAftertouchTable(const LumatoneConfigTable& tableIn) override;
-    //void setLumatouchTable(const LumatoneConfigTable& tableIn) override;
+private:
+    bool performLumatoneAction(LumatoneAction* action, bool undoable = true, bool newTransaction = true);
 
-    virtual bool performAction(LumatoneAction* action, bool undoable = true, bool newTransaction = true);
 
+protected:
+    virtual void setInactiveMacroButtonColour(juce::Colour buttonColour) override;
+    virtual void setActiveMacroButtonColour(juce::Colour buttonColour) override;
 
 protected:
     virtual juce::ValueTree loadStateProperties(juce::ValueTree stateIn);
 
     virtual void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    virtual void loadPropertiesFile(juce::PropertiesFile* properties) override;
+
 private:
     ConnectionState connectionState = ConnectionState::DISCONNECTED;
-
-    std::shared_ptr<LumatoneContext> layoutContext;
-	std::shared_ptr<LumatoneController> controller;
-    std::shared_ptr<LumatoneColourModel> colourModel;
-
-    bool contextIsSet = false;
 
 private:
     std::shared_ptr<juce::ListenerList<LumatoneEditor::StatusListener>> statusListeners;
@@ -143,9 +141,69 @@ public:
     void addFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn);
     void removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn);
 
-    // Allow these to edit state and signal listeners
-    friend class LumatoneController;
-    friend class DeviceActivityMonitor;
+
+private:
+    LumatoneFirmwareDriver& firmwareDriver;
+
+    std::shared_ptr<LumatoneContext> layoutContext;
+	std::shared_ptr<LumatoneController> controller;
+    std::shared_ptr<DeviceActivityMonitor> activityMonitor;
+    std::shared_ptr<LumatoneColourModel> colourModel;
+
+    bool contextIsSet = false;
+
+//================================================================================
+public:
+    class Controller
+    {
+    public:
+        Controller(LumatoneApplicationState& stateIn)
+            : appState(stateIn) {}
+
+    virtual bool requestSettingsFromDevice();
+    virtual bool requestMappingFromDevice();
+    virtual bool requestCompleteConfigFromDevice();
+
+    void setInactiveMacroButtonColour(juce::Colour buttonColour);
+    void setActiveMacroButtonColour(juce::Colour buttonColour);
+
+    virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
+
+    protected:
+        juce::ListenerList<LumatoneEditor::EditorListener>* getEditorListeners() const { return appState.editorListeners.get(); }
+        juce::ListenerList<LumatoneEditor::StatusListener>* getStatusListeners() const { return appState.statusListeners.get(); }
+        juce::ListenerList<LumatoneEditor::FirmwareListener>* getFirmwareListeners() const { return appState.firmwareListeners.get(); }
+        juce::ListenerList<LumatoneEditor::MidiListener>* getMidiListeners() const { return appState.midiListeners.get(); }
+
+    private:
+        LumatoneApplicationState& appState;
+    };
+
+    class DeviceController : protected Controller
+    {
+    public:
+        DeviceController(LumatoneApplicationState& stateIn)
+            : Controller(stateIn)
+            , deviceAppState(stateIn) {}
+
+        juce::Array<juce::MidiDeviceInfo> getMidiInputList();
+        juce::Array<juce::MidiDeviceInfo> getMidiOutputList();
+
+    protected:
+        virtual void setMidiInput(int deviceIndex, bool test = true);
+        virtual void setMidiOutput(int deviceIndex, bool test = true);
+
+        void setConnectionState(ConnectionState newState, bool sendNotification=true);
+
+        void setAutoConnectionEnabled(bool enabled);
+
+    private:
+        LumatoneApplicationState& deviceAppState;
+    };
+
+private:
+    friend class Controller;
+    friend class DeviceController;
 };
 
-#endif LUMATONE_APPLICATION_STATE_H
+#endif // LUMATONE_APPLICATION_STATE_H

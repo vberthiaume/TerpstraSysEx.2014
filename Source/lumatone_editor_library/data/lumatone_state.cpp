@@ -19,6 +19,16 @@ juce::Array<juce::Identifier> LumatoneState::getLumatoneStateProperties()
     properties.add(LumatoneStateProperty::LastConnectedFirmwareVersion);
     properties.add(LumatoneStateProperty::LastConnectedNumBoards);
 
+    properties.add(LumatoneStateProperty::LightsOnAfterKeystroke);
+    properties.add(LumatoneStateProperty::AftertouchEnabled);
+    properties.add(LumatoneStateProperty::InvertExpression);
+    properties.add(LumatoneStateProperty::InvertSustain);
+    
+    properties.add(LumatoneStateProperty::ExpressionSensitivity);
+    
+    properties.add(LumatoneStateProperty::InactiveMacroButtonColour);
+    properties.add(LumatoneStateProperty::ActiveMacroButtonColour);
+
     properties.add(LumatoneStateProperty::MappingData);
 
     return properties;
@@ -45,6 +55,8 @@ LumatoneState::LumatoneState(juce::String nameIn, const LumatoneState& stateToCo
     mappingData = stateToCopy.mappingData;
     midiKeyMap = stateToCopy.midiKeyMap;
 }
+
+LumatoneState::LumatoneState(const LumatoneState &stateIn) : LumatoneState(stateIn.name + "Copy", stateIn) {}
 
 LumatoneState::~LumatoneState()
 {
@@ -82,21 +94,21 @@ void LumatoneState::handleStatePropertyChange(juce::ValueTree stateIn, const juc
             );
         firmwareVersion = LumatoneFirmware::Version::fromReleaseVersion(determinedVersion);
     }
-    else if (property == LumatoneStateProperty::MappingData)
+    else if (property == LumatoneStateProperty::InactiveMacroButtonColour)
     {
-        // juce::String mappingString = stateIn.getProperty(property).toString();
-        // if (mappingString.isEmpty())
-        //     return;
-
-        // auto stringArray = juce::StringArray::fromLines(mappingString);
-        // LumatoneLayout loadedLayout(getNumBoards(), getOctaveBoardSize());
-        // loadedLayout.fromStringArray(stringArray);
-
-        // if (!loadedLayout.isEmpty())
-        // {
-        //     mappingData.reset(new LumatoneLayout(loadedLayout));
-        // }
+        auto readColour = juce::Colour::fromString(stateIn[property].toString());
+        inactiveMacroButtonColour = readColour;
     }
+    else if (property == LumatoneStateProperty::ActiveMacroButtonColour)
+    {
+        auto readColour = juce::Colour::fromString(stateIn[property].toString());
+        activeMacroButtonColour = readColour;
+    }
+}
+
+void LumatoneState::loadPropertiesFile(juce::PropertiesFile *properties)
+{
+    // No global properties for now
 }
 
 void LumatoneState::setConnectedSerialNumber(juce::String serialNumberIn)
@@ -108,7 +120,6 @@ void LumatoneState::setConnectedSerialNumber(juce::String serialNumberIn)
         connectedSerialNumber,
         undoManager);
 
-    // numBoards = 5;
 
     if (connectedSerialNumber == SERIAL_55_KEYS)
     {
@@ -126,31 +137,16 @@ void LumatoneState::setLumatoneVersion(LumatoneFirmware::ReleaseVersion versionI
 {
     determinedVersion = versionIn;
 
-    // numBoards = 5;
-
-    switch (determinedVersion)
-    {
-    case LumatoneFirmware::ReleaseVersion::VERSION_55_KEYS:
-        mappingData->setOctaveBoardSize(55);
-        break;
-    default:
-        mappingData->setOctaveBoardSize(56);
-        break;
-    }
-
     if (writeToState)
     {
-        state.setPropertyExcludingListener(
-            this,
-            LumatoneStateProperty::LastConnectedFirmwareVersion,
-            (int)determinedVersion,
-            undoManager);
+        setStateProperty(LumatoneStateProperty::LastConnectedFirmwareVersion, (int)determinedVersion);
     }
 }
 
 void LumatoneState::setCompleteConfig(const LumatoneLayout &layoutIn)
 {
-    *mappingData = layoutIn;
+    if (mappingData.get() != &layoutIn)
+        *mappingData = layoutIn;
 }
 
 void LumatoneState::setLayout(const LumatoneLayout &layoutIn)
@@ -285,63 +281,14 @@ void LumatoneState::setConfigTable(LumatoneConfigTable::TableType type, const Lu
     mappingData->setConfigTable(type, table.velocityValues);
 }
 
-//  bool LumatoneState::loadLayoutFromFile(const juce::File& layoutFile)
-// {
-//     bool fileOpened = false;
-//     bool fileParsed = false;
+void LumatoneState::setInactiveMacroButtonColour(juce::Colour buttonColour)
+{
+    inactiveMacroButtonColour = buttonColour;
+    setStateProperty(LumatoneStateProperty::InactiveMacroButtonColour, buttonColour.toString());
+}
 
-//     if (layoutFile.existsAsFile())
-//     {
-//         fileOpened = true;
-
-//         juce::StringArray stringArray;
-//         layoutFile.readLines(stringArray);
-
-//         LumatoneLayout newLayout(getNumBoards(), getOctaveBoardSize(), true);
-//         newLayout.fromStringArray(stringArray);
-
-//         // TODO: something if boards/size don't match?
-//         fileParsed = true;
-
-
-//         if (fileParsed)
-//         {
-//             *mappingData = LumatoneLayout(newLayout);
-
-//             auto layoutString = mappingData->toStringArray().joinIntoString(juce::newLine);
-//             DBG("Loaded: " + layoutString);
-
-//             writeStringProperty(LumatoneStateProperty::MappingData, layoutString, undoManager);
-
-//             invertSustain = mappingData->invertSustain;
-//             writeBoolProperty(LumatoneStateProperty::InvertSustain, invertSustain, undoManager);
-
-//             invertExpression = mappingData->invertExpression;
-//             writeBoolProperty(LumatoneStateProperty::InvertExpression, invertExpression, undoManager);
-
-//             expressionSensitivity = mappingData->expressionSensitivity;
-//             writeIntProperty(LumatoneStateProperty::ExpressionSensitivity, expressionSensitivity, undoManager);
-
-//             // Mark file as unchanged
-//             //setHasChangesToSave(false);
-
-//             // Clear undo history
-//             //undoManager.clearUndoHistory();
-
-//             // Add file to recent files list
-//             //recentFiles.addFile(currentFile);
-
-//             return true;
-//         }
-//     }
-
-//     if (fileOpened)
-//     {
-//         // Show error message
-//         juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::AlertIconType::WarningIcon, "Open File Error", "The file " + layoutFile.getFullPathName() + " could not be opened.");
-
-//         // XXX Update Window title in any case? Make file name empty/make data empty in case of error?
-//     }
-
-//     return false;
-// }
+void LumatoneState::setActiveMacroButtonColour(juce::Colour buttonColour)
+{
+    activeMacroButtonColour = buttonColour;
+    setStateProperty(LumatoneStateProperty::InactiveMacroButtonColour, buttonColour.toString());
+}

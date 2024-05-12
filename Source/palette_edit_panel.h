@@ -21,7 +21,7 @@
 *   Colour palette edtior panel
 */
 class PaletteEditPanel : public juce::Component
-                       , private LumatoneEditorState
+                       , public LumatoneEditorState
                        , public juce::Button::Listener
                        , public juce::Label::Listener
                        , public juce::ChangeBroadcaster

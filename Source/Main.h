@@ -26,16 +26,14 @@ class MainContentComponent;
 class DeviceActivityMonitor;
 
 //==============================================================================
-class TerpstraSysExApplication 	: public JUCEApplication
+class TerpstraSysExApplication 	: public juce::JUCEApplication, private LumatoneEditorState::Controller
 {
 public:
 	//==============================================================================
 	TerpstraSysExApplication();
 
-	//LumatoneFirmwareDriver& initializeDriver();
-
-	const String getApplicationName() override		{ return ProjectInfo::projectName; }
-	const String getApplicationVersion() override   { return ProjectInfo::versionString; }
+	const juce::String getApplicationName() override		{ return ProjectInfo::projectName; }
+	const juce::String getApplicationVersion() override   { return ProjectInfo::versionString; }
 	bool moreThanOneInstanceAllowed() override      { return true; }
 
 	void initialise(const String& commandLine) override;
@@ -45,10 +43,11 @@ public:
 
 	void loadPropertiesFile();
 
+	//==============================================================================
 	// Menu functionality
-	void getAllCommands(Array <CommandID>& commands) override;
-	void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
-	bool perform(const InvocationInfo& info) override;
+	void getAllCommands(juce::Array <juce::CommandID>& commands) override;
+	void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
+	bool perform(const juce::ApplicationCommandTarget::InvocationInfo& info) override;
 
 	bool openSysExMapping();
 	bool saveSysExMapping(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
@@ -62,10 +61,9 @@ public:
 	bool deleteSubBoardData();
 	bool copySubBoardData();
 	bool pasteSubBoardData();
-    bool pasteModifiedSubBoardData(CommandID commandID);
+    bool pasteModifiedSubBoardData(juce::CommandID commandID);
     bool canPasteSubBoardData() const;
 
-	bool performUndoableAction(UndoableAction* editAction, bool newTransaction=true);
 	bool undo();
 	bool redo();
 
@@ -76,24 +74,19 @@ public:
 	// bool faderVelocityCurveDialog();
 	// bool aftertouchVelocityCurveDialog();
 
-	// void sendCurrentConfigurationToDevice();
-	bool requestConfigurationFromDevice();
-
-	void updateMainTitle();
-
-	void setOpenDialogWindow(juce::DialogWindow* dialogWindowIn);
-
 	bool aboutTerpstraSysEx();
 
-	//MainContentComponent* getMainContentComponent() const;
+	//==============================================================================
+private:
+	bool onRequestDeviceConfig();
+
+	void setOpenDialogWindow(juce::DialogWindow* dialogWindowIn);
 
 private:
 	LumatoneFirmwareDriver	firmwareDriver;
 	juce::UndoManager 		undoManager;
 
-	LumatoneEditorStateController	state;
-
-	std::unique_ptr<DeviceActivityMonitor> activityMonitor;
+	LumatoneEditorState		state;
 
 	std::unique_ptr<ApplicationCommandManager> commandManager;
 	

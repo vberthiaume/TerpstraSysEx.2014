@@ -80,16 +80,16 @@ public:
 
 public:
     // LumatoneEditor::EditorListener Implementation
-    void completeMappingLoaded(LumatoneLayout mappingData) override;
-    void boardChanged(LumatoneBoard boardData) override;
+    void completeMappingLoaded(const LumatoneLayout& mappingData) override;
+    void boardChanged(const LumatoneBoard& boardData) override;
     void contextChanged(LumatoneContext* newOrEmptyContext) override; 
-    void keyChanged(int boardIndex, int keyIndex, LumatoneKey lumatoneKey) override;
-    void keyConfigChanged(int boardIndex, int keyIndex, LumatoneKey keyData) override;
+    void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;
+    void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) override;
     void keyColourChanged(int octaveNumber, int keyNumber, juce::Colour keyColour) override;
     void selectionChanged(juce::Array<MappedLumatoneKey> selection) override;
 private:
 
-    void updateKeyColour(int boardIndex, int keyIndex, const juce::Colour& colour);
+    void applyKeyUpdates(int boardIndex, int keyIndex, const LumatoneKey& keyData);
     void resetLayoutState(const LumatoneLayout* optionalLayout=nullptr);
 
     void keyUpdateCallback(int boardIndex, int keyIndex, const LumatoneKey& keyData, bool doRepaint=true);

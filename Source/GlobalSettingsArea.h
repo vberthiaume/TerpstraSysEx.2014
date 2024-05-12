@@ -25,6 +25,7 @@
 #include "./LumatoneEditorState.h"
 
 #include "./lumatone_editor_library/listeners/status_listener.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
 #include "./colour_view_component.h"
 
 //[/Headers]
@@ -43,6 +44,7 @@ class GlobalSettingsArea  : public juce::Component,
                             public LumatoneEditorState,
                             public ChangeListener,
                             public LumatoneEditor::StatusListener,
+                            public LumatoneEditor::EditorListener,
                             public juce::Button::Listener
 {
 public:
@@ -54,18 +56,16 @@ public:
     //[UserMethods]     -- You can add your own custom methods in this section.
 	void changeListenerCallback(ChangeBroadcaster *source) override;
 
-	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
-
     void listenToColourEditButtons(Button::Listener* listenerIn);
-
-    void lookAndFeelChanged() override;
 
     void setDeveloperMode(bool devModeOn);
 
     // LumatoneEditor::StatusListener implementation
-    // void connectionEstablished(int inputDevice, int outputDevice) override;
     void connectionStateChanged(ConnectionState newState) override;
-    // void connectionFailed() override;
+
+    // LumatoneEditor::EditorListener implementation
+    void macroButtonInactiveColourChanged(juce::Colour colour) override;
+    void macroButtonActiveColourChanged(juce::Colour colour) override;
 
     //[/UserMethods]
 
@@ -73,8 +73,6 @@ public:
     void resized() override;
     void buttonClicked (juce::Button* buttonThatWasClicked) override;
 
-private:
-    void restoreStateFromPropertiesFile();
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.

@@ -639,7 +639,7 @@ public:
             Label* label = new Label(sld.getName() + "_ValueLabel");
             label->setText(String(sld.getValue()), dontSendNotification);
             label->setJustificationType(Justification::centred);
-            // label->setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
+            label->setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
 
             Colour textColour = (sld.isEnabled())
                 ? findColour(LumatoneEditorColourIDs::DescriptionText)
@@ -820,8 +820,10 @@ public:
         for (auto prop : box.getProperties())
             l->getProperties().set(prop.name, prop.value);
 
+        auto name = box.getName();
+        auto fontHeight = box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR;
         l->setBounds(box.getLocalBounds());
-        l->setFont(getComboBoxFont(box).withHeight(box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR)); // Any style overrides should have been passed to Label
+        l->setFont(getComboBoxFont(box)); // Any style overrides should have been passed to Label
 
         return l;
     }
@@ -832,8 +834,10 @@ public:
         float fontHeight = labelToPosition.getFont().getHeight();
 
         labelToPosition.setBounds(
-            margin, roundToInt((box.getHeight() - fontHeight) * 0.5f),
-            box.getWidth() - box.getHeight() - margin, fontHeight
+            margin
+            , (box.getHeight() - fontHeight) * 0.5
+            , box.getWidth() - box.getHeight() - margin /* leave room for down arrow glyph */
+            , fontHeight
         );
     }
 

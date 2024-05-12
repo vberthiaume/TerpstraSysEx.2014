@@ -1,34 +1,38 @@
 #include "application_state.h"
 #include "../device/lumatone_controller.h"
+#include "../device/activity_monitor.h"
 #include "../color/colour_model.h"
 #include "../data/lumatone_context.h"
+#include "../actions/lumatone_action.h"
 
 #include "../listeners/status_listener.h"
 #include "../listeners/editor_listener.h"
 #include "../listeners/firmware_listener.h"
 #include "../listeners/midi_listener.h"
 
+#include "../lumatone_midi_driver/lumatone_midi_driver.h"
+
 juce::Array<juce::Identifier> getLumatoneApplicationProperties()
 {
     juce::Array<juce::Identifier> properties;
     properties.add(LumatoneApplicationProperty::ConnectionStateId);
-    // properties.add(LumatoneApplicationProperty::DetectDeviceIfDisconnected);
-    // properties.add(LumatoneApplicationProperty::CheckConnectionIfInactive);
     properties.add(LumatoneApplicationProperty::LayoutContextIsSetId);
     return properties;
 }
 
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn, juce::UndoManager *undoManagerIn)
     : LumatoneState(nameIn, stateIn, undoManagerIn)
+    , firmwareDriver(driverIn)
 {
+    editorListeners = std::make_shared<juce::ListenerList<LumatoneEditor::EditorListener>>();
+    statusListeners = std::make_shared<juce::ListenerList<LumatoneEditor::StatusListener>>();
+    firmwareListeners = std::make_shared<juce::ListenerList<LumatoneEditor::FirmwareListener>>();
+    midiListeners = std::make_shared<juce::ListenerList<LumatoneEditor::MidiListener>>();
+
     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
 	controller = std::make_shared<LumatoneController>(*this, driverIn);
+    activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, &driverIn);
     colourModel = std::make_shared<LumatoneColourModel>();
-
-    editorListeners.reset(new juce::ListenerList<LumatoneEditor::EditorListener>());
-    statusListeners.reset(new juce::ListenerList<LumatoneEditor::StatusListener>());
-    firmwareListeners.reset(new juce::ListenerList<LumatoneEditor::FirmwareListener>());
-    midiListeners.reset(new juce::ListenerList<LumatoneEditor::MidiListener>());
 
     loadStateProperties(stateIn);
 }
@@ -43,22 +47,25 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
 
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn)
     : LumatoneState(nameIn, (const LumatoneState&)stateIn)
-    , layoutContext(stateIn.layoutContext)
-    , controller(stateIn.controller)
-    , colourModel(stateIn.colourModel)
+    , firmwareDriver(stateIn.firmwareDriver)
     , editorListeners(stateIn.editorListeners)
     , statusListeners(stateIn.statusListeners)
     , firmwareListeners(stateIn.firmwareListeners)
     , midiListeners(stateIn.midiListeners)
+    , layoutContext(stateIn.layoutContext)
+    , controller(stateIn.controller)
+    , activityMonitor(stateIn.activityMonitor)
+    , colourModel(stateIn.colourModel)
 {
     loadStateProperties(state);
 }
 
 LumatoneApplicationState::~LumatoneApplicationState()
 {
+    layoutContext = nullptr;
+    activityMonitor = nullptr;
     controller = nullptr;
     colourModel = nullptr;
-    layoutContext = nullptr;
 }
 
 ConnectionState LumatoneApplicationState::getConnectionState() const
@@ -68,12 +75,17 @@ ConnectionState LumatoneApplicationState::getConnectionState() const
 
 int LumatoneApplicationState::getMidiInputIndex() const
 {
-    return controller->getMidiInputIndex();
+    return firmwareDriver.getMidiInputIndex();
 }
 
 int LumatoneApplicationState::getMidiOutputIndex() const
 {
-    return controller->getMidiOutputIndex();
+    return firmwareDriver.getMidiOutputIndex();
+}
+
+bool LumatoneApplicationState::isAutoConnectionEnabled() const
+{
+    return activityMonitor->willDetectDeviceIfDisconnected();
 }
 
 bool LumatoneApplicationState::doSendChangesToDevice() const
@@ -99,6 +111,49 @@ const LumatoneContext *LumatoneApplicationState::getContext() const
 std::shared_ptr<LumatoneContext> LumatoneApplicationState::shareContext()
 {
     return layoutContext;
+}
+
+bool LumatoneApplicationState::performLumatoneAction(LumatoneAction *action, bool undoable, bool newTransaction)
+{
+    if (action == nullptr)
+        return false;
+
+    if (undoable)
+    {
+        if (undoManager == nullptr)
+            return false;
+
+        if (newTransaction)
+            undoManager->beginNewTransaction();
+
+        return undoManager->perform((juce::UndoableAction*)action, action->getName());
+    }
+
+    return action->perform();
+}
+
+void LumatoneApplicationState::setInactiveMacroButtonColour(juce::Colour buttonColour)
+{
+    LumatoneState::setInactiveMacroButtonColour(buttonColour);
+
+    if (doSendChangesToDevice())
+    {
+        controller->sendMacroButtonInactiveColour(buttonColour.toString());
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::macroButtonInactiveColourChanged, buttonColour);
+}
+
+void LumatoneApplicationState::setActiveMacroButtonColour(juce::Colour buttonColour)
+{
+    LumatoneState::setInactiveMacroButtonColour(buttonColour);
+
+    if (doSendChangesToDevice())
+    {
+        controller->sendMacroButtonInactiveColour(buttonColour.toString());
+    }
+
+    editorListeners->call(&LumatoneEditor::EditorListener::macroButtonActiveColourChanged, buttonColour);
 }
 
 juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree stateIn)
@@ -133,6 +188,17 @@ void LumatoneApplicationState::handleStatePropertyChange(juce::ValueTree stateIn
     {
         LumatoneState::handleStatePropertyChange(stateIn, property);
     }
+}
+
+void LumatoneApplicationState::loadPropertiesFile(juce::PropertiesFile *properties)
+{
+    LumatoneState::loadPropertiesFile(properties);
+
+    setStateProperty(LumatoneApplicationProperty::DetectDeviceIfDisconnected, properties->getBoolValue(LumatoneApplicationProperty::DetectDeviceIfDisconnected.toString(), true));
+    setStateProperty(LumatoneApplicationProperty::CheckConnectionIfInactive, properties->getBoolValue(LumatoneApplicationProperty::CheckConnectionIfInactive.toString(), true));
+
+    setStateProperty(LumatoneApplicationProperty::LastInputDeviceId, properties->getValue(LumatoneApplicationProperty::LastInputDeviceId.toString(), juce::String()));
+    setStateProperty(LumatoneApplicationProperty::LastOutputDeviceId, properties->getValue(LumatoneApplicationProperty::LastOutputDeviceId.toString(), juce::String()));
 }
 
 LumatoneKeyContext LumatoneApplicationState::getKeyContext(int boardIndex, int keyIndex) const
@@ -254,7 +320,6 @@ void LumatoneApplicationState::sendSelectionParam(const juce::Array<MappedLumato
     for (auto mappedKey : selection)
     {
         controller->sendKeyParam(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
-        //sendKeyConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, (LumatoneKey)mappedKey, false, bufferKeyUpdates);
     }
 
     //if (signalEditorListeners)
@@ -268,7 +333,6 @@ void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLuma
     for (auto mappedKey : selection)
     {
         controller->sendKeyColourConfig(mappedKey.boardIndex, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
-        //sendKeyColourConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, (LumatoneKey)mappedKey, false, bufferKeyUpdates);
     }
 
     //if (signalEditorListeners)
@@ -387,9 +451,9 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //    }
 //}
 
-bool LumatoneApplicationState::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
+bool LumatoneApplicationState::Controller::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
 {
-    return controller->performAction(action, undoable, newTransaction);
+    return appState.performLumatoneAction(action, undoable, newTransaction);
 }
 
 void LumatoneApplicationState::addStatusListener(LumatoneEditor::StatusListener* listenerIn)
@@ -417,9 +481,9 @@ void LumatoneApplicationState::addFirmwareListener(LumatoneEditor::FirmwareListe
     firmwareListeners->add(listenerIn);
 }
 
-void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* listenerIn)
+void LumatoneApplicationState::removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn)
 {
-    midiListeners->remove(listenerIn);
+    firmwareListeners->remove(listenerIn);
 }
 
 void LumatoneApplicationState::addMidiListener(LumatoneEditor::MidiListener* listenerIn)
@@ -427,7 +491,97 @@ void LumatoneApplicationState::addMidiListener(LumatoneEditor::MidiListener* lis
     midiListeners->add(listenerIn);
 }
 
-void LumatoneApplicationState::removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn)
+void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* listenerIn)
 {
-    firmwareListeners->remove(listenerIn);
+    midiListeners->remove(listenerIn);
+}
+
+bool LumatoneApplicationState::Controller::requestCompleteConfigFromDevice()
+{
+    if (appState.connectionState != ConnectionState::ONLINE)
+        return false;
+
+    requestSettingsFromDevice();
+    requestMappingFromDevice();
+
+    return true;
+}
+
+bool LumatoneApplicationState::Controller::requestSettingsFromDevice()
+{
+    if (appState.connectionState != ConnectionState::ONLINE)
+        return false;
+
+    // Macro button colours
+    appState.controller->requestMacroButtonColours();
+    
+	// General options
+	appState.controller->requestPresetFlags();
+	appState.controller->requestExpressionPedalSensitivity();
+
+	// Velocity curve config
+	appState.controller->sendVelocityIntervalConfigRequest();
+	appState.controller->sendVelocityConfigRequest();
+	appState.controller->sendFaderConfigRequest();
+	appState.controller->sendAftertouchConfigRequest();
+
+    return true;
+}
+
+bool LumatoneApplicationState::Controller::requestMappingFromDevice()
+{
+    if (appState.connectionState != ConnectionState::ONLINE)
+        return false;
+
+    // Request MIDI channel, MIDI note, colour and key type config for all keys
+    appState.controller->sendGetCompleteMappingRequest();
+    return true;
+}
+
+void LumatoneApplicationState::Controller::setInactiveMacroButtonColour(juce::Colour buttonColour)
+{
+    appState.setInactiveMacroButtonColour(buttonColour);
+}
+
+void LumatoneApplicationState::Controller::setActiveMacroButtonColour(juce::Colour buttonColour)
+{
+    appState.setActiveMacroButtonColour(buttonColour);
+}
+
+void LumatoneApplicationState::DeviceController::setConnectionState(ConnectionState newState, bool sendNotification)
+{
+    deviceAppState.connectionState = newState;
+    deviceAppState.setStateProperty(LumatoneApplicationProperty::ConnectionStateId, juce::var((int)deviceAppState.connectionState));
+    if (sendNotification)
+        getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionStateChanged, deviceAppState.connectionState);
+}
+
+void LumatoneApplicationState::DeviceController::setAutoConnectionEnabled(bool enabled)
+{
+    deviceAppState.activityMonitor->setDetectDeviceIfDisconnected(enabled);
+    deviceAppState.activityMonitor->setCheckForInactivity(enabled);
+}
+
+juce::Array<juce::MidiDeviceInfo> LumatoneApplicationState::DeviceController::getMidiInputList()
+{
+    return deviceAppState.firmwareDriver.getMidiInputList();
+}
+
+juce::Array<juce::MidiDeviceInfo> LumatoneApplicationState::DeviceController::getMidiOutputList()
+{
+    return deviceAppState.firmwareDriver.getMidiOutputList();
+}
+
+void LumatoneApplicationState::DeviceController::setMidiInput(int deviceIndex, bool test)
+{
+    auto deviceInfo = getMidiInputList()[deviceIndex];
+    deviceAppState.setStateProperty(LumatoneApplicationProperty::LastInputDeviceId, deviceInfo.identifier);
+    deviceAppState.controller->setDriverMidiInput(deviceIndex, test);
+}
+
+void LumatoneApplicationState::DeviceController::setMidiOutput(int deviceIndex, bool test)
+{
+    auto deviceInfo = getMidiOutputList()[deviceIndex];
+    deviceAppState.setStateProperty(LumatoneApplicationProperty::LastOutputDeviceId, deviceInfo.identifier);
+    deviceAppState.controller->setDriverMidiOutput(deviceIndex, test);
 }

@@ -15,7 +15,8 @@ namespace Lumatone {
 	namespace Menu {
 
 		MainMenuModel::MainMenuModel(const LumatoneEditorState& state, juce::ApplicationCommandManager* commandManager)
-			: LumatoneEditorStateController("MainMenu", state)
+			: LumatoneEditorState("MainMenu", state)
+			, LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
 		{
 			theManager = commandManager;
 			setApplicationCommandManagerToWatch(commandManager);
@@ -33,7 +34,8 @@ namespace Lumatone {
 			menu.addCommandItem(theManager, saveSysExMapping);
 			menu.addCommandItem(theManager, saveSysExMappingAs);
 			menu.addCommandItem(theManager, resetSysExMapping);
-
+			menu.addCommandItem(theManager, importSysExMapping);
+			
 			menu.addSeparator();
 
 			PopupMenu recentFilesMenu;

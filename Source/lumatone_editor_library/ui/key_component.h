@@ -43,7 +43,7 @@ public:
 
 public:
     LumatoneKeyDisplay(int newBoardIndex, int newKeyIndex, const LumatoneKey& keyData=LumatoneKey());
-    ~LumatoneKeyDisplay();
+    ~LumatoneKeyDisplay() override;
 
     LumatoneComponentRenderMode getRenderMode() const { return renderMode; }
     void setRenderMode(LumatoneComponentRenderMode uiModeIn);
@@ -53,12 +53,7 @@ public:
 
     void setKeyGraphics(juce::Image& colourGraphicIn, juce::Image& shadowGraphicIn);
 
-    void setLumatoneKey(const LumatoneKey& lumatoneKey, int boardIdx, int keyIdx);
-
-    void setDisplayColour(const juce::Colour& colour);
-
-    // const LumatoneKey* getKeyData() const;
-    // juce::Colour getKeyColour() const;
+    void setLumatoneKey(const LumatoneKey& lumatoneKey, juce::Colour displayColour);
 
     int getBoardIndex() const { return boardIndex; }
     int getKeyIndex() const { return keyIndex; }
