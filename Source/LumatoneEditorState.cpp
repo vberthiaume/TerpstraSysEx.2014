@@ -154,6 +154,11 @@ juce::File LumatoneEditorState::getUserPalettesDirectory() const
     return directory;
 }
 
+juce::File LumatoneEditorState::getLastOpenedMappingsDirectory() const
+{
+    return recentFiles->getFile(0).getParentDirectory();
+}
+
 void LumatoneEditorState::setHasChangesToSave(bool hasChangesToSaveIn)
 {
     hasChangesToSave = hasChangesToSaveIn;

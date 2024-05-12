@@ -106,6 +106,8 @@ public:
     juce::File getUserMappingsDirectory() const;
     juce::File getUserPalettesDirectory() const;
 
+    juce::File getLastOpenedMappingsDirectory() const;
+
 
 public:
     bool doSendChangesToDevice() const override;

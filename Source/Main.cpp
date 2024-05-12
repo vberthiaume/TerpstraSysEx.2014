@@ -391,7 +391,7 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 
 bool TerpstraSysExApplication::openSysExMapping()
 {
-	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.getRecentFiles().getFile(0).getParentDirectory(), "*.ltn;*.tsx");
+	fileChooser = std::make_unique<FileChooser>("Open a Lumatone key mapping", state.getLastOpenedMappingsDirectory(), "*.ltn");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
@@ -417,7 +417,7 @@ bool TerpstraSysExApplication::saveSysExMapping(std::function<void(bool success)
 
 bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> saveFileCallback)
 {
-	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.getRecentFiles().getFile(0).getParentDirectory(), "*.ltn");
+	fileChooser = std::make_unique<FileChooser>("Lumatone Key Mapping Files", state.getLastOpenedMappingsDirectory(), "*.ltn");
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
