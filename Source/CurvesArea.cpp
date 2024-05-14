@@ -63,7 +63,7 @@ CurvesArea::CurvesArea (const LumatoneEditorState& stateIn)
 
     setName ("CurvesArea");
     labelWindowTitle.reset (new juce::Label ("labelWindowTitle",
-                                             TRANS("Curves")));
+                                             juce::translate("Curves")));
     addAndMakeVisible (labelWindowTitle.get());
     labelWindowTitle->setFont (juce::Font (18.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelWindowTitle->setJustificationType (juce::Justification::centredLeft);
@@ -76,14 +76,14 @@ CurvesArea::CurvesArea (const LumatoneEditorState& stateIn)
     curvesTab.reset (new CurvesTabComponent (juce::TabbedButtonBar::TabsAtTop));
     addAndMakeVisible (curvesTab.get());
     curvesTab->setTabBarDepth (30);
-    curvesTab->addTab (TRANS("Note Velocity"), juce::Colours::lightgrey, new NoteOnOffVelocityCurveDialog(*this), true);
+    curvesTab->addTab (juce::translate("Note Velocity"), juce::Colours::lightgrey, new NoteOnOffVelocityCurveDialog(*this), true);
     curvesTab->setCurrentTabIndex (0);
 
     curvesTab->setBounds (8, 40, 464, 200);
 
     btnDeveloperMode.reset (new juce::ToggleButton ("btnDeveloperMode"));
     addAndMakeVisible (btnDeveloperMode.get());
-    btnDeveloperMode->setButtonText (TRANS("Developer Mode"));
+    btnDeveloperMode->setButtonText (juce::translate("Developer Mode"));
     btnDeveloperMode->addListener (this);
 
     btnDeveloperMode->setBounds (200, 8, 158, 24);
@@ -100,7 +100,7 @@ CurvesArea::CurvesArea (const LumatoneEditorState& stateIn)
 
     curvesTab->setColour(TabbedComponent::ColourIds::outlineColourId, Colour());
     curvesTab->setColour(TabbedComponent::ColourIds::backgroundColourId, Colour());
-    //curvesTab->addTab(TRANS("Note Velocity"), Colour(), new NoteOnOffVelocityCurveDialog(), true);
+    //curvesTab->addTab(juce::translate("Note Velocity"), Colour(), new NoteOnOffVelocityCurveDialog(), true);
     curvesTab->setTabBackgroundColour(0, Colour());
 
 
@@ -181,9 +181,9 @@ void CurvesArea::buttonClicked (juce::Button* buttonThatWasClicked)
         //[UserButtonCode_btnDeveloperMode] -- add your button handler code here..
 		if (btnDeveloperMode->getToggleState())
 		{
-			curvesTab->addTab(TRANS("CC Fader"), juce::Colours::lightgrey, new FaderVelocityCurveDialog(*this), true);
-			curvesTab->addTab(TRANS("Aftertouch"), juce::Colours::lightgrey, new AftertouchVelocityCurveDialog(*this), true);
-			curvesTab->addTab(TRANS("Lumatouch"), juce::Colours::lightgrey, new LumatouchVelocityCurveDialog(*this), true);
+			curvesTab->addTab(juce::translate("CC Fader"), juce::Colours::lightgrey, new FaderVelocityCurveDialog(*this), true);
+			curvesTab->addTab(juce::translate("Aftertouch"), juce::Colours::lightgrey, new AftertouchVelocityCurveDialog(*this), true);
+			curvesTab->addTab(juce::translate("Lumatouch"), juce::Colours::lightgrey, new LumatouchVelocityCurveDialog(*this), true);
 		}
 		else
 		{

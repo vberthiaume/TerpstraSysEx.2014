@@ -50,11 +50,11 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
     editFunctionsTab.reset (new juce::TabbedComponent (juce::TabbedButtonBar::TabsAtTop));
     addAndMakeVisible (editFunctionsTab.get());
     editFunctionsTab->setTabBarDepth (30);
-    editFunctionsTab->addTab (TRANS("Manual Assign"), juce::Colours::lightgrey, new SingleNoteAssign(stateIn), true);
+    editFunctionsTab->addTab (juce::translate("Manual Assign"), juce::Colours::lightgrey, new SingleNoteAssign(stateIn), true);
     editFunctionsTab->setCurrentTabIndex (0);
 
     labelWindowTitle.reset (new juce::Label ("labelWindowTitle",
-                                             TRANS("Assign Keys")));
+                                             juce::translate("Assign Keys")));
     addAndMakeVisible (labelWindowTitle.get());
 	labelWindowTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     labelWindowTitle->setJustificationType (juce::Justification::centredLeft);
@@ -440,7 +440,7 @@ void NoteEditArea::updateShowIsomorphicAssign()
 
 	if (showMode && editFunctionsTab->getNumTabs() == 1)
 	{
-		editFunctionsTab->addTab(TRANS("Isomorphic Assign"), juce::Colours::lightgrey, new IsomorphicMassAssign(*this), true);
+		editFunctionsTab->addTab(juce::translate("Isomorphic Assign"), juce::Colours::lightgrey, new IsomorphicMassAssign(*this), true);
 	}
 	else if (!showMode && editFunctionsTab->getNumTabs() == 2)
 	{

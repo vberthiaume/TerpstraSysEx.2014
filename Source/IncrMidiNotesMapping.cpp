@@ -36,8 +36,8 @@ IncrMidiNotesMapping::IncrMidiNotesMapping (int& periodSizeReference, ScaleStruc
 
     channelAutoIncrButton.reset (new juce::ToggleButton ("channelAutoIncrButton"));
     addAndMakeVisible (channelAutoIncrButton.get());
-    channelAutoIncrButton->setTooltip (TRANS("Auto-increment channel after maximal note is reached"));
-    channelAutoIncrButton->setButtonText (TRANS("Multichannel"));
+    channelAutoIncrButton->setTooltip (juce::translate("Auto-increment channel after maximal note is reached"));
+    channelAutoIncrButton->setButtonText (juce::translate("Multichannel"));
     channelAutoIncrButton->setConnectedEdges (juce::Button::ConnectedOnTop);
     channelAutoIncrButton->setRadioGroupId (1);
     channelAutoIncrButton->addListener (this);
@@ -45,7 +45,7 @@ IncrMidiNotesMapping::IncrMidiNotesMapping (int& periodSizeReference, ScaleStruc
     channelAutoIncrButton->setBounds (8, 64, 280, 24);
 
     labelMidiNotesUntil.reset (new juce::Label ("labelMidiNotesUntil",
-                                                TRANS("MIDI notes from 0 to the scale size")));
+                                                juce::translate("MIDI notes from 0 to the scale size")));
     addAndMakeVisible (labelMidiNotesUntil.get());
     labelMidiNotesUntil->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelMidiNotesUntil->setJustificationType (juce::Justification::centredLeft);
@@ -57,8 +57,8 @@ IncrMidiNotesMapping::IncrMidiNotesMapping (int& periodSizeReference, ScaleStruc
 
     singleChannelButton.reset (new juce::ToggleButton ("singleChannelButton"));
     addAndMakeVisible (singleChannelButton.get());
-    singleChannelButton->setTooltip (TRANS("Only the MIDI notes from a single channel"));
-    singleChannelButton->setButtonText (TRANS("Single channel"));
+    singleChannelButton->setTooltip (juce::translate("Only the MIDI notes from a single channel"));
+    singleChannelButton->setButtonText (juce::translate("Single channel"));
     singleChannelButton->setConnectedEdges (juce::Button::ConnectedOnTop);
     singleChannelButton->setRadioGroupId (1);
     singleChannelButton->addListener (this);
@@ -67,11 +67,11 @@ IncrMidiNotesMapping::IncrMidiNotesMapping (int& periodSizeReference, ScaleStruc
 
     channelBox.reset (new juce::ComboBox ("channelBox"));
     addAndMakeVisible (channelBox.get());
-    channelBox->setTooltip (TRANS("The MIDI channel (in case of single channel)"));
+    channelBox->setTooltip (juce::translate("The MIDI channel (in case of single channel)"));
     channelBox->setEditableText (false);
     channelBox->setJustificationType (juce::Justification::centredLeft);
     channelBox->setTextWhenNothingSelected (juce::String());
-    channelBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    channelBox->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
     channelBox->addListener (this);
 
     channelBox->setBounds (184, 40, 56, 24);
@@ -272,4 +272,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

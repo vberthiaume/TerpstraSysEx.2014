@@ -42,14 +42,14 @@ CalibrationDlg::CalibrationDlg (const LumatoneEditorState& stateIn)
 
     btnStart.reset (new juce::TextButton ("btnStart"));
     addAndMakeVisible (btnStart.get());
-    btnStart->setButtonText (TRANS("Start calibration"));
+    btnStart->setButtonText (juce::translate("Start calibration"));
     btnStart->addListener (this);
 
     btnStart->setBounds (16, 176, 144, 24);
 
     btnStop.reset (new juce::TextButton ("btnStop"));
     addAndMakeVisible (btnStop.get());
-    btnStop->setButtonText (TRANS("End calibration"));
+    btnStop->setButtonText (juce::translate("End calibration"));
     btnStop->addListener (this);
 
     btnStop->setBounds (304, 176, 144, 24);

@@ -110,7 +110,7 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
 
     startingPointBox->setBounds(8, 368, 150, 24);
 
-    labelPeriodSize.reset(new juce::Label("labelPeriodSize", TRANS("Period")));
+    labelPeriodSize.reset(new juce::Label("labelPeriodSize", juce::translate("Period")));
     addAndMakeVisible(labelPeriodSize.get());
     labelPeriodSize->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
 
@@ -129,7 +129,7 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
 
     setColourToggleButton.reset (new juce::ToggleButton ("setColourToggleButton"));
     addAndMakeVisible (setColourToggleButton.get());
-    setColourToggleButton->setButtonText (TRANS("ColourAssignment"));
+    setColourToggleButton->setButtonText (juce::translate("ColourAssignment"));
     setColourToggleButton->addListener (this);
 
     setColourToggleButton->setBounds (8, 264, 152, 24);
@@ -177,15 +177,15 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
     startingPointBox->setEditableText (false);
     startingPointBox->setJustificationType (juce::Justification::centredLeft);
     startingPointBox->setTextWhenNothingSelected (juce::String());
-    startingPointBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    startingPointBox->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
     startingPointBox->addListener (this);
 
     startingPointBox->setBounds (8, 368, 144, 24);
 
     labelStartingPoint.reset (new juce::Label ("labelStartingPoint",
-                                               TRANS("Starting value")));
+                                               juce::translate("Starting value")));
     addAndMakeVisible (labelStartingPoint.get());
-    labelStartingPoint->setTooltip (TRANS("Value that will be assigned to the key at mouse pposition when clicking"));
+    labelStartingPoint->setTooltip (juce::translate("Value that will be assigned to the key at mouse pposition when clicking"));
     labelStartingPoint->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelStartingPoint->setJustificationType (juce::Justification::centredLeft);
     labelStartingPoint->setEditable (false, false, false);
@@ -195,7 +195,7 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
     labelStartingPoint->setBounds (8, 344, 150, 24);
 
     labelHorizontalSteps.reset (new juce::Label ("labelHorizontalSteps",
-                                                 TRANS("Horizontal steps")));
+                                                 juce::translate("Horizontal steps")));
     addAndMakeVisible (labelHorizontalSteps.get());
     labelHorizontalSteps->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelHorizontalSteps->setJustificationType (juce::Justification::centredLeft);
@@ -218,7 +218,7 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
     editHorizontalSteps->setBounds (216, 368, 40, 24);
 
     labelRightUpwardSteps.reset (new juce::Label ("labelRightUpwardSteps",
-                                                  TRANS("Right upward steps")));
+                                                  juce::translate("Right upward steps")));
     addAndMakeVisible (labelRightUpwardSteps.get());
     labelRightUpwardSteps->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelRightUpwardSteps->setJustificationType (juce::Justification::centredLeft);
@@ -241,7 +241,7 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
     editRightUpwardSteps->setBounds (168, 336, 39, 24);
 
     editInstructionText.reset (new juce::Label ("editInstructionText",
-                                                TRANS("Fill a line or the whole field with constant step distances. \n"
+                                                juce::translate("Fill a line or the whole field with constant step distances. \n"
                                                 "Click on desired key field to start.")));
     addAndMakeVisible (editInstructionText.get());
     editInstructionText->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
@@ -253,7 +253,7 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
     editInstructionText->setBounds (8, 200, 296, 48);
 
     groupMapping.reset (new juce::GroupComponent ("groupMapping",
-                                                  TRANS("Mapping")));
+                                                  juce::translate("Mapping")));
     addAndMakeVisible (groupMapping.get());
 
     groupMapping->setBounds (8, 40, 304, 152);
@@ -263,15 +263,15 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
     cbMappingType->setEditableText (false);
     cbMappingType->setJustificationType (juce::Justification::centredLeft);
     cbMappingType->setTextWhenNothingSelected (juce::String());
-    cbMappingType->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    cbMappingType->addItem (TRANS("MIDI notes, increasing order"), 1);
-    cbMappingType->addItem (TRANS("Scala KBM mappings"), 2);
+    cbMappingType->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
+    cbMappingType->addItem (juce::translate("MIDI notes, increasing order"), 1);
+    cbMappingType->addItem (juce::translate("Scala KBM mappings"), 2);
     cbMappingType->addListener (this);
 
     cbMappingType->setBounds (64, 64, 240, 24);
 
     labelMappingType.reset (new juce::Label ("labelMappingType",
-                                             TRANS("Type:")));
+                                             juce::translate("Type:")));
     addAndMakeVisible (labelMappingType.get());
     labelMappingType->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelMappingType->setJustificationType (juce::Justification::centredLeft);
@@ -283,25 +283,25 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
 
     btnScaleStructureEditor.reset (new juce::TextButton ("btnScaleStructureEditor"));
     addAndMakeVisible (btnScaleStructureEditor.get());
-    btnScaleStructureEditor->setTooltip (TRANS("Show/hide scale structure editor"));
-    btnScaleStructureEditor->setButtonText (TRANS("Scale Wheel"));
+    btnScaleStructureEditor->setTooltip (juce::translate("Show/hide scale structure editor"));
+    btnScaleStructureEditor->setButtonText (juce::translate("Scale Wheel"));
     btnScaleStructureEditor->addListener (this);
 
     btnScaleStructureEditor->setBounds (160, 278, 152, 32);
 
     periodSizeBox.reset (new juce::ComboBox ("periodSizeBox"));
     addAndMakeVisible (periodSizeBox.get());
-    periodSizeBox->setTooltip (TRANS("Number of tones per period interval (octave)"));
+    periodSizeBox->setTooltip (juce::translate("Number of tones per period interval (octave)"));
     periodSizeBox->setEditableText (false);
     periodSizeBox->setJustificationType (juce::Justification::centredLeft);
     periodSizeBox->setTextWhenNothingSelected (juce::String());
-    periodSizeBox->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
+    periodSizeBox->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
     periodSizeBox->addListener (this);
 
     periodSizeBox->setBounds (200, 8, 56, 24);
 
     labelPeriodSize.reset (new juce::Label ("labelPeriodSize",
-                                            TRANS("Period:")));
+                                            juce::translate("Period:")));
     addAndMakeVisible (labelPeriodSize.get());
     labelPeriodSize->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelPeriodSize->setJustificationType (juce::Justification::centredLeft);
@@ -313,15 +313,15 @@ IsomorphicMassAssign::IsomorphicMassAssign(const LumatoneEditorState& stateIn)
 
     setColourToggleButton.reset (new juce::ToggleButton ("setColourToggleButton"));
     addAndMakeVisible (setColourToggleButton.get());
-    setColourToggleButton->setButtonText (TRANS("Assign Colour"));
+    setColourToggleButton->setButtonText (juce::translate("Assign Colour"));
     setColourToggleButton->addListener (this);
 
     setColourToggleButton->setBounds (8, 264, 152, 24);
 
     setStepsToggleButton.reset (new juce::ToggleButton ("setStepsToggleButton"));
     addAndMakeVisible (setStepsToggleButton.get());
-    setStepsToggleButton->setTooltip (TRANS("Allow editing steps through the Scale Wheel"));
-    setStepsToggleButton->setButtonText (TRANS("Assign Steps"));
+    setStepsToggleButton->setTooltip (juce::translate("Allow editing steps through the Scale Wheel"));
+    setStepsToggleButton->setButtonText (juce::translate("Assign Steps"));
     setStepsToggleButton->addListener (this);
 
     setStepsToggleButton->setBounds (8, 296, 119, 24);

@@ -69,18 +69,18 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 	btnLoadFile.reset(new juce::TextButton("btnLoadFile"));
 	addAndMakeVisible(btnLoadFile.get());
-	btnLoadFile->setButtonText(TRANS("LoadFile"));
+	btnLoadFile->setButtonText(juce::translate("LoadFile"));
 	btnLoadFile->setCommandToTrigger(commandManager, Lumatone::Menu::openSysExMapping, true);
 
 	btnSaveFile.reset(new juce::TextButton("btnSaveFile"));
 	addAndMakeVisible(btnSaveFile.get());
-	btnSaveFile->setButtonText(TRANS("SaveFile"));
+	btnSaveFile->setButtonText(juce::translate("SaveFile"));
 	btnSaveFile->setCommandToTrigger(commandManager, Lumatone::Menu::saveSysExMappingAs, true);
 
 	btnImportFile.reset(new juce::TextButton("buttonReceive"));
 	addAndMakeVisible(btnImportFile.get());
-	btnImportFile->setTooltip(TRANS("ImportTooltip"));
-	btnImportFile->setButtonText(TRANS("Import from Lumatone"));
+	btnImportFile->setTooltip(juce::translate("ImportTooltip"));
+	btnImportFile->setButtonText(juce::translate("Import from Lumatone"));
 	btnImportFile->setCommandToTrigger(commandManager, Lumatone::Menu::importSysExMapping, true);
 
 

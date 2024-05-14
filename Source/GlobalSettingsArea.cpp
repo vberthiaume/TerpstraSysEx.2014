@@ -38,7 +38,7 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     //[/Constructor_pre]
 
     lblPresetButtonColours.reset (new juce::Label ("lblPresetButtonColours",
-                                                   TRANS("Preset Button Colours:")));
+                                                   juce::translate("Preset Button Colours:")));
     addAndMakeVisible (lblPresetButtonColours.get());
     lblPresetButtonColours->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     lblPresetButtonColours->setJustificationType (juce::Justification::centredLeft);
@@ -47,7 +47,7 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblPresetButtonColours->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
     lblColourInactiveMacroButton.reset (new juce::Label ("lblColourInactiveMacroButton",
-                                                         TRANS("inactive")));
+                                                         juce::translate("inactive")));
     addAndMakeVisible (lblColourInactiveMacroButton.get());
     lblColourInactiveMacroButton->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     lblColourInactiveMacroButton->setJustificationType (juce::Justification::centredLeft);
@@ -56,7 +56,7 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
     lblColourInactiveMacroButton->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
 
     lblColourActiveMacroButton.reset (new juce::Label ("lblColourActiveMacroButton",
-                                                       TRANS("active")));
+                                                       juce::translate("active")));
     addAndMakeVisible (lblColourActiveMacroButton.get());
     lblColourActiveMacroButton->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     lblColourActiveMacroButton->setJustificationType (juce::Justification::centredLeft);
@@ -66,8 +66,8 @@ GlobalSettingsArea::GlobalSettingsArea (const LumatoneEditorState& stateIn)
 
     settingsButton.reset (new juce::TextButton ("buttonCalibrate"));
     addAndMakeVisible (settingsButton.get());
-    settingsButton->setTooltip (TRANS("Show controls for calibration, setting controller MIDI channels, and updating firmware"));
-    settingsButton->setButtonText (TRANS("Settings"));
+    settingsButton->setTooltip (juce::translate("Show controls for calibration, setting controller MIDI channels, and updating firmware"));
+    settingsButton->setButtonText (juce::translate("Settings"));
     settingsButton->addListener (this);
 
 

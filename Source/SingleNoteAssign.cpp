@@ -39,32 +39,32 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     setName ("SingleNoteAssign");
     noteAutoIncrButton.reset (new juce::ToggleButton ("noteAutoIncrButton"));
     addAndMakeVisible (noteAutoIncrButton.get());
-    noteAutoIncrButton->setButtonText (TRANS("Notes-Per-Click"));
+    noteAutoIncrButton->setButtonText (juce::translate("Notes-Per-Click"));
     noteAutoIncrButton->addListener (this);
 
     channelAutoIncrButton.reset (new juce::ToggleButton ("channelAutoIncrButton"));
     addAndMakeVisible (channelAutoIncrButton.get());
-    channelAutoIncrButton->setButtonText (TRANS("Channels, after Note #:"));
+    channelAutoIncrButton->setButtonText (juce::translate("Channels, after Note #:"));
     channelAutoIncrButton->addListener (this);
 
     setNoteToggleButton.reset (new juce::ToggleButton ("setNoteToggleButton"));
     addAndMakeVisible (setNoteToggleButton.get());
-    setNoteToggleButton->setButtonText (TRANS("Note # (0-127):"));
+    setNoteToggleButton->setButtonText (juce::translate("Note # (0-127):"));
     setNoteToggleButton->addListener (this);
 
     setChannelToggleButton.reset (new juce::ToggleButton ("setChannelToggleButton"));
     addAndMakeVisible (setChannelToggleButton.get());
-    setChannelToggleButton->setButtonText (TRANS("Channel (1-16):"));
+    setChannelToggleButton->setButtonText (juce::translate("Channel (1-16):"));
     setChannelToggleButton->addListener (this);
 
     setColourToggleButton.reset (new juce::ToggleButton ("setColourToggleButton"));
     addAndMakeVisible (setColourToggleButton.get());
-    setColourToggleButton->setButtonText (TRANS("Key Colour: "));
+    setColourToggleButton->setButtonText (juce::translate("Key Colour: "));
     setColourToggleButton->addListener (this);
 
     keyTypeToggleButton.reset (new juce::ToggleButton ("keyTypeToggleButton"));
     addAndMakeVisible (keyTypeToggleButton.get());
-    keyTypeToggleButton->setButtonText (TRANS("Key type:"));
+    keyTypeToggleButton->setButtonText (juce::translate("Key type:"));
     keyTypeToggleButton->addListener (this);
 
     keyTypeCombo.reset (new juce::ComboBox ("keyTypeCombo"));
@@ -72,16 +72,16 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     keyTypeCombo->setEditableText (false);
     keyTypeCombo->setJustificationType (juce::Justification::centredLeft);
     keyTypeCombo->setTextWhenNothingSelected (juce::String());
-    keyTypeCombo->setTextWhenNoChoicesAvailable (TRANS("(no choices)"));
-    keyTypeCombo->addItem (TRANS("Note on/Note off"), 1);
-    keyTypeCombo->addItem (TRANS("Continuous controller"), 2);
-    keyTypeCombo->addItem (TRANS("Lumatouch"), 3);
-    keyTypeCombo->addItem (TRANS("Disabled"), 4);
+    keyTypeCombo->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
+    keyTypeCombo->addItem (juce::translate("Note on/Note off"), 1);
+    keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
+    keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
+    keyTypeCombo->addItem (juce::translate("Disabled"), 4);
     keyTypeCombo->addListener (this);
 
     noteInput.reset (new juce::Slider ("noteInput"));
     addAndMakeVisible (noteInput.get());
-    noteInput->setTooltip (TRANS("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
+    noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
     noteInput->setRange (0, 127, 1);
     noteInput->setSliderStyle (juce::Slider::IncDecButtons);
     noteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
@@ -92,7 +92,7 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
     colourSubwindow->setName ("colourSubwindow");
 
     autoIncrementLabel.reset (new juce::Label ("autoIncrementLabel",
-                                               TRANS("Auto-Increment")));
+                                               juce::translate("Auto-Increment")));
     addAndMakeVisible (autoIncrementLabel.get());
     autoIncrementLabel->setFont (juce::Font (15.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     autoIncrementLabel->setJustificationType (juce::Justification::centredLeft);
@@ -115,7 +115,7 @@ SingleNoteAssign::SingleNoteAssign (const LumatoneEditorState& stateIn)
 
     channelAutoIncrNoteInput.reset (new juce::Slider ("channelAutoIncrNoteInput"));
     addAndMakeVisible (channelAutoIncrNoteInput.get());
-    channelAutoIncrNoteInput->setTooltip (TRANS("After reaching this note, the channel is incremented and the note is reset to 0."));
+    channelAutoIncrNoteInput->setTooltip (juce::translate("After reaching this note, the channel is incremented and the note is reset to 0."));
     channelAutoIncrNoteInput->setRange (0, 127, 1);
     channelAutoIncrNoteInput->setSliderStyle (juce::Slider::IncDecButtons);
     channelAutoIncrNoteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
