@@ -95,7 +95,7 @@ private:
 	// Edit fields for setting key and button parameters, and edits for single keys
 	std::unique_ptr<NoteEditArea>				noteEditArea;
 	std::unique_ptr<MappingSettingsComponent>	mappingSettingsComponent;
-	
+
 	std::unique_ptr<CurvesArea> 			curvesArea;
 	std::unique_ptr<GlobalSettingsArea>		globalSettingsArea;
 
@@ -117,9 +117,9 @@ private:
 
     juce::Rectangle<int> controlsArea;
 
-    const float headerHeight                = 0.0776f;
+    const float headerHeight                = 0.0837f;
 
-    const float controlsAreaY               = 0.5273f;
+    const float controlsAreaY               = 0.662f;
     const float controlsAreaHeight          = 0.43f;
 
     const float assignMarginX               = 0.043f;
