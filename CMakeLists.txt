@@ -8,7 +8,7 @@ add_subdirectory($ENV{juce_DIR} subprojects/juce)
 juce_add_gui_app(
     LumatoneEditor
         PRODUCT_NAME "Lumatone Editor"
-        VERSION "1.2.0"
+        VERSION "1.5.0b"
         BUNDLE_ID "com.Lumatone.LumatoneEditor"
         # ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/Assets/PNG/AppIcon@1x.png"
         # ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/Assets/PNG/AppIcon@3x.png"
@@ -44,7 +44,7 @@ if (UNIX)
     set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
     set(LibraryInclude "${LibraryPath}/include")
     set(LibraryCode "${LibraryInclude}/libssh2.h")
-    
+
     add_library(SSHLib SHARED IMPORTED)
     set_target_properties( SSHLib PROPERTIES IMPORTED_LOCATION "${LibraryPath}/lib/libssh2.dylib")
 endif()
@@ -140,4 +140,3 @@ target_link_libraries(LumatoneEditor
 #         COMMAND install_name_tool -change @rpath/libssh2.dylib @loader_path/../Frameworks/libssh2.dylib $<TARGET_FILE:${JUCE_PRODUCT_NAME}>
 #     )
 # endif()
-

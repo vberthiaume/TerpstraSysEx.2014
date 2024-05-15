@@ -19,9 +19,7 @@
 class LumatoneKeyboardComponent;
 
 class MidiEditArea;
-class NoteEditArea;
-class MappingSettingsComponent;
-class CurvesArea;
+class MappingSettingsPanel;
 class GlobalSettingsArea;
 
 
@@ -44,13 +42,13 @@ public:
 	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
 
 	juce::TabbedButtonBar* getOctaveBoardSelectorTab();
-	CurvesArea* getCurvesArea() { return curvesArea.get(); }
+	// CurvesArea* getCurvesArea() { return curvesArea.get(); }
 
 	// Board edit operations
-	LumatoneAction* createDeleteCurrentSectionAction();
-	bool copyCurrentSubBoardData();
-	LumatoneAction* createPasteCurrentSectionAction();
-    LumatoneAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
+	LumatoneAction* createDeleteCurrentSectionAction(){return nullptr;};
+	bool copyCurrentSubBoardData(){return false;};
+	LumatoneAction* createPasteCurrentSectionAction(){return nullptr;};
+    LumatoneAction* createModifiedPasteCurrentSectionAction(CommandID commandID){return nullptr;};
     bool canPasteCopiedSubBoard() const;
 
 	// Implementation of ChangeListener
@@ -93,10 +91,10 @@ private:
 	std::unique_ptr<LumatoneKeyboardComponent> 	allKeysOverview;
 
 	// Edit fields for setting key and button parameters, and edits for single keys
-	std::unique_ptr<NoteEditArea>				noteEditArea;
-	std::unique_ptr<MappingSettingsComponent>	mappingSettingsComponent;
+	// std::unique_ptr<NoteEditArea>				noteEditArea;
+	std::unique_ptr<MappingSettingsPanel>	mappingSettingsComponent;
 
-	std::unique_ptr<CurvesArea> 			curvesArea;
+	// std::unique_ptr<CurvesArea> 			curvesArea;
 	std::unique_ptr<GlobalSettingsArea>		globalSettingsArea;
 
     std::unique_ptr<juce::TabbedComponent> 	sectionTabs;
@@ -115,9 +113,19 @@ private:
 	//==============================================================================
 	// Position and Size helpers
 
+	int contentMargin;
+	int contentWidth;
+
+	int controlsLabelYPos;
     juce::Rectangle<int> controlsArea;
+    juce::Rectangle<int> controlsAreaBackground;
+
+	const float contentWidthRatio 			= 0.871f;
 
     const float headerHeight                = 0.0837f;
+
+	const float controlSectionTabsY			= 0.63f;
+	// const float controlsLabelHeight 		= 0.033f;
 
     const float controlsAreaY               = 0.662f;
     const float controlsAreaHeight          = 0.43f;

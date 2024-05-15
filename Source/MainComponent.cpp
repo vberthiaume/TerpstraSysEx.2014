@@ -15,12 +15,12 @@
 #include "LumatoneMenu.h"
 
 #include "MidiEditArea.h"
-#include "NoteEditArea.h"
-#include "IsomorphicMassAssign.h"
+// #include "NoteEditArea.h"
+// #include "IsomorphicMassAssign.h"
 
-#include "CurvesArea.h"
+// #include "CurvesArea.h"
 #include "GlobalSettingsArea.h"
-#include "MappingSettingsComponent.h"
+#include "MappingSettingsPanel.h"
 
 #include "./ColourPaletteWindow.h"
 
@@ -47,14 +47,14 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	addAndMakeVisible(allKeysOverview.get());
 
 	// Edit function area
-	noteEditArea.reset(new NoteEditArea(stateIn));
-	noteEditArea->getOctaveBoardSelectorTab()->addChangeListener(this);
-	noteEditArea->getColourViewComponent()->addListener(this); // Open up ColourPaletteWindow
+	// noteEditArea.reset(new NoteEditArea(stateIn));
+	// noteEditArea->getOctaveBoardSelectorTab()->addChangeListener(this);
+	// noteEditArea->getColourViewComponent()->addListener(this); // Open up ColourPaletteWindow
 
-	mappingSettingsComponent = std::make_unique<MappingSettingsComponent>(stateIn);
+	mappingSettingsComponent = std::make_unique<MappingSettingsPanel>(stateIn);
 
-	curvesArea.reset(new CurvesArea(stateIn));
-	addAndMakeVisible(curvesArea.get());
+	// curvesArea.reset(new CurvesArea(stateIn));
+	// addAndMakeVisible(curvesArea.get());
 
 	globalSettingsArea.reset(new GlobalSettingsArea(stateIn));
 	addAndMakeVisible(globalSettingsArea.get());
@@ -62,9 +62,9 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 	sectionTabs = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::TabsAtTop);
 	addAndMakeVisible(*sectionTabs);
-	sectionTabs->addTab("Key Editor", juce::Colour(), noteEditArea.get(), false);
-	sectionTabs->addTab("AutoGenerator", juce::Colour(), noteEditArea.get(), false);
-	sectionTabs->addTab("Advanced", juce::Colour(), noteEditArea.get(), false);
+	sectionTabs->addTab("Key Editor", juce::Colour(), mappingSettingsComponent.get(), false);
+	sectionTabs->addTab("AutoGenerator", juce::Colour(), mappingSettingsComponent.get(), false);
+	sectionTabs->addTab("Advanced", juce::Colour(), mappingSettingsComponent.get(), false);
 	sectionTabs->addTab("Mapping Settings", juce::Colour(), mappingSettingsComponent.get(), false);
 
 	btnLoadFile.reset(new juce::TextButton("btnLoadFile"));
@@ -101,10 +101,10 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
 
 	// Select first board and first key
-	noteEditArea->getOctaveBoardSelectorTab()->setCurrentTabIndex(0, true);
+	// noteEditArea->getOctaveBoardSelectorTab()->setCurrentTabIndex(0, true);
 	// The above call is supposed to update changeListener - but apparently doesn't... Call it manually then. XXX
-	changeListenerCallback(noteEditArea->getOctaveBoardSelectorTab());
-    noteEditArea->changeSingleKeySelection(0);
+	// changeListenerCallback(noteEditArea->getOctaveBoardSelectorTab());
+    // noteEditArea->changeSingleKeySelection(0);
 
 	btnLoadFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::LoadIcon);
 	btnSaveFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::SaveIcon);
@@ -113,6 +113,9 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 	// Only enable when connected
 	btnImportFile->setEnabled(false);
+
+	// DEBUG
+	sectionTabs->setCurrentTabIndex(3);
 
     // Initialize mapping structure
     //deleteAll();
@@ -126,10 +129,10 @@ MainContentComponent::~MainContentComponent()
 	btnSaveFile = nullptr;
 	btnImportFile = nullptr;
 
-	globalSettingsArea = nullptr;
-	curvesArea = nullptr;
+	// globalSettingsArea = nullptr;
+	// curvesArea = nullptr;
 	mappingSettingsComponent = nullptr;
-	noteEditArea = nullptr;
+	// noteEditArea = nullptr;
 
 	midiEditArea = nullptr;
 	allKeysOverview = nullptr;
@@ -140,7 +143,7 @@ MainContentComponent::~MainContentComponent()
 
 void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
-	noteEditArea->saveStateToPropertiesFile(propertiesFile);
+	// noteEditArea->saveStateToPropertiesFile(propertiesFile);
 	// globalSettingsArea->saveStateToPropertiesFile(propertiesFile);
 }
 
@@ -169,95 +172,95 @@ void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesF
 //	newData = *getMappingData();
 //}
 
-TabbedButtonBar *MainContentComponent::getOctaveBoardSelectorTab()
-{
-	return  noteEditArea->getOctaveBoardSelectorTab();
-}
+// TabbedButtonBar *MainContentComponent::getOctaveBoardSelectorTab()
+// {
+// 	return  noteEditArea->getOctaveBoardSelectorTab();
+// }
 
-LumatoneAction* MainContentComponent::createDeleteCurrentSectionAction()
-{
-	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
-	if (currentSetSelection >= 0 && currentSetSelection < getOctaveBoardSize())
-	{
-        auto keySet = LumatoneBoard();
-        return new LumatoneEditAction::SectionEditAction(this, currentSetSelection, keySet);
-	}
-	else
-		return nullptr;
-}
+// LumatoneAction* MainContentComponent::createDeleteCurrentSectionAction()
+// {
+// 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
+// 	if (currentSetSelection >= 0 && currentSetSelection < getOctaveBoardSize())
+// 	{
+//         auto keySet = LumatoneBoard();
+//         return new LumatoneEditAction::SectionEditAction(this, currentSetSelection, keySet);
+// 	}
+// 	else
+// 		return nullptr;
+// }
 
-bool MainContentComponent::copyCurrentSubBoardData()
-{
-	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
-	if (currentSetSelection >= 0 && currentSetSelection < getOctaveBoardSize())
-	{
-		*copiedSubBoardData = getBoard(currentSetSelection);
-		return true;
-	}
-	else
-		return false;
-}
+// bool MainContentComponent::copyCurrentSubBoardData()
+// {
+// 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
+// 	if (currentSetSelection >= 0 && currentSetSelection < getOctaveBoardSize())
+// 	{
+// 		*copiedSubBoardData = getBoard(currentSetSelection);
+// 		return true;
+// 	}
+// 	else
+// 		return false;
+// }
 
-LumatoneAction* MainContentComponent::createPasteCurrentSectionAction()
-{
-	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
-	if (currentSetSelection >= 0 && currentSetSelection < getNumBoards()
-		&& !copiedSubBoardData->isEmpty())
-	{
-		return new LumatoneEditAction::SectionEditAction(this, currentSetSelection, *copiedSubBoardData);
-	}
-	else
-		return nullptr;
-}
+// LumatoneAction* MainContentComponent::createPasteCurrentSectionAction()
+// {
+// 	auto currentSetSelection = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
+// 	if (currentSetSelection >= 0 && currentSetSelection < getNumBoards()
+// 		&& !copiedSubBoardData->isEmpty())
+// 	{
+// 		return new LumatoneEditAction::SectionEditAction(this, currentSetSelection, *copiedSubBoardData);
+// 	}
+// 	else
+// 		return nullptr;
+// }
 
-LumatoneAction* MainContentComponent::createModifiedPasteCurrentSectionAction(CommandID commandID)
-{
-    auto currentSetSelectionIndex = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
-    if (currentSetSelectionIndex >= 0 && currentSetSelectionIndex < getNumBoards()
-        && !copiedSubBoardData->isEmpty())
-    {
+// LumatoneAction* MainContentComponent::createModifiedPasteCurrentSectionAction(CommandID commandID)
+// {
+//     auto currentSetSelectionIndex = noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex();
+//     if (currentSetSelectionIndex >= 0 && currentSetSelectionIndex < getNumBoards()
+//         && !copiedSubBoardData->isEmpty())
+//     {
 
-		auto modifiedSection = getBoard(currentSetSelectionIndex);
-		auto octaveSize = getOctaveBoardSize();
+// 		auto modifiedSection = getBoard(currentSetSelectionIndex);
+// 		auto octaveSize = getOctaveBoardSize();
 
-        for (int i = 0; i < octaveSize; i++)
-        {
-            LumatoneKey copiedKey = copiedSubBoardData->getKey(i);
-            LumatoneKey currentSectionKey = getKey(currentSetSelectionIndex, i);
+//         for (int i = 0; i < octaveSize; i++)
+//         {
+//             LumatoneKey copiedKey = copiedSubBoardData->getKey(i);
+//             LumatoneKey currentSectionKey = getKey(currentSetSelectionIndex, i);
 
-            switch (commandID)
-            {
-            case Lumatone::Menu::commandIDs::pasteOctaveBoardNotes:
-                currentSectionKey.setNoteOrCC(copiedKey.getMidiNumber());
-                break;
+//             switch (commandID)
+//             {
+//             case Lumatone::Menu::commandIDs::pasteOctaveBoardNotes:
+//                 currentSectionKey.setNoteOrCC(copiedKey.getMidiNumber());
+//                 break;
 
-            case Lumatone::Menu::commandIDs::pasteOctaveBoardChannels:
-                currentSectionKey.setChannelNumber(copiedKey.getMidiChannel());
-                break;
+//             case Lumatone::Menu::commandIDs::pasteOctaveBoardChannels:
+//                 currentSectionKey.setChannelNumber(copiedKey.getMidiChannel());
+//                 break;
 
-            case Lumatone::Menu::commandIDs::pasteOctaveBoardColours:
-                currentSectionKey.setColour(copiedKey.getColour());
-                break;
+//             case Lumatone::Menu::commandIDs::pasteOctaveBoardColours:
+//                 currentSectionKey.setColour(copiedKey.getColour());
+//                 break;
 
-            case Lumatone::Menu::commandIDs::pasteOctaveBoardTypes:
-                currentSectionKey.setKeyType(copiedKey.getType());
-				currentSectionKey.setDefaultCCFader(copiedKey.isCCFaderDefault());
-                break;
+//             case Lumatone::Menu::commandIDs::pasteOctaveBoardTypes:
+//                 currentSectionKey.setKeyType(copiedKey.getType());
+// 				currentSectionKey.setDefaultCCFader(copiedKey.isCCFaderDefault());
+//                 break;
 
-            default:
-                jassertfalse;
-				currentSectionKey = copiedKey;
-				break;
-            }
+//             default:
+//                 jassertfalse;
+// 				currentSectionKey = copiedKey;
+// 				break;
+//             }
 
-			modifiedSection.setKey(currentSectionKey, i);
-        }
+// 			modifiedSection.setKey(currentSectionKey, i);
+//         }
 
-        return new LumatoneEditAction::SectionEditAction(this, currentSetSelectionIndex, modifiedSection);
-    }
-    else
-        return nullptr;
-}
+//         return new LumatoneEditAction::SectionEditAction(this, currentSetSelectionIndex, modifiedSection);
+//     }
+//     else
+//         return nullptr;
+// }
 
 bool MainContentComponent::canPasteCopiedSubBoard() const
 {
@@ -267,8 +270,8 @@ bool MainContentComponent::canPasteCopiedSubBoard() const
 void MainContentComponent::updateDeveloperMode()
 {
 	// TODO This can just be implemented individually in handleStatePropertyChange
-	curvesArea->setDeveloperMode(inDeveloperMode);
-    globalSettingsArea->setDeveloperMode(inDeveloperMode);
+	// curvesArea->setDeveloperMode(inDeveloperMode);
+    // globalSettingsArea->setDeveloperMode(inDeveloperMode);
 }
 
 void MainContentComponent::connectionStateChanged(ConnectionState state)
@@ -387,10 +390,10 @@ void MainContentComponent::connectionStateChanged(ConnectionState state)
 
 void MainContentComponent::changeListenerCallback(ChangeBroadcaster *source)
 {
-	if (source == noteEditArea->getOctaveBoardSelectorTab())
-	{
-		// allKeysOverview->setCurrentSetSelection(noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex());
-	}
+	// if (source == noteEditArea->getOctaveBoardSelectorTab())
+	// {
+	// 	// allKeysOverview->setCurrentSetSelection(noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex());
+	// }
 }
 
 void MainContentComponent::buttonClicked(Button* btn)
@@ -406,21 +409,21 @@ void MainContentComponent::buttonClicked(Button* btn)
 		ColourPaletteWindow* paletteWindow = new ColourPaletteWindow(*this);
 		paletteWindow->setSize(proportionOfWidth(popupWidth), proportionOfHeight(popupHeight));
 
-        if (btn == noteEditArea->getColourViewComponent())
-        {
-            colourEdit = noteEditArea->getColourViewComponent();
+        // if (btn == noteEditArea->getColourViewComponent())
+        // {
+        //     colourEdit = noteEditArea->getColourViewComponent();
 
-			auto colourTextEditor = noteEditArea->getSingleNoteColourTextEditor();
-            paletteWindow->listenToColourSelection(static_cast<ColourSelectionListener*>(colourTextEditor));
+		// 	auto colourTextEditor = noteEditArea->getSingleNoteColourTextEditor();
+        //     paletteWindow->listenToColourSelection(static_cast<ColourSelectionListener*>(colourTextEditor));
 
-            // Shouldn't be necessary when Isomorphic is moved from dev to public
-            auto isomorphicPanel = noteEditArea->getIsomorphicMassAssignPanel();
-            if (isomorphicPanel != nullptr)
-                paletteWindow->listenToColourSelection(static_cast<ColourSelectionListener*>(isomorphicPanel));
+        //     // Shouldn't be necessary when Isomorphic is moved from dev to public
+        //     auto isomorphicPanel = noteEditArea->getIsomorphicMassAssignPanel();
+        //     if (isomorphicPanel != nullptr)
+        //         paletteWindow->listenToColourSelection(static_cast<ColourSelectionListener*>(isomorphicPanel));
 
-			paletteWindow->addColourSelectorToGroup(noteEditArea.get());
-			paletteWindow->setCurrentColourSelector(noteEditArea->getSingleNoteColourTextEditor());
-        }
+		// 	paletteWindow->addColourSelectorToGroup(noteEditArea.get());
+		// 	paletteWindow->setCurrentColourSelector(noteEditArea->getSingleNoteColourTextEditor());
+        // }
 
 		Rectangle<int> componentArea = colourEdit->getScreenBounds().translated(-getScreenX(), -getScreenY());
 
@@ -441,7 +444,9 @@ void MainContentComponent::paint (Graphics& g)
 	g.fillAll(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
 
 	g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
-	g.fillRect(controlsArea);
+	// g.setColour(juce::Colours::green);
+	g.fillRect(controlsAreaBackground);
+
 }
 
 void MainContentComponent::resized()
@@ -450,7 +455,10 @@ void MainContentComponent::resized()
     // If you add any child components, this is where you should
     // update their positions.
 	int newWidth = getWidth();
-	int newHeight = getHeight();
+	// int newHeight = getHeight();
+
+	contentWidth = proportionOfWidth(contentWidthRatio);
+	contentMargin = juce::roundToInt((newWidth - contentWidth) * 0.5);
 
 	// Logo, MIDI edit area and connection state
 	int midiAreaHeight = proportionOfHeight(headerHeight);
@@ -459,13 +467,18 @@ void MainContentComponent::resized()
 	// Bounds for controls, where background is darker
 	int footerY = proportionOfHeight(footerAreaY);
 	int footerHeight = getHeight() - footerY;
-	controlsArea = getBounds().withTop(proportionOfHeight(controlsAreaY)).withBottom(footerY);
+
+	controlsAreaBackground = getBounds().withTop(proportionOfHeight(controlsAreaY)).withBottom(footerY);
+	controlsArea = controlsAreaBackground.withSizeKeepingCentre(contentWidth, controlsAreaBackground.getHeight());
+
+	controlsLabelYPos = proportionOfHeight(controlSectionTabsY);
 
 	// All keys overview/virtual keyboard playing
-	int newKeysOverviewAreaHeight = jmax(controlsArea.getY() - midiAreaHeight, MINIMALTERPSTRAKEYSETAREAHEIGHT);
-	int keyboardMarginTop = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicMarginTop);
-	int keyboardHeight = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicH);
-	allKeysOverview->setBounds(0, midiAreaHeight + keyboardMarginTop, newWidth, keyboardHeight);
+	// int newKeysOverviewAreaHeight = jmax(controlsLabelYPos - midiAreaHeight, MINIMALTERPSTRAKEYSETAREAHEIGHT);
+	// int keyboardMarginTop = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicMarginTop);
+	// int keyboardHeight = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicH);
+
+	allKeysOverview->setBounds(contentMargin, midiAreaHeight, contentWidth, controlsLabelYPos - midiAreaHeight);
 
 	int btnHeight = roundToInt(getHeight() * fileButtonH);
 	int btnMargin = roundToInt(getWidth() * saveloadMarginW);
@@ -487,20 +500,22 @@ void MainContentComponent::resized()
 	// noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
 	// noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
 
-	sectionTabs->setBounds(proportionOfWidth(assignMarginX), controlsArea.getY(), proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
+	sectionTabs->setBounds(contentMargin, controlsLabelYPos, contentWidth, footerY - controlsArea.getY());
 
 	// generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
 	// pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
 
-	curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
+	// curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
 
-	globalSettingsArea->setBounds(getLocalBounds()
-		.withTop(roundToInt(getHeight() * footerAreaY))
-		.withTrimmedRight(footerHeight)
-	);
+	// globalSettingsArea->setBounds(getLocalBounds()
+	// 	.withTop(roundToInt(getHeight() * footerAreaY))
+	// 	.withTrimmedRight(footerHeight)
+	// );
 
 	resizeLabelWithHeight(lblAppName.get(), roundToInt(footerHeight * lumatoneVersionHeight), 1.0f, " ");
-	lblAppName->setTopLeftPosition(proportionOfWidth(lumatoneVersionMarginX), footerY + (footerHeight - lblAppName->getHeight()) * 0.5f);
+	lblAppName->setTopLeftPosition(
+		proportionOfWidth(lumatoneVersionMarginX),
+		footerY + juce::roundToInt((footerHeight - lblAppName->getHeight()) * 0.5f));
 
 	resizeLabelWithHeight(lblAppVersion.get(), roundToInt(lblAppName->getHeight() * 0.75f));
 	lblAppVersion->setTopLeftPosition(lblAppName->getRight(), lblAppName->getBottom() - lblAppVersion->getHeight());
