@@ -181,135 +181,135 @@ int IncrMidiNotesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
 //==============================================================================
 // KBM files
 
-KBMFilesMappingLogic::KBMFilesMappingLogic(ScaleStructure& scaleStructureIn, Array<Colour>& colourTableIn)
-    : MappingLogicBase(scaleStructureIn, colourTableIn)
-{
-}
+// KBMFilesMappingLogic::KBMFilesMappingLogic(ScaleStructure& scaleStructureIn, Array<Colour>& colourTableIn)
+//     : MappingLogicBase(scaleStructureIn, colourTableIn)
+// {
+// }
 
-//==============================================================
-// Set parameters
+// //==============================================================
+// // Set parameters
 
-void KBMFilesMappingLogic::setMapping(int subDlgIndex, int midiChannel, KBMMappingDataStructure kbmMappingStructure)
-{
-    jassert(subDlgIndex >= 0 && subDlgIndex < noOfChannels);
+// void KBMFilesMappingLogic::setMapping(int subDlgIndex, int midiChannel, KBMMappingDataStructure kbmMappingStructure)
+// {
+//     jassert(subDlgIndex >= 0 && subDlgIndex < noOfChannels);
 
-    KBMMappingWithChannel channelMapping;
-    channelMapping.channelNumber = midiChannel;
-    channelMapping.mapping = kbmMappingStructure;
+//     KBMMappingWithChannel channelMapping;
+//     channelMapping.channelNumber = midiChannel;
+//     channelMapping.mapping = kbmMappingStructure;
 
-    channelMappingData[subDlgIndex] = channelMapping;
+//     channelMappingData[subDlgIndex] = channelMapping;
 
-    createMappingTable();
-}
+//     createMappingTable();
+// }
 
-void KBMFilesMappingLogic::createMappingTable()
-{
-    mappingTable.clear();
+// void KBMFilesMappingLogic::createMappingTable()
+// {
+//     mappingTable.clear();
 
-    for ( int subTableIndex = 0; subTableIndex < noOfChannels; subTableIndex++)
-    {
-        if (channelMappingData[subTableIndex].channelNumber > 0)
-        {
-            KBMMappingDataStructure::NoteAndFrequencyTable noteAndFrequencyTable =
-                channelMappingData[subTableIndex].mapping.createNoteFrequencyTable();
+//     for ( int subTableIndex = 0; subTableIndex < noOfChannels; subTableIndex++)
+//     {
+//         if (channelMappingData[subTableIndex].channelNumber > 0)
+//         {
+//             KBMMappingDataStructure::NoteAndFrequencyTable noteAndFrequencyTable =
+//                 channelMappingData[subTableIndex].mapping.createNoteFrequencyTable();
 
-            for ( int k = 0; k < noteAndFrequencyTable.size(); k++)
-            {
-                KBMMappingTableEntry tableEntry;
-                tableEntry.channelNumber = channelMappingData[subTableIndex].channelNumber;
-                tableEntry.noteNumber = noteAndFrequencyTable[k].noteNumber;
-                tableEntry.frequency = noteAndFrequencyTable[k].frequency;
+//             for ( int k = 0; k < noteAndFrequencyTable.size(); k++)
+//             {
+//                 KBMMappingTableEntry tableEntry;
+//                 tableEntry.channelNumber = channelMappingData[subTableIndex].channelNumber;
+//                 tableEntry.noteNumber = noteAndFrequencyTable[k].noteNumber;
+//                 tableEntry.frequency = noteAndFrequencyTable[k].frequency;
 
-                mappingTable.add(tableEntry);   // This adds entry only if there is no other entry woth the same frequency.
-            }
-        }
-    }
+//                 mappingTable.add(tableEntry);   // This adds entry only if there is no other entry woth the same frequency.
+//             }
+//         }
+//     }
 
-    // Notify listeners
-    this->listeners.call(&Listener::mappingLogicChanged, this);
-}
+//     // Notify listeners
+//     this->listeners.call(&Listener::mappingLogicChanged, this);
+// }
 
-int KBMFilesMappingLogic::getStartOfMap() const
-{
-    // Start of map is supposed to be the same for all KBM files
-    // ToDo display error/warning message if not so
-    int subTableIndex;
-    for (subTableIndex = 0; subTableIndex < noOfChannels; subTableIndex++)
-    {
-        if (channelMappingData[subTableIndex].channelNumber > 0)
-            break;
-    }
+// int KBMFilesMappingLogic::getStartOfMap() const
+// {
+//     // Start of map is supposed to be the same for all KBM files
+//     // ToDo display error/warning message if not so
+//     int subTableIndex;
+//     for (subTableIndex = 0; subTableIndex < noOfChannels; subTableIndex++)
+//     {
+//         if (channelMappingData[subTableIndex].channelNumber > 0)
+//             break;
+//     }
 
-    if (subTableIndex == noOfChannels)
-    {
-        jassert(false);
-        return 0;
-    }
+//     if (subTableIndex == noOfChannels)
+//     {
+//         jassert(false);
+//         return 0;
+//     }
 
-    LumatoneKey keyData;
-    keyData.setChannelNumber(channelMappingData[subTableIndex].channelNumber);
-    keyData.setNoteOrCC(channelMappingData[subTableIndex].mapping.noteNrWhereMappingStarts);
+//     LumatoneKey keyData;
+//     keyData.setChannelNumber(channelMappingData[subTableIndex].channelNumber);
+//     keyData.setNoteOrCC(channelMappingData[subTableIndex].mapping.noteNrWhereMappingStarts);
 
-    return terpstraKeyToIndex(keyData);
-}
+//     return terpstraKeyToIndex(keyData);
+// }
 
-/*
-int KBMFilesMappingLogic::getPeriodSize() const
-{
-    // Period size is supposed to be the same for all KBM files
-    // ToDo display error/warning message if not so
-    int subTableIndex;
-    for (subTableIndex = 0; subTableIndex < noOfChannels; subTableIndex++)
-    {
-        if (channelMappingData[subTableIndex].channelNumber > 0)
-            break;
-    }
+// /*
+// int KBMFilesMappingLogic::getPeriodSize() const
+// {
+//     // Period size is supposed to be the same for all KBM files
+//     // ToDo display error/warning message if not so
+//     int subTableIndex;
+//     for (subTableIndex = 0; subTableIndex < noOfChannels; subTableIndex++)
+//     {
+//         if (channelMappingData[subTableIndex].channelNumber > 0)
+//             break;
+//     }
 
-    if (subTableIndex == noOfChannels)
-    {
-        jassert(false);
-        return 0;
-    }
-    else
-        return channelMappingData[subTableIndex].mapping.scaleSize;
-}
-*/
+//     if (subTableIndex == noOfChannels)
+//     {
+//         jassert(false);
+//         return 0;
+//     }
+//     else
+//         return channelMappingData[subTableIndex].mapping.scaleSize;
+// }
+// */
 
-//=================================================================
-// Access mapping data (overrides)
+// //=================================================================
+// // Access mapping data (overrides)
 
-int KBMFilesMappingLogic::globalMappingSize() const
-{
-    return mappingTable.size();
-}
+// int KBMFilesMappingLogic::globalMappingSize() const
+// {
+//     return mappingTable.size();
+// }
 
-int KBMFilesMappingLogic::indexToMIDIChannel(int inx) const
-{
-	if (inx < 0 || inx >= globalMappingSize())
-        return 0;
-    else
-        return mappingTable[inx].channelNumber;
-}
+// int KBMFilesMappingLogic::indexToMIDIChannel(int inx) const
+// {
+// 	if (inx < 0 || inx >= globalMappingSize())
+//         return 0;
+//     else
+//         return mappingTable[inx].channelNumber;
+// }
 
-int KBMFilesMappingLogic::indexToMIDINote(int inx) const
-{
-	if (inx < 0 || inx >= globalMappingSize())
-        return 0;
-    else
-        return mappingTable[inx].noteNumber;
-}
+// int KBMFilesMappingLogic::indexToMIDINote(int inx) const
+// {
+// 	if (inx < 0 || inx >= globalMappingSize())
+//         return 0;
+//     else
+//         return mappingTable[inx].noteNumber;
+// }
 
-int KBMFilesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
-{
-	if (keyData.isEmpty() || globalMappingSize() == 0)
-		return -1;
+// int KBMFilesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
+// {
+// 	if (keyData.isEmpty() || globalMappingSize() == 0)
+// 		return -1;
 
-	int inx;
-    for ( inx = 0; inx < globalMappingSize(); inx++)
-    {
-        if (keyData.hasMidiChannel(mappingTable[inx].channelNumber) && keyData.hasMidiNumber(mappingTable[inx].noteNumber))
-            break;
-    }
+// 	int inx;
+//     for ( inx = 0; inx < globalMappingSize(); inx++)
+//     {
+//         if (keyData.hasMidiChannel(mappingTable[inx].channelNumber) && keyData.hasMidiNumber(mappingTable[inx].noteNumber))
+//             break;
+//     }
 
-    return inx < globalMappingSize() ? inx : -1;
-}
+//     return inx < globalMappingSize() ? inx : -1;
+// }

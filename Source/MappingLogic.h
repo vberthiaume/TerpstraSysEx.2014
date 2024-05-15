@@ -11,7 +11,7 @@
 #pragma once
 
 #include "./lumatone_editor_library/data/lumatone_layout.h"
-#include "KBMMappingDataStructure.h"
+// #include "KBMMappingDataStructure.h"
 #include "ScaleStructureController/ScaleStructure.h"
 
 
@@ -110,64 +110,64 @@ private:
 
 //==============================================================================
 // Mapping logic for KBM files
-class KBMFilesMappingLogic: public MappingLogicBase
-{
-    //===============================
-    // Types
-private:
-    struct KBMMappingWithChannel
-    {
-        int channelNumber = 0;
-        KBMMappingDataStructure mapping;
-    };
+// class KBMFilesMappingLogic: public MappingLogicBase
+// {
+//     //===============================
+//     // Types
+// private:
+//     struct KBMMappingWithChannel
+//     {
+//         int channelNumber = 0;
+//         KBMMappingDataStructure mapping;
+//     };
 
-    class KBMMappingTableEntry : public KBMMappingDataStructure::noteAndFrequency
-    {
-    public:
-        int channelNumber;
+//     class KBMMappingTableEntry : public KBMMappingDataStructure::noteAndFrequency
+//     {
+//     public:
+//         int channelNumber;
 
-    public:
-        // Comparison operators, so a list of it can be sorted
-        bool operator==(const KBMMappingTableEntry& second) const { return this->frequency == second.frequency; }
-        bool operator<(const KBMMappingTableEntry& second) const { return this->frequency < second.frequency; }
-        bool operator>(const KBMMappingTableEntry& second) const { return this->frequency > second.frequency; }
-        bool operator<=(const KBMMappingTableEntry& second) const { return this->frequency <= second.frequency; }
-        bool operator>=(const KBMMappingTableEntry& second) const { return this->frequency >= second.frequency; }
-    };
+//     public:
+//         // Comparison operators, so a list of it can be sorted
+//         bool operator==(const KBMMappingTableEntry& second) const { return this->frequency == second.frequency; }
+//         bool operator<(const KBMMappingTableEntry& second) const { return this->frequency < second.frequency; }
+//         bool operator>(const KBMMappingTableEntry& second) const { return this->frequency > second.frequency; }
+//         bool operator<=(const KBMMappingTableEntry& second) const { return this->frequency <= second.frequency; }
+//         bool operator>=(const KBMMappingTableEntry& second) const { return this->frequency >= second.frequency; }
+//     };
 
-public:
-    KBMFilesMappingLogic(ScaleStructure& scaleStructureIn, Array<Colour>& colourTableIn);
-    virtual ~KBMFilesMappingLogic() {}
+// public:
+//     KBMFilesMappingLogic(ScaleStructure& scaleStructureIn, Array<Colour>& colourTableIn);
+//     virtual ~KBMFilesMappingLogic() {}
 
-    //===============================
-	// Set parameters
+//     //===============================
+// 	// Set parameters
 
-	void setMapping(int subDlgIndex, int midiChannel, KBMMappingDataStructure kbmMappingStructure);
+// 	void setMapping(int subDlgIndex, int midiChannel, KBMMappingDataStructure kbmMappingStructure);
 
-protected:
-    void createMappingTable();
-    virtual int getStartOfMap() const override;
+// protected:
+//     void createMappingTable();
+//     virtual int getStartOfMap() const override;
 
-    //===============================
-	// Access mapping data (overrides)
-public:
- 	int globalMappingSize() const override;
+//     //===============================
+// 	// Access mapping data (overrides)
+// public:
+//  	int globalMappingSize() const override;
 
-	int indexToMIDIChannel(int inx) const override;
-	int indexToMIDINote(int inx) const override;
+// 	int indexToMIDIChannel(int inx) const override;
+// 	int indexToMIDINote(int inx) const override;
 
-	virtual int terpstraKeyToIndex(LumatoneKey keyData) const override;
+// 	virtual int terpstraKeyToIndex(LumatoneKey keyData) const override;
 
-    //===============================
-    // Attributes
+//     //===============================
+//     // Attributes
 
-    // Number of channels that can have a KBM file specified (Limited by the amount of space on the screen)
-    static const int noOfChannels = 4;
+//     // Number of channels that can have a KBM file specified (Limited by the amount of space on the screen)
+//     static const int noOfChannels = 4;
 
-private:
-    KBMMappingWithChannel channelMappingData[noOfChannels];
+// private:
+//     KBMMappingWithChannel channelMappingData[noOfChannels];
 
-    // Frequency to key definition mapping. Key must be integer for the default hash function to work
-    SortedSet<KBMMappingTableEntry> mappingTable;
+//     // Frequency to key definition mapping. Key must be integer for the default hash function to work
+//     SortedSet<KBMMappingTableEntry> mappingTable;
 
-};
+// };
