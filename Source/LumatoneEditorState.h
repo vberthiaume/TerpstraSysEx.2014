@@ -32,7 +32,7 @@ namespace LumatoneEditorProperty
     static const juce::Identifier FirmwareUpdatePerformed = juce::Identifier("FirmwareUpdatePerformed");
 
     static const juce::Identifier ColourPalettes = juce::Identifier("ColourPalettes");
-    
+
     static const juce::Identifier CurrentFile = juce::Identifier("CurrentFile");
     static const juce::Identifier RecentFiles = juce::Identifier("RecentFiles");
 
@@ -45,7 +45,9 @@ namespace LumatoneEditorProperty
 
     static const juce::Identifier DeveloperModeOn = juce::Identifier("DeveloperModeOn");
 
-    static const juce::Identifier MainWindowState = juce::Identifier("MainWindowState");
+    static const juce::Identifier MainWindowState = juce::Identifier("MainWindowState"); // For save/recall
+    static const juce::Identifier MainWindowBounds = juce::Identifier("MainWindowBounds"); // For app drawing
+
     static const juce::Identifier EditorMode = juce::Identifier("EditorMode");
 
     static const juce::Identifier SingleNoteNoteSetActive = juce::Identifier("SingleNoteNoteSetActive");
@@ -82,6 +84,8 @@ public:
 
     const juce::String getApplicationName() const { return ProjectInfo::projectName; }
 	const juce::String getApplicationVersion() const { return ProjectInfo::versionString; }
+
+    juce::Rectangle<int> getWindowBounds() const { return windowBounds; }
 
     bool getHasChangesToSave() const { return hasChangesToSave; }
     bool getInCalibrationMode() const { return inCalibrationMode; }
@@ -128,14 +132,16 @@ protected:
 	bool firmwareUpdateWasPerformed = false;
 
     EditorMode editorMode = EditorMode::OFFLINE;
-    
+
 private:
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
 	std::shared_ptr<LumatoneEditorLookAndFeel>      lookAndFeel;
 	std::shared_ptr<juce::Array<LumatoneEditorColourPalette>>        colourPalettes;
 
-	juce::File                      currentFile;
+	juce::File currentFile;
 	std::shared_ptr<juce::RecentlyOpenedFilesList>	recentFiles;
+
+    juce::Rectangle<int> windowBounds;
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
@@ -177,12 +183,14 @@ public:
         void setDeveloperMode(bool developerModeOn);
         void setEditMode(EditorMode editMode);
 
+        void setWindowState(const juce::Rectangle<int>& windowBounds, juce::String stateString);
+
     private:
         LumatoneEditorState& editorState;
     };
-    
+
 private:
-    friend class LumatoneEditorStateController; 
+    friend class LumatoneEditorStateController;
 };
 
 

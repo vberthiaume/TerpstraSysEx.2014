@@ -45,7 +45,7 @@ MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationComm
 
     // Window aspect ratio
     constrainer.reset(new juce::ComponentBoundsConstrainer());
-    
+
     constrainer->setFixedAspectRatio(DEFAULTMAINWINDOWASPECT);
     constrainer->setMinimumSize(800, juce::roundToInt(800 / DEFAULTMAINWINDOWASPECT));
     constrainer->setMaximumHeight(1000);
@@ -122,6 +122,7 @@ void MainWindow::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
     bool useSavedState = restoreWindowStateFromString(getProperty(LumatoneEditorProperty::MainWindowState));
 
     fixWindowPositionAndSize(!useSavedState);
+    setWindowState(getBounds(), getWindowStateAsString());
 
     setVisible(true);
 }
@@ -148,7 +149,7 @@ void MainWindow::updateBounds()
     if (isOutOfVerticalBounds())
         fixWindowPositionAndSize();
 
-    (LumatoneEditorProperty::MainWindowState, getWindowStateAsString());
+    setWindowState(getBounds(), getWindowStateAsString());
 }
 
 void MainWindow::fixWindowPositionAndSize(bool setToDefault)
@@ -187,10 +188,10 @@ void MainWindow::timerCallback()
 void MainWindow::updateTitle()
 {
     juce::String windowTitle("Lumatone Editor");
-	
+
 	if (getCurrentFile().getFileName().isNotEmpty())
 		windowTitle << " - " << getCurrentFile().getFileName();
-        
+
 	if (getHasChangesToSave())
 		windowTitle << "*";
 

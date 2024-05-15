@@ -176,6 +176,13 @@ void LumatoneEditorState::Controller::setEditMode(EditorMode editMode)
     editorState.setStateProperty(LumatoneEditorProperty::EditorMode, (int)editorState.editorMode);
 }
 
+void LumatoneEditorState::Controller::setWindowState(const juce::Rectangle<int> &windowBounds, juce::String stateString)
+{
+    editorState.windowBounds = windowBounds;
+    editorState.setStateProperty(LumatoneEditorProperty::MainWindowState, stateString);
+    editorState.setStateProperty(LumatoneEditorProperty::MainWindowBounds, windowBounds.toString());
+}
+
 juce::ValueTree LumatoneEditorState::loadStateProperties(juce::ValueTree stateIn)
 {
     juce::ValueTree newState = (stateIn.hasType(LumatoneEditorProperty::StateTree))
@@ -200,6 +207,10 @@ void LumatoneEditorState::handleStatePropertyChange(juce::ValueTree stateIn, con
 {
     LumatoneApplicationState::handleStatePropertyChange(stateIn, property);
 
+    if (property == LumatoneEditorProperty::MainWindowBounds)
+    {
+        windowBounds = juce::Rectangle<int>::fromString(stateIn[property].toString());
+    }
     if (property == LumatoneEditorProperty::HasChangesToSave)
     {
         hasChangesToSave = (bool)stateIn[property];
@@ -257,7 +268,7 @@ void LumatoneEditorState::loadPropertiesFile(juce::PropertiesFile *propertiesIn)
     setStateProperty(LumatoneEditorProperty::UserPalettesDirectory, propertiesFile->getValue(LumatoneEditorProperty::UserPalettesDirectory.toString(), getDefaultUserPalettesDirectory().getFullPathName()));
     setStateProperty(LumatoneEditorProperty::RecentFiles, propertiesFile->getValue(LumatoneEditorProperty::RecentFiles.toString(), juce::String()));
     setStateProperty(LumatoneEditorProperty::MainWindowState, propertiesFile->getValue(LumatoneEditorProperty::MainWindowState.toString(), juce::String()));
-    
+
     setStateProperty(LumatoneEditorProperty::AutoConnectDevice, propertiesFile->getBoolValue(LumatoneEditorProperty::AutoConnectDevice.toString(), true));
 
     setStateProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive.toString(), true));
