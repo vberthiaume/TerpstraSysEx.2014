@@ -445,6 +445,9 @@ bool LumatoneEditorState::Controller::savePropertiesFile() const
     jassert(editorState.propertiesFile != nullptr);
     editorState.propertiesFile->setValue(LumatoneEditorProperty::RecentFiles, editorState.recentFiles->toString());
 
+    auto saveWindowState = editorState.getStringProperty(LumatoneEditorProperty::MainWindowState);
+    editorState.propertiesFile->setValue(LumatoneEditorProperty::MainWindowState, saveWindowState);
+
     return editorState.propertiesFile->saveIfNeeded();
 }
 

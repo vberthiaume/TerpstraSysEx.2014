@@ -84,8 +84,8 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 	commandManager->registerAllCommandsForTarget(this);
 
 	mainWindow.reset(new MainWindow(state, commandManager.get()));
-	mainWindow->restoreStateFromPropertiesFile(getPropertiesFile());
-
+	// mainWindow->restoreStateFromPropertiesFile(getPropertiesFile());
+	mainWindow->setVisible(true);
 
 	if (state.getCurrentFile().existsAsFile())
 		resetToCurrentFile();

@@ -31,7 +31,6 @@ class MainWindow : public juce::DocumentWindow
                  , public LumatoneEditorState
                  , private LumatoneEditorState::Controller
                  , private LumatoneEditor::EditorListener
-                 , private juce::Timer
 {
 public:
     MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager);
@@ -58,6 +57,12 @@ public:
     // Returns true if left side of window is too far right, or if right side of window is too far left
     bool isOutOfHorizontalBounds() const;
 
+    void saveBounds();
+
+    void resized() override;
+
+    void moved() override;
+
     void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
 
     void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
@@ -67,7 +72,7 @@ public:
 
     void fixWindowPositionAndSize(bool setToDefault=false);
 
-    void timerCallback() override;
+    // void timerCallback() override;
 
     void updateTitle();
 
@@ -81,7 +86,6 @@ private:
 private:
     juce::ApplicationCommandManager* commandManager;
     std::unique_ptr<Lumatone::Menu::MainMenuModel> menuModel;
-    std::unique_ptr<ComponentBoundsConstrainer> constrainer;
 
     int maxWindowWidth = 0;
     int maxWindowHeight = 0;

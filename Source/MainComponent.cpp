@@ -109,7 +109,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	addStatusListener(this);
 
 	// Initial size
-	setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
+	// setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
 
 	// Select first board and first key
 	// noteEditArea->getOctaveBoardSelectorTab()->setCurrentTabIndex(0, true);

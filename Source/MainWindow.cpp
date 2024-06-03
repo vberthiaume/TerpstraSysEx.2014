@@ -23,12 +23,21 @@ MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationComm
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , commandManager(cmdManager)
 {
-    setContentOwned(new MainContentComponent(*this, commandManager), true);
-    setResizable(true, true);
+    // Window aspect ratio
+    setResizeLimits(800, juce::roundToInt(800 / DEFAULTMAINWINDOWASPECT), juce::roundToInt(1000 * DEFAULTMAINWINDOWASPECT), 1000);
+    getConstrainer()->setFixedAspectRatio(DEFAULTMAINWINDOWASPECT);
+    getConstrainer()->setMinimumOnscreenAmounts(0xffffff, 0xffffff, 0xffffff, 0xffffff);
+
+    restoreStateFromPropertiesFile(getPropertiesFile());
+
+    auto mainComponent = new MainContentComponent(*this, commandManager);
+    mainComponent->setSize(getWidth(), getHeight());
+    setContentOwned(mainComponent, true);
 
 #if JUCE_ANDROID
     setFullScreen(true);
 #else
+    setResizable(true, true);
     setLookAndFeel(&getEditorLookAndFeel());
 
     menuModel = std::make_unique<Lumatone::Menu::MainMenuModel>(*this, commandManager);
@@ -43,20 +52,10 @@ MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationComm
     );
 #endif
 
-    // Window aspect ratio
-    constrainer.reset(new juce::ComponentBoundsConstrainer());
-
-    constrainer->setFixedAspectRatio(DEFAULTMAINWINDOWASPECT);
-    constrainer->setMinimumSize(800, juce::roundToInt(800 / DEFAULTMAINWINDOWASPECT));
-    constrainer->setMaximumHeight(1000);
-    setConstrainer(constrainer.get());
-
     addKeyListener(commandManager->getKeyMappings());
-    updateBounds();
 
     addEditorListener(this);
 
-    startTimer(2000);
 #endif
 }
 
@@ -72,9 +71,6 @@ MainWindow::~MainWindow()
 #endif
 
     menuModel = nullptr;
-
-    stopTimer();
-    setConstrainer(nullptr);
 }
 
 void MainWindow::closeButtonPressed()
@@ -110,6 +106,23 @@ bool MainWindow::isOutOfHorizontalBounds() const
         || getScreenX() >= (maxWindowWidth - horizontalBoundsThreshold);
 }
 
+void MainWindow::saveBounds()
+{
+    setWindowState(getBounds(), getWindowStateAsString());
+}
+
+void MainWindow::resized()
+{
+    juce::DocumentWindow::resized();
+    saveBounds();
+}
+
+void MainWindow::moved()
+{
+    juce::DocumentWindow::moved();
+    saveBounds();
+}
+
 void MainWindow::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 {
     // Save state of main window
@@ -119,12 +132,13 @@ void MainWindow::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
 
 void MainWindow::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
 {
-    bool useSavedState = restoreWindowStateFromString(getProperty(LumatoneEditorProperty::MainWindowState));
+    // auto restoredState = getProperty(LumatoneEditorProperty::MainWindowState);
+    bool useSavedState = restoreWindowStateFromString(propertiesFile->getValue(LumatoneEditorProperty::MainWindowState));
 
-    fixWindowPositionAndSize(!useSavedState);
-    setWindowState(getBounds(), getWindowStateAsString());
+    // fixWindowPositionAndSize(!useSavedState);
+    // setWindowState(getBounds(), getWindowStateAsString());
 
-    setVisible(true);
+    saveBounds();
 }
 
 void MainWindow::updateBounds()
@@ -139,7 +153,7 @@ void MainWindow::updateBounds()
         {
             maxWindowWidth = screenWidth;
             maxWindowHeight = screenHeight;
-            constrainer->setMaximumHeight(maxWindowHeight);
+            // constrainer->setMaximumHeight(maxWindowHeight);
 
             fixWindowPositionAndSize();
             return;
@@ -177,13 +191,15 @@ void MainWindow::fixWindowPositionAndSize(bool setToDefault)
     }
 }
 
-void MainWindow::timerCallback()
-{
-    // Set threshold to be a quarter of the window handle height
-    verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f);
+// void MainWindow::timerCallback()
+// {
+//     // Set threshold to be a quarter of the window handle height
+//     // verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f);
 
-    updateBounds();
-}
+//     // updateBounds();
+
+//     setWindowState(getBounds(), getWindowStateAsString());
+// }
 
 void MainWindow::updateTitle()
 {
