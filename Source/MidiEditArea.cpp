@@ -184,7 +184,7 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
     // btnAutoConnect->setToggleState(isAutoConnectionEnabled(), sendNotificationSync);
 	bool enableAutoConnection = getBoolProperty(LumatoneEditorProperty::AutoConnectDevice, true);
     btnAutoConnect->setToggleState(enableAutoConnection, dontSendNotification);
-	onAutoConnectionChanged();
+	onAutoConnectionChanged(false);
 }
 
 MidiEditArea::~MidiEditArea()
@@ -380,12 +380,13 @@ void MidiEditArea::setConnectivity(bool isConnectedIn, juce::String connectionSt
 	resized();
 }
 
-void MidiEditArea::onAutoConnectionChanged()
+void MidiEditArea::onAutoConnectionChanged(bool writeToPropertiesFile)
 {
 	bool isAuto = btnAutoConnect->getToggleState();
 	bool isNotAuto = !isAuto;
 
-	savePropertyBoolValue(LumatoneEditorProperty::AutoConnectDevice, isAuto);
+	if (writeToPropertiesFile)
+		savePropertyBoolValue(LumatoneEditorProperty::AutoConnectDevice, isAuto);
 
 	cbMidiInput->setVisible(isNotAuto);
 	cbMidiOutput->setVisible(isNotAuto);

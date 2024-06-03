@@ -77,7 +77,7 @@ public:
 private:
     void setConnectivity(bool isConnected, juce::String connectionStatus=String());
 
-    void onAutoConnectionChanged();
+    void onAutoConnectionChanged(bool writeToPropertiesFile=true);
 
     void editModeChangedCallback();
 
