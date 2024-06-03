@@ -18,13 +18,13 @@
 MappingSettingsControls::MappingSettingsControls (const LumatoneEditorState& stateIn)
     : LumatoneEditorState("MappingSettingsControls", stateIn)
 {
-    labelGeneralSettingslTitle.reset (new juce::Label ("labelGeneralSettingslTitle", juce::translate("General Settings")));
-    labelGeneralSettingslTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
-    labelGeneralSettingslTitle->setJustificationType (juce::Justification::centredLeft);
-    labelGeneralSettingslTitle->setEditable (false, false, false);
-    labelGeneralSettingslTitle->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
-    labelGeneralSettingslTitle->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-    addAndMakeVisible (labelGeneralSettingslTitle.get());
+    lblGeneralSettings.reset (new juce::Label ("lblGeneralSettings", juce::translate("General Settings")));
+    lblGeneralSettings->setJustificationType (juce::Justification::centredLeft);
+    lblGeneralSettings->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    lblGeneralSettings->setEditable (false, false, false);
+    lblGeneralSettings->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
+    lblGeneralSettings->setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible (lblGeneralSettings.get());
 
     buttonAfterTouchActive.reset (new juce::ToggleButton ("buttonAfterTouchActive"));
     buttonAfterTouchActive->setButtonText (juce::translate("Polyphonic Aftertouch"));
@@ -42,30 +42,29 @@ MappingSettingsControls::MappingSettingsControls (const LumatoneEditorState& sta
     };
     addAndMakeVisible (buttonLightOnKeyStrokes.get());
 
-    labelExprContrSensitivity.reset (new juce::Label ("labelExprContrSensitivity", juce::translate("Sensitivity")));
-    labelExprContrSensitivity->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
-    labelExprContrSensitivity->setJustificationType (juce::Justification::centred);
-    labelExprContrSensitivity->setEditable (false, false, false);
-    labelExprContrSensitivity->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    labelExprContrSensitivity->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-    addAndMakeVisible (labelExprContrSensitivity.get());
+    lblExprSensitivity.reset (new juce::Label ("lblExprSensitivity", juce::translate("Expression Sensitivity")));
+    lblExprSensitivity->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
+    lblExprSensitivity->setJustificationType (juce::Justification::centred);
+    lblExprSensitivity->setEditable (false, false, false);
+    lblExprSensitivity->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+    lblExprSensitivity->setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible (lblExprSensitivity.get());
 
     btnInvertExpression.reset (new juce::ToggleButton ("btnInvertExpression"));
-    btnInvertExpression->setButtonText (juce::translate("Invert"));
+    btnInvertExpression->setButtonText (juce::translate("Invert Expression"));
     btnInvertExpression->onClick = [&]()
     {
         setInvertExpression(btnInvertExpression->getToggleState());
     };
     addAndMakeVisible (btnInvertExpression.get());
 
-    lblExpression.reset (new juce::Label ("lblExpression", juce::translate("Expression")));
-    lblExpression->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
-    lblExpression->setJustificationType (juce::Justification::centredLeft);
-    lblExpression->setEditable (false, false, false);
-    lblExpression->setColour (juce::Label::textColourId, juce::Colour (0xff61acc8));
-    lblExpression->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    lblExpression->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-    addAndMakeVisible (lblExpression.get());
+    lblPedalSettings.reset (new juce::Label ("lblPedalSettings", juce::translate("Pedal Settings")));
+    lblPedalSettings->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    lblPedalSettings->setJustificationType (juce::Justification::centredLeft);
+    lblPedalSettings->setEditable (false, false, false);
+    lblPedalSettings->setColour (juce::Label::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
+    lblPedalSettings->setColour (juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
+    addAndMakeVisible (lblPedalSettings.get());
 
     sldExprCtrlSensitivity.reset (new juce::Slider ("sldExprCtrlSensitivity"));
     sldExprCtrlSensitivity->setRange (0, 127, 1);
@@ -78,20 +77,20 @@ MappingSettingsControls::MappingSettingsControls (const LumatoneEditorState& sta
     addAndMakeVisible (sldExprCtrlSensitivity.get());
 
     btnInvertSustain.reset (new juce::ToggleButton ("btnInvertSustain"));
-    btnInvertSustain->setButtonText (juce::translate("Invert"));
+    btnInvertSustain->setButtonText (juce::translate("Invert Sustain"));
     btnInvertSustain->onClick = [&]()
     {
         setInvertSustain(btnInvertSustain->getToggleState());
     };
-    // addAndMakeVisible (btnInvertSustain.get());
+    addAndMakeVisible (btnInvertSustain.get());
 
-    lblSustain.reset (new juce::Label ("lblSustain", juce::translate("Sustain")));
-    lblSustain->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
-    lblSustain->setJustificationType (juce::Justification::centredLeft);
-    lblSustain->setEditable (false, false, false);
-    lblSustain->setColour (juce::Label::textColourId, juce::Colour (0xff61acc8));
-    lblSustain->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    lblSustain->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+    // lblSustain.reset (new juce::Label ("lblSustain", juce::translate("Sustain")));
+    // lblSustain->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    // lblSustain->setJustificationType (juce::Justification::centredLeft);
+    // lblSustain->setEditable (false, false, false);
+    // lblSustain->setColour (juce::Label::textColourId, juce::Colour (0xff61acc8));
+    // lblSustain->setColour (juce::TextEditor::textColourId, juce::Colours::black);
+    // lblSustain->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
     // addAndMakeVisible (lblSustain.get());
 
 
@@ -102,7 +101,7 @@ MappingSettingsControls::~MappingSettingsControls()
 {
     removeEditorListener(this);
 
-    labelGeneralSettingslTitle = nullptr;
+    lblGeneralSettings = nullptr;
     buttonAfterTouchActive = nullptr;
     buttonLightOnKeyStrokes = nullptr;
 }
@@ -110,62 +109,69 @@ MappingSettingsControls::~MappingSettingsControls()
 //==============================================================================
 void MappingSettingsControls::paint (juce::Graphics& g)
 {
-    g.setColour(juce::Colour(0xff212626));
-    g.fillRoundedRectangle(getLocalBounds().toFloat().withTop(proportionOfHeight(SETTINGSAREAMARGINHEIGHT)), roundedCornerSize);
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlAreaBackground));
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), roundedCornerSize);
+
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlBoxBackground));
+    g.fillRoundedRectangle(generalSettingsBounds, roundedCornerSize);
+    g.fillRoundedRectangle(pedalBounds, roundedCornerSize);
 }
 
 void MappingSettingsControls::resized()
 {
-    float w = getWidth();
-    float h = getHeight();
+    float w = (float)getWidth();
+    float h = (float)getHeight();
 
     roundedCornerSize = roundToInt(getWindowBounds().getHeight() * ROUNDEDCORNERTOAPPHEIGHT);
 
-    resizeLabelWithHeight(labelGeneralSettingslTitle.get(), roundToInt(getHeight() * SETTINGSLABELHEIGHT));
-    labelGeneralSettingslTitle->setTopLeftPosition(roundToInt(getWidth() * SETTINGSLABELMARGINWIDTH), 0);
+    int settingsMarginX = roundToInt(w * controlAreaXMargin);
+    int settingsYMargin = roundToInt(h * settingsAreaMarginH);
 
-    int marginX = roundToInt(getParentWidth() * SETTINGSCONTROLMARGINTOAPPWIDTH);
+    int generalSettingsRightX = roundToInt(w * 0.5f - settingsMarginX);
+    int pedalSettingsX = roundToInt(w * 0.5f);
+
+    int lblHeight = roundToInt(h * settingsLabelH);
+
+    int controlAreaY = lblGeneralSettings->getBottom() + settingsYMargin;
+    int settingsHeight = h - controlAreaY - settingsYMargin;
+
+    generalSettingsBounds = juce::Rectangle<float>(settingsMarginX, controlAreaY, generalSettingsRightX - settingsMarginX, settingsHeight);
+    pedalBounds = juce::Rectangle<float>(pedalSettingsX, controlAreaY, w - settingsMarginX - pedalSettingsX, settingsHeight);
+
+    resizeLabelWithHeight(lblGeneralSettings.get(), lblHeight);
+    lblGeneralSettings->setTopLeftPosition(generalSettingsBounds.getX(), settingsYMargin);
+
+    resizeLabelWithHeight(lblPedalSettings.get(), lblHeight);
+    lblPedalSettings->setTopLeftPosition(pedalBounds.getX(), lblGeneralSettings->getY());
+
+    int buttonHeight = roundToInt(h * controlHeightScalar);
+    int buttonY = roundToInt(h * 0.3f);
+    int buttonMarginY = roundToInt(buttonHeight * controlYMarginToControlHeight);
+
+    int controlMarginX = proportionOfWidth(controlXMargin);
 
     buttonAfterTouchActive->setBounds(
-        marginX, proportionOfHeight(0.3f), proportionOfWidth(1.0f), proportionOfHeight(SETTINGSTOGGLEHEIGHTSCALAR)
-    );
+        generalSettingsBounds.withTrimmedLeft(controlMarginX).withTrimmedTop(buttonMarginY).withHeight(buttonHeight).toNearestInt());
 
     buttonLightOnKeyStrokes->setBounds(
-        marginX, proportionOfHeight(0.5f), proportionOfWidth(1.0f), proportionOfHeight(SETTINGSTOGGLEHEIGHTSCALAR)
-    );
+        buttonAfterTouchActive->getBounds().translated(0, buttonHeight + buttonMarginY));
 
-    roundedCornerSize = roundToInt(getWindowBounds().getHeight() * ROUNDEDCORNERTOAPPHEIGHT);
+    btnInvertSustain->setBounds(pedalBounds.withTrimmedLeft(controlMarginX)
+                                           .withTop(buttonY)
+                                           .withHeight(buttonHeight)
+                                           .toNearestInt());
 
-    int areaMarginWidth = roundToInt(w * sectionMarginWidth) * 0.5f;
-    int areaMarginHeight = roundToInt(h * SETTINGSAREAMARGINHEIGHT);
+    btnInvertExpression->setBounds(pedalBounds.withTrimmedLeft(controlMarginX)
+                                              .withTop(btnInvertSustain->getBottom() + settingsYMargin)
+                                              .withHeight(buttonHeight).toNearestInt());
 
-    expressionBounds = getLocalBounds().toFloat().withTop(areaMarginHeight).withRight(roundToInt(w * 0.5f - areaMarginWidth));
-    sustainBounds = getLocalBounds().toFloat().withTop(areaMarginHeight).withLeft(roundToInt(w * 0.5f + areaMarginWidth));
+    lblExprSensitivity->setBounds(pedalBounds.withTop(btnInvertExpression->getBottom() + settingsYMargin)
+                                             .withHeight(buttonHeight)
+                                             .toNearestInt());
 
-    int lblMarginX = roundToInt(w * SETTINGSLABELMARGINWIDTH);
-    int lblWidth = roundToInt(w * 0.5f);
-    int lblHeight = roundToInt(h * SETTINGSLABELHEIGHT);
-    lblExpression->setBounds(expressionBounds.getX() + lblMarginX, 0, lblWidth, lblHeight);
-    lblSustain->setBounds(sustainBounds.getX() + lblMarginX, 0, lblWidth, lblHeight);
-
-    int controlMargin = roundToInt(getParentWidth() * SETTINGSCONTROLMARGINTOAPPWIDTH);
-    int buttonHeight = roundToInt(h * SETTINGSTOGGLEHEIGHTSCALAR);
-    int buttonY = roundToInt(h * 0.3f);
-    btnInvertExpression->setBounds(expressionBounds.withTrimmedLeft(controlMargin).withTop(buttonY).withHeight(buttonHeight).toNearestInt());
-    btnInvertSustain->setBounds(sustainBounds.withTrimmedLeft(controlMargin).withTop(buttonY).withHeight(buttonHeight).toNearestInt());
-
-    sldExprCtrlSensitivity->setBounds(
-          expressionBounds.reduced(expressionBounds.getWidth() * 0.2f, 0)
-                          .withTop(btnInvertExpression->getBottom() + buttonHeight)
-                          .withTrimmedBottom(buttonHeight * 1.5f)
-                          .toNearestInt()
-    );
-
-    labelExprContrSensitivity->setBounds(
-         expressionBounds.withTop(sldExprCtrlSensitivity->getBottom() + buttonHeight * 0.1f)
-                         .withTrimmedBottom(buttonHeight * 0.5f)
-                         .toNearestInt()
-    );
+    sldExprCtrlSensitivity->setBounds(pedalBounds.withTop(lblExprSensitivity->getBottom() + buttonMarginY * 0.25f)
+                                                 .withTrimmedBottom(buttonMarginY)
+                                                 .toNearestInt());
 }
 
 void MappingSettingsControls::loadFromMapping()

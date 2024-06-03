@@ -65,11 +65,11 @@ CurvesArea::CurvesArea (const LumatoneEditorState& stateIn)
     labelWindowTitle.reset (new juce::Label ("labelWindowTitle",
                                              juce::translate("Curves")));
     addAndMakeVisible (labelWindowTitle.get());
-    labelWindowTitle->setFont (juce::Font (18.00f, juce::Font::plain).withTypefaceStyle ("Regular"));
     labelWindowTitle->setJustificationType (juce::Justification::centredLeft);
     labelWindowTitle->setEditable (false, false, false);
-    labelWindowTitle->setColour (juce::TextEditor::textColourId, juce::Colours::black);
-    labelWindowTitle->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+    labelWindowTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+    labelWindowTitle->setColour (juce::Label::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
+    labelWindowTitle->setColour (juce::Label::backgroundColourId, juce::Colours::transparentBlack);
 
     labelWindowTitle->setBounds (8, 8, 150, 24);
 
@@ -94,9 +94,6 @@ CurvesArea::CurvesArea (const LumatoneEditorState& stateIn)
 
     getEditorLookAndFeel().setColour(VelocityCurveBeam::beamColourId, Colour(0x66ff5e00));
     getEditorLookAndFeel().setColour(VelocityCurveBeam::outlineColourId, Colour(0xffd7d9da));
-
-    labelWindowTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
-    labelWindowTitle->setColour(Label::backgroundColourId, Colour());
 
     curvesTab->setColour(TabbedComponent::ColourIds::outlineColourId, Colour());
     curvesTab->setColour(TabbedComponent::ColourIds::backgroundColourId, Colour());

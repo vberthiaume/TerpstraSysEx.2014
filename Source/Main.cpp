@@ -705,7 +705,7 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 	//resizeLabelWithHeight(label, roundToInt(area.getHeight() * 0.24f));
 
 	options.dialogTitle = "About Lumatone Editor";
-	options.dialogBackgroundColour = state.getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DarkBackground);
+	options.dialogBackgroundColour = state.getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::HeaderBackground);
 
 	options.escapeKeyTriggersCloseButton = true;
 	options.useNativeTitleBar = false;

@@ -90,6 +90,8 @@ private:
     //==============================================================================
     // Size and position constants
 
+    const float marginXRatio                = 0.02f;
+
     const float colourButtonAspect          = 1.235294f;
     const float inactiveButtonAspect        = 4.695652f;
 

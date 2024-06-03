@@ -44,21 +44,32 @@ private:
 
 private:
     int roundedCornerSize = 0;
-    juce::Rectangle<float> expressionBounds;
-    juce::Rectangle<float> sustainBounds;
-    const float sectionMarginWidth = 0.05f;
+    juce::Rectangle<float> generalSettingsBounds;
+    juce::Rectangle<float> pedalBounds;
 
     //==============================================================================
-    std::unique_ptr<juce::Label> labelGeneralSettingslTitle;
+    std::unique_ptr<juce::Label> lblGeneralSettings;
     std::unique_ptr<juce::ToggleButton> buttonAfterTouchActive;
     std::unique_ptr<juce::ToggleButton> buttonLightOnKeyStrokes;
 
-    std::unique_ptr<juce::Label> labelExprContrSensitivity;
+    std::unique_ptr<juce::Label> lblExprSensitivity;
     std::unique_ptr<juce::ToggleButton> btnInvertExpression;
-    std::unique_ptr<juce::Label> lblExpression;
+    std::unique_ptr<juce::Label> lblPedalSettings;
     std::unique_ptr<juce::Slider> sldExprCtrlSensitivity;
     std::unique_ptr<juce::ToggleButton> btnInvertSustain;
     std::unique_ptr<juce::Label> lblSustain;
+
+    //==============================================================================
+
+    const float settingsAreaMarginH   = 0.067f;
+    const float settingsLabelH        = 0.1f;
+
+    const float controlAreaXMargin = 0.055f;
+
+    const float controlXMargin = 0.034f;
+    const float controlHeightScalar    = 0.055f;
+
+    const float controlYMarginToControlHeight = 1.0f;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MappingSettingsControls)

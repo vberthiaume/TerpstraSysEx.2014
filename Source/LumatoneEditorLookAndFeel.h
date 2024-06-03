@@ -52,6 +52,14 @@ public:
     }
 
 public:
+    // Helpers for static style definition that don't need component references
+
+    juce::Font getTabBarFont(float height=12.0f) const
+    {
+        return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height);
+    }
+
+public:
     //==================================================================
     // LookAndFeel_V4 Implementation
 
@@ -142,7 +150,7 @@ public:
         void drawDocumentWindowTitleBar(DocumentWindow& window, Graphics& g,
             int w, int h, int titleSpaceX, int titleSpaceW, const Image* icon, bool drawTitleTextOnLeft) override
         {
-            g.fillAll(parent->findColour(LumatoneEditorColourIDs::DarkBackground));
+            g.fillAll(parent->findColour(LumatoneEditorColourIDs::HeaderBackground));
 
             g.setColour(parent->findColour(LumatoneEditorColourIDs::DescriptionText));
             g.setFont(parent->getAppFont(LumatoneEditorFont::GothamNarrowMedium, h * 0.75f));
@@ -163,7 +171,7 @@ public:
             Image btnImage(Image::PixelFormat::RGB, btnSize, btnSize, false);
 
             Graphics g(btnImage);
-            g.fillAll(parent->findColour(LumatoneEditorColourIDs::DarkBackground));
+            g.fillAll(parent->findColour(LumatoneEditorColourIDs::HeaderBackground));
 
             if (buttonType == DocumentWindow::closeButton)
             {
@@ -1029,6 +1037,11 @@ public:
         return bar.getWidth() / bar.getNumTabs();
     }
 
+    juce::Rectangle<int> getTabButtonExtraComponentBounds(const juce::TabBarButton& tbb, juce::Rectangle<int>& area, juce::Component& extraComp) override
+    {
+        return juce::Rectangle<int>(400,400,400,400);
+    }
+
     void drawTabButton(TabBarButton& tbb, Graphics& g, bool isMouseOver, bool isMouseDown) override
     {
         Colour c;
@@ -1047,7 +1060,7 @@ public:
 
     Font getTabButtonFont(TabBarButton& tbb, float height) override
     {
-        return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height).withHorizontalScale(1.05f);
+        return getTabBarFont().withHeight(height).withHorizontalScale(1.05f);
     }
 
     void drawTabButtonText(TabBarButton& tbb, Graphics& g, bool isMouseOver, bool isMouseDown) override
@@ -1271,18 +1284,19 @@ private:
     void setupDefaultColours()
     {
         // Colour references
-        setColour(LumatoneEditorColourIDs::LabelPink,                       Colour(0xffdfceca));
+        setColour(LumatoneEditorColourIDs::TitlePink,                       Colour(0xffdfceca));
+        setColour(LumatoneEditorColourIDs::LabelPink,                       Colour(0xffcecece));
         setColour(LumatoneEditorColourIDs::LabelBlue,                       Colour(0xff60aac5));
         setColour(LumatoneEditorColourIDs::DisconnectedRed,                 Colour(0xffd7002a));
         setColour(LumatoneEditorColourIDs::ConnectedGreen,                  Colour(0xff84aea3));
-        setColour(LumatoneEditorColourIDs::DarkBackground,                  Colour(0xff1a1b1c));
+        setColour(LumatoneEditorColourIDs::HeaderBackground,                Colour(0xff1a1b1c));
         setColour(LumatoneEditorColourIDs::MediumBackground,                Colour(0xff212529));
-        setColour(LumatoneEditorColourIDs::LightBackground,                 Colour(0xff272b2f));
+        setColour(LumatoneEditorColourIDs::LightBackground,                 Colour(0xff272b2e));
         setColour(LumatoneEditorColourIDs::ControlAreaBackground,           Colour(0xff212626));
         setColour(LumatoneEditorColourIDs::ActiveText,                      Colours::white);
         setColour(LumatoneEditorColourIDs::InactiveText,                    Colour(0xffb1b1b1));
         setColour(LumatoneEditorColourIDs::DescriptionText,                 Colour(0xffcbcbcb));
-        setColour(LumatoneEditorColourIDs::ControlBoxBackground,            Colour(0xff212427));
+        setColour(LumatoneEditorColourIDs::ControlBoxBackground,            Colour(0xff1e2222));
         setColour(LumatoneEditorColourIDs::ControlBoxHighlighted,           Colour(0xff3d5a78));
         setColour(LumatoneEditorColourIDs::DefaultPresetButtonActive,       Colour(0xffff84e6));
         setColour(LumatoneEditorColourIDs::DefaultPresetButtonInactive,     Colour(0xff5c7cf2));
@@ -1312,7 +1326,7 @@ private:
         setColour(TextEditor::ColourIds::highlightedTextColourId, findColour(LumatoneEditorColourIDs::DescriptionText));
         setColour(TextEditor::ColourIds::shadowColourId, Colour());
 
-        setColour(AlertWindow::ColourIds::backgroundColourId, findColour(LumatoneEditorColourIDs::DarkBackground));
+        setColour(AlertWindow::ColourIds::backgroundColourId, findColour(LumatoneEditorColourIDs::HeaderBackground));
         setColour(AlertWindow::ColourIds::textColourId, findColour(LumatoneEditorColourIDs::DescriptionText));
         setColour(AlertWindow::ColourIds::outlineColourId, findColour(LumatoneEditorColourIDs::MediumBackground));
     }

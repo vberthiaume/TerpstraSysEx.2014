@@ -61,6 +61,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+	void resizeEditSectionTabs();
+
 	//void refreshKeyDataFields();
 	//void refreshAllFields();
 
@@ -97,6 +99,7 @@ private:
 	// std::unique_ptr<CurvesArea> 			curvesArea;
 	std::unique_ptr<GlobalSettingsArea>		globalSettingsArea;
 
+	std::unique_ptr<juce::Label> 			lblEditTitle;
     std::unique_ptr<juce::TabbedComponent> 	sectionTabs;
 
 	std::unique_ptr<juce::TextButton>		btnLoadFile;
@@ -120,12 +123,16 @@ private:
     juce::Rectangle<int> controlsArea;
     juce::Rectangle<int> controlsAreaBackground;
 
+	juce::TabbedButtonBar* sectionTabBar;
+	const float sectionTabsMarginW			= 0.013f;
+	juce::StringArray sectionTabNames;
+
 	const float contentWidthRatio 			= 0.871f;
 
     const float headerHeight                = 0.0837f;
 
 	const float controlSectionTabsY			= 0.63f;
-	// const float controlsLabelHeight 		= 0.033f;
+	const float controlsLabelHeight 		= 0.033f;
 
     const float controlsAreaY               = 0.662f;
     const float controlsAreaHeight          = 0.43f;

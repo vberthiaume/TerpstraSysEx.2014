@@ -30,14 +30,6 @@
 // Rounded corner size over app height ratio for layout elements
 #define ROUNDEDCORNERTOAPPHEIGHT 0.00555556f
 
-
-#define SETTINGSAREAMARGINHEIGHT 0.1714f
-#define SETTINGSLABELHEIGHT      0.13f
-#define SETTINGSLABELMARGINWIDTH 0.01f
-
-#define SETTINGSCONTROLMARGINTOAPPWIDTH 0.01171875f
-#define SETTINGSTOGGLEHEIGHTSCALAR      0.087f
-
 #if JUCE_MAC
     #define GLOBALFONTSCALAR 0.9f
     #define CONTROLBOXFONTHEIGHTSCALAR 0.7f
@@ -610,11 +602,12 @@ enum LumatoneEditorIcon
 
 enum LumatoneEditorColourIDs
 {
+    TitlePink,
     LabelPink,
     LabelBlue,
     DisconnectedRed,
     ConnectedGreen,
-    DarkBackground,
+    HeaderBackground,
     MediumBackground,
     LightBackground,
     ControlAreaBackground,

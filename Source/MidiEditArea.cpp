@@ -41,7 +41,7 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 
 	lumatoneLabel.reset(new juce::Label("LumatoneLabel", "lumatone"));
 	lumatoneLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
-	lumatoneLabel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelPink));
+	lumatoneLabel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::TitlePink));
 	lumatoneLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(lumatoneLabel.get());
 
@@ -215,7 +215,7 @@ void MidiEditArea::paint (juce::Graphics& g)
 	g.fillAll(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
 
 	// Dark background for title and logomark
-	g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DarkBackground));
+	g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::HeaderBackground));
 	g.fillRect(lumatoneLabelBounds);
 	g.fillRect(connectivityArea);
 

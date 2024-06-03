@@ -60,12 +60,23 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	addAndMakeVisible(globalSettingsArea.get());
 	globalSettingsArea->listenToColourEditButtons(this);
 
+	lblEditTitle.reset(new Label("lblEditTitle", "Edit Mapping"));
+	lblEditTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+	lblEditTitle->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
+	lblEditTitle->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+	addAndMakeVisible(lblEditTitle.get());
+
 	sectionTabs = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::TabsAtTop);
+	sectionTabs->setColour(juce::TabbedComponent::ColourIds::outlineColourId, juce::Colours::transparentBlack);
 	addAndMakeVisible(*sectionTabs);
 	sectionTabs->addTab("Key Editor", juce::Colour(), mappingSettingsComponent.get(), false);
 	sectionTabs->addTab("AutoGenerator", juce::Colour(), mappingSettingsComponent.get(), false);
 	sectionTabs->addTab("Advanced", juce::Colour(), mappingSettingsComponent.get(), false);
 	sectionTabs->addTab("Mapping Settings", juce::Colour(), mappingSettingsComponent.get(), false);
+
+	sectionTabNames = sectionTabs->getTabNames();
+	sectionTabBar = &sectionTabs->getTabbedButtonBar();
+	sectionTabBar->addChangeListener(this);
 
 	btnLoadFile.reset(new juce::TextButton("btnLoadFile"));
 	addAndMakeVisible(btnLoadFile.get());
@@ -123,22 +134,24 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 MainContentComponent::~MainContentComponent()
 {
-    //TerpstraSysExApplication::getApp().getMidiDriver().removeListener(this);
+	copiedSubBoardData = nullptr;
 
-	btnLoadFile = nullptr;
-	btnSaveFile = nullptr;
-	btnImportFile = nullptr;
-
-	// globalSettingsArea = nullptr;
-	// curvesArea = nullptr;
-	mappingSettingsComponent = nullptr;
-	// noteEditArea = nullptr;
-
-	midiEditArea = nullptr;
-	allKeysOverview = nullptr;
-
-	lblAppName = nullptr;
 	lblAppVersion = nullptr;
+	lblAppName = nullptr;
+
+	btnImportFile = nullptr;
+	btnSaveFile = nullptr;
+	btnLoadFile = nullptr;
+
+	sectionTabs = nullptr;
+	lblEditTitle = nullptr;
+
+	globalSettingsArea = nullptr;
+
+	mappingSettingsComponent = nullptr;
+
+	allKeysOverview = nullptr;
+	midiEditArea = nullptr;
 }
 
 void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesFile)
@@ -394,6 +407,12 @@ void MainContentComponent::changeListenerCallback(ChangeBroadcaster *source)
 	// {
 	// 	// allKeysOverview->setCurrentSetSelection(noteEditArea->getOctaveBoardSelectorTab()->getCurrentTabIndex());
 	// }
+
+	// Probably not the cleanest way to do this
+	if (source == sectionTabBar)
+	{
+		resizeEditSectionTabs();
+	}
 }
 
 void MainContentComponent::buttonClicked(Button* btn)
@@ -444,9 +463,7 @@ void MainContentComponent::paint (Graphics& g)
 	g.fillAll(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
 
 	g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
-	// g.setColour(juce::Colours::green);
 	g.fillRect(controlsAreaBackground);
-
 }
 
 void MainContentComponent::resized()
@@ -471,7 +488,7 @@ void MainContentComponent::resized()
 	controlsAreaBackground = getBounds().withTop(proportionOfHeight(controlsAreaY)).withBottom(footerY);
 	controlsArea = controlsAreaBackground.withSizeKeepingCentre(contentWidth, controlsAreaBackground.getHeight());
 
-	controlsLabelYPos = proportionOfHeight(controlSectionTabsY);
+	controlsLabelYPos = controlsArea.getY() - proportionOfHeight(controlsLabelHeight);
 
 	// All keys overview/virtual keyboard playing
 	// int newKeysOverviewAreaHeight = jmax(controlsLabelYPos - midiAreaHeight, MINIMALTERPSTRAKEYSETAREAHEIGHT);
@@ -500,17 +517,18 @@ void MainContentComponent::resized()
 	// noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
 	// noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
 
+	lblEditTitle->setTopLeftPosition(contentMargin, controlsLabelYPos);
+	resizeLabelWithHeight(lblEditTitle.get(), (controlsArea.getY() - controlsLabelYPos) * 0.8f);
+
 	sectionTabs->setBounds(contentMargin, controlsLabelYPos, contentWidth, footerY - controlsArea.getY());
+	// sectionTabs->setOff(lblEditTitle->getWidth());
+	resizeEditSectionTabs();
 
 	// generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
 	// pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
-
 	// curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
 
-	// globalSettingsArea->setBounds(getLocalBounds()
-	// 	.withTop(roundToInt(getHeight() * footerAreaY))
-	// 	.withTrimmedRight(footerHeight)
-	// );
+	globalSettingsArea->setBounds(getLocalBounds().withTop(roundToInt(getHeight() * footerAreaY)));
 
 	resizeLabelWithHeight(lblAppName.get(), roundToInt(footerHeight * lumatoneVersionHeight), 1.0f, " ");
 	lblAppName->setTopLeftPosition(
@@ -520,15 +538,30 @@ void MainContentComponent::resized()
 	resizeLabelWithHeight(lblAppVersion.get(), roundToInt(lblAppName->getHeight() * 0.75f));
 	lblAppVersion->setTopLeftPosition(lblAppName->getRight(), lblAppName->getBottom() - lblAppVersion->getHeight());
 }
+void MainContentComponent::resizeEditSectionTabs()
+{
+	int sectionTabsMargin = proportionOfWidth(sectionTabsMarginW);
+	int sectionTabsWidth = 0;
+
+	auto font = getEditorLookAndFeel().getTabBarFont((float)sectionTabBar->getHeight() * 0.7f);
+	for (int i = 0; i < sectionTabNames.size(); i++)
+	{
+		sectionTabsWidth += font.getStringWidth(sectionTabNames[i]) + sectionTabsMargin;
+	}
+
+	int leftMargin = lblEditTitle->getWidth() + roundToInt(sectionTabsMargin * 0.5f);
+	sectionTabBar->setBounds(sectionTabBar->getBounds().withTrimmedLeft(leftMargin).withWidth(sectionTabsWidth));
+}
+
 //
-//void MainContentComponent::refreshKeyDataFields()
+// void MainContentComponent::refreshKeyDataFields()
 //{
 //	noteEditArea->refreshKeyFields();
 //	// allKeysOverview->mappingUpdateCallback();
 //	// juce::Timer::callAfterDelay(1, [&]() { allKeysOverview->refreshMappingData(); });
 //}
 //
-//void MainContentComponent::refreshAllFields()
+// void MainContentComponent::refreshAllFields()
 //{
 //	refreshKeyDataFields();
 //	generalOptionsArea->loadFromMapping();
@@ -536,7 +569,6 @@ void MainContentComponent::resized()
 //	curvesArea->loadFromMapping();
 //	curvesArea->repaint();
 //}
-
 
 void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
 {

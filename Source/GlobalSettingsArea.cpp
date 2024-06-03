@@ -154,6 +154,9 @@ void GlobalSettingsArea::paint (juce::Graphics& g)
     //[UserPrePaint] Add your own custom painting code here..
     //[/UserPrePaint]
 
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
+    g.fillAll();
+
     //[UserPaint] Add your own custom painting code here..
     //[/UserPaint]
 }
@@ -167,31 +170,32 @@ void GlobalSettingsArea::resized()
     int calbrateBtnHeight = roundToInt(getHeight() * calibrateHeight);
     int calibrateWidth = getLookAndFeel().getTextButtonWidthToFitText(*settingsButton, calbrateBtnHeight);
 
-    settingsButton->setSize(calibrateWidth, calbrateBtnHeight);
-    settingsButton->setTopRightPosition(getWidth(), roundToInt((getHeight() - settingsButton->getHeight()) * 0.5f));
-
-    float margin = roundToInt(getHeight() * 0.1f);
+    float controlsMargin = roundToInt(getHeight() * 0.1f);
     float colourEditHeight = proportionOfHeight(controlsHeight);
     float controlY = proportionOfHeight((1 - controlsHeight) / 2.0f);
     float colourButtonWidth = colourEditHeight * colourButtonAspect;
     Font colourLabelsFont = getAppFonts().getFont(LumatoneEditorFont::FranklinGothic, colourEditHeight * 1.1f);
 
+    int startMargin = proportionOfWidth(marginXRatio);
+    settingsButton->setSize(calibrateWidth, calbrateBtnHeight);
+    settingsButton->setTopRightPosition(getWidth() - startMargin, roundToInt((getHeight() - settingsButton->getHeight()) * 0.5f));
+
     lblColourInactiveMacroButton->setFont(colourLabelsFont);
     resizeLabelWithHeight(lblColourInactiveMacroButton.get(), colourEditHeight);
-    lblColourInactiveMacroButton->setTopRightPosition(settingsButton->getX() - margin, controlY);
+    lblColourInactiveMacroButton->setTopRightPosition(settingsButton->getX() - controlsMargin, controlY);
 
     inactiveMacroButtonColourEdit->setSize(colourButtonWidth, colourEditHeight);
-    inactiveMacroButtonColourEdit->setTopRightPosition(lblColourInactiveMacroButton->getX() - margin, controlY);
+    inactiveMacroButtonColourEdit->setTopRightPosition(lblColourInactiveMacroButton->getX() - controlsMargin, controlY);
 
     lblColourActiveMacroButton->setFont(colourLabelsFont);
     resizeLabelWithHeight(lblColourActiveMacroButton.get(), colourEditHeight);
-    lblColourActiveMacroButton->setTopRightPosition(inactiveMacroButtonColourEdit->getX() - margin, controlY);
+    lblColourActiveMacroButton->setTopRightPosition(inactiveMacroButtonColourEdit->getX() - controlsMargin, controlY);
 
     activeMacroButtonColourEdit->setSize(colourButtonWidth, colourEditHeight);
-    activeMacroButtonColourEdit->setTopRightPosition(lblColourActiveMacroButton->getX() - margin, controlY);
+    activeMacroButtonColourEdit->setTopRightPosition(lblColourActiveMacroButton->getX() - controlsMargin, controlY);
 
     resizeLabelWithHeight(lblPresetButtonColours.get(), colourEditHeight);
-    lblPresetButtonColours->setTopRightPosition(activeMacroButtonColourEdit->getX() - margin, controlY);
+    lblPresetButtonColours->setTopRightPosition(activeMacroButtonColourEdit->getX() - controlsMargin, controlY);
 
     resizeLabelWithHeight(lblDeveloperMode.get(), getHeight());
     lblDeveloperMode->setCentrePosition(getLocalBounds().getCentre());
