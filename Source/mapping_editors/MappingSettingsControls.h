@@ -11,8 +11,8 @@
 #ifndef LUMATONE_EDITOR_MAPPING_SETTINGS_COMPONENT_H
 #define LUMATONE_EDITOR_MAPPING_SETTINGS_COMPONENT_H
 
-#include "./lumatone_editor_library/listeners/editor_listener.h"
-#include "LumatoneEditorState.h"
+#include "../lumatone_editor_library/listeners/editor_listener.h"
+#include "../LumatoneEditorState.h"
 
 class MappingSettingsControls : public juce::Component
                                , public LumatoneEditorState
@@ -43,7 +43,7 @@ private:
     void exprSensitivitySliderCallback();
 
 private:
-    int roundedCornerSize = 0;
+    // int roundedCornerSize = 0;
     juce::Rectangle<float> generalSettingsBounds;
     juce::Rectangle<float> pedalBounds;
 

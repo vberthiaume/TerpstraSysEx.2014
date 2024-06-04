@@ -12,7 +12,7 @@
 #define LUMATONE_EDITOR_MAPPING_SETTINGS_PANEL_H
 
 // #include "./lumatone_editor_library/listeners/editor_listener.h"
-#include "LumatoneEditorState.h"
+#include "../LumatoneEditorState.h"
 
 class MappingSettingsControls;
 class CurvesArea;
@@ -34,7 +34,6 @@ private:
 
     std::unique_ptr<MappingSettingsControls>    settingsControls;
     std::unique_ptr<CurvesArea>                 curvesArea;
-
 
     int contentMarginY;
     int contentHeight;

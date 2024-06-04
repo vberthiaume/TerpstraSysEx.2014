@@ -10,9 +10,9 @@
 
 #include "MappingSettingsControls.h"
 
-#include "LumatoneEditorLookAndFeel.h"
+#include "../LumatoneEditorLookAndFeel.h"
 
-#include "./lumatone_editor_library/graphics/view_constants.h"
+#include "../lumatone_editor_library/graphics/view_constants.h"
 
 //==============================================================================
 MappingSettingsControls::MappingSettingsControls (const LumatoneEditorState& stateIn)
@@ -109,12 +109,12 @@ MappingSettingsControls::~MappingSettingsControls()
 //==============================================================================
 void MappingSettingsControls::paint (juce::Graphics& g)
 {
-    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlAreaBackground));
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), roundedCornerSize);
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), getRoundedRectCornerSize());
 
     g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlBoxBackground));
-    g.fillRoundedRectangle(generalSettingsBounds, roundedCornerSize);
-    g.fillRoundedRectangle(pedalBounds, roundedCornerSize);
+    g.fillRoundedRectangle(generalSettingsBounds, getRoundedRectCornerSize());
+    g.fillRoundedRectangle(pedalBounds, getRoundedRectCornerSize());
 }
 
 void MappingSettingsControls::resized()
@@ -122,7 +122,7 @@ void MappingSettingsControls::resized()
     float w = (float)getWidth();
     float h = (float)getHeight();
 
-    roundedCornerSize = roundToInt(getWindowBounds().getHeight() * ROUNDEDCORNERTOAPPHEIGHT);
+    // roundedCornerSize = roundToInt(getWindowBounds().getHeight() * ROUNDEDCORNERTOAPPHEIGHT);
 
     int settingsMarginX = roundToInt(w * controlAreaXMargin);
     int settingsYMargin = roundToInt(h * settingsAreaMarginH);
