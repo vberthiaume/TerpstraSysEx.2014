@@ -220,7 +220,7 @@ public:
                 return getComboBoxFont(*comboBox);
         }
 
-        Font font = l.getFont().withHeight(l.getHeight());
+        Font font = l.getFont();//.withHeight(l.getHeight());
 
         if (parent)
         {

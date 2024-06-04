@@ -322,8 +322,8 @@ static void addArcToPath(Path& pathIn, Rectangle<float>& ellipseBounds, float fr
 
 static void resizeLabelWithHeight(Label* label, int height, float fontHeightScalar = 1.0f, String textSuffix = "_")
 {
-    label->setFont(label->getFont().withHeight(height * fontHeightScalar * GLOBALFONTSCALAR));
-    label->setSize(round(label->getFont().getStringWidthFloat(label->getText() + textSuffix)), height);
+    label->setFont(label->getFont().withHeight(height * fontHeightScalar));
+    label->setSize(roundToInt(label->getFont().getStringWidthFloat(label->getText() + textSuffix)), height);
 }
 
 //static void positionLabelWithHeight(Label* label, int xPosition, int yPosition, int height, float fontHeightScalar = 1.0f, String textSuffix = "_")
@@ -338,7 +338,7 @@ static void resizeLabelWithHeight(Label* label, int height, float fontHeightScal
 static void resizeLabelWithWidth(Label* label, int width, float fontHeightScalar = 1.0f)
 {
     float heightOverWidth = label->getFont().getHeight() / label->getFont().getStringWidthFloat(label->getText());
-    label->setSize(width, round(heightOverWidth * width));
+    label->setSize(width, roundToInt(heightOverWidth * width));
     label->setFont(label->getFont().withHeight(label->getHeight() * fontHeightScalar * GLOBALFONTSCALAR));
 }
 
