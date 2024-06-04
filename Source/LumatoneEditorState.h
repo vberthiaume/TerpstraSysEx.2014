@@ -86,6 +86,7 @@ public:
 	const juce::String getApplicationVersion() const { return ProjectInfo::versionString; }
 
     juce::Rectangle<int> getWindowBounds() const { return windowBounds; }
+    float getRoundedRectCornerSize() const;
 
     bool getHasChangesToSave() const { return hasChangesToSave; }
     bool getInCalibrationMode() const { return inCalibrationMode; }

@@ -27,9 +27,6 @@
 #define PATH_PI_2_CW   1.5707963 // pi / 2
 #define PATH_PI_2_CCW -1.5707963
 
-// Rounded corner size over app height ratio for layout elements
-#define ROUNDEDCORNERTOAPPHEIGHT 0.00555556f
-
 #if JUCE_MAC
     #define GLOBALFONTSCALAR 0.9f
     #define CONTROLBOXFONTHEIGHTSCALAR 0.7f
@@ -610,6 +607,7 @@ enum LumatoneEditorColourIDs
     HeaderBackground,
     MediumBackground,
     LightBackground,
+    ControlAreaHeader,
     ControlAreaBackground,
     ControlBoxHighlighted,
     ActiveText,

@@ -78,6 +78,11 @@ LumatoneEditorState::~LumatoneEditorState()
     appFonts = nullptr;
 }
 
+float LumatoneEditorState::getRoundedRectCornerSize() const
+{
+    return windowBounds.getHeight() * lookAndFeel->getRoundedRectCornerToAppHeightRatio();
+}
+
 juce::String LumatoneEditorState::getProperty(juce::Identifier propertyId, juce::String fallbackValue) const
 {
     return propertiesFile->getValue(propertyId, fallbackValue);

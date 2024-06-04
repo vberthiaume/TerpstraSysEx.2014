@@ -59,6 +59,11 @@ public:
         return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height);
     }
 
+    float getRoundedRectCornerToAppHeightRatio() const
+    {
+        return 0.00555556f;
+    }
+
 public:
     //==================================================================
     // LookAndFeel_V4 Implementation
@@ -1292,7 +1297,8 @@ private:
         setColour(LumatoneEditorColourIDs::HeaderBackground,                Colour(0xff1a1b1c));
         setColour(LumatoneEditorColourIDs::MediumBackground,                Colour(0xff212529));
         setColour(LumatoneEditorColourIDs::LightBackground,                 Colour(0xff272b2e));
-        setColour(LumatoneEditorColourIDs::ControlAreaBackground,           Colour(0xff212626));
+        setColour(LumatoneEditorColourIDs::ControlAreaHeader,               Colour(0xff272b2e));
+        setColour(LumatoneEditorColourIDs::ControlAreaBackground,           Colour(0xff2d3135));
         setColour(LumatoneEditorColourIDs::ActiveText,                      Colours::white);
         setColour(LumatoneEditorColourIDs::InactiveText,                    Colour(0xffb1b1b1));
         setColour(LumatoneEditorColourIDs::DescriptionText,                 Colour(0xffcbcbcb));
