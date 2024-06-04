@@ -37,7 +37,7 @@ void MappingSettingsPanel::paint(juce::Graphics& g)
 void MappingSettingsPanel::resized()
 {
     contentMarginY = proportionOfHeight(contentMarginHeightRatio);
-    contentHeight = juce::roundToInt(getHeight() - contentMarginY);
+    contentHeight = juce::roundToInt(getHeight() - contentMarginY * 2);
 
     settingsControls->setBounds(0, contentMarginY, proportionOfWidth(controlsWidthRatio), contentHeight);
 

@@ -15,12 +15,10 @@
 #include "LumatoneMenu.h"
 
 #include "MidiEditArea.h"
-// #include "NoteEditArea.h"
-// #include "IsomorphicMassAssign.h"
 
-// #include "CurvesArea.h"
+#include "mapping_editors/KeyEditorPanel.h"
+#include "mapping_editors/MappingSettingsPanel.h"
 #include "GlobalSettingsArea.h"
-#include "MappingSettingsPanel.h"
 
 #include "./ColourPaletteWindow.h"
 
@@ -51,6 +49,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	// noteEditArea->getOctaveBoardSelectorTab()->addChangeListener(this);
 	// noteEditArea->getColourViewComponent()->addListener(this); // Open up ColourPaletteWindow
 
+	keyEditorPanel = std::make_unique<KeyEditorPanel>(stateIn);
 	mappingSettingsComponent = std::make_unique<MappingSettingsPanel>(stateIn);
 
 	// curvesArea.reset(new CurvesArea(stateIn));
@@ -69,7 +68,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	sectionTabs = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::TabsAtTop);
 	sectionTabs->setColour(juce::TabbedComponent::ColourIds::outlineColourId, juce::Colours::transparentBlack);
 	addAndMakeVisible(*sectionTabs);
-	sectionTabs->addTab("Key Editor", juce::Colour(), mappingSettingsComponent.get(), false);
+	sectionTabs->addTab("Key Editor", juce::Colour(), keyEditorPanel.get(), false);
 	sectionTabs->addTab("AutoGenerator", juce::Colour(), mappingSettingsComponent.get(), false);
 	sectionTabs->addTab("Advanced", juce::Colour(), mappingSettingsComponent.get(), false);
 	sectionTabs->addTab("Mapping Settings", juce::Colour(), mappingSettingsComponent.get(), false);
@@ -126,7 +125,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	btnImportFile->setEnabled(false);
 
 	// DEBUG
-	sectionTabs->setCurrentTabIndex(3);
+	// sectionTabs->setCurrentTabIndex(3);
 
     // Initialize mapping structure
     //deleteAll();
@@ -149,6 +148,7 @@ MainContentComponent::~MainContentComponent()
 	globalSettingsArea = nullptr;
 
 	mappingSettingsComponent = nullptr;
+	keyEditorPanel = nullptr;
 
 	allKeysOverview = nullptr;
 	midiEditArea = nullptr;
@@ -490,11 +490,6 @@ void MainContentComponent::resized()
 
 	controlsLabelYPos = controlsArea.getY() - proportionOfHeight(controlsLabelHeight);
 
-	// All keys overview/virtual keyboard playing
-	// int newKeysOverviewAreaHeight = jmax(controlsLabelYPos - midiAreaHeight, MINIMALTERPSTRAKEYSETAREAHEIGHT);
-	// int keyboardMarginTop = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicMarginTop);
-	// int keyboardHeight = juce::roundToInt(newKeysOverviewAreaHeight * lumatoneGraphicH);
-
 	allKeysOverview->setBounds(contentMargin, midiAreaHeight, contentWidth, controlsLabelYPos - midiAreaHeight);
 
 	int btnHeight = roundToInt(getHeight() * fileButtonH);
@@ -507,26 +502,15 @@ void MainContentComponent::resized()
 	btnLoadFile->setBounds(halfWidthX - btnMargin - saveLoadWidth, btnY, saveLoadWidth, btnHeight);
 	btnSaveFile->setBounds(halfWidthX + btnMargin, btnY, saveLoadWidth, btnHeight);
 
-	//octaveLineY = lumatoneBounds.getBottom() + roundToInt(getHeight() * octaveLineYRatio);
-
 	int importY = allKeysOverview->getY() - roundToInt(getHeight() * importYFromImageTop);
 	int importWidth = roundToInt(getWidth() * importW);
 	btnImportFile->setBounds(allKeysOverview->getRight() - importWidth, importY, importWidth, btnHeight);
 
-	// Edit function/single key field area
-	// noteEditArea->setSize(proportionOfWidth(assignWidth), proportionOfHeight(assignHeight));
-	// noteEditArea->setControlsTopLeftPosition(proportionOfWidth(assignMarginX), controlsArea.getY());
-
 	lblEditTitle->setTopLeftPosition(contentMargin, controlsLabelYPos);
 	resizeLabelWithHeight(lblEditTitle.get(), (controlsArea.getY() - controlsLabelYPos) * 0.8f);
 
-	sectionTabs->setBounds(contentMargin, controlsLabelYPos, contentWidth, footerY - controlsArea.getY());
-	// sectionTabs->setOff(lblEditTitle->getWidth());
+	sectionTabs->setBounds(contentMargin, controlsLabelYPos, contentWidth, footerY - controlsLabelYPos);
 	resizeEditSectionTabs();
-
-	// generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
-	// pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
-	// curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
 
 	globalSettingsArea->setBounds(getLocalBounds().withTop(roundToInt(getHeight() * footerAreaY)));
 

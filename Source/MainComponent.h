@@ -19,6 +19,7 @@
 class LumatoneKeyboardComponent;
 
 class MidiEditArea;
+class KeyEditorPanel;
 class MappingSettingsPanel;
 class GlobalSettingsArea;
 
@@ -94,6 +95,7 @@ private:
 
 	// Edit fields for setting key and button parameters, and edits for single keys
 	// std::unique_ptr<NoteEditArea>				noteEditArea;
+	std::unique_ptr<KeyEditorPanel>			keyEditorPanel;
 	std::unique_ptr<MappingSettingsPanel>	mappingSettingsComponent;
 
 	// std::unique_ptr<CurvesArea> 			curvesArea;
