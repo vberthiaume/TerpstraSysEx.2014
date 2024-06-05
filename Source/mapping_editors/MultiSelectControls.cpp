@@ -11,6 +11,9 @@
 #include "MultiSelectControls.h"
 #include "../LumatoneEditorLookAndFeel.h"
 
+#include "../colour_view_component.h"
+#include "../lumatone_editor_library/palettes/colour_edit_textbox.h"
+
 MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
         : LumatoneEditorState(stateIn)
         , juce::Component("MultiSelectControls")
@@ -20,7 +23,14 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     lblMultiSelect->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
     addAndMakeVisible(lblMultiSelect.get());
 
-    keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeCombo");
+    colourTextEditor = std::make_unique<ColourTextEditor>("colourSelectEditor", "000000");
+    addAndMakeVisible(colourTextEditor.get());
+
+    colourSubwindow = std::make_unique<ColourViewComponent>(juce::Colour(0xff5398b7));
+    colourSubwindow->setColourButtonMode(ColourViewComponent::ColourButtonMode::Dropper);
+    addAndMakeVisible(colourSubwindow.get());
+
+    keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeComboSelect");
     keyTypeCombo->setEditableText (false);
     keyTypeCombo->setJustificationType (juce::Justification::centredLeft);
     keyTypeCombo->setTextWhenNothingSelected (juce::String());
@@ -31,7 +41,7 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->addItem (juce::translate("Disabled"), 4);
     addAndMakeVisible(keyTypeCombo.get());
 
-    noteInput = std::make_unique<juce::Slider>("noteInput");
+    noteInput = std::make_unique<juce::Slider>("noteInputSelect");
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
     noteInput->setRange (0, 127, 1);
     noteInput->setSliderStyle (juce::Slider::IncDecButtons);
@@ -39,7 +49,7 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     // noteInput->addListener (this);
     addAndMakeVisible(noteInput.get());
 
-    channelInput = std::make_unique<juce::Slider>("channelInput");
+    channelInput = std::make_unique<juce::Slider>("channelInputSelect");
     channelInput->setRange (1, 16, 1);
     channelInput->setSliderStyle (juce::Slider::IncDecButtons);
     // channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
@@ -78,6 +88,8 @@ MultiSelectControls::~MultiSelectControls()
     noteInput = nullptr;
     keyTypeCombo = nullptr;
 
+    colourSubwindow = nullptr;
+    colourTextEditor = nullptr;
 }
 
 void MultiSelectControls::paint(juce::Graphics& g)
@@ -115,17 +127,24 @@ void MultiSelectControls::resized()
 
     colourTypeColumnWidth = roundToInt(w * colourTypeColumnW);
 
+    noteChannelColumnWidth = roundToInt(w * noteChannelColumnW);
+    noteChannelColumnX = (int)w - noteChannelColumnWidth - roundToInt(contentMarginWidth * 0.5f);
+
     lblColour->setTopLeftPosition(contentMarginWidth + labelMarginWidth, headerHeight + contentMarginHeight);
     resizeLabelWithHeight(lblColour.get(), labelHeight, controlLabelFontScalar);
 
-    // fix with colour component
-    lblKeyType->setTopLeftPosition(contentMarginWidth + labelMarginWidth, lblColour->getBottom() + controlHeight + controlMarginHeight);
+    colourButtonMargin = lblColour->getFont().getStringWidth(" ");
+    colourButtonWidth = roundToInt(getParentWidth() * colourButtonParentW) - colourButtonMargin;
+
+    colourTextBoxWidth = colourTypeColumnWidth - colourButtonWidth - colourButtonMargin;
+    colourTextEditor->setBounds(contentMarginWidth, lblColour->getBottom(), colourTextBoxWidth, controlHeight);
+    colourSubwindow->setBounds(colourTextEditor->getRight() + colourButtonMargin, colourTextEditor->getY(), colourButtonWidth, controlHeight);
+
+    lblKeyType->setTopLeftPosition(contentMarginWidth + labelMarginWidth, colourTextEditor->getBottom() + controlMarginHeight);
     resizeLabelWithHeight(lblKeyType.get(), labelHeight, controlLabelFontScalar);
 
     keyTypeCombo->setBounds(contentMarginWidth, lblKeyType->getBottom(), colourTypeColumnWidth, controlHeight);
 
-    noteChannelColumnWidth = roundToInt(w * noteChannelColumnW);
-    noteChannelColumnX = (int)w - noteChannelColumnWidth - roundToInt(contentMarginWidth * 0.5f);
 
     lblNote->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, headerHeight + contentMarginHeight);
     resizeLabelWithHeight(lblNote.get(), labelHeight, controlLabelFontScalar);

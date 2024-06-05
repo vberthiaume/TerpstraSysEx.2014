@@ -30,11 +30,12 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     colourTextEditor = std::make_unique<ColourTextEditor>("colourTextEditor", "000000");
     addAndMakeVisible(colourTextEditor.get());
 
-    colourSubwindow = std::make_unique<ColourViewComponent>();
+    colourSubwindow = std::make_unique<ColourViewComponent>(juce::Colour(0xff5398b7));
+    colourSubwindow->setColourButtonMode(ColourViewComponent::ColourButtonMode::Dropper);
     addAndMakeVisible(colourSubwindow.get());
 
-    colourPickerToggle = std::make_unique<juce::TextButton>("Pick");
-    addAndMakeVisible(colourPickerToggle.get());
+    // colourPickerToggle = std::make_unique<juce::TextButton>("Pick");
+    // addAndMakeVisible(colourPickerToggle.get());
 
     keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeCombo");
     keyTypeCombo->setEditableText (false);
@@ -61,7 +62,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     addAndMakeVisible(channelInput.get());
 
-    lblColour = std::make_unique<juce::Label>("lblColour", "Key Colour: ");
+    lblColour = std::make_unique<juce::Label>("lblColour", "Key Colour:");
     lblColour->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
     lblColour->setJustificationType(juce::Justification::centredLeft);
     lblColour->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
@@ -106,7 +107,7 @@ KeyEditorControls::~KeyEditorControls()
     channelInput = nullptr;
     noteInput = nullptr;
     keyTypeCombo = nullptr;
-    colourPickerToggle = nullptr;
+    // colourPickerToggle = nullptr;
     colourSubwindow = nullptr;
     colourTextEditor = nullptr;
     lblKeySettings = nullptr;
@@ -148,7 +149,12 @@ void KeyEditorControls::resized()
 
     lblColour->setTopLeftPosition(contentMarginWidth, headerHeight + contentMarginHeight);
     resizeLabelWithHeight(lblColour.get(), keyControlHeight, controlLabelFontScalar);
-    colourTextEditor->setBounds(lblColour->getRight(), lblColour->getY(), keyControlColumnRight - lblColour->getRight(), keyControlHeight);
+
+    colourButtonMargin = lblColour->getFont().getStringWidth(" ");
+    colourButtonWidth = roundToInt(getParentWidth() * colourButtonParentW) - colourButtonMargin;
+
+    colourTextEditor->setBounds(lblColour->getRight(), lblColour->getY(), keyControlColumnRight - lblColour->getRight() - colourButtonWidth, keyControlHeight);
+    colourSubwindow->setBounds(colourTextEditor->getRight() + colourButtonMargin, colourTextEditor->getY(), colourButtonWidth, keyControlHeight);
 
     lblKeyType->setTopLeftPosition(contentMarginWidth, lblColour->getBottom() + keyControlMarginHeight);
     resizeLabelWithHeight(lblKeyType.get(), keyControlHeight, controlLabelFontScalar);

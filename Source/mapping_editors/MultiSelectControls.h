@@ -13,6 +13,9 @@
 
 #include "../LumatoneEditorState.h"
 
+class ColourViewComponent;
+class ColourTextEditor;
+
 class MultiSelectControls : public LumatoneEditorState
                           , public juce::Component
 {
@@ -28,7 +31,9 @@ private:
 
     std::unique_ptr<juce::Label>    lblMultiSelect;
 
-    // colourinput
+    std::unique_ptr<ColourTextEditor>       colourTextEditor;
+    std::unique_ptr<ColourViewComponent>    colourSubwindow;
+
     std::unique_ptr<juce::ComboBox> keyTypeCombo;
     std::unique_ptr<juce::Slider>   noteInput;
     std::unique_ptr<juce::Slider>   channelInput;
@@ -45,7 +50,7 @@ private:
     juce::Path controlPath;
 
     int contentMarginWidth;
-    const float contentMarginParentW   = 0.024f;
+    const float contentMarginParentW   = 0.022f;
 
     int contentMarginHeight;
     const float controlMarginH        = 0.08f;
@@ -54,6 +59,10 @@ private:
     int labelMarginWidth;
     const float labelToHeaderH        = 0.5f;
 
+    int colourTextBoxWidth;
+    int colourButtonMargin;
+    int colourButtonWidth;
+    const float colourButtonParentW   = 0.03f;
 
     int controlHeight;
     const float controlH                = 0.13f;

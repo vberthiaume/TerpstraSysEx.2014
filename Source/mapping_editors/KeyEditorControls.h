@@ -40,7 +40,7 @@ private:
 
     std::unique_ptr<ColourTextEditor>       colourTextEditor;
     std::unique_ptr<ColourViewComponent>    colourSubwindow;
-    std::unique_ptr<juce::TextButton>       colourPickerToggle;
+    // std::unique_ptr<juce::TextButton>       colourPickerToggle;
 
     std::unique_ptr<juce::ComboBox>         keyTypeCombo;
     std::unique_ptr<juce::Slider>           noteInput;
@@ -70,7 +70,7 @@ private:
     int labelHeight;
     // int labelMarginWidth;
     const float labelToHeaderH         = 0.5f;
-    const float controlLabelFontScalar = 0.7f;
+    const float controlLabelFontScalar = 0.67f;
 
     int keyControlColumnWidth;
     int keyControlColumnRight;
@@ -85,6 +85,10 @@ private:
     int colourColumnX;
     int colourColumnWidth;
     const float columnMarginW         = 0.055f;
+
+    int colourButtonMargin;
+    int colourButtonWidth;
+    const float colourButtonParentW   = 0.031f;
 
     int colourColumnHeight;
     const float colourColumnH         = 0.6f;
