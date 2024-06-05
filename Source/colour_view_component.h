@@ -72,7 +72,6 @@ Draw each item in ColourComboBox's drop-down list in "its" colour
 //[/Headers]
 
 
-
 //==============================================================================
 /**
                                                                     //[Comments]
@@ -85,26 +84,36 @@ class ColourViewComponent  : public juce::Button,
                              public juce::ChangeBroadcaster,
                              public ColourSelectionListener
 {
+
+public:
+
+enum ColourButtonMode
+{
+    ViewOnly = 0,
+    PalettePopup,
+    Dropper
+};
+
+enum ColourViewMode
+{
+    StrictRgb = 0,
+    Modelled
+};
+
 public:
     //==============================================================================
     ColourViewComponent (juce::Colour initialColour = juce::Colour(0xff5c7cf2));
     ~ColourViewComponent() override;
 
-    //==============================================================================
-    //[UserMethods]     -- You can add your own custom methods in this section.
-	//void changeListenerCallback(juce::ChangeBroadcaster *source) override;
-
 	void setColour(juce::String colourAsString, bool sendChangeMessage = true);
 	juce::String getColourAsString();
 	int getColourAsNumber();
     juce::Colour getColourAsObject();
-	//void addColourToBox(int newColourAsNumber);
-    //[/UserMethods]
 
-    //void paint (juce::Graphics g) override;
-    //void resized() override;
-    //void buttonClicked (juce::Button* buttonThatWasClicked) override;
-    //void comboBoxChanged (juce::ComboBox* comboBoxThatHasChanged) override;
+    ColourButtonMode getColourButtonMode() const;
+    void setColourButtonMode(ColourButtonMode modeIn);
+
+    //==============================================================================
 
     void paintButton(juce::Graphics& g, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
@@ -115,19 +124,12 @@ public:
 
 
 private:
-    //[UserVariables]   -- You can add your own custom variables in this section.
-    //std::unique_ptr<ColourComboLookAndFeel> colourComboLookAndFeel;
 
     juce::Colour currentColour = juce::Colour(0xffd1d1d1);
     juce::String currentColourAsString = currentColour.toString();
     float brightnessAdjust = 0.0f;
 
-    //[/UserVariables]
-
-    //==============================================================================
-    //std::unique_ptr<juce::TextButton> btnColourPicker;
-    //std::unique_ptr<ColourComboBox> colourCombo;
-
+    ColourButtonMode colourButtonMode;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourViewComponent)

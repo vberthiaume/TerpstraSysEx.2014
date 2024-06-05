@@ -236,9 +236,12 @@ void ColourViewComponent::paintButton(juce::Graphics& g, bool shouldDrawButtonAs
     g.setColour(backgroundColour);
     g.fillRoundedRectangle(getLocalBounds().toFloat(), getHeight() / 3.0f);
 
-    g.setFont(juce::Font().withHeight(proportionOfHeight(0.75f)).withHorizontalScale(2.0f));
-    g.setColour(textColour);
-    g.drawFittedText(getButtonText(), getLocalBounds(), juce::Justification::centred, 1);
+    if (colourButtonMode > ColourViewComponent::ColourButtonMode::ViewOnly)
+    {
+        g.setFont(juce::Font().withHeight(proportionOfHeight(0.75f)).withHorizontalScale(2.0f));
+        g.setColour(textColour);
+        g.drawFittedText(getButtonText(), getLocalBounds(), juce::Justification::centred, 1);
+    }
 }
 
 void ColourViewComponent::setColour(juce::String colourAsString, bool sendChange)
@@ -271,6 +274,31 @@ int ColourViewComponent::getColourAsNumber()
 juce::Colour ColourViewComponent::getColourAsObject()
 {
     return currentColour;
+}
+
+ColourViewComponent::ColourButtonMode ColourViewComponent::getColourButtonMode() const
+{
+    return colourButtonMode;
+}
+
+void ColourViewComponent::setColourButtonMode(ColourButtonMode modeIn)
+{
+    colourButtonMode = modeIn;
+
+    if (colourButtonMode == ColourButtonMode::PalettePopup)
+    {
+        setButtonText("v");
+    }
+    else if (colourButtonMode == ColourButtonMode::Dropper)
+    {
+        setButtonText("P");  // place holder TODO
+    }
+    else
+    {
+        setButtonText("");
+    }
+
+    repaint();
 }
 
 void ColourViewComponent::colourChangedCallback(ColourSelectionBroadcaster* source, juce::Colour newColour)
