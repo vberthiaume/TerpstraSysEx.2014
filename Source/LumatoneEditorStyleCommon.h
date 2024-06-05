@@ -54,7 +54,7 @@ static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCo
     // TODO: finish implementing 3 and 12
     if (connectedFlags == 0 || connectedFlags == 3 || connectedFlags == 12)
     {
-        rect.addRoundedRectangle(bounds, roundedCornerSize);
+        rect.addRoundedRectangle(0, 0, bounds.getWidth(), bounds.getHeight(), roundedCornerSize);
         return rect;
     }
 
@@ -610,6 +610,7 @@ enum LumatoneEditorColourIDs
     ControlAreaHeader,
     ControlAreaBackground,
     ControlBoxHighlighted,
+    ColourPaletteBackground,
     ActiveText,
     InactiveText,
     DescriptionText,
