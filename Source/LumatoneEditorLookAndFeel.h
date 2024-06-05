@@ -59,6 +59,11 @@ public:
         return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height);
     }
 
+    juce::Font getSliderTextBoxFont(float height=12.0f) const
+    {
+        return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height);
+    }
+
     float getRoundedRectCornerToAppHeightRatio() const
     {
         return 0.00555556f;
@@ -264,7 +269,8 @@ public:
 
     void drawLabel(Graphics& g, Label& l) override
     {
-        Path roundedBounds = getConnectedRoundedRectPath(l.getBounds().toFloat(), l.getHeight() * comboBoxRoundedCornerScalar, 0);
+        auto labelBounds = l.getBounds().toFloat();
+        Path roundedBounds = getConnectedRoundedRectPath(labelBounds, l.getHeight() * comboBoxRoundedCornerScalar, 0);
         g.setColour(l.findColour(Label::ColourIds::backgroundColourId));
         g.fillPath(roundedBounds);
 
@@ -647,13 +653,13 @@ public:
 
     Label* createSliderTextBox(Slider& sld) override
     {
+        Label* label = new Label(sld.getName() + "_ValueLabel");
+        label->setText(String(sld.getValue()), dontSendNotification);
+        label->setJustificationType(Justification::centred);
+        label->setFont(getSliderTextBoxFont());
+
         if (sld.getSliderStyle() >= Slider::SliderStyle::Rotary && sld.getSliderStyle() < Slider::SliderStyle::IncDecButtons)
         {
-            Label* label = new Label(sld.getName() + "_ValueLabel");
-            label->setText(String(sld.getValue()), dontSendNotification);
-            label->setJustificationType(Justification::centred);
-            label->setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
-
             Colour textColour = (sld.isEnabled())
                 ? findColour(LumatoneEditorColourIDs::DescriptionText)
                 : findColour(LumatoneEditorColourIDs::InactiveText);
@@ -670,13 +676,13 @@ public:
         }
         else if (sld.getSliderStyle() == Slider::SliderStyle::IncDecButtons)
         {
-            Label* label = new Label(sld.getName() + "_ValueLabel");
-            label->setText(String(sld.getValue()), dontSendNotification);
-            label->setJustificationType(Justification::centred);
-            label->setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium));
-
+            float fontHeightScalar = 1.0f;
             if (sld.getProperties().contains(LumatoneEditorStyleIDs::fontHeightScalar))
-                label->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, sld.getProperties()[LumatoneEditorStyleIDs::fontHeightScalar]);
+            {
+                auto scalarProperty = sld.getProperties()[LumatoneEditorStyleIDs::fontHeightScalar];
+                fontHeightScalar = (float)scalarProperty;
+                label->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, scalarProperty);
+            }
 
             Colour backgroundColour = findColour(LumatoneEditorColourIDs::ControlBoxBackground);
             Colour textColour = findColour(LumatoneEditorColourIDs::DescriptionText);
@@ -690,6 +696,28 @@ public:
             label->setColour(Label::ColourIds::backgroundColourId, backgroundColour);
             label->setColour(Label::ColourIds::backgroundWhenEditingColourId, backgroundColour);
             label->setColour(Label::ColourIds::textColourId, textColour);
+
+            auto sliderRange = sld.getRange();
+            juce::String minValue = juce::String(roundToInt(sliderRange.getEnd()));
+            juce::String maxValue = juce::String(roundToInt(sliderRange.getStart()));
+            juce::String longestValue = (minValue.length() > maxValue.length()) ? minValue : maxValue;
+
+            for (int n = 0; n < sld.getNumDecimalPlacesToDisplay(); n++)
+            {
+                longestValue += "_";
+            }
+
+            // extra margin
+            longestValue += "_";
+
+            float fontHeight = sld.getHeight() * fontHeightScalar * 0.8f;
+
+            juce::Font textBoxFont = getSliderTextBoxFont(fontHeight);
+
+            int labelMaxWidth = textBoxFont.getStringWidth(longestValue);
+
+            sld.setTextBoxStyle(sld.getTextBoxPosition(), false, labelMaxWidth, roundToInt(fontHeight));
+
 
             return label;
         }
@@ -1299,6 +1327,7 @@ private:
         setColour(LumatoneEditorColourIDs::LightBackground,                 Colour(0xff272b2e));
         setColour(LumatoneEditorColourIDs::ControlAreaHeader,               Colour(0xff272b2e));
         setColour(LumatoneEditorColourIDs::ControlAreaBackground,           Colour(0xff2d3135));
+        setColour(LumatoneEditorColourIDs::ColourPaletteBackground,         Colour(0xff292b2d));
         setColour(LumatoneEditorColourIDs::ActiveText,                      Colours::white);
         setColour(LumatoneEditorColourIDs::InactiveText,                    Colour(0xffb1b1b1));
         setColour(LumatoneEditorColourIDs::DescriptionText,                 Colour(0xffcbcbcb));
