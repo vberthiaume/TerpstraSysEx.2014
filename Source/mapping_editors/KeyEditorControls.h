@@ -15,6 +15,9 @@
 
 class ColourViewComponent;
 class ColourTextEditor;
+class ColourPaletteWindow;
+class CustomPickerPanel;
+class ColourPalettesPanel;
 
 class KeyEditorControls : public LumatoneEditorState
                         , public juce::Component
@@ -43,6 +46,15 @@ private:
     std::unique_ptr<juce::Slider>           noteInput;
     std::unique_ptr<juce::Slider>           channelInput;
 
+    std::unique_ptr<juce::Label>            lblColour;
+    std::unique_ptr<juce::Label>            lblKeyType;
+    std::unique_ptr<juce::Label>            lblNote;
+    std::unique_ptr<juce::Label>            lblChannel;
+
+    std::unique_ptr<ColourPaletteWindow>    colourPalettePanel;
+    // std::unique_ptr<>    colourPalettePanel;
+    std::unique_ptr<CustomPickerPanel>      colourPickerPanel;
+
 
     const float headerH         = 0.19f;
     int headerHeight;
@@ -50,15 +62,18 @@ private:
     juce::Path controlPath;
 
     int contentMarginWidth;
-    const float contentMarginW        = 0.0414f;
+    const float contentMarginParentW  = 0.024f;
 
     int contentMarginHeight;
     const float controlMarginH        = 0.08f;
 
     int labelHeight;
-    const float labelToHeaderH        = 0.5f;
+    // int labelMarginWidth;
+    const float labelToHeaderH         = 0.5f;
+    const float controlLabelFontScalar = 0.7f;
 
     int keyControlColumnWidth;
+    int keyControlColumnRight;
     const float keyControlColumnW     = 0.3f;
 
     int keyControlHeight;
