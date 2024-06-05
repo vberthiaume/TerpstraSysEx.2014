@@ -40,8 +40,8 @@ juce::String ColourTextEditor::checkInputAndUpdate(bool sendSelectorListenerUpda
 
 void ColourTextEditor::resetToLastUpdated(bool sendSelectorListenerUpdate)
 {
-    juce::NotificationType notification = (sendSelectorListenerUpdate) 
-        ? juce::NotificationType::sendNotification 
+    juce::NotificationType notification = (sendSelectorListenerUpdate)
+        ? juce::NotificationType::sendNotification
         : juce::NotificationType::dontSendNotification;
 
     setText(lastBroadcastedColour.toDisplayString(true).toLowerCase(), notification);
@@ -102,4 +102,10 @@ juce::String ColourTextEditor::parseTextToColourString(juce::String textIn)
     }
 
     return textIn;
+}
+
+void ColourTextEditor::resized()
+{
+    juce::TextEditor::resized();
+    setIndents(getFont().getStringWidth("_"), 0);
 }

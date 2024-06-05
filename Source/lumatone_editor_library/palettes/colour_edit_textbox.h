@@ -37,6 +37,8 @@ public:
 
     static juce::String parseTextToColourString(juce::String textIn);
 
+    void resized() override;
+
 private:
     // TextEditor::Listener Implementation
     /** Called when the user changes the text in some way. */
