@@ -18,9 +18,12 @@
 // #include "../lumatone_editor_library/palettes/palette_selection_panel.h"
 #include "../lumatone_editor_library/palettes/colour_picker_panel.h"
 
+#include "../actions/EditorControlActions.h"
+
 KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
-        : LumatoneEditorState(stateIn)
-        , juce::Component("KeyEditorControls")
+        : juce::Component("KeyEditorControls")
+        , LumatoneEditorState("KeyEditorControls", stateIn)
+        , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
 {
     lblKeySettings = std::make_unique<juce::Label>("lblKeySettings", "Key Settings");
     lblKeySettings->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
@@ -34,9 +37,6 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     colourSubwindow->setColourButtonMode(ColourViewComponent::ColourButtonMode::Dropper);
     addAndMakeVisible(colourSubwindow.get());
 
-    // colourPickerToggle = std::make_unique<juce::TextButton>("Pick");
-    // addAndMakeVisible(colourPickerToggle.get());
-
     keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeCombo");
     keyTypeCombo->setEditableText (false);
     keyTypeCombo->setJustificationType (juce::Justification::centredLeft);
@@ -46,6 +46,10 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
     keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
     keyTypeCombo->addItem (juce::translate("Disabled"), 4);
+    keyTypeCombo->onChange = [&]()
+    {
+        performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId() - 1)));
+    };
     addAndMakeVisible(keyTypeCombo.get());
 
     noteInput = std::make_unique<juce::Slider>("noteInput");
@@ -53,6 +57,10 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     noteInput->setRange (0, 127, 1);
     noteInput->setSliderStyle (juce::Slider::IncDecButtons);
     noteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
+    noteInput->onValueChange = [&]()
+    {
+        performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
+    };
     // noteInput->addListener (this);
     addAndMakeVisible(noteInput.get());
 
@@ -60,6 +68,10 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     channelInput->setRange (1, 16, 1);
     channelInput->setSliderStyle (juce::Slider::IncDecButtons);
     channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
+    channelInput->onValueChange = [&]()
+    {
+        performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
+    };
     addAndMakeVisible(channelInput.get());
 
     lblColour = std::make_unique<juce::Label>("lblColour", "Key Colour:");
@@ -88,14 +100,6 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
 
     colourPalettePanel = std::make_unique<ColourPaletteWindow>(stateIn);
     addAndMakeVisible(colourPalettePanel.get());
-    // colourPickerPanel = std::make_unique<CustomPickerPanel>();
-
-    // juce::Colour colourControlBackground = getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ColourPaletteBackground);
-    // colourControlTabs = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::Orientation::TabsAtTop);
-    // colourControlTabs->addTab("Colour Palettes", colourControlBackground, colourPalettePanel.get(), false);
-    // colourControlTabs->addTab("Custom Picker", colourControlBackground, colourPickerPanel.get(), false);
-    // addAndMakeVisible(colourControlTabs.get());
-
 }
 
 KeyEditorControls::~KeyEditorControls()
@@ -173,4 +177,32 @@ void KeyEditorControls::resized()
     colourColumnHeight = roundToInt(h * colourColumnH);
 
     colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, h - contentMarginHeight);
+}
+
+void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
+{
+    LumatoneEditorState::handleStatePropertyChange(stateIn, property);
+
+    juce::var value = stateIn.getProperty(property);
+
+    if (property == LumatoneEditSelectionProperty::AssignKeyColour)
+    {
+
+    }
+    else if (property == LumatoneEditSelectionProperty::AssignKeyType)
+    {
+        keyTypeCombo->setSelectedId(((int)value) + 1, juce::NotificationType::dontSendNotification);
+    }
+    else if (property == LumatoneEditSelectionProperty::AssignKeyNote)
+    {
+        noteInput->setValue((int)value, juce::NotificationType::dontSendNotification);
+    }
+    else if (property == LumatoneEditSelectionProperty::AssignKeyChannel)
+    {
+        channelInput->setValue((int)value, juce::NotificationType::dontSendNotification);
+    }
+    else if (property == LumatoneEditSelectionProperty::AssignKeyCCFader)
+    {
+
+    }
 }

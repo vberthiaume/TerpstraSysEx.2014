@@ -19,8 +19,9 @@ class ColourPaletteWindow;
 class CustomPickerPanel;
 class ColourPalettesPanel;
 
-class KeyEditorControls : public LumatoneEditorState
-                        , public juce::Component
+class KeyEditorControls : public juce::Component
+                        , public LumatoneEditorState
+                        , private LumatoneEditorState::Controller
 {
 public:
     KeyEditorControls(const LumatoneEditorState& stateIn);
@@ -31,6 +32,10 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
 
+
+private:
+
+    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
 private:
 

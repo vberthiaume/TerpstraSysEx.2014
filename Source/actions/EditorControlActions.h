@@ -39,6 +39,9 @@ public:
 
     int getSizeInUnits() override { return sizeof(SetKeySettingsAction); }
 
+    // void assignToSelectedKeys();
+    void addToEditAassignment();
+
 public:
 
     static SetKeySettingsAction* NewSetAssignColourAction(LumatoneEditorState&  stateIn,    juce::Colour colourIn);
@@ -50,19 +53,8 @@ public:
 private:
 
     LumatoneEditSelectionState::Data previousData;
-    LumatoneEditSelectionState newEditData;
+    LumatoneEditSelectionState::Data newEditData;
 
-  // bool setKeyColour = false;
-  // bool setKeyType = false;
-  // bool setKeyNote = false;
-  // bool setKeyChannel = false;
-  // bool setCCFaderDefault = false;
-
-  // juce::Colour colour;
-  // LumatoneKeyType type;
-  // int note;
-  // int channel;
-  // bool ccFaderDefault;
 };
 
 

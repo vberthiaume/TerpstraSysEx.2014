@@ -15,26 +15,30 @@ SetKeySettingsAction::SetKeySettingsAction(const LumatoneEditorState & stateIn,
 	: LumatoneEditorState("SetKeySettingsAction", stateIn)
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , LumatoneAction(this, "SetKeySettingsAction")
-    , newEditData("SetKeySettingsActionData")
+    // , newEditData("SetKeySettingsActionData")
 {
     previousData = stateIn.getEditSelectionData();
 
-    newEditData.setKeyColour(setKeyColourIn, colourIn);
-    newEditData.setKeyType(setKeyTypeIn, typeIn);
-    newEditData.setKeyNote(setKeyNoteIn, noteIn);
-    newEditData.setKeyChannel(setKeyChannelIn, channelIn);
-    newEditData.setCCFader(setCCFaderDefaultIn, ccFaderDefaultIn);
+    newEditData.setColour = setKeyColourIn;
+    newEditData.colour = colourIn;
+
+    newEditData.setType = setKeyTypeIn;
+    newEditData.type = typeIn;
+
+    newEditData.setNote = setKeyNoteIn;
+    newEditData.note = noteIn;
+
+    newEditData.setChannel = setKeyChannelIn;
+    newEditData.channel = channelIn;
+
+    newEditData.setCCFaderDefault = setCCFaderDefaultIn;
+    newEditData.ccFaderDefault = ccFaderDefaultIn;
 }
 
 bool SetKeySettingsAction::perform()
 {
-    LumatoneEditSelectionState::Data data = newEditData.getData();
-    setAssignKeyColour(data.setColour, data.colour);
-    setAssignKeyType(data.setType, data.type);
-    setAssignKeyNote(data.setNote, data.note);
-    setAssignKeyChannel(data.setChannel, data.channel);
-    setAssignCCFader(data.setCCFaderDefault, data.ccFaderDefault);
-    return false;
+    addToEditAassignment();
+    return true;
 }
 
 bool SetKeySettingsAction::undo()
@@ -44,7 +48,25 @@ bool SetKeySettingsAction::undo()
     setAssignKeyNote(previousData.setNote, previousData.note);
     setAssignKeyChannel(previousData.setChannel, previousData.channel);
     setAssignCCFader(previousData.setCCFaderDefault, previousData.ccFaderDefault);
-    return false;
+    return true;
+}
+
+// void SetKeySettingsAction::assignToSelectedKeys()
+// {
+// }
+
+void SetKeySettingsAction::addToEditAassignment()
+{
+    if (newEditData.setColour)
+        setAssignKeyColour(newEditData.setColour, newEditData.colour);
+    if (newEditData.setType)
+        setAssignKeyType(newEditData.setType, newEditData.type);
+    if (newEditData.setNote)
+        setAssignKeyNote(newEditData.setNote, newEditData.note);
+    if (newEditData.setChannel)
+        setAssignKeyChannel(newEditData.setChannel, newEditData.channel);
+    if (newEditData.setCCFaderDefault)
+        setAssignCCFader(newEditData.setCCFaderDefault, newEditData.ccFaderDefault);
 }
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignColourAction(LumatoneEditorState &stateIn, juce::Colour colourIn)
