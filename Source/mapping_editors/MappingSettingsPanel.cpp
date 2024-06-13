@@ -14,7 +14,7 @@
 
 MappingSettingsPanel::MappingSettingsPanel(const LumatoneEditorState& stateIn)
   : juce::Component("MappingSettingsPanel")
-  , LumatoneEditorState(stateIn)
+  , LumatoneEditorState("MappingSettingsPanel", stateIn)
 {
     settingsControls = std::make_unique<MappingSettingsControls>(stateIn);
     addAndMakeVisible(settingsControls.get());

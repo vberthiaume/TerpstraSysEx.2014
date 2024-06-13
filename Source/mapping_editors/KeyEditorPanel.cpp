@@ -6,7 +6,7 @@
 
 KeyEditorPanel::KeyEditorPanel(const LumatoneEditorState &stateIn)
   : juce::Component("KeyEditorPanel")
-  , LumatoneEditorState(stateIn)
+  , LumatoneEditorState("KeyEditorPanel", stateIn)
 {
     keyEditorControls = std::make_unique<KeyEditorControls>(stateIn);
     addAndMakeVisible(keyEditorControls.get());

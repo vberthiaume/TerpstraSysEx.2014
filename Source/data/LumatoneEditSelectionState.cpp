@@ -1,4 +1,6 @@
 #include "LumatoneEditSelectionState.h"
+#include "../lumatone_editor_library/data/lumatone_layout.h"
+#include "../LumatoneEditorState.h"
 
 static juce::Array<juce::Identifier> getEditSelectionProperties()
 {
@@ -11,23 +13,27 @@ static juce::Array<juce::Identifier> getEditSelectionProperties()
     return properties;
 }
 
-LumatoneEditSelectionState::LumatoneEditSelectionState(juce::String nameIn)
-    : LumatoneStateBase(nameIn)
-{
-    state = juce::ValueTree(LumatoneEditSelectionProperty::AssignKeyEdits);
-}
-
 LumatoneEditSelectionState::LumatoneEditSelectionState(juce::String nameIn, juce::ValueTree parentStateIn)
     : LumatoneStateBase(nameIn)
 {
-    state = juce::ValueTree(LumatoneEditSelectionProperty::AssignKeyEdits);
-    parentStateIn.addChild(state, -1, nullptr);
+    state = parentStateIn.getChildWithName(LumatoneEditSelectionProperty::AssignKeyEdits);
+
+    if (!state.isValid())
+    {
+        state = juce::ValueTree(LumatoneEditSelectionProperty::AssignKeyEdits);
+        parentStateIn.addChild(state, -1, nullptr);
+    }
+
+    state.addListener(this);
 }
 
 LumatoneEditSelectionState::LumatoneEditSelectionState(juce::String nameIn,  juce::ValueTree parentStateIn, const LumatoneEditSelectionState &stateToCopy)
     : LumatoneStateBase(nameIn)
 {
-    state = loadStateProperties(stateToCopy.state.getChildWithName(LumatoneEditSelectionProperty::AssignKeyEdits));
+    juce::ValueTree stateData = stateToCopy.state.getChildWithName(LumatoneEditSelectionProperty::AssignKeyEdits);
+    state = loadStateProperties(stateData);
+    state.addListener(this);
+
     parentStateIn.addChild(state, -1, nullptr);
 }
 
@@ -47,6 +53,12 @@ juce::ValueTree LumatoneEditSelectionState::loadStateProperties(juce::ValueTree 
 
 void LumatoneEditSelectionState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
 {
+    // DBG(name + " edit selection state changed");
+    // DBG(state.toXmlString());
+
+    if (stateIn != state)
+        return;
+
     bool setProperty = stateIn.hasProperty(property);
     juce::var value = stateIn.getProperty(property);
 
@@ -119,7 +131,7 @@ void LumatoneEditSelectionState::setKeyColour(bool set, juce::Colour colourIn)
 
     if (set)
     {
-        state.setProperty(LumatoneEditSelectionProperty::AssignKeyColour, colourIn.toString(), nullptr);
+        state.setPropertyExcludingListener(this, LumatoneEditSelectionProperty::AssignKeyColour, colourIn.toString(), nullptr);
     }
     else
     {
@@ -134,7 +146,7 @@ void LumatoneEditSelectionState::setKeyType(bool set, LumatoneKeyType typeIn)
 
     if (set)
     {
-        state.setProperty(LumatoneEditSelectionProperty::AssignKeyType, juce::var((int)typeIn), nullptr);
+        state.setPropertyExcludingListener(this, LumatoneEditSelectionProperty::AssignKeyType, juce::var((int)typeIn), nullptr);
     }
     else
     {
@@ -149,7 +161,7 @@ void LumatoneEditSelectionState::setKeyNote(bool set, int noteIn)
 
     if (set)
     {
-        state.setProperty(LumatoneEditSelectionProperty::AssignKeyNote, juce::var(noteIn), nullptr);
+        state.setPropertyExcludingListener(this, LumatoneEditSelectionProperty::AssignKeyNote, juce::var(noteIn), nullptr);
     }
     else
     {
@@ -164,7 +176,7 @@ void LumatoneEditSelectionState::setKeyChannel(bool set, int channelIn)
 
     if (set)
     {
-        state.setProperty(LumatoneEditSelectionProperty::AssignKeyChannel, juce::var(channelIn), nullptr);
+        state.setPropertyExcludingListener(this, LumatoneEditSelectionProperty::AssignKeyChannel, juce::var(channelIn), nullptr);
     }
     else
     {
@@ -179,7 +191,7 @@ void LumatoneEditSelectionState::setCCFader(bool set, bool ccFaderDefaultIn)
 
     if (set)
     {
-        state.setProperty(LumatoneEditSelectionProperty::AssignKeyCCFader, juce::var(ccFaderDefaultIn), nullptr);
+        state.setPropertyExcludingListener(this, LumatoneEditSelectionProperty::AssignKeyCCFader, juce::var(ccFaderDefaultIn), nullptr);
     }
     else
     {

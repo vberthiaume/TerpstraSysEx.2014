@@ -11,7 +11,6 @@
 #include "LumatoneEditorState.h"
 
 #include "./LumatoneEditorLookAndFeel.h"
-#include "./KeyEditComponent.h"
 
 #include "./lumatone_editor_library/device/lumatone_controller.h"
 #include "./lumatone_editor_library/listeners/editor_listener.h"
@@ -48,9 +47,9 @@ juce::Array<juce::Identifier> GetLumatoneEditorProperty()
     return properties;
 }
 
-
-LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager *undoManagerIn)
-    : LumatoneApplicationState("LumatoneEditor", driverIn, juce::ValueTree(), undoManagerIn)
+LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwareDriver &driverIn, juce::UndoManager *undoManagerIn)
+    : LumatoneApplicationState(stateIn, driverIn, undoManagerIn)
+    , editSelectionState(name + "_EditSelection", state)
 {
     appFonts = std::make_shared<LumatoneEditorFontLibrary>();
     lookAndFeel = std::make_shared<LumatoneEditorLookAndFeel>(*appFonts, true);
@@ -62,6 +61,7 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, LumatoneFirmwareDriv
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditorState &stateIn)
     : LumatoneApplicationState(name, stateIn)
+    , editSelectionState(name, state)
     , appFonts(stateIn.appFonts)
     , lookAndFeel(stateIn.lookAndFeel)
     , recentFiles(stateIn.recentFiles)
@@ -70,8 +70,16 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditor
 {
 }
 
+LumatoneEditorState::LumatoneEditorState(const LumatoneEditorState &stateIn)
+    : LumatoneEditorState(stateIn.name + "Copy", stateIn)
+{
+}
+
 LumatoneEditorState::~LumatoneEditorState()
 {
+    if (name == LumatoneEditorProperty::StateTree.toString())
+        DBG(state.toXmlString());
+
     recentFiles = nullptr;
     propertiesFile = nullptr;
     lookAndFeel = nullptr;
@@ -93,7 +101,12 @@ juce::RecentlyOpenedFilesList& LumatoneEditorState::getRecentFiles()
     return *recentFiles;
 }
 
-const juce::Array<LumatoneEditorColourPalette>& LumatoneEditorState::getColourPalettes()
+LumatoneEditSelectionState::Data LumatoneEditorState::getEditSelectionData() const
+{
+    return editSelectionState.getData();
+}
+
+const juce::Array<LumatoneEditorColourPalette> &LumatoneEditorState::getColourPalettes()
 {
     return *colourPalettes;
 }
@@ -181,6 +194,31 @@ void LumatoneEditorState::Controller::setEditMode(EditorMode editMode)
     editorState.setStateProperty(LumatoneEditorProperty::EditorMode, (int)editorState.editorMode);
 }
 
+void LumatoneEditorState::Controller::setAssignKeyColour(bool set, juce::Colour colourIn)
+{
+    editorState.editSelectionState.setKeyColour(set, colourIn);
+}
+
+void LumatoneEditorState::Controller::setAssignKeyType(bool set, LumatoneKeyType typeIn)
+{
+    editorState.editSelectionState.setKeyType(set, typeIn);
+}
+
+void LumatoneEditorState::Controller::setAssignKeyNote(bool set, int noteIn)
+{
+    editorState.editSelectionState.setKeyNote(set, noteIn);
+}
+
+void LumatoneEditorState::Controller::setAssignKeyChannel(bool set, int channelIn)
+{
+    editorState.editSelectionState.setKeyChannel(set, channelIn);
+}
+
+void LumatoneEditorState::Controller::setAssignCCFader(bool set, bool ccFaderDefaultIn)
+{
+    editorState.editSelectionState.setCCFader(set, ccFaderDefaultIn);
+}
+
 void LumatoneEditorState::Controller::setWindowState(const juce::Rectangle<int> &windowBounds, juce::String stateString)
 {
     editorState.windowBounds = windowBounds;
@@ -210,6 +248,9 @@ juce::ValueTree LumatoneEditorState::loadStateProperties(juce::ValueTree stateIn
 
 void LumatoneEditorState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
 {
+    // DBG(name + " state changed");
+    // DBG(state.toXmlString());
+
     LumatoneApplicationState::handleStatePropertyChange(stateIn, property);
 
     if (property == LumatoneEditorProperty::MainWindowBounds)
@@ -276,16 +317,16 @@ void LumatoneEditorState::loadPropertiesFile(juce::PropertiesFile *propertiesIn)
 
     setStateProperty(LumatoneEditorProperty::AutoConnectDevice, propertiesFile->getBoolValue(LumatoneEditorProperty::AutoConnectDevice.toString(), true));
 
-    setStateProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive.toString(), true));
-    setStateProperty(LumatoneEditorProperty::SingleNoteNoteSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteNoteSetActive.toString(), true));
-    setStateProperty(LumatoneEditorProperty::SingleNoteChannelSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteChannelSetActive.toString(), true));
-    setStateProperty(LumatoneEditorProperty::SingleNoteColourSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteColourSetActive.toString(), true));
-    setStateProperty(LumatoneEditorProperty::SingleNoteCCFaderIsDefault, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteCCFaderIsDefault.toString(), false));
-    setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncNoteActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteAutoIncNoteActive.toString(), true));
-    setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteAutoIncChannelActive.toString(), true));
-    setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes, propertiesFile->getIntValue(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes.toString(), 127));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteKeyTypeSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteKeyTypeSetActive.toString(), true));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteNoteSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteNoteSetActive.toString(), true));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteChannelSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteChannelSetActive.toString(), true));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteColourSetActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteColourSetActive.toString(), true));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteCCFaderIsDefault, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteCCFaderIsDefault.toString(), false));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncNoteActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteAutoIncNoteActive.toString(), true));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelActive, propertiesFile->getBoolValue(LumatoneEditorProperty::SingleNoteAutoIncChannelActive.toString(), true));
+    // setStateProperty(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes, propertiesFile->getIntValue(LumatoneEditorProperty::SingleNoteAutoIncChannelAfterNumNotes.toString(), 127));
 
-    setStateProperty(LumatoneEditorProperty::IsomorphicMassAssign, propertiesFile->getBoolValue(LumatoneEditorProperty::IsomorphicMassAssign.toString(), false));
+    // setStateProperty(LumatoneEditorProperty::IsomorphicMassAssign, propertiesFile->getBoolValue(LumatoneEditorProperty::IsomorphicMassAssign.toString(), false))
 
     setStateProperty(LumatoneEditorProperty::LastSettingsPanel, propertiesFile->getIntValue(LumatoneEditorProperty::LastSettingsPanel.toString(), 1));
     setStateProperty(LumatoneEditorProperty::LastColourWindowTab, propertiesFile->getIntValue(LumatoneEditorProperty::LastColourWindowTab.toString(), 1));

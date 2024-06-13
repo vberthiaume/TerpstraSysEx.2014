@@ -14,6 +14,8 @@
 #include "./lumatone_editor_library/data/application_state.h"
 #include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
+#include "./data/LumatoneEditSelectionState.h"
+
 #define CHOOSE_FILE_NOOP [](bool) -> void {}
 
 struct LumatoneEditorFontLibrary;
@@ -50,16 +52,18 @@ namespace LumatoneEditorProperty
 
     static const juce::Identifier EditorMode = juce::Identifier("EditorMode");
 
-    static const juce::Identifier SingleNoteNoteSetActive = juce::Identifier("SingleNoteNoteSetActive");
-    static const juce::Identifier SingleNoteChannelSetActive = juce::Identifier("SingleNoteChannelSetActive");
-    static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
-    static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
-    static const juce::Identifier SingleNoteAutoIncNoteActive = juce::Identifier("SingleNoteAutoIncNoteActive");
-    static const juce::Identifier SingleNoteAutoIncChannelActive = juce::Identifier("SingleNoteAutoIncChannelActive");
-    static const juce::Identifier SingleNoteAutoIncChannelAfterNumNotes = juce::Identifier("SingleNoteAutoIncChannelAfterNumNotes");
-    static const juce::Identifier SingleNoteCCFaderIsDefault = juce::Identifier("SingleNoteCCFaderIsDefault");
+    // static const juce::Identifier SingleNoteNoteSetActive = juce::Identifier("SingleNoteNoteSetActive");
+    // static const juce::Identifier SingleNoteChannelSetActive = juce::Identifier("SingleNoteChannelSetActive");
+    // static const juce::Identifier SingleNoteColourSetActive = juce::Identifier("SingleNoteColourSetActive");
+    // static const juce::Identifier SingleNoteKeyTypeSetActive = juce::Identifier("SingleNoteKeyTypeSetActive");
+    // static const juce::Identifier SingleNoteAutoIncNoteActive = juce::Identifier("SingleNoteAutoIncNoteActive");
+    // static const juce::Identifier SingleNoteAutoIncChannelActive = juce::Identifier("SingleNoteAutoIncChannelActive");
+    // static const juce::Identifier SingleNoteAutoIncChannelAfterNumNotes = juce::Identifier("SingleNoteAutoIncChannelAfterNumNotes");
+    // static const juce::Identifier SingleNoteCCFaderIsDefault = juce::Identifier("SingleNoteCCFaderIsDefault");
 
-    static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
+    // static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
+
+    static const juce::Identifier SelectedKeys = juce::Identifier("SelectedKeys");
 
     static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
     static const juce::Identifier LastColourWindowTab = juce::Identifier("LastColourWindowTab");
@@ -77,8 +81,11 @@ static juce::Array<juce::Identifier> GetLumatoneEditorProperties();
 class LumatoneEditorState : public LumatoneApplicationState
 {
 public:
-    LumatoneEditorState(juce::String name, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn);
+    // Only for "top level" state instance
+    LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManagerIn);
+
     LumatoneEditorState(juce::String name, const LumatoneEditorState& stateIn);
+    LumatoneEditorState(const LumatoneEditorState& stateIn);
 
     ~LumatoneEditorState() override;
 
@@ -94,6 +101,10 @@ public:
     bool getInDeveloperMode() const { return inDeveloperMode; }
 
     EditorMode getEditorMode() const { return editorMode; }
+
+    juce::Array<LumatoneKey> getSelectedKeys() const;
+
+    LumatoneEditSelectionState::Data getEditSelectionData() const;
 
     LumatoneEditorLookAndFeel& getEditorLookAndFeel() { return *lookAndFeel; }
 
@@ -134,6 +145,10 @@ protected:
 
     EditorMode editorMode = EditorMode::OFFLINE;
 
+    juce::Array<LumatoneKey> selectedKeys;
+
+    LumatoneEditSelectionState editSelectionState;
+
 private:
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
 	std::shared_ptr<LumatoneEditorLookAndFeel>      lookAndFeel;
@@ -148,7 +163,7 @@ private:
 
 //================================================================================
 public:
-    class Controller : protected LumatoneApplicationState::Controller
+    class Controller : public LumatoneApplicationState::Controller
     {
     public:
         Controller(LumatoneEditorState& stateIn)
@@ -183,6 +198,12 @@ public:
         void setCalibrationMode(bool calibrationModeOn);
         void setDeveloperMode(bool developerModeOn);
         void setEditMode(EditorMode editMode);
+
+        void setAssignKeyColour(bool set, juce::Colour colourIn);
+        void setAssignKeyType(bool set, LumatoneKeyType typeIn);
+        void setAssignKeyNote(bool set, int noteIn);
+        void setAssignKeyChannel(bool set, int channelIn);
+        void setAssignCCFader(bool set, bool ccFaderDefaultIn);
 
         void setWindowState(const juce::Rectangle<int>& windowBounds, juce::String stateString);
 

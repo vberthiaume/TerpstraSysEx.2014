@@ -35,7 +35,6 @@ public:
 
 public:
 
-    LumatoneEditSelectionState(juce::String nameIn);
     LumatoneEditSelectionState(juce::String nameIn, juce::ValueTree parentStateIn);
     LumatoneEditSelectionState(juce::String nameIn,  juce::ValueTree parentStateIn, const LumatoneEditSelectionState& stateToCopy);
 

@@ -15,7 +15,7 @@
 #include "../lumatone_editor_library/palettes/colour_edit_textbox.h"
 
 MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
-        : LumatoneEditorState(stateIn)
+        : LumatoneEditorState("MultiSelectControls", stateIn)
         , juce::Component("MultiSelectControls")
 {
     lblMultiSelect = std::make_unique<juce::Label>("lblMultiSelect", "Multi-Select");

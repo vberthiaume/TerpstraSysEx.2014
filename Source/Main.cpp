@@ -37,7 +37,7 @@
 
 TerpstraSysExApplication::TerpstraSysExApplication()
 	: firmwareDriver(LumatoneFirmwareDriver::HostMode::Driver)
-	, state("LumatoneEditor", firmwareDriver, &undoManager)
+	, state(juce::ValueTree(LumatoneEditorProperty::StateTree), firmwareDriver, &undoManager)
 	, LumatoneEditorState::Controller(state)
 {
 	// Localisation
