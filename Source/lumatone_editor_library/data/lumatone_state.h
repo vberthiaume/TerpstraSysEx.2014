@@ -21,7 +21,8 @@ class LumatoneOutputMap;
 
 namespace LumatoneStateProperty
 {
-    static const juce::Identifier StateTree = juce::Identifier("LumatoneEditorStateTree");
+    static const juce::Identifier DefaultState = juce::Identifier("LumatoneStateTree");
+    static const juce::Identifier LumatoneState = juce::Identifier("LumatoneState");
 
     // Lumatone Data
     static const juce::Identifier LastConnectedSerialNumber = juce::Identifier("LastConnectedSerialNumber");
@@ -43,8 +44,9 @@ namespace LumatoneStateProperty
 class LumatoneState : public LumatoneStateBase
 {
 public:
+    // Top-level constructor
+    LumatoneState(juce::ValueTree stateIn, juce::UndoManager* undoManager);
 
-    LumatoneState(juce::String nameIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
     LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy);
     LumatoneState(const LumatoneState& stateIn);
 
@@ -114,8 +116,6 @@ protected:
 protected:
 
     virtual juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
-
-    virtual void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
 
     virtual void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 

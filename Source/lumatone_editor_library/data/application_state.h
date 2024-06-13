@@ -53,8 +53,11 @@ class DeviceActivityMonitor;
 class LumatoneApplicationState : public LumatoneState
 {
 public:
-    LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn=juce::ValueTree(), juce::UndoManager* undoManager=nullptr);
+    // Top-level constructor
+    LumatoneApplicationState(juce::ValueTree stateIn, LumatoneFirmwareDriver& driverIn, juce::UndoManager* undoManager);
+
     LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState& stateIn);
+    LumatoneApplicationState(const LumatoneApplicationState& stateIn);
 
     virtual ~LumatoneApplicationState() override;
 
@@ -84,19 +87,19 @@ public:
     virtual void setCompleteConfig(const LumatoneLayout& layoutIn) override;
     virtual void setLayout(const LumatoneLayout& layoutIn) override;
     virtual void setBoard(const LumatoneBoard& boardIn, int boardId) override;
-    
+
     virtual void setKey(const LumatoneKey& keyIn, int boardId, int keyIndex) override;
     virtual void setKeyConfig(const LumatoneKey& keyIn, int boardId, int keyIndex) override;
     virtual void setKeyColour(juce::Colour colour, int boardId, int keyIndex) override;
     virtual void sendSelectionParam(const juce::Array<MappedLumatoneKey>& selection, bool signalEditorListeners = true, bool bufferKeyUpdates = false) override;
     virtual void sendSelectionColours(const juce::Array<MappedLumatoneKey>& selection, bool signalEditorListeners = true, bool bufferKeyUpdates = false) override;
-    
+
     virtual void setAftertouchEnabled(bool enabled) override;
     virtual void setLightOnKeyStrokes(bool enabled) override;
     virtual void setInvertExpression(bool invert) override;
     virtual void setInvertSustain(bool invert) override;
     virtual void setExpressionSensitivity(juce::uint8 sensitivity) override;
-    
+
     virtual void setConfigTable(LumatoneConfigTable::TableType type, const LumatoneConfigTable& table) override;
 
 private:

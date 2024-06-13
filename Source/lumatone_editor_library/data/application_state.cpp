@@ -20,8 +20,8 @@ juce::Array<juce::Identifier> getLumatoneApplicationProperties()
     return properties;
 }
 
-LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, LumatoneFirmwareDriver& driverIn, juce::ValueTree stateIn, juce::UndoManager *undoManagerIn)
-    : LumatoneState(nameIn, stateIn, undoManagerIn)
+LumatoneApplicationState::LumatoneApplicationState(juce::ValueTree stateIn, LumatoneFirmwareDriver& driverIn, juce::UndoManager *undoManagerIn)
+    : LumatoneState(stateIn, undoManagerIn)
     , firmwareDriver(driverIn)
 {
     editorListeners = std::make_shared<juce::ListenerList<LumatoneEditor::EditorListener>>();
@@ -37,14 +37,6 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, Lumatone
     loadStateProperties(stateIn);
 }
 
-// LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneState &stateIn, juce::UndoManager *undoManagerIn)
-//     : LumatoneState(nameIn, stateIn, undoManagerIn)
-// {
-//     colourModel = std::make_shared<LumatoneColourModel>();
-//     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
-//     loadStateProperties(state);
-// }
-
 LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const LumatoneApplicationState &stateIn)
     : LumatoneState(nameIn, (const LumatoneState&)stateIn)
     , firmwareDriver(stateIn.firmwareDriver)
@@ -58,6 +50,11 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const Lu
     , colourModel(stateIn.colourModel)
 {
     loadStateProperties(state);
+}
+
+LumatoneApplicationState::LumatoneApplicationState(const LumatoneApplicationState &stateIn)
+    : LumatoneApplicationState(stateIn.name + "Copy", stateIn)
+{
 }
 
 LumatoneApplicationState::~LumatoneApplicationState()
@@ -158,9 +155,11 @@ void LumatoneApplicationState::setActiveMacroButtonColour(juce::Colour buttonCol
 
 juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree stateIn)
 {
-    juce::ValueTree newState = (stateIn.hasType(LumatoneStateProperty::StateTree))
+    juce::ValueTree newState = (stateIn.hasType(LumatoneStateProperty::LumatoneState))
                              ? stateIn
-                             : juce::ValueTree(LumatoneStateProperty::StateTree);
+                             : juce::ValueTree(LumatoneStateProperty::LumatoneState);
+
+    LumatoneState::loadStateProperties(newState);
 
     // DBG("LumatoneApplicationState::loadStateProperties:\n" + newState.toXmlString());
     for (auto property : getLumatoneApplicationProperties())
@@ -169,7 +168,8 @@ juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree st
             handleStatePropertyChange(newState, property);
     }
 
-    LumatoneState::loadStateProperties(newState);
+    // if (name.contains("Copy"))
+    //     DBG(juce::String("Loaded ") + name + juce::String(" properties"));
 
     return newState;
 }
@@ -378,7 +378,7 @@ void LumatoneApplicationState::setInvertExpression(bool invert)
 void LumatoneApplicationState::setInvertSustain(bool invert)
 {
     LumatoneState::setInvertSustain(invert);
-    
+
     if (doSendChangesToDevice())
     {
         controller->invertSustainPedal(invert);
@@ -514,7 +514,7 @@ bool LumatoneApplicationState::Controller::requestSettingsFromDevice()
 
     // Macro button colours
     appState.controller->requestMacroButtonColours();
-    
+
 	// General options
 	appState.controller->requestPresetFlags();
 	appState.controller->requestExpressionPedalSensitivity();

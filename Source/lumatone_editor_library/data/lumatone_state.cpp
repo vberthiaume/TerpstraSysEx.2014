@@ -23,9 +23,9 @@ juce::Array<juce::Identifier> LumatoneState::getLumatoneStateProperties()
     properties.add(LumatoneStateProperty::AftertouchEnabled);
     properties.add(LumatoneStateProperty::InvertExpression);
     properties.add(LumatoneStateProperty::InvertSustain);
-    
+
     properties.add(LumatoneStateProperty::ExpressionSensitivity);
-    
+
     properties.add(LumatoneStateProperty::InactiveMacroButtonColour);
     properties.add(LumatoneStateProperty::ActiveMacroButtonColour);
 
@@ -34,29 +34,34 @@ juce::Array<juce::Identifier> LumatoneState::getLumatoneStateProperties()
     return properties;
 }
 
-LumatoneState::LumatoneState(juce::String nameIn, juce::ValueTree stateIn, juce::UndoManager* undoManagerIn)
-    : LumatoneStateBase(nameIn)
+LumatoneState::LumatoneState(juce::ValueTree stateIn, juce::UndoManager *undoManagerIn)
+    : LumatoneStateBase(stateIn.getType().toString())
     , undoManager(undoManagerIn)
 {
-    state = loadStateProperties(stateIn);
-    state.addListener(this);
-
     mappingData = std::make_shared<LumatoneLayout>();
     midiKeyMap = std::make_shared<LumatoneOutputMap>(mappingData.get());
 
-    juce::ValueTree layoutState = juce::ValueTree(juce::Identifier(nameIn));
-    layoutState.appendChild(mappingData->getState(), nullptr);
-    state.appendChild(layoutState, nullptr);
+    state = loadStateProperties(stateIn);
+    state.addListener(this);
+
+    auto mappingState = mappingData->getState();
+    state.appendChild(mappingState, nullptr);
 }
 
-LumatoneState::LumatoneState(juce::String nameIn, const LumatoneState& stateToCopy)
-    : LumatoneState(nameIn, stateToCopy.state, stateToCopy.undoManager)
+LumatoneState::LumatoneState(juce::String nameIn, const LumatoneState &stateIn)
+    : LumatoneStateBase(nameIn)
+    , undoManager(stateIn.undoManager)
+    , mappingData(stateIn.mappingData)
+    , midiKeyMap(stateIn.midiKeyMap)
 {
-    mappingData = stateToCopy.mappingData;
-    midiKeyMap = stateToCopy.midiKeyMap;
+    state = loadStateProperties(stateIn.state);
+    state.addListener(this);
 }
 
-LumatoneState::LumatoneState(const LumatoneState &stateIn) : LumatoneState(stateIn.name + "Copy", stateIn) {}
+LumatoneState::LumatoneState(const LumatoneState &stateIn)
+    : LumatoneState(stateIn.name + "Copy", stateIn)
+{
+}
 
 LumatoneState::~LumatoneState()
 {
@@ -68,9 +73,9 @@ LumatoneState::~LumatoneState()
 
 juce::ValueTree LumatoneState::loadStateProperties(juce::ValueTree stateIn)
 {
-    juce::ValueTree newState = (stateIn.hasType(LumatoneStateProperty::StateTree))
+    juce::ValueTree newState = stateIn.isValid()
                              ? stateIn
-                             : juce::ValueTree(LumatoneStateProperty::StateTree);
+                             : juce::ValueTree(LumatoneStateProperty::DefaultState);
 
     for (auto property : getLumatoneStateProperties())
     {
@@ -83,6 +88,10 @@ juce::ValueTree LumatoneState::loadStateProperties(juce::ValueTree stateIn)
 
 void LumatoneState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
 {
+    // Ignore any changes from parents
+    if (stateIn != state || !stateIn.isAChildOf(state))
+        return;
+
     if (property == LumatoneStateProperty::LastConnectedSerialNumber)
     {
         connectedSerialNumber = stateIn.getProperty(property).toString();
@@ -201,20 +210,6 @@ void LumatoneState::setAftertouchEnabled(bool enabled)
 void LumatoneState::setLightOnKeyStrokes(bool enabled)
 {
     mappingData->setLightOnKeyStrokes(enabled);
-}
-
-void LumatoneState::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property)
-{
-    //if (treeWhosePropertyHasChanged == state)
-    //{
-        DBG("LumatoneState::valueTreePropertyChanged("
-            + treeWhosePropertyHasChanged.getType().toString() + ", "
-            + property.toString() + ")");
-
-    if (treeWhosePropertyHasChanged == state)
-    {
-        handleStatePropertyChange(state, property);
-    }
 }
 
 LumatoneFirmware::ReleaseVersion LumatoneState::getLumatoneVersion() const
