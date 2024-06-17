@@ -16,6 +16,7 @@
 
 #include "MidiEditArea.h"
 
+#include "mapping_editors/KeySelectionController.h"
 #include "mapping_editors/KeyEditorPanel.h"
 #include "mapping_editors/MappingSettingsPanel.h"
 #include "GlobalSettingsArea.h"
@@ -42,7 +43,11 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 	// All keys overview
 	allKeysOverview.reset(new LumatoneKeyboardComponent(*this));
+	allKeysOverview->setUiMode(LumatoneKeyboardComponent::UiMode::Controller);
 	addAndMakeVisible(allKeysOverview.get());
+
+	// Listens to key selection and creates selection edit actions
+	keySelectionController = std::make_unique<KeySelectionController>(*this, allKeysOverview.get());
 
 	// Edit function area
 	// noteEditArea.reset(new NoteEditArea(stateIn));
@@ -133,6 +138,8 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 MainContentComponent::~MainContentComponent()
 {
+	keySelectionController = nullptr;
+
 	copiedSubBoardData = nullptr;
 
 	lblAppVersion = nullptr;

@@ -18,6 +18,7 @@
 
 class LumatoneKeyboardComponent;
 
+class KeySelectionController;
 class MidiEditArea;
 class KeyEditorPanel;
 class MappingSettingsPanel;
@@ -114,6 +115,10 @@ private:
 
 	// Buffer for copy/paste of sub board data
 	std::unique_ptr<LumatoneBoard>			copiedSubBoardData;
+
+	//==============================================================================
+
+	std::unique_ptr<KeySelectionController>	keySelectionController;
 
 	//==============================================================================
 	// Position and Size helpers
