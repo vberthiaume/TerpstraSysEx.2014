@@ -19,11 +19,13 @@ LumatoneKeyboardComponent::LumatoneKeyboardComponent(const LumatoneApplicationSt
 {
     renderMode = LumatoneComponentRenderMode::GraphicInteractive;
     resetOctaveSize(false);
-    completeMappingLoaded(*getMappingData());
 
     addMouseListener(this, this);
     addKeyListener(this);
     setWantsKeyboardFocus(true);
+
+    completeMappingLoaded(*getMappingData());
+    updateSelectedKeys(*getSelectedKeys());
 
     addEditorListener(this);
     addMidiListener(this);
@@ -242,16 +244,16 @@ void LumatoneKeyboardComponent::keyColourChanged(int boardIndex, int keyIndex, j
     keyUpdateCallback(boardIndex, keyIndex, getKey(boardIndex, keyIndex));
 }
 
-void LumatoneKeyboardComponent::selectionChanged(juce::Array<MappedLumatoneKey> selection)
+void LumatoneKeyboardComponent::keySetChanged(juce::Array<MappedLumatoneKey> selection)
 {
-    auto paintKey = renderMode != LumatoneComponentRenderMode::MaxRes;
-    for (auto mappedKey : selection)
-    {
-        keyUpdateCallback(mappedKey.boardIndex, mappedKey.keyIndex, mappedKey, paintKey);
-    }
+    // auto paintKey = renderMode != LumatoneComponentRenderMode::MaxRes;
+    // if (renderMode == LumatoneComponentRenderMode::MaxRes)
+    //     rerender();
+}
 
-    if (renderMode == LumatoneComponentRenderMode::MaxRes)
-        rerender();
+void LumatoneKeyboardComponent::selectionChanged()
+{
+    updateSelectedKeys(*getSelectedKeys());
 }
 
 void LumatoneKeyboardComponent::keyUpdateCallback(int boardIndex, int keyIndex, const LumatoneKey& newKey, bool doRepaint)
@@ -299,9 +301,52 @@ void LumatoneKeyboardComponent::rerender()
     repaint(lumatoneBounds);
 }
 
+void LumatoneKeyboardComponent::updateSelectedKeys(const juce::Array<MappedLumatoneKey>& newSelection)
+{
+    for (const MappedLumatoneKey& mappedKey : lastKeySelection)
+    {
+        if (mappedKey.boardIndex < 0)
+        {
+            DBG("ERR: bad board index!");
+            break;
+        }
+
+        if (mappedKey.keyIndex < 0)
+        {
+            DBG("ERR: bad key index!");
+            break;
+        }
+
+        const OctaveBoard* board = octaveBoards.getUnchecked(mappedKey.boardIndex);
+        board->keyMiniDisplay.getUnchecked(mappedKey.keyIndex)->setSelected(false);
+    }
+
+    for (const MappedLumatoneKey& mappedKey : newSelection)
+    {
+        if (mappedKey.boardIndex < 0)
+        {
+            DBG("ERR: bad board index!");
+            break;
+        }
+
+        if (mappedKey.keyIndex < 0)
+        {
+            DBG("ERR: bad key index!");
+            break;
+        }
+
+        const OctaveBoard* board = octaveBoards.getUnchecked(mappedKey.boardIndex);
+        board->keyMiniDisplay.getUnchecked(mappedKey.keyIndex)->setSelected(true);
+    }
+
+    lastKeySelection.clearQuick();
+    lastKeySelection.addArray(newSelection);
+}
+
 void LumatoneKeyboardComponent::applyKeyUpdates(int boardIndex, int keyIndex, const LumatoneKey& keyData)
 {
     auto modelColour = getColourModel()->getModelColour(keyData.getColour());
+    // DBG("Adj. " + keyData.getColour().toDisplayString(true) + " to " + modelColour.toDisplayString(true));
     auto key = octaveBoards[boardIndex]->keyMiniDisplay[keyIndex];
     key->setLumatoneKey(keyData, modelColour);
 }
@@ -601,7 +646,7 @@ void LumatoneKeyboardComponent::keyDownInternal(int boardIndex, int keyIndex, ju
 
     if (uiMode == UiMode::Controller)
     {
-        auto keyNum = mappingData->keyCoordToKeyNum(keyIndex, boardIndex);
+        auto keyNum = mappingData->keyCoordToKeyNum(boardIndex, keyIndex);
         listeners.call(&Listener::handleKeyDown, keyNum);
     }
     else switch (key->getType())

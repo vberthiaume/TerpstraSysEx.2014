@@ -18,7 +18,7 @@ LumatoneKeyDisplay::LumatoneKeyDisplay(int newBoardIndex, int newKeyIndex, const
 {
     boardIndex = newBoardIndex;
     keyIndex = newKeyIndex;
-    
+
     renderMode = LumatoneComponentRenderMode::GraphicInteractive;
     clearUiState();
 }
@@ -52,13 +52,13 @@ void LumatoneKeyDisplay::paint(juce::Graphics& g)
     case LumatoneComponentRenderMode::MaxRes:
         if(isSelected)
         {
-            drawColour = drawColour.overlaidWith(juce::Colours::slateblue.withAlpha(0.2f));
+            // drawColour = drawColour.overlaidWith(juce::Colours::slateblue.withAlpha(0.2f));
         }
         if (isNoteOn || isClicked)
         {
             drawColour = hexagonColour.contrasting(0.5f);
         }
-        else if (mouseIsOver)
+        else if (mouseIsOver && !isClicked)
         {
             drawColour = drawColour.contrasting(0.25f);
         }
@@ -100,10 +100,22 @@ void LumatoneKeyDisplay::paint(juce::Graphics& g)
         break;
     }
     }
+
+    if (isSelected)
+    {
+        g.setColour(juce::Colour(0xff333333));
+        g.fillEllipse(selectBounds);
+    }
 }
 
 void LumatoneKeyDisplay::resized()
 {
+    float dotSize = jmin(getWidth(), getHeight()) * selectedDotScalar;
+    float dotOffset = dotSize * 0.5f;
+    selectBounds = juce::Rectangle<float>(getWidth() * 0.5f - dotOffset
+                                        , getHeight() * 0.5f - dotOffset
+                                        , dotSize
+                                        , dotSize);
 }
 
 void LumatoneKeyDisplay::parentHierarchyChanged()

@@ -34,13 +34,13 @@ class LumatoneKeyboardComponent : public juce::Component,
                                   public LumatoneEditor::EditorListener,
                                   public LumatoneEditor::MidiListener
 {
-public: 
+public:
 
     enum class UiMode
     {
         None,           // Do not interact
         Controller,     // Only send signals about keys pressed
-        Perform         // Send MIDI based on layout    
+        Perform        // Send MIDI based on layout
     };
 
 public:
@@ -82,11 +82,12 @@ public:
     // LumatoneEditor::EditorListener Implementation
     void completeMappingLoaded(const LumatoneLayout& mappingData) override;
     void boardChanged(const LumatoneBoard& boardData) override;
-    void contextChanged(LumatoneContext* newOrEmptyContext) override; 
+    void contextChanged(LumatoneContext* newOrEmptyContext) override;
     void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;
     void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) override;
     void keyColourChanged(int octaveNumber, int keyNumber, juce::Colour keyColour) override;
-    void selectionChanged(juce::Array<MappedLumatoneKey> selection) override;
+    void keySetChanged(juce::Array<MappedLumatoneKey> selection) override;
+    void selectionChanged() override;
 private:
 
     void applyKeyUpdates(int boardIndex, int keyIndex, const LumatoneKey& keyData);
@@ -97,7 +98,7 @@ private:
 
 public:
     // Playing mode methods
-    
+
     void clearHeldNotes();
 
     void sustainStarted();
@@ -156,6 +157,8 @@ private:
 
     void rerender();
 
+    void updateSelectedKeys(const juce::Array<MappedLumatoneKey>& selection);
+
 private:
 
     struct OctaveBoard
@@ -176,7 +179,9 @@ private:
 
     LumatoneOutputMap   lumatoneMidiMap;
 
-    LumatoneKeyboardComponent::UiMode uiMode = LumatoneKeyboardComponent::UiMode::Perform;
+    LumatoneKeyboardComponent::UiMode   uiMode = LumatoneKeyboardComponent::UiMode::Perform;
+
+    juce::Array<MappedLumatoneKey>      lastKeySelection;
 
     // std::unique_ptr<juce::Label> lblFirmwareVersion;
 

@@ -30,7 +30,7 @@ enum class LumatoneComponentRenderMode
 };
 
 // Representation of a key inside the overview
-class LumatoneKeyDisplay : public LumatoneKeyContext, 
+class LumatoneKeyDisplay : public LumatoneKeyContext,
                            public juce::Component
 {
 public:
@@ -83,7 +83,7 @@ public:
     void mouseEnter(const juce::MouseEvent& e) override;
     void mouseExit(const juce::MouseEvent& e) override;
     void mouseMove(const juce::MouseEvent& e) override;
-    
+
     void mouseDown(const juce::MouseEvent& e) override;
     void mouseUp(const juce::MouseEvent& e) override;
     void mouseDrag(const juce::MouseEvent& e) override;
@@ -101,6 +101,11 @@ private:
 
     juce::Image colourGraphic;
     juce::Image shadowGraphic;
+
+    juce::Rectangle<float> selectBounds;
+
+    const float selectedDotScalar = 0.15f;
+
 };
 
 #endif LUMATONE_KEY_COMPONENT_H
