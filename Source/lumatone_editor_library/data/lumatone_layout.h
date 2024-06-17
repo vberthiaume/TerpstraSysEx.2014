@@ -144,10 +144,10 @@ public:
 	juce::Array<LumatoneKeyCoord> getAllKeyCoords() const;
 
 	bool isKeyCoordValid(const LumatoneKeyCoord& coord) const;
-	bool isKeyCoordValid(int keyIndex, int boardIndex) const;
+	bool isKeyCoordValid(int boardIndex, int keyIndex) const;
 
 	int keyCoordToKeyNum(const LumatoneKeyCoord& coord) const;
-	int keyCoordToKeyNum(int keyIndex, int boardIndex) const;
+	int keyCoordToKeyNum(int boardIndex, int keyIndex) const;
 
 	LumatoneKeyCoord keyNumToKeyCoord(int keyNum) const;
 

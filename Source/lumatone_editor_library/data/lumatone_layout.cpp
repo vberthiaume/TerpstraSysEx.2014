@@ -264,7 +264,8 @@ const LumatoneKey& LumatoneLayout::getKey(int boardIndex, int keyIndex) const
 
 MappedLumatoneKey LumatoneLayout::getMappedKey(int boardIndex, int keyIndex) const
 {
-    return MappedLumatoneKey(boards[boardIndex].theKeys[keyIndex], boardIndex, keyIndex);
+    auto keyData = getKey(boardIndex, keyIndex);
+    return MappedLumatoneKey(keyData, boardIndex, keyIndex);
 }
 
 void LumatoneLayout::setKey(const LumatoneKey &keyIn, int boardIndex, int keyIndex)
@@ -294,7 +295,7 @@ bool LumatoneLayout::isKeyCoordValid(const LumatoneKeyCoord &coord) const
         && coord.keyIndex < getOctaveBoardSize();
 }
 
-bool LumatoneLayout::isKeyCoordValid(int keyIndex, int boardIndex) const
+bool LumatoneLayout::isKeyCoordValid(int boardIndex, int keyIndex) const
 {
     return keyIndex >= 0
         && keyIndex < getOctaveBoardSize()
@@ -309,9 +310,9 @@ int LumatoneLayout::keyCoordToKeyNum(const LumatoneKeyCoord& coord) const
     return coord.boardIndex * getOctaveBoardSize() + coord.keyIndex;
 }
 
-int LumatoneLayout::keyCoordToKeyNum(int keyIndex, int boardIndex) const
+int LumatoneLayout::keyCoordToKeyNum(int boardIndex, int keyIndex) const
 {
-    if (!isKeyCoordValid(keyIndex, boardIndex))
+    if (!isKeyCoordValid(boardIndex, keyIndex))
         return -1;
     return boardIndex * getOctaveBoardSize() + keyIndex;
 }
