@@ -12,13 +12,13 @@ class EditorListener
 public:
 
     virtual ~EditorListener() {}
-    
+
     // App Actions
     virtual void completeMappingLoaded(const LumatoneLayout& mappingData) {}
     virtual void boardChanged(const LumatoneBoard& boardData) {}
     virtual void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) {}
 
-    virtual void selectionChanged(juce::Array<MappedLumatoneKey> selection) {}
+    virtual void keySetChanged(juce::Array<MappedLumatoneKey> selection) {}
 
     virtual void newFileLoaded(juce::File file) {}
 
@@ -28,6 +28,8 @@ public:
 
     virtual void configTableChanged(LumatoneConfigTable::TableType type) {}
 
+    virtual void selectionChanged() {}
+
 
     // Firmware Actions
     virtual void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) {}
@@ -35,10 +37,10 @@ public:
 
     virtual void expressionPedalSensitivityChanged(unsigned char value) {}
     virtual void invertFootControllerChanged(bool inverted) {}
-    
+
     virtual void macroButtonActiveColourChanged(juce::Colour colour) {}
     virtual void macroButtonInactiveColourChanged(juce::Colour colour) {}
-    
+
     virtual void lightOnKeyStrokesChanged(bool lightOn) {}
 
     virtual void velocityConfigChanged() {}
