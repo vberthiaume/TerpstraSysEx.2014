@@ -35,6 +35,10 @@ namespace LumatoneApplicationProperty
     // UI States
     static const juce::Identifier ConnectionStateId = juce::Identifier("ConnectionState");
 
+    static const juce::Identifier KeySelection = juce::Identifier("KeySelection");
+    static const juce::Identifier SelectedKey = juce::Identifier("SelectedKey");
+    static const juce::Identifier NumKeySelected = juce::Identifier("NumSelected");
+
     static const juce::Identifier LayoutContextIsSetId = juce::Identifier("LayoutContextIsSetId");
 
     // Settings
@@ -72,6 +76,9 @@ public:
     bool isAutoConnectionEnabled() const;
 
     virtual bool doSendChangesToDevice() const;
+
+    // App Methods
+    const juce::Array<MappedLumatoneKey>* getSelectedKeys() const;
 
     // Context Methods
     bool isContextSet() const { return contextIsSet; }
@@ -119,6 +126,9 @@ protected:
 
 private:
     ConnectionState connectionState = ConnectionState::DISCONNECTED;
+
+    // Allow a certain set of keys to be focused on
+    std::shared_ptr<juce::Array<MappedLumatoneKey>> selectedKeys;
 
 private:
     std::shared_ptr<juce::ListenerList<LumatoneEditor::StatusListener>> statusListeners;
@@ -170,6 +180,10 @@ public:
     void setInactiveMacroButtonColour(juce::Colour buttonColour);
     void setActiveMacroButtonColour(juce::Colour buttonColour);
 
+    void setSelectedKeys(juce::Array<MappedLumatoneKey> selection);
+    void addSelectedKey(int keyNum);
+    void removeSelectedKey(int keyNum);
+
     virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
 
     protected:
@@ -177,6 +191,9 @@ public:
         juce::ListenerList<LumatoneEditor::StatusListener>* getStatusListeners() const { return appState.statusListeners.get(); }
         juce::ListenerList<LumatoneEditor::FirmwareListener>* getFirmwareListeners() const { return appState.firmwareListeners.get(); }
         juce::ListenerList<LumatoneEditor::MidiListener>* getMidiListeners() const { return appState.midiListeners.get(); }
+
+    private:
+        static void updateSelectionState(LumatoneApplicationState& stateIn, const juce::Array<MappedLumatoneKey>& selection);
 
     private:
         LumatoneApplicationState& appState;

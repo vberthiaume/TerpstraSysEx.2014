@@ -1,4 +1,4 @@
-/*
+ /*
   ==============================================================================
 
     LumatoneEditorState.h
@@ -63,8 +63,6 @@ namespace LumatoneEditorProperty
 
     // static const juce::Identifier IsomorphicMassAssign = juce::Identifier("IsomorphicMassAssign");
 
-    static const juce::Identifier SelectedKeys = juce::Identifier("SelectedKeys");
-
     static const juce::Identifier LastSettingsPanel = juce::Identifier("LastSettingsPanel");
     static const juce::Identifier LastColourWindowTab = juce::Identifier("LastColourWindowTab");
     static const juce::Identifier LastFirmwareBinPath = juce::Identifier("LastFirmwareBinPath");
@@ -87,7 +85,7 @@ public:
     LumatoneEditorState(juce::String name, const LumatoneEditorState& stateIn);
     LumatoneEditorState(const LumatoneEditorState& stateIn);
 
-    ~LumatoneEditorState() override;
+    virtual ~LumatoneEditorState() override;
 
     const juce::String getApplicationName() const { return ProjectInfo::projectName; }
 	const juce::String getApplicationVersion() const { return ProjectInfo::versionString; }
@@ -102,7 +100,7 @@ public:
 
     EditorMode getEditorMode() const { return editorMode; }
 
-    juce::Array<LumatoneKey> getSelectedKeys() const;
+    // juce::Array<LumatoneKey> getSelectedKeys() const;
 
     LumatoneEditSelectionState::Data getEditSelectionData() const;
 
@@ -144,8 +142,6 @@ protected:
 	bool firmwareUpdateWasPerformed = false;
 
     EditorMode editorMode = EditorMode::OFFLINE;
-
-    juce::Array<LumatoneKey> selectedKeys;
 
     LumatoneEditSelectionState editSelectionState;
 

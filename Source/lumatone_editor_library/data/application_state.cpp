@@ -34,6 +34,8 @@ LumatoneApplicationState::LumatoneApplicationState(juce::ValueTree stateIn, Luma
     activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, &driverIn);
     colourModel = std::make_shared<LumatoneColourModel>();
 
+    selectedKeys = std::make_shared<juce::Array<MappedLumatoneKey>>();
+
     loadStateProperties(stateIn);
 }
 
@@ -48,6 +50,7 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const Lu
     , controller(stateIn.controller)
     , activityMonitor(stateIn.activityMonitor)
     , colourModel(stateIn.colourModel)
+    , selectedKeys(stateIn.selectedKeys)
 {
     loadStateProperties(state);
 }
@@ -88,6 +91,11 @@ bool LumatoneApplicationState::isAutoConnectionEnabled() const
 bool LumatoneApplicationState::doSendChangesToDevice() const
 {
     return connectionState == ConnectionState::ONLINE;
+}
+
+const juce::Array<MappedLumatoneKey> *LumatoneApplicationState::getSelectedKeys() const
+{
+    return selectedKeys.get();
 }
 
 LumatoneController *LumatoneApplicationState::getLumatoneController() const
@@ -323,7 +331,7 @@ void LumatoneApplicationState::sendSelectionParam(const juce::Array<MappedLumato
     }
 
     //if (signalEditorListeners)
-    editorListeners->call(&LumatoneEditor::EditorListener::selectionChanged, selection);
+    editorListeners->call(&LumatoneEditor::EditorListener::keySetChanged, selection);
 }
 
 void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLumatoneKey>& selection, bool signalEditorListeners, bool bufferKeyUpdates)
@@ -336,7 +344,7 @@ void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLuma
     }
 
     //if (signalEditorListeners)
-    editorListeners->call(&LumatoneEditor::EditorListener::selectionChanged, selection);
+    editorListeners->call(&LumatoneEditor::EditorListener::keySetChanged, selection);
 }
 
 void LumatoneApplicationState::setAftertouchEnabled(bool enabled)
@@ -450,6 +458,96 @@ void LumatoneApplicationState::setConfigTable(LumatoneConfigTable::TableType typ
 //        controller->setLumatouchTable(tableIn);
 //    }
 //}
+
+void LumatoneApplicationState::Controller::updateSelectionState(LumatoneApplicationState& stateIn, const juce::Array<MappedLumatoneKey>& selection)
+{
+    auto selectionState = stateIn.state.getOrCreateChildWithName(LumatoneApplicationProperty::KeySelection, nullptr);
+    selectionState.removeAllChildren(nullptr);
+
+    for (const MappedLumatoneKey& key : selection)
+    {
+        juce::ValueTree selectedKey(LumatoneApplicationProperty::SelectedKey);
+        selectedKey.setProperty(LumatoneKeyProperty::Index, key.keyIndex, nullptr);
+        selectedKey.setProperty(LumatoneKeyProperty::Board, key.boardIndex, nullptr);
+        selectionState.addChild(selectedKey, -1, nullptr);
+    }
+
+    selectionState.setPropertyExcludingListener(&stateIn, LumatoneApplicationProperty::NumKeySelected, selection.size(), nullptr);
+
+    // DBG(stateIn.state.toXmlString());
+}
+
+void LumatoneApplicationState::Controller::setSelectedKeys(juce::Array<MappedLumatoneKey> selection)
+{
+    appState.selectedKeys->swapWith(selection);
+
+    updateSelectionState(appState, *appState.selectedKeys);
+
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
+}
+
+void LumatoneApplicationState::Controller::addSelectedKey(int keyNum)
+{
+    LumatoneKeyCoord coords = appState.mappingData->keyNumToKeyCoord(keyNum);
+    const MappedLumatoneKey key = appState.mappingData->getMappedKey(coords.boardIndex, coords.keyIndex);
+
+    bool inserted = false;
+    if (appState.selectedKeys->size() == 0)
+    {
+        appState.selectedKeys->add(key);
+        inserted = true;
+    }
+    else for (int i = 0; i < appState.selectedKeys->size(); i++)
+    {
+        const MappedLumatoneKey& selectedKey = appState.selectedKeys->getReference(i);
+        const LumatoneKeyCoord keyCoord = selectedKey.getKeyCoord();
+        if (coords.boardIndex == keyCoord.boardIndex && coords.keyIndex == keyCoord.keyIndex)
+        {
+            appState.selectedKeys->remove(i);
+            appState.selectedKeys->insert(i, key);
+            inserted = true;
+            break;
+        }
+        else if (selectedKey > key)
+        {
+            appState.selectedKeys->insert(jmax(0, i - 1), key);
+            inserted = true;
+            break;
+        }
+    }
+
+    if (!inserted)
+    {
+        appState.selectedKeys->add(key);
+    }
+
+    updateSelectionState(appState, *appState.selectedKeys);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
+}
+
+void LumatoneApplicationState::Controller::removeSelectedKey(int keyNum)
+{
+    LumatoneKeyCoord coords = appState.mappingData->keyNumToKeyCoord(keyNum);
+    const MappedLumatoneKey key = appState.mappingData->getMappedKey(coords.boardIndex, coords.keyIndex);
+    bool removed = false;
+    for (int i = 0; i < appState.selectedKeys->size(); i++)
+    {
+        const LumatoneKeyCoord keyCoord = appState.selectedKeys->getReference(i).getKeyCoord();
+        if (coords.boardIndex == keyCoord.boardIndex && coords.keyIndex == keyCoord.keyIndex)
+        {
+            appState.selectedKeys->remove(i);
+            removed = true;
+            break;
+        }
+
+    }
+
+    if (removed)
+    {
+        updateSelectionState(appState, *appState.selectedKeys);
+        getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
+    }
+}
 
 bool LumatoneApplicationState::Controller::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
 {
