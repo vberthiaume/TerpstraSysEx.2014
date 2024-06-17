@@ -136,3 +136,18 @@ void LumatoneKey::refreshFromState()
     channelNumber = (int)state.getProperty(LumatoneKeyProperty::MidiChnl, 1);
     ccFaderDefault = (bool)state.getProperty(LumatoneKeyProperty::DefaultCCFader, false);
 }
+
+
+// Make sortable by coordinates, octave based
+
+bool MappedLumatoneKey::operator<(const MappedLumatoneKey &other) const
+{
+    return boardIndex < other.boardIndex
+        || ( boardIndex == other.boardIndex && keyIndex < other.keyIndex );
+}
+
+bool MappedLumatoneKey::operator>(const MappedLumatoneKey &other) const
+{
+    return boardIndex > other.boardIndex
+        || ( boardIndex == other.boardIndex && keyIndex > other.keyIndex );
+}

@@ -114,6 +114,10 @@ public:
 
     LumatoneKeyCoord getKeyCoord() const { return LumatoneKeyCoord(boardIndex, keyIndex); }
 
+    // Make sortable by coordinates, octave based
+    bool operator<(const MappedLumatoneKey& other) const;
+    bool operator>(const MappedLumatoneKey& other) const;
+
 public:
 
     int boardIndex = -1;
