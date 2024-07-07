@@ -73,7 +73,7 @@ jobs:
       - uses: microsoft/setup-msbuild@v1.1
       - name: Install JUCE to C:\
         run: |
-          Invoke-WebRequest https://github.com/juce-framework/JUCE/releases/download/6.1.6/juce-6.1.6-windows.zip -O juce-6.1.6-windows.zip
+          Invoke-WebRequest https://github.com/juce-framework/JUCE/releases/download/6.1.6/juce-6.1.6-windows.zip -OutFile juce-6.1.6-windows.zip
           7z x juce-6.1.6-windows.zip -oC:\
       - name: Build Lumatone Editor
         run: |
@@ -96,4 +96,3 @@ jobs:
           name: LumatoneEditor-Windows
           path: Libraries/win64/bin/*.dll
           if-no-files-found: error
-
