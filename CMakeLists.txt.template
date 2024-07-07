@@ -140,3 +140,8 @@ target_link_libraries(LumatoneEditor
 #         COMMAND install_name_tool -change @rpath/libssh2.dylib @loader_path/../Frameworks/libssh2.dylib $<TARGET_FILE:${JUCE_PRODUCT_NAME}>
 #     )
 # endif()
+
+# set_target_properties(LumatoneEditor PROPERTIES
+#                       RUNTIME_OUTPUT_DIRECTORY_DEBUG ./Builds/Debug
+#                       RUNTIME_OUTPUT_DIRECTORY_RELEASE ./Builds/Release
+# )
