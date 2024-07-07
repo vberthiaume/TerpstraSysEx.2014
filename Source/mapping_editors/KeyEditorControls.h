@@ -12,6 +12,7 @@
 #define LUMATONE_EDITOR_KEY_EDITOR_CONTROLS_H
 
 #include "../LumatoneEditorState.h"
+#include "../lumatone_editor_library/listeners/editor_listener.h"
 
 class ColourViewComponent;
 class ColourTextEditor;
@@ -19,9 +20,11 @@ class ColourPaletteWindow;
 class CustomPickerPanel;
 class ColourPalettesPanel;
 
+class RangedControl;
 class KeyEditorControls : public juce::Component
                         , public LumatoneEditorState
                         , private LumatoneEditorState::Controller
+                        , public LumatoneEditor::EditorListener
 {
 public:
     KeyEditorControls(const LumatoneEditorState& stateIn);
@@ -31,6 +34,13 @@ public:
 
     void paint(juce::Graphics&) override;
     void resized() override;
+
+
+
+    void selectionChanged() override;
+
+private:
+
 
 
 private:
@@ -48,8 +58,10 @@ private:
     // std::unique_ptr<juce::TextButton>       colourPickerToggle;
 
     std::unique_ptr<juce::ComboBox>         keyTypeCombo;
-    std::unique_ptr<juce::Slider>           noteInput;
-    std::unique_ptr<juce::Slider>           channelInput;
+    // std::unique_ptr<juce::Slider>           noteInput;
+    std::unique_ptr<RangedControl>           noteInput;
+    // std::unique_ptr<juce::Slider>           channelInput;
+    std::unique_ptr<RangedControl>           channelInput;
 
     std::unique_ptr<juce::Label>            lblColour;
     std::unique_ptr<juce::Label>            lblKeyType;

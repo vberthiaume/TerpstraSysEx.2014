@@ -20,6 +20,8 @@
 
 #include "../actions/EditorControlActions.h"
 
+#include "../components/RangedControl.h"
+
 KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
         : juce::Component("KeyEditorControls")
         , LumatoneEditorState("KeyEditorControls", stateIn)
@@ -42,36 +44,29 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->setJustificationType (juce::Justification::centredLeft);
     keyTypeCombo->setTextWhenNothingSelected (juce::String());
     keyTypeCombo->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
-    keyTypeCombo->addItem (juce::translate("Note on/Note off"), 1);
-    keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
-    keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
-    keyTypeCombo->addItem (juce::translate("Disabled"), 4);
+    keyTypeCombo->addItem (juce::translate("Note on/Note off"), (int)LumatoneKeyType::noteOnNoteOff);
+    keyTypeCombo->addItem (juce::translate("Continuous controller"), (int)LumatoneKeyType::continuousController);
+    keyTypeCombo->addItem (juce::translate("Lumatouch"), (int)LumatoneKeyType::lumaTouch);
+    keyTypeCombo->addItem (juce::translate("Disabled"), (int)LumatoneKeyType::disabled);
     keyTypeCombo->onChange = [&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId() - 1)));
     };
     addAndMakeVisible(keyTypeCombo.get());
 
-    noteInput = std::make_unique<juce::Slider>("noteInput");
+    noteInput = std::make_unique<RangedControl>("noteInput", 0, 127, RangedControl::Style::IncDecButtons);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
-    noteInput->setRange (0, 127, 1);
-    noteInput->setSliderStyle (juce::Slider::IncDecButtons);
-    noteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
-    noteInput->onValueChange = [&]()
+    noteInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
-    };
-    // noteInput->addListener (this);
+    });
     addAndMakeVisible(noteInput.get());
 
-    channelInput = std::make_unique<juce::Slider>("channelInput");
-    channelInput->setRange (1, 16, 1);
-    channelInput->setSliderStyle (juce::Slider::IncDecButtons);
-    channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
-    channelInput->onValueChange = [&]()
+    channelInput = std::make_unique<RangedControl>("channelInput", 1, 16, RangedControl::Style::IncDecButtons);
+    channelInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
-    };
+    });
     addAndMakeVisible(channelInput.get());
 
     lblColour = std::make_unique<juce::Label>("lblColour", "Key Colour:");
@@ -100,6 +95,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
 
     colourPalettePanel = std::make_unique<ColourPaletteWindow>(stateIn);
     addAndMakeVisible(colourPalettePanel.get());
+
+    addEditorListener(this);
 }
 
 KeyEditorControls::~KeyEditorControls()
@@ -177,6 +174,34 @@ void KeyEditorControls::resized()
     colourColumnHeight = roundToInt(h * colourColumnH);
 
     colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, h - contentMarginHeight);
+}
+
+void KeyEditorControls::selectionChanged()
+{
+    // Make more efficient? (each time goes through loop)
+    auto newData = LumatoneEditSelectionState::findSharedSelectionProperties(*getSelectedKeys());
+
+    if (newData.setColour)
+        colourTextEditor->setText(newData.colour.toDisplayString(false));
+    else
+        colourTextEditor->clear();
+
+    if (newData.setType)
+        keyTypeCombo->setSelectedId((int)newData.type, juce::NotificationType::dontSendNotification);
+    else
+        keyTypeCombo->setSelectedId(0, juce::NotificationType::dontSendNotification);
+
+    if (newData.setNote)
+        noteInput->setValue(newData.note);
+    else
+        noteInput->setValue(-1, juce::NotificationType::dontSendNotification);
+
+    if (newData.setChannel)
+        channelInput->setValue(newData.channel);
+    else
+        channelInput->setValue(-1, juce::NotificationType::dontSendNotification);
+
+
 }
 
 void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
