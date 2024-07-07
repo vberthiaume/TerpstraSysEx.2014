@@ -13,21 +13,34 @@
 
 const double PI = 3.14159265359f;
 
+static int PRIMES[100] = {
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
+        31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+        73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
+        127, 131, 137, 139, 149, 151, 157, 163, 167, 173,
+        179, 181, 191, 193, 197, 199, 211, 223, 227, 229,
+        233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
+        283, 293, 307, 311, 313, 317, 331, 337, 347, 349,
+        353, 359, 367, 373, 379, 383, 389, 397, 401, 409,
+        419, 421, 431, 433, 439, 443, 449, 457, 461, 463,
+        467, 479, 487, 491, 499, 503, 509, 521, 523, 541
+    };
+
 template <class T>
 struct PointPair
 {
-	Point<T> x, y;
+	juce::Point<T> x, y;
 
 	PointPair() {}
-	PointPair(Point<T> xIn, Point<T> yIn)
+	PointPair(juce::Point<T> xIn, juce::Point<T> yIn)
 	{
 		x = xIn;
 		y = yIn;
 	};
 	PointPair(T x1, T y1, T x2, T y2)
 	{
-		x = Point<T>(x1, y1);
-		y = Point<T>(x2, y2);
+		x = juce::Point<T>(x1, y1);
+		y = juce::Point<T>(x2, y2);
 	}
 };
 
@@ -71,12 +84,12 @@ static int getLCM(int num1, int num2)
 		return 0;
 
 	long gcd = getGCD(num1, num2);
-	return (int)(jmax(num1, num2) / gcd * (jmin(num1, num2)));
+	return (int)(juce::jmax(num1, num2) / gcd * (juce::jmin(num1, num2)));
 }
 
-static Array<int> getCoprimes(int numIn)
+static juce::Array<int> getCoprimes(int numIn)
 {
-    Array<int> coprimes = {1};
+    juce::Array<int> coprimes = {1};
     int m, d, t;
     for (int i = 2; i < numIn - 1; i++)
     {
@@ -89,34 +102,58 @@ static Array<int> getCoprimes(int numIn)
             d = m;
             m = t;
         }
-        
+
 		if (d > 0)
 		{
 			coprimes.add(i);
 		}
     }
-    
+
     coprimes.add(numIn-1);
 
     return coprimes;
 }
 
-static Array<int> getFactors(int numIn)
+static juce::Array<int> getFactors(int numIn)
 {
-    Array<int> factors;
-    
-    for (int i = 1; i < numIn / 2; i++)
-    {
-        if (numIn % i == 0)
-            factors.add(i);
-    }
-    
+    juce::Array<int> factors;
+
+	double factorized = numIn;
+
+	int maxPrime = (int)sqrt(numIn);
+
+	while (factorized > 1.0)
+	{
+		int i = 0;
+		double p = 1;
+		double q = factorized;
+
+		while (factorized > 1 && p < maxPrime && i < 100)
+		{
+			int exp = 0;
+			p = PRIMES[i];
+
+			q = factorized / p;
+
+			// See if it divides more than once
+			while ((int)q == q)
+			{
+				factorized = q;
+				exp++;
+				q = factorized / p;
+			}
+
+			factors.set(i, exp);
+			i++;
+		}
+	}
+
     return factors;
 }
 
-static Array<int> getContinuedFraction(double num, int maxDepth=20, double round0Thresh=10e-8)
+static juce::Array<int> getContinuedFraction(double num, int maxDepth=20, double round0Thresh=10e-8)
 {
-    Array<int> cf;
+    juce::Array<int> cf;
     double f = num;
     double nextF;
 
@@ -134,7 +171,7 @@ static Array<int> getContinuedFraction(double num, int maxDepth=20, double round
 }
 
 template <class T>
-static String arrayToString(Array<T>& arrayIn, String name = "", char arrayStart=0, char arrayEnd=0)
+static juce::String arrayToString(juce::Array<T>& arrayIn, juce::String name = "", char arrayStart=0, char arrayEnd=0)
 {
 	String strOut;
 
@@ -145,7 +182,7 @@ static String arrayToString(Array<T>& arrayIn, String name = "", char arrayStart
 
 	for (int i = 0; i < arrayIn.size(); i++)
 	{
-		strOut += String(arrayIn[i]);
+		strOut += juce::String(arrayIn[i]);
 		if (i < arrayIn.size() - 1)
 			strOut += ',';
 	}
