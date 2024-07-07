@@ -1,4 +1,4 @@
-#include "LumatoneEditSelectionState.h"
+                                                                                                                                                                                                                                                                                                                                                                                                                   #include "LumatoneEditSelectionState.h"
 #include "../lumatone_editor_library/data/lumatone_layout.h"
 #include "../LumatoneEditorState.h"
 
@@ -197,4 +197,69 @@ void LumatoneEditSelectionState::setCCFader(bool set, bool ccFaderDefaultIn)
     {
         state.removeProperty(LumatoneEditSelectionProperty::AssignKeyCCFader, nullptr);
     }
+}
+
+LumatoneEditSelectionState::Data LumatoneEditSelectionState::findSharedSelectionProperties(const juce::Array<MappedLumatoneKey> &selection)
+{
+    LumatoneEditSelectionState::Data data;
+
+    bool updated = false;
+
+    for (int i = 0; i < selection.size(); i++)
+    {
+        const MappedLumatoneKey& key = selection.getReference(i);
+
+        if (i == 0)
+        {
+            data.setColour = true;
+            data.colour = key.getColour();
+        }
+        else if (data.colour != key.getColour())
+        {
+            data.setColour = false;
+        }
+
+        if (i == 0)
+        {
+            data.setType = true;
+            data.type = key.getType();
+        }
+        else if (data.type != key.getType())
+        {
+            data.setType = false;
+        }
+
+        if (i == 0)
+        {
+            data.setNote = true;
+            data.note = key.getMidiNumber();
+        }
+        else if (data.note != key.getMidiNumber())
+        {
+            data.setNote = false;
+        }
+
+        if (i == 0)
+        {
+            data.setChannel = true;
+            data.channel = key.getMidiChannel();
+        }
+        else if (data.channel != key.getMidiChannel())
+        {
+            data.setChannel = false;
+        }
+
+        if (i == 0)
+        {
+            data.setCCFaderDefault = true;
+            data.ccFaderDefault = key.isCCFaderDefault();
+        }
+        else if (data.ccFaderDefault != key.isCCFaderDefault())
+        {
+            data.ccFaderDefault = false;
+        }
+
+    }
+
+    return data;
 }

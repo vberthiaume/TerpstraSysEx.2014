@@ -48,6 +48,10 @@ public:
     void setKeyChannel(bool set, int channelIn);
     void setCCFader(bool set, bool ccFaderDefaultIn);
 
+public:
+
+    static LumatoneEditSelectionState::Data findSharedSelectionProperties(const juce::Array<MappedLumatoneKey>& selection);
+
 protected:
 
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
