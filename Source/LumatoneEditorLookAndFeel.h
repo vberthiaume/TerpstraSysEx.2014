@@ -654,6 +654,7 @@ public:
     Label* createSliderTextBox(Slider& sld) override
     {
         Label* label = new Label(sld.getName() + "_ValueLabel");
+
         label->setText(String(sld.getValue()), dontSendNotification);
         label->setJustificationType(Justification::centred);
         label->setFont(getSliderTextBoxFont());
@@ -895,8 +896,8 @@ public:
         return PopupMenu::Options()
             .withTargetComponent(box)
             .withMinimumWidth(box.getWidth())
-            //.withMinimumNumColumns(numColumns)
-            .withMaximumNumColumns(1)
+            .withMinimumNumColumns(numColumns)
+            .withMaximumNumColumns(numColumns)
             .withStandardItemHeight(label.getFont().getHeight() * CONTROLBOXFONTHEIGHTSCALAR)
             .withPreferredPopupDirection(PopupMenu::Options::PopupDirection::downwards);
     }

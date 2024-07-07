@@ -671,6 +671,8 @@ namespace LumatoneEditorStyleIDs
     // Even values will have top left and bottom right rounded corners
     static Identifier roundedDiagonalCorners = Identifier("RoundedDiagonalCorners");
 
+    // Flag to not draw a value for Slider LookAndFeel methods
+    static Identifier sliderValueNull = Identifier("SliderValueNull");
 }
 
 // LookAndFeel doesn't have Slider IncDec button access in drawIncDecButtonsBackground
