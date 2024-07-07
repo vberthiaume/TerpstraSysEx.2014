@@ -1331,6 +1331,7 @@ private:
         setColour(LumatoneEditorColourIDs::ActiveText,                      Colours::white);
         setColour(LumatoneEditorColourIDs::InactiveText,                    Colour(0xffb1b1b1));
         setColour(LumatoneEditorColourIDs::DescriptionText,                 Colour(0xffcbcbcb));
+        setColour(LumatoneEditorColourIDs::NumKeySelectedText,              Colour(0xffd8697e));
         setColour(LumatoneEditorColourIDs::ControlBoxBackground,            Colour(0xff1e2222));
         setColour(LumatoneEditorColourIDs::ControlBoxHighlighted,           Colour(0xff3d5a78));
         setColour(LumatoneEditorColourIDs::DefaultPresetButtonActive,       Colour(0xffff84e6));

@@ -102,6 +102,8 @@ private:
 	// std::unique_ptr<CurvesArea> 			curvesArea;
 	std::unique_ptr<GlobalSettingsArea>		globalSettingsArea;
 
+	std::unique_ptr<juce::Label>			lblSelectedKeys;
+
 	std::unique_ptr<juce::Label> 			lblEditTitle;
     std::unique_ptr<juce::TabbedComponent> 	sectionTabs;
 

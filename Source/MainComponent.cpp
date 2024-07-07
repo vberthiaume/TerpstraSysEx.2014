@@ -64,6 +64,13 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	addAndMakeVisible(globalSettingsArea.get());
 	globalSettingsArea->listenToColourEditButtons(this);
 
+	lblSelectedKeys.reset(new Label("lblSelectedKeys", "0 Keys Selected"));
+	lblSelectedKeys->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
+	lblSelectedKeys->setJustificationType(juce::Justification::centredRight);
+	lblSelectedKeys->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::NumKeySelectedText));
+	lblSelectedKeys->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
+	addAndMakeVisible(lblSelectedKeys.get());
+
 	lblEditTitle.reset(new Label("lblEditTitle", "Edit Mapping"));
 	lblEditTitle->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
 	lblEditTitle->setColour(Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
@@ -151,6 +158,7 @@ MainContentComponent::~MainContentComponent()
 
 	sectionTabs = nullptr;
 	lblEditTitle = nullptr;
+	lblSelectedKeys = nullptr;
 
 	globalSettingsArea = nullptr;
 
@@ -516,6 +524,9 @@ void MainContentComponent::resized()
 	lblEditTitle->setTopLeftPosition(contentMargin, controlsLabelYPos);
 	resizeLabelWithHeight(lblEditTitle.get(), (controlsArea.getY() - controlsLabelYPos) * 0.8f);
 
+	resizeLabelWithHeight(lblSelectedKeys.get(), lblEditTitle->getHeight(), 0.667f, "____");
+	lblSelectedKeys->setTopRightPosition(controlsArea.getRight(), lblEditTitle->getY());
+
 	sectionTabs->setBounds(contentMargin, controlsLabelYPos, contentWidth, footerY - controlsLabelYPos);
 	resizeEditSectionTabs();
 
@@ -568,5 +579,9 @@ void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, co
 	if (property == LumatoneEditorProperty::DeveloperModeOn)
 	{
 		updateDeveloperMode();
+	}
+	if (property == LumatoneApplicationProperty::NumKeySelected)
+	{
+		lblSelectedKeys->setText(stateIn[property].toString() + " Keys Selected", juce::NotificationType::dontSendNotification);
 	}
 }

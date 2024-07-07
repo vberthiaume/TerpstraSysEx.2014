@@ -614,6 +614,7 @@ enum LumatoneEditorColourIDs
     ActiveText,
     InactiveText,
     DescriptionText,
+    NumKeySelectedText,
     ControlBoxBackground,
     DefaultPresetButtonActive,
     DefaultPresetButtonInactive,
