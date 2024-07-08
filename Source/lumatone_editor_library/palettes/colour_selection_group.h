@@ -20,11 +20,16 @@ class ColourSelectionGroup :  public ColourSelectionBroadcaster,
 {
 public:
 
+    ColourSelectionGroup(juce::String nameIn=juce::String())
+        : name(nameIn) { }
+
     ~ColourSelectionGroup()
     {
         for (auto selector : colourSelectors)
             selector->removeColourSelectionListener(this);
     }
+
+    juce::String getName() const { return name; }
 
     /// <summary>
     /// Adds a ColourPaletteComponent and returns the palette's group index
@@ -64,7 +69,7 @@ public:
     {
         if (selectedBroadcasterIndex >= 0)
             return colourSelectors[selectedBroadcasterIndex]->getSelectedColour();
-        
+
         return juce::Colour();
     }
 
@@ -120,6 +125,9 @@ private:
     juce::Array<ColourSelectionBroadcaster*> colourSelectors;
 
     int selectedBroadcasterIndex = -1;
+
+    juce::String name;
+
 };
 
 #endif // LUMATONE_COLOUR_SELECTION_GROUP_H
