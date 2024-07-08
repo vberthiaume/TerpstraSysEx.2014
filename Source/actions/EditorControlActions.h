@@ -57,7 +57,31 @@ private:
 
 };
 
+class ApplyAssignmentsToSelectionAction : public LumatoneEditorState
+                                        , private LumatoneEditorState::Controller
+                                        , public LumatoneAction
+{
+public:
 
+    ApplyAssignmentsToSelectionAction(const LumatoneEditorState& stateIn
+                                    , LumatoneEditSelectionState::Data assignData
+                                    , const juce::Array<MappedLumatoneKey>& keySelectionIn);
 
+    bool perform() override;
+    bool undo() override;
+
+    int getSizeInUnits() override { return sizeof(ApplyAssignmentsToSelectionAction); }
+
+private:
+
+    void applyData(LumatoneEditSelectionState::Data& dataToApply);
+
+private:
+    juce::Array<MappedLumatoneKey>    previousData;
+    LumatoneEditSelectionState::Data  newData;
+
+    juce::Array<MappedLumatoneKey> keySelection;
+
+};
 
 #endif // LUMATONE_EDITOR_CONTROL_ACTIONS_H

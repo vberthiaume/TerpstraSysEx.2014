@@ -93,3 +93,55 @@ SetKeySettingsAction *SetKeySettingsAction::NewSetAssignCCFaderAction(LumatoneEd
 {
     return new SetKeySettingsAction(stateIn, false, false, false, false, true, juce::Colour(), LumatoneKeyType(), 0, 0, faderDefaultIn);
 }
+
+ApplyAssignmentsToSelectionAction::ApplyAssignmentsToSelectionAction(const LumatoneEditorState& stateIn
+                                                                   , LumatoneEditSelectionState::Data assignData
+                                                                   , const juce::Array<MappedLumatoneKey> &keySelectionIn)
+	: LumatoneEditorState("ApplyAssignmentsToSelectionAction", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
+    , LumatoneAction(this, "ApplyAssignmentsToSelectionAction")
+{
+    for (const MappedLumatoneKey& key : keySelectionIn)
+    {
+        keySelection.add(key);
+        previousData.add(key);
+    }
+
+    newData = assignData;
+}
+
+bool ApplyAssignmentsToSelectionAction::perform()
+{
+    for (const MappedLumatoneKey key : previousData)
+    {
+        MappedLumatoneKey keyUpdate = key;
+        if (newData.setColour)
+            keyUpdate.setColour(newData.colour);
+        if (newData.setType)
+            keyUpdate.setKeyType(newData.type);
+        if (newData.setNote)
+            keyUpdate.setNoteOrCC(newData.note);
+        if (newData.setChannel)
+            keyUpdate.setChannelNumber(newData.channel);
+        if (newData.ccFaderDefault)
+            keyUpdate.setDefaultCCFader(newData.ccFaderDefault);
+
+        setKey((const LumatoneKey&) keyUpdate, keyUpdate.boardIndex + 1, keyUpdate.keyIndex);
+    }
+
+    updatedSelectedKeys();
+
+    return true;
+}
+
+bool ApplyAssignmentsToSelectionAction::undo()
+{
+    for (const MappedLumatoneKey key : previousData)
+    {
+        setKey((const LumatoneKey&) key, key.boardIndex + 1, key.keyIndex);
+    }
+
+    updatedSelectedKeys();
+
+    return true;
+}
