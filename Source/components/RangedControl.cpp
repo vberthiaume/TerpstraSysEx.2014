@@ -6,7 +6,7 @@
 RangedControl::RangedControl(juce::String name, int minValueIn, int maxValueIn, Style style)
     : juce::Component(name)
 {
-    range = juce::Range(minValueIn, maxValueIn);
+    range = juce::Range<int>(minValueIn, maxValueIn);
     valueChangedCallback = [](){}; // no operation
     setStyle(style);
     setValue(minValueIn - 1);
