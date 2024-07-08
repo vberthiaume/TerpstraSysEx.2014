@@ -3,7 +3,7 @@
 #include "../actions/KeySelectionControlActions.h"
 
 KeySelectionController::KeySelectionController(const LumatoneEditorState &stateIn, LumatoneKeyboardComponent *keyboardComponentIn)
-    : LumatoneEditorState(stateIn)
+    : LumatoneEditorState("LumatoneKeySelectionController", stateIn)
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , keyboardComponent(keyboardComponentIn)
 {

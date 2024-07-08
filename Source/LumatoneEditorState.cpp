@@ -51,6 +51,7 @@ LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwa
     : LumatoneApplicationState(stateIn, driverIn, undoManagerIn)
     , editSelectionState(name + "_EditSelection", state)
 {
+    // DBG(name + " LumatoneEditorState created");
     appFonts = std::make_shared<LumatoneEditorFontLibrary>();
     lookAndFeel = std::make_shared<LumatoneEditorLookAndFeel>(*appFonts, true);
 
@@ -68,11 +69,13 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditor
     , propertiesFile(stateIn.propertiesFile)
     , colourPalettes(stateIn.colourPalettes)
 {
+    // DBG(name + " LumatoneEditorState created");
 }
 
 LumatoneEditorState::LumatoneEditorState(const LumatoneEditorState &stateIn)
     : LumatoneEditorState(stateIn.name + "Copy", stateIn)
 {
+    // DBG(name + " LumatoneEditorState created");
 }
 
 LumatoneEditorState::~LumatoneEditorState()
@@ -84,6 +87,8 @@ LumatoneEditorState::~LumatoneEditorState()
     propertiesFile = nullptr;
     lookAndFeel = nullptr;
     appFonts = nullptr;
+
+    // DBG(name + " LumatoneEditorState deleted");
 }
 
 float LumatoneEditorState::getRoundedRectCornerSize() const

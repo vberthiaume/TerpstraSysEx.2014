@@ -5,6 +5,8 @@
     Created: 6 June 2024
     Author:  Vito
 
+    Holds the key property values that are active in a key assignment controller
+
   ==============================================================================
 */
 
