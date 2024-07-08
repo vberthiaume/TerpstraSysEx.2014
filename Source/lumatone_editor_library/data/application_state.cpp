@@ -549,6 +549,18 @@ void LumatoneApplicationState::Controller::removeSelectedKey(int keyNum)
     }
 }
 
+void LumatoneApplicationState::Controller::updatedSelectedKeys()
+{
+    juce::Array<MappedLumatoneKey> updatedKeys;
+    for (const MappedLumatoneKey& key : *appState.selectedKeys)
+    {
+        updatedKeys.add(MappedLumatoneKey(appState.getKey(key.boardIndex, key.keyIndex), key.boardIndex, key.keyIndex));
+    }
+
+    appState.selectedKeys->swapWith(updatedKeys);
+    appState.editorListeners->call(&LumatoneEditor::EditorListener::selectionChanged);
+}
+
 bool LumatoneApplicationState::Controller::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
 {
     return appState.performLumatoneAction(action, undoable, newTransaction);

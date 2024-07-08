@@ -79,6 +79,7 @@ public:
 
     // App Methods
     const juce::Array<MappedLumatoneKey>* getSelectedKeys() const;
+    void updateSelecetdKeys();
 
     // Context Methods
     bool isContextSet() const { return contextIsSet; }
@@ -183,6 +184,12 @@ public:
     void setSelectedKeys(juce::Array<MappedLumatoneKey> selection);
     void addSelectedKey(int keyNum);
     void removeSelectedKey(int keyNum);
+
+    protected:
+
+    void updatedSelectedKeys();
+
+    public:
 
     virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
 
