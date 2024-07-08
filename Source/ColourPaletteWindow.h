@@ -36,9 +36,16 @@ public:
     ColourPaletteWindow(const LumatoneEditorState& stateIn);
     ~ColourPaletteWindow() override;
 
+    void paint(juce::Graphics& g) override;
+
     void resized() override;
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
+    void setIndentSize(int size, bool resize=true);
+    void setTabBarDepth(int height, bool resize=true);
+
+    void setBackgroundColour(juce::Colour backgroundIn);
 
     //====================================================================
 
@@ -66,6 +73,8 @@ public:
 
         colourSelectorGroup->setCurrentSelector(newSelector);
     }
+
+    ColourSelectionGroup* getColourSelectionGroup() { return colourSelectorGroup.get(); }
 
 private:
 
@@ -99,23 +108,26 @@ protected:
 
 private:
 
-    // LumatoneEditorLookAndFeel lookAndFeel;
+    std::unique_ptr<ColourSelectionGroup> colourSelectorGroup;
 
-    //juce::Array<LumatoneEditorColourPalette>& colourPalettes;
-
-    std::unique_ptr<juce::TabbedComponent> colourToolTabs;
     std::unique_ptr<ColourPalettesPanel> palettePanel;
-    std::unique_ptr<CustomPickerPanel> customPickerPanel;
-    std::unique_ptr<PaletteEditPanel> paletteEditPanel;
-
     std::unique_ptr<juce::Viewport> palettePanelViewport;
 
-    std::unique_ptr<ColourSelectionGroup> colourSelectorGroup;
+    std::unique_ptr<CustomPickerPanel> customPickerPanel;
+
+    std::unique_ptr<juce::TabbedComponent> colourToolTabs;
+
+    std::unique_ptr<PaletteEditPanel> paletteEditPanel;
 
     int paletteIndexEditing = -1;
     bool paletteEditingIsNew = false;
 
+    int indent = 48;
+    int tabBarDepth = 48;
+
     const float viewportScrollbarWidthScalar = 0.020833f;
+
+    juce::Colour backgroundColour;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourPaletteWindow)
 };

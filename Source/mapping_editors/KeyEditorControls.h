@@ -14,53 +14,44 @@
 #include "../LumatoneEditorState.h"
 #include "../lumatone_editor_library/listeners/editor_listener.h"
 
-class ColourViewComponent;
-class ColourTextEditor;
-class ColourPaletteWindow;
-class CustomPickerPanel;
-class ColourPalettesPanel;
+#include "../lumatone_editor_library/palettes/colour_selection_broadcaster.h"
 
+class ColourSelectionGroup;
+class ColourTextEditor;
+class ColourViewComponent;
 class RangedControl;
+class ColourPaletteWindow;
+
 class KeyEditorControls : public juce::Component
                         , public LumatoneEditorState
                         , private LumatoneEditorState::Controller
                         , public LumatoneEditor::EditorListener
+                        , public ColourSelectionListener
 {
 public:
     KeyEditorControls(const LumatoneEditorState& stateIn);
 
     virtual ~KeyEditorControls() override;
 
-
     void paint(juce::Graphics&) override;
     void resized() override;
-
-
 
     void selectionChanged() override;
 
 private:
 
-
-
-private:
-
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    void colourChangedCallback(ColourSelectionBroadcaster* source, juce::Colour newColour) override;
+
 private:
-
     std::unique_ptr<juce::Label>            lblKeySettings;
-
-    std::unique_ptr<juce::TabbedComponent>  colourControlTabs;
 
     std::unique_ptr<ColourTextEditor>       colourTextEditor;
     std::unique_ptr<ColourViewComponent>    colourSubwindow;
-    // std::unique_ptr<juce::TextButton>       colourPickerToggle;
 
     std::unique_ptr<juce::ComboBox>         keyTypeCombo;
-    // std::unique_ptr<juce::Slider>           noteInput;
     std::unique_ptr<RangedControl>           noteInput;
-    // std::unique_ptr<juce::Slider>           channelInput;
     std::unique_ptr<RangedControl>           channelInput;
 
     std::unique_ptr<juce::Label>            lblColour;
@@ -69,9 +60,8 @@ private:
     std::unique_ptr<juce::Label>            lblChannel;
 
     std::unique_ptr<ColourPaletteWindow>    colourPalettePanel;
-    // std::unique_ptr<>    colourPalettePanel;
-    std::unique_ptr<CustomPickerPanel>      colourPickerPanel;
-
+    // std::unique_ptr<ColourSelectionGroup>   colourSelectionGroup;
+    ColourSelectionGroup*                   colourSelectionGroup;
 
     const float headerH         = 0.19f;
     int headerHeight;
@@ -79,7 +69,7 @@ private:
     juce::Path controlPath;
 
     int contentMarginWidth;
-    const float contentMarginParentW  = 0.024f;
+    const float contentMarginParentW  = 0.02f;
 
     int contentMarginHeight;
     const float controlMarginH        = 0.08f;
@@ -87,7 +77,7 @@ private:
     int labelHeight;
     // int labelMarginWidth;
     const float labelToHeaderH         = 0.5f;
-    const float controlLabelFontScalar = 0.67f;
+    const float controlLabelFontScalar = 0.6f;
 
     int keyControlColumnWidth;
     int keyControlColumnRight;

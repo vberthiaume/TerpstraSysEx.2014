@@ -93,6 +93,8 @@ void TerpstraSysExApplication::initialise(const String& commandLine)
 
 void TerpstraSysExApplication::shutdown()
 {
+	undoManager.clearUndoHistory();
+
 	LocalisedStrings::setCurrentMappings(nullptr);
 
 	// Save state of main window

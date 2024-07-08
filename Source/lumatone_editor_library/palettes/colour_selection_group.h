@@ -25,6 +25,8 @@ public:
 
     ~ColourSelectionGroup()
     {
+        selectorListeners.clear();
+
         for (auto selector : colourSelectors)
             selector->removeColourSelectionListener(this);
     }

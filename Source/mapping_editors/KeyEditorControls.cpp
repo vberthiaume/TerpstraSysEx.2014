@@ -17,10 +17,14 @@
 #include "../ColourPaletteWindow.h"
 // #include "../lumatone_editor_library/palettes/palette_selection_panel.h"
 #include "../lumatone_editor_library/palettes/colour_picker_panel.h"
+#include "../lumatone_editor_library/palettes/colour_selection_group.h"
 
 #include "../actions/EditorControlActions.h"
 
 #include "../components/RangedControl.h"
+
+#include "../actions/EditorControlActions.h"
+
 
 KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
         : juce::Component("KeyEditorControls")
@@ -50,7 +54,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->addItem (juce::translate("Disabled"), (int)LumatoneKeyType::disabled);
     keyTypeCombo->onChange = [&]()
     {
-        performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId() - 1)));
+        performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId())));
+        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     };
     addAndMakeVisible(keyTypeCombo.get());
 
@@ -59,6 +64,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     noteInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
+        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     });
     addAndMakeVisible(noteInput.get());
 
@@ -66,6 +72,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     channelInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
+        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     });
     addAndMakeVisible(channelInput.get());
 
@@ -94,23 +101,42 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     addAndMakeVisible(lblChannel.get());
 
     colourPalettePanel = std::make_unique<ColourPaletteWindow>(stateIn);
+    colourPalettePanel->setBackgroundColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ColourPaletteBackground));
+    // colourPalettePanel->setColourSelectionGroup(group);
     addAndMakeVisible(colourPalettePanel.get());
+    // colourPalettePanel->addColourSelectorToGroup(colourSelectionGroup.get());
+
+    // ColourSelectionGroup* group = new ColourSelectionGroup("KeyEditorControlColour");
+    colourSelectionGroup = colourPalettePanel->getColourSelectionGroup();
+    // colourSelectionGroup = std::make_unique<ColourSelectionGroup>("KeyEditorControlColour");
+    colourSelectionGroup->addSelector(colourTextEditor.get());
+    colourSelectionGroup->addColourSelectionListener(colourSubwindow.get());
+    colourSelectionGroup->addColourSelectionListener(colourTextEditor.get());
+    colourSelectionGroup->addColourSelectionListener(this);
+    // group->addSelector(colourTextEditor.get());
+    // group->addColourSelectionListener(colourSubwindow.get());
+    // group->addColourSelectionListener(colourTextEditor.get());
 
     addEditorListener(this);
 }
 
 KeyEditorControls::~KeyEditorControls()
 {
-    colourControlTabs = nullptr;
-    colourPickerPanel = nullptr;
+    colourSelectionGroup = nullptr;
     colourPalettePanel = nullptr;
+
+    lblChannel = nullptr;
+    lblNote = nullptr;
+    lblKeyType = nullptr;
+    lblColour = nullptr;
 
     channelInput = nullptr;
     noteInput = nullptr;
     keyTypeCombo = nullptr;
-    // colourPickerToggle = nullptr;
+
     colourSubwindow = nullptr;
     colourTextEditor = nullptr;
+
     lblKeySettings = nullptr;
 }
 
@@ -173,7 +199,9 @@ void KeyEditorControls::resized()
     colourColumnWidth = w - colourColumnX - contentMarginWidth;
     colourColumnHeight = roundToInt(h * colourColumnH);
 
-    colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, h - contentMarginHeight);
+    colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, h);
+    colourPalettePanel->setIndentSize(contentMarginHeight, false);
+    colourPalettePanel->setTabBarDepth(headerHeight, false);
 }
 
 void KeyEditorControls::selectionChanged()
@@ -182,9 +210,20 @@ void KeyEditorControls::selectionChanged()
     auto newData = LumatoneEditSelectionState::findSharedSelectionProperties(*getSelectedKeys());
 
     if (newData.setColour)
-        colourTextEditor->setText(newData.colour.toDisplayString(false));
+    {
+        setAssignKeyColour(newData.setColour, newData.colour);
+        // performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, newData.colour), true, false);
+        colourSubwindow->setColour(newData.colour.toString(), false);
+        if (newData.colour.isTransparent())
+            colourTextEditor->setText("", juce::NotificationType::dontSendNotification);
+        else
+            colourTextEditor->setText(newData.colour.toDisplayString(false), juce::NotificationType::dontSendNotification);
+    }
     else
-        colourTextEditor->clear();
+    {
+        colourSubwindow->setColour("", false);
+        colourTextEditor->setText("", juce::NotificationType::dontSendNotification);
+    }
 
     if (newData.setType)
         keyTypeCombo->setSelectedId((int)newData.type, juce::NotificationType::dontSendNotification);
@@ -192,16 +231,14 @@ void KeyEditorControls::selectionChanged()
         keyTypeCombo->setSelectedId(0, juce::NotificationType::dontSendNotification);
 
     if (newData.setNote)
-        noteInput->setValue(newData.note);
+        noteInput->setValue(newData.note, juce::NotificationType::dontSendNotification);
     else
         noteInput->setValue(-1, juce::NotificationType::dontSendNotification);
 
     if (newData.setChannel)
-        channelInput->setValue(newData.channel);
+        channelInput->setValue(newData.channel, juce::NotificationType::dontSendNotification);
     else
         channelInput->setValue(-1, juce::NotificationType::dontSendNotification);
-
-
 }
 
 void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
@@ -212,7 +249,9 @@ void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const
 
     if (property == LumatoneEditSelectionProperty::AssignKeyColour)
     {
-
+        auto colourString = stateIn[property].toString();
+        colourTextEditor->setText(colourString, juce::NotificationType::dontSendNotification);
+        colourSubwindow->setColour(colourString, false);
     }
     else if (property == LumatoneEditSelectionProperty::AssignKeyType)
     {
@@ -230,4 +269,10 @@ void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const
     {
 
     }
+}
+
+void KeyEditorControls::colourChangedCallback(ColourSelectionBroadcaster *source, juce::Colour newColour)
+{
+    performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, newColour));
+    performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()), true, false);
 }

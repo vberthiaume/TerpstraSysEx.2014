@@ -29,9 +29,9 @@ ColourPaletteWindow::ColourPaletteWindow(const LumatoneEditorState& stateIn)
     setName("ColourPaletteWindow");
     setLookAndFeel(&getEditorLookAndFeel());
 
-    colourSelectorGroup.reset(new ColourSelectionGroup());
-
     loadColourPalettesFromFile();
+
+    colourSelectorGroup.reset(new ColourSelectionGroup());
 
     palettePanel.reset(new ColourPalettesPanel(getColourPalettes(), colourSelectorGroup.get()));
     palettePanel->addListener(this);
@@ -50,7 +50,7 @@ ColourPaletteWindow::ColourPaletteWindow(const LumatoneEditorState& stateIn)
     colourToolTabs->addTab(juce::translate("ColourPalettes"), juce::Colour(), palettePanelViewport.get(), false);
     colourToolTabs->addTab(juce::translate("CustomPicker"), juce::Colour(), customPickerPanel.get(), false);
     colourToolTabs->setColour(juce::TabbedComponent::ColourIds::outlineColourId, juce::Colour());
-    colourToolTabs->getTabbedButtonBar().getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.9f);
+    colourToolTabs->getTabbedButtonBar().getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 0.75f);
     addAndMakeVisible(*colourToolTabs);
 
     const int firstTabIndex = getProperty(LumatoneEditorProperty::LastColourWindowTab, "0").getIntValue();
@@ -60,7 +60,10 @@ ColourPaletteWindow::ColourPaletteWindow(const LumatoneEditorState& stateIn)
 
 ColourPaletteWindow::~ColourPaletteWindow()
 {
+    setLookAndFeel(nullptr);
+
     paletteEditPanel        = nullptr;
+
     colourToolTabs          = nullptr;
 
     colourSelectorGroup->removeSelector(customPickerPanel.get());
@@ -68,15 +71,32 @@ ColourPaletteWindow::~ColourPaletteWindow()
 
     palettePanelViewport    = nullptr;
     palettePanel            = nullptr;
-    colourSelectorGroup     = nullptr;
 
-    setLookAndFeel(nullptr);
+    colourSelectorGroup     = nullptr;
+}
+
+void ColourPaletteWindow::paint(juce::Graphics &g)
+{
+    g.setColour(backgroundColour);
+
+    auto controlBounds = getLocalBounds().toFloat()
+                                         .withTop(colourToolTabs->getTabbedButtonBar().getHeight())
+                                         .withTrimmedTop(indent)
+                                         .withTrimmedBottom(indent);
+
+    g.fillRoundedRectangle(controlBounds, getRoundedRectCornerSize());
 }
 
 void ColourPaletteWindow::resized()
 {
     palettePanelViewport->setScrollBarThickness(proportionOfWidth(viewportScrollbarWidthScalar));
+
+    colourToolTabs->setIndent(indent);
+    colourToolTabs->setTabBarDepth(tabBarDepth);
     colourToolTabs->setBounds(getLocalBounds());
+
+
+    // colourToolTabs->setIndent(indent);
 
     if (paletteEditPanel.get())
         paletteEditPanel->setBounds(getLocalBounds());
@@ -102,7 +122,7 @@ void ColourPaletteWindow::duplicatePalette(int paletteIndexIn)
 {
     auto colourPalettes = getColourPalettes();
     auto copiedPalette = getColourPalettes()[paletteIndexIn].clone();
-    
+
     if (! copiedPalette.saveToFile())
         return; // TODO
 
@@ -117,7 +137,7 @@ void ColourPaletteWindow::removePalette(int paletteIndexToRemove)
     // Remove loaded colour palette
     auto colourPalettes = getColourPalettes();
     auto deletedPalette = colourPalettes[paletteIndexToRemove];
-    
+
     if (!deletedPalette.deleteFile())
         return; // TODO
 
@@ -166,7 +186,7 @@ void ColourPaletteWindow::newPaletteRequested()
     auto newPalette = LumatoneEditorColourPalette();
     newPalette.saveToFile();
     colourPalettes.insert(0, newPalette);
-    
+
     setColourPalettes(colourPalettes);
     startEditingPalette(0, 0);
 }
@@ -209,4 +229,24 @@ void ColourPaletteWindow::changeListenerCallback(juce::ChangeBroadcaster* source
         const int newTab = colourToolTabs->getCurrentTabIndex();
         getPropertiesFile()->setValue(LumatoneEditorProperty::LastColourWindowTab, juce::String(newTab));
     }
+}
+
+void ColourPaletteWindow::setIndentSize(int size, bool resize)
+{
+    indent = size;
+    if (resize)
+        resized();
+}
+
+void ColourPaletteWindow::setTabBarDepth(int height, bool resize)
+{
+    tabBarDepth = height;
+    if (resize)
+        resized();
+}
+
+void ColourPaletteWindow::setBackgroundColour(juce::Colour backgroundIn)
+{
+    backgroundColour = backgroundIn;
+    repaint();
 }

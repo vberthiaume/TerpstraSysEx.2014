@@ -50,7 +50,7 @@ private:
     juce::Path controlPath;
 
     int contentMarginWidth;
-    const float contentMarginParentW   = 0.022f;
+    const float contentMarginParentW   = 0.02f;
 
     int contentMarginHeight;
     const float controlMarginH        = 0.08f;
