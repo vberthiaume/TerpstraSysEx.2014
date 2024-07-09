@@ -15,6 +15,7 @@
 
 class ColourViewComponent;
 class ColourTextEditor;
+class RangedControl;
 
 class MultiSelectControls : public LumatoneEditorState
                           , public juce::Component
@@ -34,9 +35,9 @@ private:
     std::unique_ptr<ColourTextEditor>       colourTextEditor;
     std::unique_ptr<ColourViewComponent>    colourSubwindow;
 
-    std::unique_ptr<juce::ComboBox> keyTypeCombo;
-    std::unique_ptr<juce::Slider>   noteInput;
-    std::unique_ptr<juce::Slider>   channelInput;
+    std::unique_ptr<juce::ComboBox>   keyTypeCombo;
+    std::unique_ptr<RangedControl>    noteInput;
+    std::unique_ptr<RangedControl>    channelInput;
 
     std::unique_ptr<juce::Label>    lblColour;
     std::unique_ptr<juce::Label>    lblKeyType;

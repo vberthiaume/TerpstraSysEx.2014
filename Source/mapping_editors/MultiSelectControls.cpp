@@ -12,6 +12,7 @@
 #include "../LumatoneEditorLookAndFeel.h"
 
 #include "../colour_view_component.h"
+#include "../components/RangedControl.h"
 #include "../lumatone_editor_library/palettes/colour_edit_textbox.h"
 
 MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
@@ -41,17 +42,17 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->addItem (juce::translate("Disabled"), 4);
     addAndMakeVisible(keyTypeCombo.get());
 
-    noteInput = std::make_unique<juce::Slider>("noteInputSelect");
+    noteInput = std::make_unique<RangedControl>("noteInputSelect", 0, 127, RangedControl::Style::DropdownBox);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
-    noteInput->setRange (0, 127, 1);
-    noteInput->setSliderStyle (juce::Slider::IncDecButtons);
+    // noteInput->setRange (0, 127, 1);
+    // noteInput->setSliderStyle (juce::Slider::IncDecButtons);
     // noteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     // noteInput->addListener (this);
     addAndMakeVisible(noteInput.get());
 
-    channelInput = std::make_unique<juce::Slider>("channelInputSelect");
-    channelInput->setRange (1, 16, 1);
-    channelInput->setSliderStyle (juce::Slider::IncDecButtons);
+    channelInput = std::make_unique<RangedControl>("channelInputSelect", 1, 16, RangedControl::Style::DropdownBox);
+    // channelInput->setRange (1, 16, 1);
+    // channelInput->setSliderStyle (juce::Slider::IncDecButtons);
     // channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     addAndMakeVisible(channelInput.get());
 
@@ -149,12 +150,12 @@ void MultiSelectControls::resized()
     lblNote->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, headerHeight + contentMarginHeight);
     resizeLabelWithHeight(lblNote.get(), labelHeight, controlLabelFontScalar);
 
-    noteInput->setBounds(noteChannelColumnX, lblNote->getBottom(), noteChannelColumnWidth, controlHeight);
     noteInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, roundToInt(noteInput->getWidth() * 0.75f), roundToInt(noteInput->getHeight() * 0.8f));
+    noteInput->setBounds(noteChannelColumnX, lblNote->getBottom(), noteChannelColumnWidth, controlHeight);
 
     lblChannel->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, noteInput->getBottom() + controlMarginHeight);
     resizeLabelWithHeight(lblChannel.get(), labelHeight, controlLabelFontScalar);
 
-    channelInput->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
     channelInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, roundToInt(channelInput->getWidth() * 0.6f), roundToInt(channelInput->getHeight() * 0.8f));
+    channelInput->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
 }
