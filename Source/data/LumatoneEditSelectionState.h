@@ -20,29 +20,13 @@
 class LumatoneEditSelectionState : public LumatoneStateBase
 {
 public:
-    struct Data
-    {
-        bool setColour = false;
-        bool setType = false;
-        bool setNote = false;
-        bool setChannel = false;
-        bool setCCFaderDefault = false;
-
-        juce::Colour colour = juce::Colour();
-        LumatoneKeyType type = LumatoneKeyType::disabledDefault;
-        int note = -1;
-        int channel = -1;
-        bool ccFaderDefault = false;
-    };
-
-public:
 
     LumatoneEditSelectionState(juce::String nameIn, juce::ValueTree parentStateIn);
     LumatoneEditSelectionState(juce::String nameIn,  juce::ValueTree parentStateIn, const LumatoneEditSelectionState& stateToCopy);
 
     virtual ~LumatoneEditSelectionState() override { };
 
-    LumatoneEditSelectionState::Data getData() const { return data; }
+    LumatoneKeyPropertyData getData() const { return data; }
 
     void setKeyColour(bool set, juce::Colour colourIn);
     void setKeyType(bool set, LumatoneKeyType typeIn);
@@ -52,7 +36,7 @@ public:
 
 public:
 
-    static LumatoneEditSelectionState::Data findSharedSelectionProperties(const juce::Array<MappedLumatoneKey>& selection);
+    static LumatoneKeyPropertyData findSharedSelectionProperties(const juce::Array<MappedLumatoneKey>& selection);
 
 protected:
 
@@ -63,7 +47,7 @@ protected:
 
 private:
 
-    LumatoneEditSelectionState::Data data;
+    LumatoneKeyPropertyData data;
 };
 
 namespace LumatoneEditSelectionProperty

@@ -66,67 +66,67 @@ void LumatoneEditSelectionState::handleStatePropertyChange(juce::ValueTree state
     {
         if (setProperty && value.isString())
         {
-            data.setColour = true;
+            data.useColour = true;
             data.colour = juce::Colour::fromString(value.toString());
         }
         else
         {
-            data.setColour = false;
+            data.useColour = false;
         }
     }
     else if (property == LumatoneEditSelectionProperty::AssignKeyType)
     {
         if (setProperty && value.isInt())
         {
-            data.setType = true;
+            data.useType = true;
             data.type = LumatoneKeyType((int)value);
         }
         else
         {
-            data.setType = false;
+            data.useType = false;
         }
     }
     else if (property == LumatoneEditSelectionProperty::AssignKeyNote)
     {
         if (setProperty && value.isInt())
         {
-            data.setNote = true;
+            data.useNote = true;
             data.note = (int)value;
         }
         else
         {
-            data.setNote = false;
+            data.useNote = false;
         }
     }
     else if (property == LumatoneEditSelectionProperty::AssignKeyChannel)
     {
         if (setProperty && value.isInt())
         {
-            data.setChannel = true;
+            data.useChannel = true;
             data.channel = (int)value;
         }
         else
         {
-            data.setChannel = false;
+            data.useChannel = false;
         }
     }
     else if (property == LumatoneEditSelectionProperty::AssignKeyCCFader)
     {
         if (setProperty && value.isBool())
         {
-            data.setCCFaderDefault = true;
+            data.useCCFaderDefault = true;
             data.ccFaderDefault = (bool)value;
         }
         else
         {
-            data.setCCFaderDefault = false;
+            data.useCCFaderDefault = false;
         }
     }
 }
 
 void LumatoneEditSelectionState::setKeyColour(bool set, juce::Colour colourIn)
 {
-    data.setColour = set;
+    data.useColour = set;
     data.colour = colourIn;
 
     if (set)
@@ -141,7 +141,7 @@ void LumatoneEditSelectionState::setKeyColour(bool set, juce::Colour colourIn)
 
 void LumatoneEditSelectionState::setKeyType(bool set, LumatoneKeyType typeIn)
 {
-    data.setType = set;
+    data.useType = set;
     data.type = typeIn;
 
     if (set)
@@ -156,7 +156,7 @@ void LumatoneEditSelectionState::setKeyType(bool set, LumatoneKeyType typeIn)
 
 void LumatoneEditSelectionState::setKeyNote(bool set, int noteIn)
 {
-    data.setNote = set;
+    data.useNote = set;
     data.note = noteIn;
 
     if (set)
@@ -171,7 +171,7 @@ void LumatoneEditSelectionState::setKeyNote(bool set, int noteIn)
 
 void LumatoneEditSelectionState::setKeyChannel(bool set, int channelIn)
 {
-    data.setChannel = set;
+    data.useChannel = set;
     data.channel = channelIn;
 
     if (set)
@@ -186,7 +186,7 @@ void LumatoneEditSelectionState::setKeyChannel(bool set, int channelIn)
 
 void LumatoneEditSelectionState::setCCFader(bool set, bool ccFaderDefaultIn)
 {
-    data.setCCFaderDefault = set;
+    data.useCCFaderDefault = set;
     data.ccFaderDefault = ccFaderDefaultIn;
 
     if (set)
@@ -199,9 +199,9 @@ void LumatoneEditSelectionState::setCCFader(bool set, bool ccFaderDefaultIn)
     }
 }
 
-LumatoneEditSelectionState::Data LumatoneEditSelectionState::findSharedSelectionProperties(const juce::Array<MappedLumatoneKey> &selection)
+LumatoneKeyPropertyData LumatoneEditSelectionState::findSharedSelectionProperties(const juce::Array<MappedLumatoneKey> &selection)
 {
-    LumatoneEditSelectionState::Data data;
+    LumatoneKeyPropertyData data;
 
     bool updated = false;
 
@@ -211,47 +211,47 @@ LumatoneEditSelectionState::Data LumatoneEditSelectionState::findSharedSelection
 
         if (i == 0)
         {
-            data.setColour = true;
+            data.useColour = true;
             data.colour = key.getColour();
         }
         else if (data.colour != key.getColour())
         {
-            data.setColour = false;
+            data.useColour = false;
         }
 
         if (i == 0)
         {
-            data.setType = true;
+            data.useType = true;
             data.type = key.getType();
         }
         else if (data.type != key.getType())
         {
-            data.setType = false;
+            data.useType = false;
         }
 
         if (i == 0)
         {
-            data.setNote = true;
+            data.useNote = true;
             data.note = key.getMidiNumber();
         }
         else if (data.note != key.getMidiNumber())
         {
-            data.setNote = false;
+            data.useNote = false;
         }
 
         if (i == 0)
         {
-            data.setChannel = true;
+            data.useChannel = true;
             data.channel = key.getMidiChannel();
         }
         else if (data.channel != key.getMidiChannel())
         {
-            data.setChannel = false;
+            data.useChannel = false;
         }
 
         if (i == 0)
         {
-            data.setCCFaderDefault = true;
+            data.useCCFaderDefault = true;
             data.ccFaderDefault = key.isCCFaderDefault();
         }
         else if (data.ccFaderDefault != key.isCCFaderDefault())

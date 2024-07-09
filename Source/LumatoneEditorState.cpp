@@ -106,7 +106,7 @@ juce::RecentlyOpenedFilesList& LumatoneEditorState::getRecentFiles()
     return *recentFiles;
 }
 
-LumatoneEditSelectionState::Data LumatoneEditorState::getEditSelectionData() const
+LumatoneKeyPropertyData LumatoneEditorState::getEditSelectionData() const
 {
     return editSelectionState.getData();
 }

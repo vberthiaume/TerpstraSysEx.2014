@@ -19,19 +19,19 @@ SetKeySettingsAction::SetKeySettingsAction(const LumatoneEditorState & stateIn,
 {
     previousData = stateIn.getEditSelectionData();
 
-    newEditData.setColour = setKeyColourIn;
+    newEditData.useColour = setKeyColourIn;
     newEditData.colour = colourIn;
 
-    newEditData.setType = setKeyTypeIn;
+    newEditData.useType = setKeyTypeIn;
     newEditData.type = typeIn;
 
-    newEditData.setNote = setKeyNoteIn;
+    newEditData.useNote = setKeyNoteIn;
     newEditData.note = noteIn;
 
-    newEditData.setChannel = setKeyChannelIn;
+    newEditData.useChannel = setKeyChannelIn;
     newEditData.channel = channelIn;
 
-    newEditData.setCCFaderDefault = setCCFaderDefaultIn;
+    newEditData.useCCFaderDefault = setCCFaderDefaultIn;
     newEditData.ccFaderDefault = ccFaderDefaultIn;
 }
 
@@ -43,11 +43,11 @@ bool SetKeySettingsAction::perform()
 
 bool SetKeySettingsAction::undo()
 {
-    setAssignKeyColour(previousData.setColour, previousData.colour);
-    setAssignKeyType(previousData.setType, previousData.type);
-    setAssignKeyNote(previousData.setNote, previousData.note);
-    setAssignKeyChannel(previousData.setChannel, previousData.channel);
-    setAssignCCFader(previousData.setCCFaderDefault, previousData.ccFaderDefault);
+    setAssignKeyColour(previousData.useColour, previousData.colour);
+    setAssignKeyType(previousData.useType, previousData.type);
+    setAssignKeyNote(previousData.useNote, previousData.note);
+    setAssignKeyChannel(previousData.useChannel, previousData.channel);
+    setAssignCCFader(previousData.useCCFaderDefault, previousData.ccFaderDefault);
     return true;
 }
 
@@ -57,16 +57,16 @@ bool SetKeySettingsAction::undo()
 
 void SetKeySettingsAction::addToEditAassignment()
 {
-    if (newEditData.setColour)
-        setAssignKeyColour(newEditData.setColour, newEditData.colour);
-    if (newEditData.setType)
-        setAssignKeyType(newEditData.setType, newEditData.type);
-    if (newEditData.setNote)
-        setAssignKeyNote(newEditData.setNote, newEditData.note);
-    if (newEditData.setChannel)
-        setAssignKeyChannel(newEditData.setChannel, newEditData.channel);
-    if (newEditData.setCCFaderDefault)
-        setAssignCCFader(newEditData.setCCFaderDefault, newEditData.ccFaderDefault);
+    if (newEditData.useColour)
+        setAssignKeyColour(newEditData.useColour, newEditData.colour);
+    if (newEditData.useType)
+        setAssignKeyType(newEditData.useType, newEditData.type);
+    if (newEditData.useNote)
+        setAssignKeyNote(newEditData.useNote, newEditData.note);
+    if (newEditData.useChannel)
+        setAssignKeyChannel(newEditData.useChannel, newEditData.channel);
+    if (newEditData.useCCFaderDefault)
+        setAssignCCFader(newEditData.useCCFaderDefault, newEditData.ccFaderDefault);
 }
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignColourAction(LumatoneEditorState &stateIn, juce::Colour colourIn)
@@ -95,7 +95,7 @@ SetKeySettingsAction *SetKeySettingsAction::NewSetAssignCCFaderAction(LumatoneEd
 }
 
 ApplyAssignmentsToSelectionAction::ApplyAssignmentsToSelectionAction(const LumatoneEditorState& stateIn
-                                                                   , LumatoneEditSelectionState::Data assignData
+                                                                   , LumatoneKeyPropertyData assignData
                                                                    , const juce::Array<MappedLumatoneKey> &keySelectionIn)
 	: LumatoneEditorState("ApplyAssignmentsToSelectionAction", stateIn)
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
@@ -115,13 +115,13 @@ bool ApplyAssignmentsToSelectionAction::perform()
     for (const MappedLumatoneKey key : previousData)
     {
         MappedLumatoneKey keyUpdate = key;
-        if (newData.setColour)
+        if (newData.useColour)
             keyUpdate.setColour(newData.colour);
-        if (newData.setType)
+        if (newData.useType)
             keyUpdate.setKeyType(newData.type);
-        if (newData.setNote)
+        if (newData.useNote)
             keyUpdate.setNoteOrCC(newData.note);
-        if (newData.setChannel)
+        if (newData.useChannel)
             keyUpdate.setChannelNumber(newData.channel);
         if (newData.ccFaderDefault)
             keyUpdate.setDefaultCCFader(newData.ccFaderDefault);

@@ -102,7 +102,7 @@ public:
 
     // juce::Array<LumatoneKey> getSelectedKeys() const;
 
-    LumatoneEditSelectionState::Data getEditSelectionData() const;
+    LumatoneKeyPropertyData getEditSelectionData() const;
 
     LumatoneEditorLookAndFeel& getEditorLookAndFeel() { return *lookAndFeel; }
 

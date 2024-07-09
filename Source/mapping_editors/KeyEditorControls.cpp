@@ -211,9 +211,9 @@ void KeyEditorControls::selectionChanged()
     // Make more efficient? (each time goes through loop)
     auto newData = LumatoneEditSelectionState::findSharedSelectionProperties(*getSelectedKeys());
 
-    if (newData.setColour)
+    if (newData.useColour)
     {
-        setAssignKeyColour(newData.setColour, newData.colour);
+        setAssignKeyColour(newData.useColour, newData.colour);
         // performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, newData.colour), true, false);
         colourSubwindow->setColour(newData.colour.toString(), false);
         if (newData.colour.isTransparent())
@@ -227,17 +227,17 @@ void KeyEditorControls::selectionChanged()
         colourTextEditor->setText("", juce::NotificationType::dontSendNotification);
     }
 
-    if (newData.setType)
+    if (newData.useType)
         keyTypeCombo->setSelectedId((int)newData.type, juce::NotificationType::dontSendNotification);
     else
         keyTypeCombo->setSelectedId(0, juce::NotificationType::dontSendNotification);
 
-    if (newData.setNote)
+    if (newData.useNote)
         noteInput->setValue(newData.note, juce::NotificationType::dontSendNotification);
     else
         noteInput->setValue(-1, juce::NotificationType::dontSendNotification);
 
-    if (newData.setChannel)
+    if (newData.useChannel)
         channelInput->setValue(newData.channel, juce::NotificationType::dontSendNotification);
     else
         channelInput->setValue(-1, juce::NotificationType::dontSendNotification);

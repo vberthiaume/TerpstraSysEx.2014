@@ -75,7 +75,6 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     lblChannel->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
     lblChannel->setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(lblChannel.get());
-
 }
 
 MultiSelectControls::~MultiSelectControls()

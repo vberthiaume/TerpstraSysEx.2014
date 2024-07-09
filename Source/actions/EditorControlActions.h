@@ -52,8 +52,8 @@ public:
 
 private:
 
-    LumatoneEditSelectionState::Data previousData;
-    LumatoneEditSelectionState::Data newEditData;
+    LumatoneKeyPropertyData previousData;
+    LumatoneKeyPropertyData newEditData;
 
 };
 
@@ -64,7 +64,7 @@ class ApplyAssignmentsToSelectionAction : public LumatoneEditorState
 public:
 
     ApplyAssignmentsToSelectionAction(const LumatoneEditorState& stateIn
-                                    , LumatoneEditSelectionState::Data assignData
+                                    , LumatoneKeyPropertyData assignData
                                     , const juce::Array<MappedLumatoneKey>& keySelectionIn);
 
     bool perform() override;
@@ -74,11 +74,11 @@ public:
 
 private:
 
-    void applyData(LumatoneEditSelectionState::Data& dataToApply);
+    void applyData(LumatoneKeyPropertyData& dataToApply);
 
 private:
     juce::Array<MappedLumatoneKey>    previousData;
-    LumatoneEditSelectionState::Data  newData;
+    LumatoneKeyPropertyData  newData;
 
     juce::Array<MappedLumatoneKey> keySelection;
 

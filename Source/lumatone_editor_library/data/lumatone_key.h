@@ -30,7 +30,23 @@ namespace LumatoneKeyProperty
     static const juce::Identifier Board = juce::Identifier("Board");
 }
 
-// Mapping of one key
+// A set of Lumatone Key properties, optionally completed
+struct LumatoneKeyPropertyData
+{
+    bool useColour = false;
+    bool useType = false;
+    bool useNote = false;
+    bool useChannel = false;
+    bool useCCFaderDefault = false;
+
+    juce::Colour colour = juce::Colour();
+    LumatoneKeyType type = LumatoneKeyType::disabledDefault;
+    int note = -1;
+    int channel = -1;
+    bool ccFaderDefault = false;
+};
+
+// State of one Lumatone Key
 
 class LumatoneKey
 {
