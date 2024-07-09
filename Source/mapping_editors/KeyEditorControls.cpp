@@ -64,7 +64,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     noteInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
-        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
+        if (!noteInput->isValueNull())
+            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     });
     addAndMakeVisible(noteInput.get());
 
@@ -72,7 +73,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     channelInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
-        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
+        if (!channelInput->isValueNull())
+            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     });
     addAndMakeVisible(channelInput.get());
 
