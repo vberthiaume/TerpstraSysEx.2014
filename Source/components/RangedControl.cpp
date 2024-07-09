@@ -24,6 +24,14 @@ void RangedControl::resized()
     component->setBounds(getLocalBounds());
 }
 
+void RangedControl::setTextBoxStyle(juce::Slider::TextEntryBoxPosition position, bool readOnly, int boxWidth, int boxHeight)
+{
+    if (slider)
+    {
+        slider->setTextBoxStyle(position, readOnly, boxWidth, boxHeight);
+    }
+}
+
 void RangedControl::setStyle(Style newStyle)
 {
     if (component)
@@ -115,7 +123,8 @@ void RangedControl::setRange(int min, int max)
 
     else if (slider)
     {
-        slider->setRange(range.getStart(), range.getEnd(), 1);
+        // Minus 1 to reserve for null value
+        slider->setRange(range.getStart() - 1, range.getEnd(), 1);
     }
 }
 
@@ -128,6 +137,8 @@ void RangedControl::setValue(int newValue, juce::NotificationType notify)
     {
         slider->getProperties().set(LumatoneEditorStyleIDs::sliderValueNull, isNull);
         slider->setValue(newValue, notify);
+
+        // does not update if null is same value
 
         // Kludge to hide label when null
         if (isNull)
@@ -164,8 +175,8 @@ void RangedControl::setValueChangedCallback(std::function<void()> callback)
     {
         slider->onValueChange =[&]() {
             // Kludge fix for incrementing from null -- side effects??
-            if (isNull && slider->getValue() == (range.getStart() + 1))
-                slider->setValue(range.getStart(), juce::NotificationType::dontSendNotification);
+            // if (isNull && slider->getValue() == (range.getStart() + 1))
+            //     slider->setValue(range.getStart(), juce::NotificationType::dontSendNotification);
 
             valueChangedCallback();
             updateNull(slider->getValue());
@@ -196,6 +207,11 @@ int RangedControl::getValue() const
     {
         return range.getStart() + box->getSelectedId() - 1;
     }
+}
+
+bool RangedControl::isValueNull() const
+{
+    return isNull;
 }
 
 bool RangedControl::valueIsNull(int checkValue) const

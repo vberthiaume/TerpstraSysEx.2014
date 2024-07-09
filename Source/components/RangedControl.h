@@ -36,6 +36,8 @@ public:
     // void paint(juce::Graphics& g) override;
     void resized() override;
 
+    void setTextBoxStyle(juce::Slider::TextEntryBoxPosition position, bool readOnly, int boxWidth, int boxHeight);
+
     void setStyle(Style newStyle);
 
     void setRange(juce::Range<int> newRange);
@@ -52,6 +54,8 @@ public:
     juce::Range<int> getRange() const { return range; }
 
     int getValue() const;
+
+    bool isValueNull() const;
 
 public:
     bool valueIsNull(int checkValue) const;
