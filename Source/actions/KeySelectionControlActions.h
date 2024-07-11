@@ -34,24 +34,28 @@ private:
     bool remove;
 };
 
-// class SetKeySelectionAction : public LumatoneEditorState
-//                             , private LumatoneEditorState::Controller
-//                             , public LumatoneAction
-// {
-// public:
-//     SetKeySelectionAction(const LumatoneEditorState& stateIn, juce::Array<MappedLumatoneKey> newSelection);
-//     ~SetKeySelectionAction() override;
+class SetKeySelectionAction : public LumatoneEditorState
+                            , private LumatoneEditorState::Controller
+                            , public LumatoneAction
+{
+public:
+    SetKeySelectionAction(const LumatoneEditorState& stateIn, juce::Array<MappedLumatoneKey> newSelection);
+    ~SetKeySelectionAction() override;
 
-//     bool perform() override;
-//     bool undo() override;
+    bool perform() override;
+    bool undo() override;
 
-//     int getSizeInUnits() override { return sizeof(SetKeySelectionAction); }
+    int getSizeInUnits() override { return sizeof(SetKeySelectionAction); }
 
-// private:
+public:
 
-//     juce::Array<MappedLumatoneKey> previousSelection;
-//     juce::Array<MappedLumatoneKey> newSelection;
-// };
+    static SetKeySelectionAction* NewSetKeySelectionActionByCoords(const LumatoneEditorState& stateIn, juce::Array<LumatoneKeyCoord> keyCoords);
+
+private:
+
+    juce::Array<MappedLumatoneKey> previousSelection;
+    juce::Array<MappedLumatoneKey> newSelection;
+};
 
 
 

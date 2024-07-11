@@ -44,27 +44,40 @@ bool AddOrRemoveKeySelectionAction::undo()
 
 // SetKeySelectionAction
 
-// SetKeySelectionAction::SetKeySelectionAction(const LumatoneEditorState &stateIn, juce::Array<MappedLumatoneKey> newSelectionIn)
-// 	: LumatoneEditorState("SetKeySelectionAction", stateIn)
-//     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
-//     , LumatoneAction(this, "SetKeySelectionAction")
-// {
-//     previousSelection.addArray(selectedKeys);
-//     newSelection.addArray(newSelectionIn);
-// }
+SetKeySelectionAction::SetKeySelectionAction(const LumatoneEditorState &stateIn, juce::Array<MappedLumatoneKey> newSelectionIn)
+	: LumatoneEditorState("SetKeySelectionAction", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
+    , LumatoneAction(this, "SetKeySelectionAction")
+{
+    previousSelection.addArray(*getSelectedKeys());
+    newSelection.addArray(newSelectionIn);
+}
 
-// SetKeySelectionAction::~SetKeySelectionAction()
-// {
-// }
+SetKeySelectionAction::~SetKeySelectionAction()
+{
+}
 
-// bool SetKeySelectionAction::perform()
-// {
-//     // setSelectedKeys(newSelection);
-//     return true;
-// }
+bool SetKeySelectionAction::perform()
+{
+    setSelectedKeys(newSelection);
+    return true;
+}
 
-// bool SetKeySelectionAction::undo()
-// {
-//     // setSelectedKeys(previousSelection);
-//     return true;
-// }
+bool SetKeySelectionAction::undo()
+{
+    setSelectedKeys(previousSelection);
+    return true;
+}
+
+SetKeySelectionAction *SetKeySelectionAction::NewSetKeySelectionActionByCoords(const LumatoneEditorState &stateIn, juce::Array<LumatoneKeyCoord> keyCoords)
+{
+    juce::Array<MappedLumatoneKey> keys;
+
+    for (const LumatoneKeyCoord& coord : keyCoords)
+    {
+        auto key = stateIn.getMappingData()->getMappedKey(coord.boardIndex, coord.keyIndex);
+        keys.add(key);
+    }
+
+    return new SetKeySelectionAction(stateIn, keys);
+}
