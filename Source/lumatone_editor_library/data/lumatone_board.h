@@ -49,6 +49,8 @@ public:
     void setKeyColour(juce::Colour colour, int index);
 
     juce::Array<juce::Colour> getBoardColours() const;
+
+    juce::Array<LumatoneKeyCoord> getKeysWithProperties(LumatoneKeyPropertyData properties) const;
     juce::Array<LumatoneKeyCoord> getKeysWithColour(const juce::Colour& c) const;
 
 private:

@@ -113,7 +113,9 @@ public:
 	void setConfigTable(LumatoneConfigTable::TableType tableType, const int* table);
 
 	juce::Array<juce::Colour> getLayoutColours() const;
-    juce::Array<LumatoneKeyCoord> getKeysWithColour(const juce::Colour& c) const;
+
+	juce::Array<LumatoneKeyCoord> getKeysWithProperties(LumatoneKeyPropertyData properties) const;
+	juce::Array<LumatoneKeyCoord> getKeysWithColour(const juce::Colour& c) const;
 
 	// Key configuration
 	const LumatoneBoard& getBoard(int index) const;

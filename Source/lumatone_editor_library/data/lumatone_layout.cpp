@@ -737,7 +737,16 @@ juce::Array<juce::Colour> LumatoneLayout::getLayoutColours() const
     return layoutColours;
 }
 
-juce::Array<LumatoneKeyCoord> LumatoneLayout::getKeysWithColour(const juce::Colour& c) const
+juce::Array<LumatoneKeyCoord> LumatoneLayout::getKeysWithProperties(LumatoneKeyPropertyData properties) const
+{
+    juce::Array<LumatoneKeyCoord> keyCoords;
+
+    for (int i = 0; i < numBoards; i++)
+        keyCoords.addArray(boards[i].getKeysWithProperties(properties));
+
+    return keyCoords;}
+
+juce::Array<LumatoneKeyCoord> LumatoneLayout::getKeysWithColour(const juce::Colour &c) const
 {
     juce::Array<LumatoneKeyCoord> keyCoords;
 

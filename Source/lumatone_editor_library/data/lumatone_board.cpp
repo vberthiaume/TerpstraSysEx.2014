@@ -48,7 +48,7 @@ LumatoneBoard::LumatoneBoard(juce::ValueTree stateIn)
 void LumatoneBoard::operator=(const LumatoneBoard& copyBoard)
 {
     numKeys = copyBoard.numKeys;
-    
+
     for (int i = 0; i < numKeys; i++)
     {
         theKeys[i] = copyBoard.getKey(i);
@@ -111,7 +111,48 @@ juce::Array<juce::Colour> LumatoneBoard::getBoardColours() const
     return boardColours;
 }
 
-juce::Array<LumatoneKeyCoord> LumatoneBoard::getKeysWithColour(const juce::Colour& c) const
+juce::Array<LumatoneKeyCoord> LumatoneBoard::getKeysWithProperties(LumatoneKeyPropertyData properties) const
+{
+    juce::Array<LumatoneKeyCoord> keyCoords;
+
+    for (int i = 0; i < numKeys; i++)
+    {
+        const LumatoneKey& key = theKeys[i];
+        bool matches = true;
+
+        if (matches && properties.useColour)
+        {
+            matches = matches && key.isColour(properties.colour);
+        }
+
+        if (matches && properties.useType)
+        {
+            matches = matches && key.hasType(properties.type);
+        }
+
+        if (matches && properties.useNote)
+        {
+            matches = matches && key.hasMidiNumber(properties.note);
+        }
+
+        if (matches && properties.useChannel)
+        {
+            matches = matches && key.hasMidiChannel(properties.channel);
+        }
+
+        if (matches && properties.useCCFaderDefault)
+        {
+            matches = matches && key.hasCCFaderFlag(properties.ccFaderDefault);
+        }
+
+        if (matches)
+            keyCoords.add(LumatoneKeyCoord(board_idx, i));
+    }
+
+    return keyCoords;
+}
+
+juce::Array<LumatoneKeyCoord> LumatoneBoard::getKeysWithColour(const juce::Colour &c) const
 {
     juce::Array<LumatoneKeyCoord> keyCoords;
 
