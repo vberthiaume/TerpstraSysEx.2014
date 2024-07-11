@@ -18,6 +18,7 @@ class ColourTextEditor;
 class RangedControl;
 
 class MultiSelectControls : public LumatoneEditorState
+                          , public LumatoneEditorState::Controller
                           , public juce::Component
 {
 public:

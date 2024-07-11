@@ -12,11 +12,13 @@
 #include "../LumatoneEditorLookAndFeel.h"
 
 #include "../colour_view_component.h"
+#include "../actions/KeySelectionControlActions.h"
 #include "../components/RangedControl.h"
 #include "../lumatone_editor_library/palettes/colour_edit_textbox.h"
 
 MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
         : LumatoneEditorState("MultiSelectControls", stateIn)
+        , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
         , juce::Component("MultiSelectControls")
 {
     lblMultiSelect = std::make_unique<juce::Label>("lblMultiSelect", "Multi-Select");
@@ -40,20 +42,40 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
     keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
     keyTypeCombo->addItem (juce::translate("Disabled"), 4);
+    keyTypeCombo->onChange = [&]()
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useType = true;
+        properties.type = LumatoneKeyType(keyTypeCombo->getSelectedId());
+
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    };
     addAndMakeVisible(keyTypeCombo.get());
 
     noteInput = std::make_unique<RangedControl>("noteInputSelect", 0, 127, RangedControl::Style::DropdownBox);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
-    // noteInput->setRange (0, 127, 1);
-    // noteInput->setSliderStyle (juce::Slider::IncDecButtons);
-    // noteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
-    // noteInput->addListener (this);
+    noteInput->setValueChangedCallback([&]()
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useNote = true;
+        properties.note = noteInput->getValue();
+
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    });
     addAndMakeVisible(noteInput.get());
 
     channelInput = std::make_unique<RangedControl>("channelInputSelect", 1, 16, RangedControl::Style::DropdownBox);
-    // channelInput->setRange (1, 16, 1);
-    // channelInput->setSliderStyle (juce::Slider::IncDecButtons);
-    // channelInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
+    channelInput->setValueChangedCallback([&]()
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useChannel = true;
+        properties.channel = channelInput->getValue();
+
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    });
     addAndMakeVisible(channelInput.get());
 
     lblColour = std::make_unique<juce::Label>("lblColour", "Colour");
