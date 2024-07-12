@@ -794,25 +794,27 @@ public:
 
         g.setColour(backgroundColour);
 
-        auto properties = box.getProperties();
-        Path boxShape;
+        // auto properties = box.getProperties();
+        // Path boxShape;
 
-        if (properties.contains(LumatoneEditorStyleIDs::roundedDiagonalCorners))
-        {
-            boxShape = getDiagonalRoundedCornersPath(box.getLocalBounds().toFloat(),
-                roundToInt(height * comboBoxRoundedCornerScalar),
-                (int)properties[LumatoneEditorStyleIDs::roundedDiagonalCorners],
-                box.isPopupActive()
-            );
-        }
-        else
-        {
-            boxShape = getConnectedRoundedRectPath(box.getLocalBounds().toFloat(),
-                roundToInt(height * comboBoxRoundedCornerScalar),
-                (box.isPopupActive()) ? Button::ConnectedEdgeFlags::ConnectedOnBottom : 0
-            );
-        }
-        g.fillPath(boxShape);
+        // if (properties.contains(LumatoneEditorStyleIDs::roundedDiagonalCorners))
+        // {
+        //     boxShape = getDiagonalRoundedCornersPath(box.getLocalBounds().toFloat(),
+        //         roundToInt(height * comboBoxRoundedCornerScalar),
+        //         (int)properties[LumatoneEditorStyleIDs::roundedDiagonalCorners],
+        //         box.isPopupActive()
+        //     );
+        // }
+        // else
+        // {
+        //     boxShape = getConnectedRoundedRectPath(box.getLocalBounds().toFloat(),
+        //         roundToInt(height * comboBoxRoundedCornerScalar),
+        //         (box.isPopupActive()) ? Button::ConnectedEdgeFlags::ConnectedOnBottom : 0
+        //     );
+        // }
+        // g.fillPath(boxShape);
+
+        g.fillRoundedRectangle(Rectangle<float>(0, 0, width, height), height * comboBoxRoundedCornerScalar);
 
         int realButtonX = jmax(margin, box.getWidth() - box.getHeight());
 
@@ -927,8 +929,9 @@ public:
 
         g.setColour(targetColour);
 
-		Path menuShape = getConnectedRoundedRectPath(Rectangle<float>(0, 0, targetWidth, height), targetMargin, Button::ConnectedEdgeFlags::ConnectedOnTop);
-		g.fillPath(menuShape);
+		// Path menuShape = getConnectedRoundedRectPath(Rectangle<float>(0, 0, targetWidth, height), targetMargin, Button::ConnectedEdgeFlags::ConnectedOnTop);
+		// g.fillPath(menuShape);
+        g.fillRoundedRectangle(Rectangle<float>(0, 0, targetWidth, height), targetMargin);
     }
 
     void drawPopupMenuItemWithOptions(
