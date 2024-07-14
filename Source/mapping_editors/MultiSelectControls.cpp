@@ -16,6 +16,8 @@
 #include "../components/RangedControl.h"
 #include "../lumatone_editor_library/palettes/colour_edit_textbox.h"
 
+#include "../components/ColourDropdownSelector.h"
+
 MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
         : LumatoneEditorState("MultiSelectControls", stateIn)
         , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
@@ -27,11 +29,23 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     addAndMakeVisible(lblMultiSelect.get());
 
     colourTextEditor = std::make_unique<ColourTextEditor>("colourSelectEditor", "000000");
-    addAndMakeVisible(colourTextEditor.get());
+    // addAndMakeVisible(colourTextEditor.get());
 
     colourSubwindow = std::make_unique<ColourViewComponent>(juce::Colour(0xff5398b7));
     colourSubwindow->setColourButtonMode(ColourViewComponent::ColourButtonMode::Dropper);
-    addAndMakeVisible(colourSubwindow.get());
+    // addAndMakeVisible(colourSubwindow.get());
+
+    colourDropdown = std::make_unique<ColourDropdownSelector>("MultiSelectColourEdit");
+    colourDropdown->setOnValueChangeCallback([&]()
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useColour = true;
+        properties.colour = colourDropdown->getSelectedColour();
+
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    });
+    addAndMakeVisible(colourDropdown.get());
 
     keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeComboSelect");
     keyTypeCombo->setEditableText (false);
@@ -97,10 +111,14 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     lblChannel->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
     lblChannel->setJustificationType(juce::Justification::centredLeft);
     addAndMakeVisible(lblChannel.get());
+
+    addEditorListener(this);
 }
 
 MultiSelectControls::~MultiSelectControls()
 {
+    removeEditorListener(this);
+
     lblChannel = nullptr;
     lblNote = nullptr;
     lblKeyType = nullptr;
@@ -110,6 +128,7 @@ MultiSelectControls::~MultiSelectControls()
     noteInput = nullptr;
     keyTypeCombo = nullptr;
 
+    colourDropdown = nullptr;
     colourSubwindow = nullptr;
     colourTextEditor = nullptr;
 }
@@ -162,6 +181,8 @@ void MultiSelectControls::resized()
     colourTextEditor->setBounds(contentMarginWidth, lblColour->getBottom(), colourTextBoxWidth, controlHeight);
     colourSubwindow->setBounds(colourTextEditor->getRight() + colourButtonMargin, colourTextEditor->getY(), colourButtonWidth, controlHeight);
 
+    colourDropdown->setBounds(contentMarginWidth, lblColour->getBottom(), colourTextBoxWidth + colourButtonWidth, controlHeight);
+
     lblKeyType->setTopLeftPosition(contentMarginWidth + labelMarginWidth, colourTextEditor->getBottom() + controlMarginHeight);
     resizeLabelWithHeight(lblKeyType.get(), labelHeight, controlLabelFontScalar);
 
@@ -179,4 +200,42 @@ void MultiSelectControls::resized()
 
     channelInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, roundToInt(channelInput->getWidth() * 0.6f), roundToInt(channelInput->getHeight() * 0.8f));
     channelInput->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
+}
+
+void MultiSelectControls::completeMappingLoaded(const LumatoneLayout &mappingData)
+{
+    auto layoutColours = mappingData.getLayoutColours();
+    colourDropdown->setColourOptions(layoutColours);
+}
+
+void MultiSelectControls::boardChanged(const LumatoneBoard &boardData)
+{
+    auto boardColours = boardData.getBoardColours();
+    auto colourOptions = colourDropdown->getColourOptions();
+    for (auto colour : boardColours)
+    {
+        if (colourOptions.contains(colour))
+            continue;
+
+        colourDropdown->addItem(colour.toDisplayString(false), colourDropdown->getNumItems() + 1);
+    }
+}
+
+void MultiSelectControls::keyChanged(int boardIndex, int keyIndex, const LumatoneKey &lumatoneKey)
+{
+    auto colourOptions = colourDropdown->getColourOptions();
+    if (!colourOptions.contains(lumatoneKey.getColour()))
+        colourDropdown->addItem(lumatoneKey.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
+}
+
+void MultiSelectControls::keySetChanged(juce::Array<MappedLumatoneKey> selection)
+{
+    auto colourOptions = colourDropdown->getColourOptions();
+    for (auto key : selection)
+    {
+        if (colourOptions.contains(key.getColour()))
+            continue;
+
+        colourDropdown->addItem(key.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
+    }
 }
