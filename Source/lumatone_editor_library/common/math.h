@@ -15,7 +15,9 @@
 
 const double PI = 3.14159265359f;
 
-static int PRIMES[100] = {
+#define LTN_MAX_PRIMES 100
+
+static int PRIMES[LTN_MAX_PRIMES] = {
         2, 3, 5, 7, 11, 13, 17, 19, 23, 29,
         31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
         73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
@@ -105,7 +107,7 @@ static juce::Array<int> getFactors(int numIn)
 
 	double factorized = numIn;
 
-	int maxPrime = (int)sqrt(numIn);
+	int maxPrime = PRIMES[LTN_MAX_PRIMES - 1];
 
 	while (factorized > 1.0)
 	{
