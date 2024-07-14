@@ -1,7 +1,7 @@
 #include "RangedControl.h"
 
 #include "../LumatoneEditorStyleCommon.h"
-#include "../ScaleStructureController/Common.h"
+#include "../lumatone_editor_library/common/math.h"
 
 RangedControl::RangedControl(juce::String name, int minValueIn, int maxValueIn, Style style)
     : juce::Component(name)

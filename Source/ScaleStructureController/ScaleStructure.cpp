@@ -11,6 +11,9 @@
 
 #include "ScaleStructure.h"
 
+#include "../lumatone_editor_library/common/math.h"
+#include "../lumatone_editor_library/common/utility.h"
+
 ScaleStructure::ScaleStructure()
 {
 	period = 0;

@@ -8,7 +8,9 @@
   ==============================================================================
 */
 
-#pragma once
+#ifndef LUMATONE_EDITOR_LIBRARY_MATH_H
+#define LUMATONE_EDITOR_LIBRARY_MATH_H
+
 #include <JuceHeader.h>
 
 const double PI = 3.14159265359f;
@@ -26,23 +28,6 @@ static int PRIMES[100] = {
         467, 479, 487, 491, 499, 503, 509, 521, 523, 541
     };
 
-template <class T>
-struct PointPair
-{
-	juce::Point<T> x, y;
-
-	PointPair() {}
-	PointPair(juce::Point<T> xIn, juce::Point<T> yIn)
-	{
-		x = xIn;
-		y = yIn;
-	};
-	PointPair(T x1, T y1, T x2, T y2)
-	{
-		x = juce::Point<T>(x1, y1);
-		y = juce::Point<T>(x2, y2);
-	}
-};
 
 static int modulo(int numIn, int mod)
 {
@@ -170,25 +155,4 @@ static juce::Array<int> getContinuedFraction(double num, int maxDepth=20, double
     return cf;
 }
 
-template <class T>
-static juce::String arrayToString(juce::Array<T>& arrayIn, juce::String name = "", char arrayStart=0, char arrayEnd=0)
-{
-	String strOut;
-
-	if (name != "")
-		strOut += name + ": ";
-	if (arrayStart != 0)
-		strOut += arrayStart;
-
-	for (int i = 0; i < arrayIn.size(); i++)
-	{
-		strOut += juce::String(arrayIn[i]);
-		if (i < arrayIn.size() - 1)
-			strOut += ',';
-	}
-
-	if (arrayEnd != 0)
-		strOut += arrayEnd;
-
-	return strOut;
-}
+#endif //LUMATONE_EDITOR_LIBRARY_MATH_H

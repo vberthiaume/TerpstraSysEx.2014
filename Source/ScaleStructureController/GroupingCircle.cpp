@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "GroupingCircle.h"
 
+#include "../lumatone_editor_library/common/utility.h"
+
 //==============================================================================
 GroupingCircle::GroupingCircle(const ScaleStructure& structureIn, Array<Colour>& groupColoursIn)
 	:	scaleStructure(structureIn),
@@ -203,7 +205,7 @@ void GroupingCircle::paint (Graphics& g)
 				degreeColour = groupColour.contrasting(highlightContrastRatio);
 
 			Path& degreePath = degreeArcPaths.getReference(degIndex);
-			
+
 			g.setColour(degreeColour.brighter());
 			g.fillPath(degreePath);
 
@@ -283,7 +285,7 @@ void GroupingCircle::resized()
 	groupOuterCircleBounds = getBounds().toFloat().reduced(proportionOfWidth(1 - borderRatio));
 	groupInnerCircleBounds = groupOuterCircleBounds.reduced(groupRingWidth);
 	degreeInnerCircleBounds = groupInnerCircleBounds.reduced(degreeRingWidth);
-	
+
 	angleIncrement = 2 * MathConstants<double>::pi / groupChain.size();
 	angleHalf = angleIncrement / 2.0f;
 
@@ -299,7 +301,7 @@ void GroupingCircle::resized()
 	float degreeLabelSize = jmin(degreeRingWidth, float_Tau * degreeMiddleRadius / degreeLabels.size()) * sectorLabelSizeRatio;
 	float groupLabelSize = groupRingWidth * sectorLabelSizeRatio;
 
-	float angle, angleTo, groupAngleFrom = -circleOffset; 
+	float angle, angleTo, groupAngleFrom = -circleOffset;
 	float degLabelAngle, groupLabelAngle;
 
 	Path degreePath, groupPath;
@@ -318,7 +320,7 @@ void GroupingCircle::resized()
 	{
 		angle = angleIncrement * i - circleOffset;
 		angleTo = angle + angleIncrement;
-	
+
 		// draw arc sections
 		degreePath = Path();
 		addAnnulusSector(degreePath, groupInnerCircleBounds, degreeInnerCircleBounds, angle, angleTo);
@@ -333,7 +335,7 @@ void GroupingCircle::resized()
 		degree = groupChain[i];
 
 		if (showNoteNameLabels && noteNames)
-		{ 
+		{
 			degreeLabel->setFont(noteNames->getNoteNameFont());
 			degreeLabel->insertTextAtCaret(noteNames->getChainIndexName(i));
 		}
@@ -404,7 +406,7 @@ void GroupingCircle::resized()
 		{
 			if (handle->isDraggingClockwise())
 				handle->setPosition(Point<float>(theta + handleDotAngRatio, handlePlacementRadius), center);
-			
+
 			else
 				handle->setPosition(Point<float>(theta - handleDotAngRatio, handlePlacementRadius), center);
 
@@ -425,7 +427,7 @@ void GroupingCircle::resized()
 		float length = outerToInnerRatio;
 		int index;
 		Line<float> line;
-		
+
 		for (int i = 0; i < highlightedDegreeEdges.size(); i++)
 		{
 			index = highlightedDegreeEdges[i];
@@ -455,7 +457,7 @@ void GroupingCircle::resized()
 			{
 				int symGroup = scaleStructure.getSymmetricGroup(handleBeingDragged->getGroupIndex());
 				dragFrom = groupChain.indexOf(scaleStructure.getDegreeGroupings()[symGroup][0]);
-				
+
 				if (!handleBeingDragged->addsGroupWhenDragged() || handleBeingDragged->isDraggingClockwise())
 					dragFrom += groupSizes[symGroup];
 
@@ -497,7 +499,7 @@ void GroupingCircle::mouseMove(const MouseEvent& event)
 			groupHandles[handleMouseOver]->setMouseOver(false);
 			handleMouseOver = -1;
 		}
-		
+
 		dirty = true;
 	}
 
@@ -569,10 +571,10 @@ void GroupingCircle::mouseMove(const MouseEvent& event)
 				handleMouseOver = -1;
 				dirty = true;
 			}
-			
+
 		}
 	}
-	
+
 	if (handleMouseOver > -1)
 	{
 		if (!groupHandles[handleMouseOver]->isMouseOver(event))
@@ -612,11 +614,11 @@ void GroupingCircle::mouseDown(const MouseEvent& event)
 				int degreeIndexMouseOn = degreeSectorMouseOver;
 				bool& hideMods = cancelMods;
 				bool& showNames = showNoteNameLabels;
-								
+
 				auto selectionCallback = [this](int degIndex) {
 					degreeToModSelectedCallback(degIndex);
 				};
-				
+
 				auto alterationCallback = [this](int degIndex, Point<int> alteration) {
 					listeners.call(&Listener::degreeIndexAltered, degIndex, alteration);
 					updateGenerator();
@@ -699,7 +701,7 @@ void GroupingCircle::mouseDown(const MouseEvent& event)
 							highlightedDegreeEdges.add(indicies.x);
 						if (indicies.y > -1)
 							highlightedDegreeEdges.add(indicies.y);
-						
+
 					}
 				}
 
@@ -800,7 +802,7 @@ void GroupingCircle::mouseDrag(const MouseEvent& event)
 				angDistance = abs(angDistance * angleIncrement);
 
 				handleDragAmt = degreesMouseMoved;
-				
+
 				if (angDistance >= handleDragThreshold)
 				{
 					handleDragAmt += (abs(degreesMouseMoved) / degreesMouseMoved);
@@ -825,7 +827,7 @@ void GroupingCircle::mouseDrag(const MouseEvent& event)
 					if (adjGroup == scaleStructure.getSymmetricGroup(adjGroup))
 						dragLimit /= 2;
 				}
-					
+
 				if (abs(handleDragAmt) <= dragLimit)
 				{
 					lastDraggedIndex = handleDraggedToDegIndex;
@@ -931,7 +933,7 @@ void GroupingCircle::cancelDegreeMods()
 		degreeIndexToMod = -1;
 		degreeModCandidates.clear();
 	}
-	
+
 }
 
 float GroupingCircle::getNormalizedMouseAngle(const MouseEvent& event) const
@@ -969,7 +971,7 @@ int GroupingCircle::mouseInGroupSector(int degreeIndex) const
 
 		groupSize = groupSizes[++groupIndex];
 	}
-	
+
 	return groupIndex;
 }
 

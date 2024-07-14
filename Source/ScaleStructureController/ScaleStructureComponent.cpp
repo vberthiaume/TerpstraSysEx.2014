@@ -22,6 +22,7 @@
 
 #include "ScaleStructureComponent.h"
 
+#include "../lumatone_editor_library/common/math.h"
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
@@ -496,4 +497,3 @@ END_JUCER_METADATA
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

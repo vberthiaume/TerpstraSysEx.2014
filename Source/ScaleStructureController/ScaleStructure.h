@@ -10,7 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "Common.h"
+#include "../lumatone_editor_library/common/data.h"
 #include "Symmetry.h"
 
 class ScaleStructure
@@ -36,7 +36,7 @@ class ScaleStructure
 	Array<Array<int>> scalesInIntervals;
 
 	// A list of scale degrees from the generator stacked period number of times. Takes offset into account.
-	// For fractional periods, 
+	// For fractional periods,
 	Array<int> generatorChain;
 
 	// Array of indicies referring to the support scale sizes
@@ -64,7 +64,7 @@ class ScaleStructure
 	// X-value is chroma level, Y-value is alteration amount
 	// A chroma level of -1 is used if there is no alteration
 	Array<Point<int>> chromaAlterations;
-	
+
 	// List of chroma alterations of each scale degree
 	Array<Point<int>> degreeAlterations;
 
@@ -72,7 +72,7 @@ class ScaleStructure
 	// May removed one method if one is determined to be objectively wrong
 	bool alterationsAttachedToDegree = false;
 
-	// Used in degree grouping related functions to make sure that the groups 
+	// Used in degree grouping related functions to make sure that the groups
 	// can be arranged on a circle with symmetrically so that each group has
 	// a group of the same size on the other side of the circle (horizontally across),
 	// except for the first group and the middle group (for odd-amounts of groups).
@@ -80,7 +80,7 @@ class ScaleStructure
 
 	// Used in degree grouping related functions to make sure that the groups'
 	// sizes are restricted to sizes supported by the MOS properties
-	// This allows for consistency with the scale's natural properties which 
+	// This allows for consistency with the scale's natural properties which
 	// lends well particularly for notation and theory.
 	bool retainMOSGroupSizes = true;
 
@@ -110,11 +110,11 @@ public:
 
 	ScaleStructure();
 	ScaleStructure(
-		int periodIn, 
-		int genIndexIn, 
-		int sizeIndexIn, 
+		int periodIn,
+		int genIndexIn,
+		int sizeIndexIn,
 		int genOffsetIn,
-		int periodFactorIndexIn = 0, 
+		int periodFactorIndexIn = 0,
 		Array<int> degreeGroupsIn = Array<int>(),
 		Array<Point<int>> chromaAlterationsIn = Array<Point<int>>()
 	);
@@ -149,7 +149,7 @@ public:
 		the factor, if a fractional period is selected.
 	*/
 	int getPeriod(bool ofSelectedFactor = false) const;
-	
+
 	Array<int> getPeriodFactors() const;
 	int getPeriodFactorIndex() const;
 	int getPeriodFactor() const;
@@ -204,10 +204,10 @@ public:
 		Returns an array of scale sizes referring to the degree group sizes
 	*/
 	Array<Array<int>> getDegreeGroupings() const;
-	
-	/* 
+
+	/*
 		Returns the index of the group the scale degree is a part of.
-		Used for determining the colour of the scale degree 
+		Used for determining the colour of the scale degree
 	*/
 	int getGroupOfDegree(int scaleDegreeIn) const;
 
@@ -220,7 +220,7 @@ public:
 		Finds the generator chain indices a given degree can be altered to
 	*/
 	Array<Point<int>> findDegreeMods(int degreeIndex, int chromaLevels) const;
-	
+
 	/*
 		Returns the list of user-chosen alterations of scale degrees
 	*/
@@ -235,7 +235,7 @@ public:
 		Returns the chroma alteration of a given scale degree
 	*/
 	Array<Point<int>> getAlterationOfDegree(int degreeIn) const;
-	
+
 	/*
 		Given a group chain index and chroma alteration, this returns the altered degree's group chain index
 	*/
@@ -284,7 +284,7 @@ public:
 		the group and adjacent group sizes.
 		If retainGroupSymmetry, the y value corresponds to the degree indicies of the symmetric group.
 
-		The first value will always refer to the adjacent CCW edge that the group edge can move to, and 
+		The first value will always refer to the adjacent CCW edge that the group edge can move to, and
 		the second value will always refer to the adjacent CW edge.
 	*/
 	Array<Point<int>> findIndiciesForGroupResizing(int groupIndexIn) const;
