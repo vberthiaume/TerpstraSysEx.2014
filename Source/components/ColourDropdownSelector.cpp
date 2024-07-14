@@ -35,6 +35,8 @@ void ColourDropdownSelector::setColourOptions(const juce::Array<juce::Colour> &c
     {
         addItem(c.toDisplayString(false), id++);
     }
+
+    findIdealComboBoxNumColumns(this, getNumItems());
 }
 
 void ColourDropdownSelector::setShowDropdown(bool show)
