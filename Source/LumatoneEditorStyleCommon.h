@@ -14,6 +14,8 @@
 #include <JuceHeader.h>
 #include "./lumatone_editor_library/graphics/lumatone_assets.h"
 
+#include "./lumatone_editor_library/common/math.h"
+
 //==================================================================
 //
 // STATIC HELPERS
@@ -709,3 +711,47 @@ public:
         }
     }
 };
+
+static void findIdealComboBoxNumColumns(juce::ComboBox* box, int numItems)
+{
+    double sqNumItems = sqrt((double)numItems);
+    int maxColumns = (int)(sqNumItems);
+
+    if (maxColumns != sqNumItems)
+    {
+        // get prime factors
+        auto factors = getFactors(numItems);
+
+        // find largest exponent
+        int maxF = 1;
+        int maxExp = 1;
+        for (int i = 0; i < juce::jmin(factors.size(), 100); i++)
+        {
+            int iExp = factors[i];
+            if (iExp >= maxExp)
+            {
+                maxExp = iExp;
+                maxF = (int)pow(PRIMES[i], maxExp);
+            }
+        }
+
+        if (maxExp > 4)
+            maxColumns = 8;
+        else if (maxExp > 2)
+            maxColumns = 4;
+        else if (maxExp > 1)
+            maxColumns = 2;
+        else
+        {
+            if (maxF > 8)
+            {
+                maxColumns = sqrt(maxF);
+            }
+            else
+                maxColumns = 1;
+        }
+    }
+
+
+    box->getProperties().set(LumatoneEditorStyleIDs::popupMenuMaxColumns, juce::var(maxColumns));
+}

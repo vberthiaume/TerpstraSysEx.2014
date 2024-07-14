@@ -85,40 +85,7 @@ void RangedControl::setRange(int min, int max)
             box->addItem(juce::String(i), id++);
         }
 
-    int numItems = range.getEnd() - range.getStart() + 1;
-    double sqNumItems = sqrt((double)numItems);
-    int maxColumns = (int)(sqNumItems);
-
-    if (maxColumns != sqNumItems)
-    {
-        // get prime factors
-        auto factors = getFactors(numItems);
-
-        // find largest exponent
-        int maxF = 1;
-        int maxExp = 1;
-        for (int i = 0; i < jmin(factors.size(), 100); i++)
-        {
-            int iExp = factors[i];
-            if (iExp > maxExp)
-            {
-                maxExp = iExp;
-                maxF = (int)pow(PRIMES[i], maxExp);
-            }
-        }
-
-        if (maxExp > 4)
-            maxColumns = 8;
-        else if (maxExp > 2)
-            maxColumns = 4;
-        else if (maxExp > 1)
-            maxColumns = 2;
-        else
-            maxColumns = 1;
-    }
-
-
-    box->getProperties().set(LumatoneEditorStyleIDs::popupMenuMaxColumns, juce::var(maxColumns));
+        findIdealComboBoxNumColumns(box.get(), range.getEnd() - range.getStart() + 1);
     }
 
     else if (slider)
