@@ -32,7 +32,7 @@
     #define CONTROLBOXFONTHEIGHTSCALAR 0.7f
 #elif JUCE_WINDOWS
     #define GLOBALFONTSCALAR 1.0f
-    #define CONTROLBOXFONTHEIGHTSCALAR 0.8f
+    #define CONTROLBOXFONTHEIGHTSCALAR 0.62f
 #elif JUCE_LINUX
     #define GLOBALFONTSCALAR 1.0f
     #define CONTROLBOXFONTHEIGHTSCALAR 0.73f
@@ -673,6 +673,12 @@ namespace LumatoneEditorStyleIDs
 
     // Flag to not draw a value for Slider LookAndFeel methods
     static Identifier sliderValueNull = Identifier("SliderValueNull");
+
+    // Apply set of characters to restrict combo box input to
+    static Identifier comboBoxEditorRestrictedChars = Identifier("ComboBoxEditorRestrictedChars");
+    static Identifier comboBoxEditorRestrictedLength = Identifier("ComboBoxEditorRestrictedLength");
+
+    static Identifier comboBoxRenderColourItems = Identifier("ComboBoxRenderColourItems");
 }
 
 // LookAndFeel doesn't have Slider IncDec button access in drawIncDecButtonsBackground

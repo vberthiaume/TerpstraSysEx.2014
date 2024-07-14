@@ -865,9 +865,21 @@ public:
             l->getProperties().set(prop.name, prop.value);
 
         auto name = box.getName();
-        auto fontHeight = box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR;
         l->setBounds(box.getLocalBounds());
         l->setFont(getComboBoxFont(box)); // Any style overrides should have been passed to Label
+
+        juce::String textEditChars = box.getProperties()[LumatoneEditorStyleIDs::comboBoxEditorRestrictedChars].toString();
+        int textEditLength = (int)box.getProperties()[LumatoneEditorStyleIDs::comboBoxEditorRestrictedLength];
+
+        if (textEditChars.length() > 0 || textEditLength > 0)
+        {
+            l->onEditorShow = [l, textEditChars, textEditLength]()
+            {
+                auto editor = l->getCurrentTextEditor();
+                if (editor)
+                    editor->setInputRestrictions(textEditLength, textEditChars);
+            };
+        }
 
         return l;
     }
@@ -879,7 +891,7 @@ public:
 
         labelToPosition.setBounds(
             margin
-            , (box.getHeight() - fontHeight) * 0.5
+            , (box.getHeight() - fontHeight) * 0.5f
             , box.getWidth() - box.getHeight() - margin /* leave room for down arrow glyph */
             , fontHeight
         );
@@ -942,17 +954,23 @@ public:
 
         Rectangle<int> areaToUse = area;
 
-        // Only using PopupMenus with ComboBoxes so this should be fine
         auto target = dynamic_cast<ComboBox*>(options.getTargetComponent());
         Font font;
         Colour textColour;
         int margin = 0;
+        bool renderColour = false;
         if (target)
         {
             font = getComboBoxFont(*target);
             textColour = target->findColour(ComboBox::ColourIds::textColourId);
             margin = target->proportionOfHeight(comboBoxRoundedCornerScalar);
             areaToUse = areaToUse.withWidth(width);
+
+            auto properties = target->getProperties();
+            if (properties[LumatoneEditorStyleIDs::comboBoxRenderColourItems])
+            {
+                renderColour = true;
+            }
         }
         else
         {
@@ -982,12 +1000,31 @@ public:
         g.setColour(textColour);
         g.setFont(font);
 
-        g.drawFittedText(item.text, areaToUse.withTrimmedLeft(margin).withTrimmedRight(margin), Justification::centredLeft, 1);
+        juce::Rectangle<int> textArea = areaToUse.withTrimmedLeft(margin).withTrimmedRight(margin);
+        g.drawFittedText(item.text, textArea, Justification::centredLeft, 1);
 
         if (item.subMenu)
         {
             g.drawFittedText(">", areaToUse.withTrimmedRight(margin), Justification::centredRight, 1, 0.5f);
             item.subMenu->setLookAndFeel(this);
+        }
+        else if (renderColour && item.text.length() == 6)
+        {
+            juce::Colour itemColour = juce::Colour::fromString("ff" + item.text);
+            g.setColour(itemColour);
+
+            float textWidth = font.getStringWidth("DDDDDD ");
+            float colourSize = font.getStringWidth("DD") * 0.67f;
+            float colourY = juce::roundToInt((areaToUse.getHeight() - colourSize) * 0.5f);
+            juce::Rectangle<int> colourArea(textArea.getX() + textWidth, colourY, colourSize, colourSize);
+            g.fillRect(colourArea);
+
+            Colour backgroundColour = (target->getProperties().contains(LumatoneEditorStyleIDs::popupMenuBackgroundColour))
+                ? Colour::fromString(target->getProperties()[LumatoneEditorStyleIDs::popupMenuBackgroundColour].toString()).withMultipliedSaturation(1.5f) // Box colour will always be highlighted
+                : findColour(LumatoneEditorColourIDs::MenuBarBackground);
+
+            g.setColour(juce::Colour::contrasting(backgroundColour, itemColour));
+            g.drawRect(colourArea);
         }
     }
 
