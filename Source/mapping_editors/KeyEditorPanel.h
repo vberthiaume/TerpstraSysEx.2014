@@ -16,10 +16,10 @@
 
 class KeyEditorControls;
 class MultiSelectControls;
+class BatchTools;
 
 class KeyEditorPanel : public juce::Component
                      , public LumatoneEditorState
-                          //  , public LumatoneEditor::EditorListener
 {
 public:
     KeyEditorPanel(const LumatoneEditorState& stateIn);
@@ -32,6 +32,7 @@ private:
 
     std::unique_ptr<KeyEditorControls>    keyEditorControls;
     std::unique_ptr<MultiSelectControls>  multiSelectControls;
+    std::unique_ptr<BatchTools>           batchTools;
 
     juce::Rectangle<float>  keySettingsAndMultiSelectArea;
     juce::Rectangle<float>  keySettingsArea;
@@ -54,7 +55,7 @@ private:
     int contentHeight;
     int multiSelectWidth;
 
-    const float contentHeightRatio    = 0.81f;
+    // const float contentHeightRatio    = 0.81f;
 
     const float controlsWidthRatio          = 0.466f;
     const float curvesAreaWidthRatio        = 0.512f;

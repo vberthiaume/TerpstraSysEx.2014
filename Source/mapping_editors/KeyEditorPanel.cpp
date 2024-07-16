@@ -3,6 +3,7 @@
 
 #include "./KeyEditorControls.h"
 #include "./MultiSelectControls.h"
+#include "./BatchTools.h"
 
 KeyEditorPanel::KeyEditorPanel(const LumatoneEditorState &stateIn)
   : juce::Component("KeyEditorPanel")
@@ -13,10 +14,14 @@ KeyEditorPanel::KeyEditorPanel(const LumatoneEditorState &stateIn)
 
     multiSelectControls = std::make_unique<MultiSelectControls>(stateIn);
     addAndMakeVisible(multiSelectControls.get());
+
+    batchTools = std::make_unique<BatchTools>(stateIn);
+    addAndMakeVisible(batchTools.get());
 }
 
 KeyEditorPanel::~KeyEditorPanel()
 {
+    batchTools = nullptr;
     multiSelectControls = nullptr;
     keyEditorControls = nullptr;
 }
@@ -33,17 +38,17 @@ void KeyEditorPanel::resized()
     float w = (float)getWidth();
     float h = (float)getHeight();
 
-    areaHeight = roundToInt(h * areaHeightRatio);
-    areaMargin = roundToInt((h - areaHeight) * 0.5f);
+    float windowH = (float)getWindowBounds().getHeight();
 
-    keySettingsAndMultiSelectArea = juce::Rectangle<float>(0, areaMargin, roundToInt(w * keySettingsAndSelectAreaW), areaHeight);
+    areaHeight = juce::roundToInt(h * areaHeightRatio);
+    areaMargin = juce::roundToInt((h - areaHeight) * 0.5f);
 
-    int batchToolsAreaWidth = roundToInt(w * batchToolsAreaW);
+    keySettingsAndMultiSelectArea = juce::Rectangle<float>(0, areaMargin, juce::roundToInt(w * keySettingsAndSelectAreaW), areaHeight);
+
+    int batchToolsAreaWidth = juce::roundToInt(w * batchToolsAreaW);
     batchToolsArea = juce::Rectangle<float>(w - batchToolsAreaWidth, areaMargin, batchToolsAreaWidth, areaHeight);
 
-    contentHeight = roundToInt(h * contentHeightRatio);
-    contentMargin = roundToInt(h - (float)contentHeight) * 0.5;
-
+    contentMargin = juce::roundToInt(windowH * contentMarginWidthWindowH);
     keyEditorControls->setBounds(keySettingsAndMultiSelectArea.reduced(contentMargin)
                                                               .withWidth(roundToInt(keySettingsAndMultiSelectArea.getWidth() * keySettingsComponentAreaW))
                                                               .toNearestInt());
@@ -52,4 +57,6 @@ void KeyEditorPanel::resized()
     multiSelectControls->setBounds(keySettingsAndMultiSelectArea.reduced(contentMargin)
                                                                 .withLeft(keySettingsAndMultiSelectArea.getRight() - multiSelectWidth - contentMargin)
                                                                 .toNearestInt());
+
+    batchTools->setBounds(batchToolsArea.reduced(contentMargin).toNearestInt());
 }

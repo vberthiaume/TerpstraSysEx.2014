@@ -63,21 +63,23 @@ private:
     // std::unique_ptr<ColourSelectionGroup>   colourSelectionGroup;
     ColourSelectionGroup*                   colourSelectionGroup;
 
-    const float headerH         = 0.19f;
-    int headerHeight;
     juce::Path headerPath;
     juce::Path controlPath;
 
     int contentMarginWidth;
-    const float contentMarginParentW  = 0.02f;
+
+    // int contentMarginWidth;
+    // const float contentMarginParentW  = 0.02f;
 
     int contentMarginHeight;
     const float controlMarginH        = 0.08f;
 
+    int headerHeight;
+    // const float headerH         = 0.19f;
+
     int labelHeight;
-    // int labelMarginWidth;
-    const float labelToHeaderH         = 0.5f;
-    const float controlLabelFontScalar = 0.6f;
+    // const float labelToHeaderH         = 0.5f;
+    // const float controlLabelFontScalar = 0.6f;
 
     int keyControlColumnWidth;
     int keyControlColumnRight;

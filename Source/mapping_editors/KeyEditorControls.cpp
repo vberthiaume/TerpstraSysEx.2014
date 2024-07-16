@@ -156,19 +156,20 @@ void KeyEditorControls::resized()
     float w = (float)getWidth();
     float h = (float)getHeight();
 
-    auto roundedCornerSize = getRoundedRectCornerSize();
-    // labelMarginWidth = roundToInt(roundedCornerSize * 0.25f);
+    float windowH = getWindowBounds().getHeight();
 
-    headerHeight = roundToInt(h * headerH);
+    auto roundedCornerSize = getRoundedRectCornerSize();
+
+    headerHeight = roundToInt(windowH * contentLabelHeightWindowH);
     headerPath = getConnectedRoundedRectPath(getLocalBounds().withBottom(headerHeight + 1).toFloat(), roundedCornerSize, juce::Button::ConnectedEdgeFlags::ConnectedOnBottom);
     controlPath = getConnectedRoundedRectPath(getLocalBounds().withTop(headerHeight).toFloat(), roundedCornerSize, juce::Button::ConnectedEdgeFlags::ConnectedOnTop);
 
-    contentMarginWidth = roundToInt(getParentWidth() * contentMarginParentW);
+    contentMarginWidth = roundToInt(windowH * contentMarginWidthWindowH);
     contentMarginHeight = roundToInt(h * controlMarginH);
 
-    labelHeight = roundToInt(headerHeight * labelToHeaderH);
+    labelHeight = roundToInt(headerHeight * contentLabelFontScalar);
     lblKeySettings->setTopLeftPosition(contentMarginWidth, 0);
-    resizeLabelWithHeight(lblKeySettings.get(), headerHeight, labelToHeaderH);
+    resizeLabelWithHeight(lblKeySettings.get(), headerHeight, contentLabelFontScalar);
 
     keyControlColumnWidth = roundToInt(w * keyControlColumnW);
     keyControlColumnRight = contentMarginWidth + keyControlColumnWidth;
@@ -177,7 +178,7 @@ void KeyEditorControls::resized()
     keyControlMarginHeight = roundToInt(h * keyControlMarginH);
 
     lblColour->setTopLeftPosition(contentMarginWidth, headerHeight + contentMarginHeight);
-    resizeLabelWithHeight(lblColour.get(), keyControlHeight, controlLabelFontScalar);
+    resizeLabelWithHeight(lblColour.get(), keyControlHeight, contentLabelFontScalar);
 
     colourButtonMargin = lblColour->getFont().getStringWidth(" ");
     colourButtonWidth = roundToInt(getParentWidth() * colourButtonParentW) - colourButtonMargin;
