@@ -157,6 +157,23 @@ private:
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
+protected:
+
+    // Global UI constants
+
+    const float contentMarginWidthWindowH   = 2.0e-2f;
+
+    const float contentLabelHeightWindowH   = 4.0e-2f;
+    const float contentLabelFontScalar      = 0.5f;
+
+    const float controlContentSmallMarginHeightWindowH  = 1.3e-2f;
+
+    const float controlContentHeightParentH = 0.81f;
+    const float controlLabelFontScalar      = 0.6f;
+
+    const float controlHeightWindowH        = 2.38e-2f;
+
+
 //================================================================================
 public:
     class Controller : public LumatoneApplicationState::Controller
