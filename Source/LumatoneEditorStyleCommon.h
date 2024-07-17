@@ -624,10 +624,27 @@ enum LumatoneEditorColourIDs
     CurveGradientMin,
     CurveGradientMax,
     CurveGridColour,
-    RotaryGradientMin,
-    RotaryGradientMax,
     DisabledOverlay,
-    MenuBarBackground
+    MenuBarBackground,
+
+    ExprRotaryGradientMax,
+    ExprRotaryGradientMin,
+    BrightnessRotaryGradientMin,
+    BrightnessRotaryGradientMax,
+    HueRotaryGradientMin,
+    HueRotaryGradientMid,
+    HueRotaryGradientMax,
+    TempRotaryGradientMin,
+    TempRotaryGradientMid,
+    TempRotaryGradientMax
+};
+
+enum LumatoneEditorColourGradients
+{
+    ExpressionSlider,
+    BrightnessSlider,
+    HueSlider,
+    TemperatureSlider
 };
 
 namespace LumatoneEditorStyleIDs
@@ -680,7 +697,11 @@ namespace LumatoneEditorStyleIDs
     static Identifier comboBoxEditorRestrictedChars = Identifier("ComboBoxEditorRestrictedChars");
     static Identifier comboBoxEditorRestrictedLength = Identifier("ComboBoxEditorRestrictedLength");
 
+    // Check combo box items for colour hex strings, render if they pass
     static Identifier comboBoxRenderColourItems = Identifier("ComboBoxRenderColourItems");
+
+    // Specify LumatoneEditorColourGradient id for rotary Slider
+    static Identifier sliderRotaryColourGradient = Identifier("SliderRotaryColourGradient");
 }
 
 // LookAndFeel doesn't have Slider IncDec button access in drawIncDecButtonsBackground

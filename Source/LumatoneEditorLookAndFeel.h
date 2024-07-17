@@ -22,13 +22,13 @@ class LumatoneEditorLookAndFeel : public LookAndFeel_V4
 {
 public:
 
-    LumatoneEditorLookAndFeel(const LumatoneEditorFontLibrary& appFontsIn, bool doImageCache = false)
+    LumatoneEditorLookAndFeel(const LumatoneEditorFontLibrary& appFontsIn, bool setupAssets = false)
         : appFonts(appFontsIn)
         , compactWindowStyle(this)
     {
         setupDefaultColours();
 
-        if (doImageCache)
+        if (setupAssets)
         {
             cacheImages();
             cacheIcons();
@@ -36,15 +36,11 @@ public:
 
     }
 
-    // LumatoneEditorLookAndFeel(const LumatoneEditorLookAndFeel& lafCopy)
-    //     : appFonts(lafCopy.appFonts),
-    //       saveIconPath(lafCopy.saveIconPath),
-    //       arrowUpIconPath(lafCopy.arrowUpIconPath),
-    //       arrowDownIconPath(lafCopy.arrowDownIconPath),
-    //       compactWindowStyle(this)
-    // {
-    //     setupDefaultColours();
-    // }
+    ~LumatoneEditorLookAndFeel()
+    {
+        colourGradientDictionary = nullptr;
+        colourGradients = nullptr;
+    }
 
     Font getAppFont(LumatoneEditorFont fontIdIn, float heightIn=12.0f) const
     {
@@ -626,22 +622,13 @@ public:
         addArcToPath(ring, innerBounds, rotaryAngleEnd, rotaryAngleStart, false);
         ring.closeSubPath();
 
-        Colour minColour = findColour(LumatoneEditorColourIDs::RotaryGradientMin);
-        Colour maxColour = findColour(LumatoneEditorColourIDs::RotaryGradientMax);
-        Colour dialColour = Colours::white;
-
-        if (!sld.isEnabled())
-        {
-            minColour = minColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
-            maxColour = maxColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
-            dialColour = findColour(LumatoneEditorColourIDs::InactiveText);
-        }
-
-        ColourGradient grad = ColourGradient::horizontal(minColour, maxColour, outerBounds);
+        LumatoneEditorColourGradients gradientId = LumatoneEditorColourGradients((int)sld.getProperties()[LumatoneEditorStyleIDs::sliderRotaryColourGradient]);
+        juce::ColourGradient grad = getColourGradient(gradientId, outerBounds);
         g.setGradientFill(grad);
         g.fillPath(ring);
 
-        g.setColour(Colours::white);
+        Colour dialColour = Colours::white;
+        g.setColour(dialColour);
 
         float dialRadius = size * dialRadiusFactor * 0.5f;
         float dialThickness = size * 0.025f;
@@ -1381,10 +1368,21 @@ private:
         setColour(LumatoneEditorColourIDs::CurveGradientMin,                Colour(0xffbf961e));
         setColour(LumatoneEditorColourIDs::CurveGradientMax,                Colour(0xffcd6f2e));
         setColour(LumatoneEditorColourIDs::CurveGridColour,                 Colour(0xff303030));
-        setColour(LumatoneEditorColourIDs::RotaryGradientMin,               Colour(0xff5497b6));
-        setColour(LumatoneEditorColourIDs::RotaryGradientMax,               Colour(0xff77a8b3));
         setColour(LumatoneEditorColourIDs::DisabledOverlay,                 Colour(0x601b1b1b));
         setColour(LumatoneEditorColourIDs::MenuBarBackground,               Colour(0xff1a1b1c));
+
+        // Gradients
+        setColour(LumatoneEditorColourIDs::ExprRotaryGradientMin,           Colour(0xff5497b6));
+        setColour(LumatoneEditorColourIDs::ExprRotaryGradientMax,           Colour(0xff77a8b3));
+        setColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMin,     Colour(0xff293044));
+        setColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMax,     Colour(0xffaac1dd));
+        setColour(LumatoneEditorColourIDs::HueRotaryGradientMin,            Colour(0xffd4838b));
+        setColour(LumatoneEditorColourIDs::HueRotaryGradientMid,            Colour(0xff8dd48f));
+        setColour(LumatoneEditorColourIDs::HueRotaryGradientMax,            Colour(0xff8495d4));
+        setColour(LumatoneEditorColourIDs::TempRotaryGradientMin,           Colour(0xffd4838b));
+        setColour(LumatoneEditorColourIDs::TempRotaryGradientMid,           Colour(0xffe8e8e8));
+        setColour(LumatoneEditorColourIDs::TempRotaryGradientMax,           Colour(0xff8495d4));
+
 
         // Component defaults
         setColour(TextButton::ColourIds::buttonOnColourId, Colour(0xff383b3d));
@@ -1406,6 +1404,48 @@ private:
         setColour(AlertWindow::ColourIds::backgroundColourId, findColour(LumatoneEditorColourIDs::HeaderBackground));
         setColour(AlertWindow::ColourIds::textColourId, findColour(LumatoneEditorColourIDs::DescriptionText));
         setColour(AlertWindow::ColourIds::outlineColourId, findColour(LumatoneEditorColourIDs::MediumBackground));
+    }
+
+public:
+
+    juce::ColourGradient LumatoneEditorLookAndFeel::getColourGradient(LumatoneEditorColourGradients gradientId, const juce::Rectangle<float>& area) const
+    {
+        switch (gradientId)
+        {
+            default:
+                break;
+
+            case LumatoneEditorColourGradients::ExpressionSlider:
+                return juce::ColourGradient::horizontal(
+                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMin),
+                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMax),
+                                        area);
+            case LumatoneEditorColourGradients::BrightnessSlider:
+                return juce::ColourGradient::horizontal(
+                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMin),
+                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMax),
+                                        area);
+
+            case LumatoneEditorColourGradients::HueSlider:
+            {
+                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::HueRotaryGradientMin), area.getTopLeft(),
+                                                              findColour(LumatoneEditorColourIDs::HueRotaryGradientMax), area.getTopRight(),
+                                                              false);
+                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::HueRotaryGradientMid));
+                return g;
+            }
+
+            case LumatoneEditorColourGradients::TemperatureSlider:
+            {
+                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::TempRotaryGradientMin), area.getTopLeft(),
+                                                              findColour(LumatoneEditorColourIDs::TempRotaryGradientMax), area.getTopRight(),
+                                                              false);
+                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::TempRotaryGradientMid));
+                return g;
+            }
+        }
+
+        return juce::ColourGradient();
     }
 
 private:

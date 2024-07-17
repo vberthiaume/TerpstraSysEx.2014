@@ -70,6 +70,7 @@ MappingSettingsControls::MappingSettingsControls (const LumatoneEditorState& sta
     sldExprCtrlSensitivity->setRange (0, 127, 1);
     sldExprCtrlSensitivity->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     sldExprCtrlSensitivity->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    sldExprCtrlSensitivity->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::ExpressionSlider);
     sldExprCtrlSensitivity->onValueChange = [&] ()
     {
         exprSensitivitySliderCallback();

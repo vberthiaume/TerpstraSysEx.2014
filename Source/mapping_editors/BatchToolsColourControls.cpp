@@ -11,6 +11,7 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     brightness->setRange (0, 127, 1);
     brightness->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     brightness->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    brightness->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::BrightnessSlider);
     brightness->onValueChange = [&] () {};
     addAndMakeVisible (brightness.get());
 
@@ -18,6 +19,7 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     hue->setRange (0, 127, 1);
     hue->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     hue->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    hue->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::HueSlider);
     hue->onValueChange = [&] () {};
     addAndMakeVisible (hue.get());
 
@@ -25,6 +27,7 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     temperature->setRange (0, 127, 1);
     temperature->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     temperature->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    temperature->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::TemperatureSlider);
     temperature->onValueChange = [&] () {};
     addAndMakeVisible (temperature.get());
 
