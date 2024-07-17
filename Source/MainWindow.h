@@ -39,7 +39,7 @@ public:
 
     void closeButtonPressed() override;
 
-    juce::BorderSize<int> getBorderThickness() override;
+    juce::BorderSize<int> getBorderThickness() const override;
 
     /* Note: Be careful if you override any DocumentWindow methods - the base
     class uses a lot of them, so by overriding you might break its functionality.
