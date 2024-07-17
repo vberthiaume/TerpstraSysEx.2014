@@ -36,12 +36,6 @@ public:
 
     }
 
-    ~LumatoneEditorLookAndFeel()
-    {
-        colourGradientDictionary = nullptr;
-        colourGradients = nullptr;
-    }
-
     Font getAppFont(LumatoneEditorFont fontIdIn, float heightIn=12.0f) const
     {
         return appFonts.getFont(fontIdIn, heightIn);

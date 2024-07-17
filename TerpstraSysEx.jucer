@@ -99,406 +99,412 @@
     </GROUP>
     <GROUP id="{33698847-1685-930C-FEE9-83E0329F8EB4}" name="Source">
       <GROUP id="{677A5402-14C3-1901-8BA8-4116C445E6C6}" name="actions">
-        <FILE id="dtzxJO" name="EditorControlActions.cpp" compile="1" resource="0"
+        <FILE id="BVMNyo" name="EditorControlActions.cpp" compile="1" resource="0"
               file="Source/actions/EditorControlActions.cpp"/>
-        <FILE id="scYqI7" name="EditorControlActions.h" compile="0" resource="0"
+        <FILE id="Q1jqWw" name="EditorControlActions.h" compile="0" resource="0"
               file="Source/actions/EditorControlActions.h"/>
-        <FILE id="cuTXuj" name="KeySelectionControlActions.cpp" compile="1"
+        <FILE id="pz6Ukk" name="KeySelectionControlActions.cpp" compile="1"
               resource="0" file="Source/actions/KeySelectionControlActions.cpp"/>
-        <FILE id="JislHl" name="KeySelectionControlActions.h" compile="0" resource="0"
+        <FILE id="skMlum" name="KeySelectionControlActions.h" compile="0" resource="0"
               file="Source/actions/KeySelectionControlActions.h"/>
       </GROUP>
       <GROUP id="{E5099000-1A88-5084-C29B-2CE56B5338E5}" name="components">
-        <FILE id="opgV7W" name="ColourDropdownSelector.cpp" compile="1" resource="0"
+        <FILE id="weoQCg" name="ColourDropdownSelector.cpp" compile="1" resource="0"
               file="Source/components/ColourDropdownSelector.cpp"/>
-        <FILE id="XzHHyc" name="ColourDropdownSelector.h" compile="0" resource="0"
+        <FILE id="mN3OkN" name="ColourDropdownSelector.h" compile="0" resource="0"
               file="Source/components/ColourDropdownSelector.h"/>
-        <FILE id="NQANBm" name="RangedControl.cpp" compile="1" resource="0"
+        <FILE id="nq7LkZ" name="RangedControl.cpp" compile="1" resource="0"
               file="Source/components/RangedControl.cpp"/>
-        <FILE id="ByJBWH" name="RangedControl.h" compile="0" resource="0" file="Source/components/RangedControl.h"/>
+        <FILE id="HtbWtW" name="RangedControl.h" compile="0" resource="0" file="Source/components/RangedControl.h"/>
       </GROUP>
       <GROUP id="{69890E7D-3BA6-F61C-9023-E267AEBAF4DC}" name="data">
-        <FILE id="Hs5PXz" name="LumatoneEditSelectionState.cpp" compile="1"
+        <FILE id="ayjLdm" name="LumatoneEditSelectionState.cpp" compile="1"
               resource="0" file="Source/data/LumatoneEditSelectionState.cpp"/>
-        <FILE id="idldee" name="LumatoneEditSelectionState.h" compile="0" resource="0"
+        <FILE id="jwhWds" name="LumatoneEditSelectionState.h" compile="0" resource="0"
               file="Source/data/LumatoneEditSelectionState.h"/>
       </GROUP>
       <GROUP id="{B1364F41-7DBD-B07C-2CB5-4A63B2C14662}" name="lumatone_editor_library">
         <GROUP id="{A16E8598-F899-1851-6FC1-248BB9CF73B4}" name="actions">
-          <FILE id="m3G8UQ" name="edit_actions.cpp" compile="1" resource="0"
+          <FILE id="Y7T50L" name="edit_actions.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/actions/edit_actions.cpp"/>
-          <FILE id="Ksw1G6" name="edit_actions.h" compile="0" resource="0" file="Source/lumatone_editor_library/actions/edit_actions.h"/>
-          <FILE id="YpxpXx" name="lumatone_action.cpp" compile="1" resource="0"
+          <FILE id="VtUZn6" name="edit_actions.h" compile="0" resource="0" file="Source/lumatone_editor_library/actions/edit_actions.h"/>
+          <FILE id="Ao3U8v" name="lumatone_action.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/actions/lumatone_action.cpp"/>
-          <FILE id="JS59hk" name="lumatone_action.h" compile="0" resource="0"
+          <FILE id="ErKiJH" name="lumatone_action.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/actions/lumatone_action.h"/>
         </GROUP>
         <GROUP id="{85757986-8074-2C9B-CFDB-B0D500C79119}" name="assets">
           <GROUP id="{4343245A-8E97-4492-B4CD-938E779EC198}" name="colours">
-            <FILE id="upk536" name="model.json" compile="0" resource="1" file="Source/lumatone_editor_library/assets/colours/model.json"/>
+            <FILE id="fjRmOj" name="model.json" compile="0" resource="1" file="Source/lumatone_editor_library/assets/colours/model.json"/>
           </GROUP>
           <GROUP id="{7C6A6277-4F57-C854-22EA-D61980DBA920}" name="png">
-            <FILE id="O9aIND" name="KeyboardBase.png" compile="0" resource="1"
+            <FILE id="Zbo7NT" name="KeyboardBase.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyboardBase.png"/>
-            <FILE id="l0eYlA" name="KeyboardBase@2x.png" compile="0" resource="1"
+            <FILE id="dBIfWK" name="KeyboardBase@2x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyboardBase@2x.png"/>
-            <FILE id="g6WkJJ" name="KeyboardBase@4x.png" compile="0" resource="1"
+            <FILE id="UFcujs" name="KeyboardBase@4x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyboardBase@4x.png"/>
-            <FILE id="M2O6kw" name="KeyboardBase@8x.png" compile="0" resource="1"
+            <FILE id="Wh5PUN" name="KeyboardBase@8x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyboardBase@8x.png"/>
-            <FILE id="CwfOeP" name="KeyShadow.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShadow.png"/>
-            <FILE id="ykVuo6" name="KeyShadow@2x.png" compile="0" resource="1"
+            <FILE id="oWtdOh" name="KeyShadow.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShadow.png"/>
+            <FILE id="M4uyKZ" name="KeyShadow@2x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyShadow@2x.png"/>
-            <FILE id="bDu1pB" name="KeyShadow@4x.png" compile="0" resource="1"
+            <FILE id="vu5Sp6" name="KeyShadow@4x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyShadow@4x.png"/>
-            <FILE id="wa0VjB" name="KeyShadow@8x.png" compile="0" resource="1"
+            <FILE id="wLvEPH" name="KeyShadow@8x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyShadow@8x.png"/>
-            <FILE id="ko401o" name="KeyShadow@16x.png" compile="0" resource="1"
+            <FILE id="V0CigP" name="KeyShadow@16x.png" compile="0" resource="1"
                   file="Source/lumatone_editor_library/assets/png/KeyShadow@16x.png"/>
-            <FILE id="McwYFU" name="KeyShape.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape.png"/>
-            <FILE id="UDEdM2" name="KeyShape@2x.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@2x.png"/>
-            <FILE id="NfnAMs" name="KeyShape@4x.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@4x.png"/>
-            <FILE id="b4L3wB" name="KeyShape@8x.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@8x.png"/>
-            <FILE id="aUThSq" name="KeyShape@16.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@16.png"/>
+            <FILE id="GWtC0y" name="KeyShape.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape.png"/>
+            <FILE id="dxR7k4" name="KeyShape@2x.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@2x.png"/>
+            <FILE id="doNQMb" name="KeyShape@4x.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@4x.png"/>
+            <FILE id="MuIlY4" name="KeyShape@8x.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@8x.png"/>
+            <FILE id="eJVIIn" name="KeyShape@16.png" compile="0" resource="1" file="Source/lumatone_editor_library/assets/png/KeyShape@16.png"/>
           </GROUP>
         </GROUP>
         <GROUP id="{659F7722-1A91-4A76-126F-C14868554DE9}" name="color">
-          <FILE id="sAixjk" name="adjust_layout_colour.cpp" compile="1" resource="0"
+          <FILE id="u6XngR" name="adjust_layout_colour.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/color/adjust_layout_colour.cpp"/>
-          <FILE id="YaeFJm" name="adjust_layout_colour.h" compile="0" resource="0"
+          <FILE id="BjillD" name="adjust_layout_colour.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/color/adjust_layout_colour.h"/>
-          <FILE id="wkXTCU" name="colour_model.cpp" compile="1" resource="0"
+          <FILE id="OiJUZv" name="colour_model.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/color/colour_model.cpp"/>
-          <FILE id="mMUSB3" name="colour_model.h" compile="0" resource="0" file="Source/lumatone_editor_library/color/colour_model.h"/>
-          <FILE id="E4Q872" name="interpolation.h" compile="0" resource="0" file="Source/lumatone_editor_library/color/interpolation.h"/>
+          <FILE id="xy2Mqy" name="colour_model.h" compile="0" resource="0" file="Source/lumatone_editor_library/color/colour_model.h"/>
+          <FILE id="E6wgw9" name="interpolation.h" compile="0" resource="0" file="Source/lumatone_editor_library/color/interpolation.h"/>
         </GROUP>
         <GROUP id="{0C41BA1C-A07F-220A-B238-804380610BA5}" name="common">
-          <FILE id="a00Rx3" name="data.h" compile="0" resource="0" file="Source/lumatone_editor_library/common/data.h"/>
-          <FILE id="kGgvz2" name="math.h" compile="0" resource="0" file="Source/lumatone_editor_library/common/math.h"/>
-          <FILE id="FjilWM" name="utility.h" compile="0" resource="0" file="Source/lumatone_editor_library/common/utility.h"/>
+          <FILE id="XILK4e" name="data.h" compile="0" resource="0" file="Source/lumatone_editor_library/common/data.h"/>
+          <FILE id="c6OfCx" name="math.h" compile="0" resource="0" file="Source/lumatone_editor_library/common/math.h"/>
+          <FILE id="TivLVb" name="utility.h" compile="0" resource="0" file="Source/lumatone_editor_library/common/utility.h"/>
         </GROUP>
         <GROUP id="{EA70193D-96FB-A6A4-B199-15529252147D}" name="data">
-          <FILE id="DWm9TQ" name="application_state.cpp" compile="1" resource="0"
+          <FILE id="ocsf8z" name="application_state.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/data/application_state.cpp"/>
-          <FILE id="ZOlvI0" name="application_state.h" compile="0" resource="0"
+          <FILE id="VYxjFN" name="application_state.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/data/application_state.h"/>
-          <FILE id="W7c8Za" name="lumatone_board.cpp" compile="1" resource="0"
+          <FILE id="Sx2FRw" name="lumatone_board.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_board.cpp"/>
-          <FILE id="ZGo6pJ" name="lumatone_board.h" compile="0" resource="0"
+          <FILE id="IFgSNl" name="lumatone_board.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_board.h"/>
-          <FILE id="Qxyn6u" name="lumatone_context.cpp" compile="1" resource="0"
+          <FILE id="Z8U4NV" name="lumatone_context.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_context.cpp"/>
-          <FILE id="an9lcK" name="lumatone_context.h" compile="0" resource="0"
+          <FILE id="uMuSH1" name="lumatone_context.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_context.h"/>
-          <FILE id="uiBoqJ" name="lumatone_editor_common.h" compile="0" resource="0"
+          <FILE id="hgt6mA" name="lumatone_editor_common.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_editor_common.h"/>
-          <FILE id="gc1Jei" name="lumatone_key.cpp" compile="1" resource="0"
+          <FILE id="LIz8Gw" name="lumatone_key.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_key.cpp"/>
-          <FILE id="hWtrtT" name="lumatone_key.h" compile="0" resource="0" file="Source/lumatone_editor_library/data/lumatone_key.h"/>
-          <FILE id="GlVHz0" name="lumatone_layout.cpp" compile="1" resource="0"
+          <FILE id="PUoqBT" name="lumatone_key.h" compile="0" resource="0" file="Source/lumatone_editor_library/data/lumatone_key.h"/>
+          <FILE id="ykB9zj" name="lumatone_layout.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_layout.cpp"/>
-          <FILE id="l8BreY" name="lumatone_layout.h" compile="0" resource="0"
+          <FILE id="aN11rm" name="lumatone_layout.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_layout.h"/>
-          <FILE id="r5AVE1" name="lumatone_state.cpp" compile="1" resource="0"
+          <FILE id="sOc84M" name="lumatone_state.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_state.cpp"/>
-          <FILE id="OXipNN" name="lumatone_state.h" compile="0" resource="0"
+          <FILE id="r0n6Yf" name="lumatone_state.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/data/lumatone_state.h"/>
-          <FILE id="zsVebK" name="state_base.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/data/state_base.cpp"/>
-          <FILE id="R7kVXl" name="state_base.h" compile="0" resource="0" file="Source/lumatone_editor_library/data/state_base.h"/>
+          <FILE id="V9rdUX" name="state_base.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/data/state_base.cpp"/>
+          <FILE id="sv5zmK" name="state_base.h" compile="0" resource="0" file="Source/lumatone_editor_library/data/state_base.h"/>
         </GROUP>
         <GROUP id="{6F08ED83-609A-3DB2-2093-81F181EFF49E}" name="device">
-          <FILE id="Gn0VUd" name="activity_monitor.cpp" compile="1" resource="0"
+          <FILE id="fP8I52" name="activity_monitor.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/device/activity_monitor.cpp"/>
-          <FILE id="H9nBYA" name="activity_monitor.h" compile="0" resource="0"
+          <FILE id="ulFffq" name="activity_monitor.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/device/activity_monitor.h"/>
-          <FILE id="WiaSh2" name="key_update_buffer.cpp" compile="1" resource="0"
+          <FILE id="iY67I5" name="key_update_buffer.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/device/key_update_buffer.cpp"/>
-          <FILE id="EdsB1N" name="key_update_buffer.h" compile="0" resource="0"
+          <FILE id="ZaCwPB" name="key_update_buffer.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/device/key_update_buffer.h"/>
-          <FILE id="i60eS3" name="lumatone_controller.cpp" compile="1" resource="0"
+          <FILE id="pjTctk" name="lumatone_controller.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/device/lumatone_controller.cpp"/>
-          <FILE id="SUhAaW" name="lumatone_controller.h" compile="0" resource="0"
+          <FILE id="pF5bS0" name="lumatone_controller.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/device/lumatone_controller.h"/>
-          <FILE id="dSWW9X" name="lumatone_event_manager.cpp" compile="1" resource="0"
+          <FILE id="UrDQKM" name="lumatone_event_manager.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/device/lumatone_event_manager.cpp"/>
-          <FILE id="tCp3Ey" name="lumatone_event_manager.h" compile="0" resource="0"
+          <FILE id="SF6Azx" name="lumatone_event_manager.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/device/lumatone_event_manager.h"/>
         </GROUP>
         <GROUP id="{400C99FD-2CF4-8435-7C47-741AD1E94967}" name="graphics">
           <GROUP id="{D3AE0211-7713-957A-D9CD-DF3F24D5A663}" name="resampler">
-            <FILE id="ArnOMr" name="image_resampler.h" compile="0" resource="0"
+            <FILE id="JQoGKa" name="image_resampler.h" compile="0" resource="0"
                   file="Source/lumatone_editor_library/graphics/resampler/image_resampler.h"/>
-            <FILE id="HQThQK" name="resampler.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/graphics/resampler/resampler.cpp"/>
-            <FILE id="ycoXrp" name="resampler.h" compile="0" resource="0" file="Source/lumatone_editor_library/graphics/resampler/resampler.h"/>
+            <FILE id="azCqVh" name="resampler.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/graphics/resampler/resampler.cpp"/>
+            <FILE id="Rweo68" name="resampler.h" compile="0" resource="0" file="Source/lumatone_editor_library/graphics/resampler/resampler.h"/>
           </GROUP>
-          <FILE id="gDKemU" name="lumatone_assets.h" compile="0" resource="0"
+          <FILE id="VRL08Y" name="lumatone_assets.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/graphics/lumatone_assets.h"/>
-          <FILE id="zDqsRg" name="lumatone_render.cpp" compile="1" resource="0"
+          <FILE id="h52Cb1" name="lumatone_render.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/graphics/lumatone_render.cpp"/>
-          <FILE id="PLufZO" name="lumatone_render.h" compile="0" resource="0"
+          <FILE id="d4go89" name="lumatone_render.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/graphics/lumatone_render.h"/>
-          <FILE id="YX23w3" name="view_constants.h" compile="0" resource="0"
+          <FILE id="mz1wUY" name="view_constants.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/graphics/view_constants.h"/>
         </GROUP>
         <GROUP id="{C864EC21-74F2-92DB-5E6A-E05F04AAB5F4}" name="hex">
-          <FILE id="oLiGQF" name="hex_field.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/hex/hex_field.cpp"/>
-          <FILE id="XQvuFd" name="hex_field.h" compile="0" resource="0" file="Source/lumatone_editor_library/hex/hex_field.h"/>
+          <FILE id="azDulr" name="hex_field.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/hex/hex_field.cpp"/>
+          <FILE id="YJg44h" name="hex_field.h" compile="0" resource="0" file="Source/lumatone_editor_library/hex/hex_field.h"/>
         </GROUP>
         <GROUP id="{F9C7FE49-F88A-AB4D-D97E-918F16FB4502}" name="listeners">
-          <FILE id="HH1F4M" name="editor_listener.h" compile="0" resource="0"
+          <FILE id="UbgxN4" name="editor_listener.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/listeners/editor_listener.h"/>
-          <FILE id="MSGDyQ" name="firmware_listener.h" compile="0" resource="0"
+          <FILE id="SHnbri" name="firmware_listener.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/listeners/firmware_listener.h"/>
-          <FILE id="poLA5I" name="midi_listener.h" compile="0" resource="0" file="Source/lumatone_editor_library/listeners/midi_listener.h"/>
-          <FILE id="Ycrxrd" name="status_listener.h" compile="0" resource="0"
+          <FILE id="SJ6gnl" name="midi_listener.h" compile="0" resource="0" file="Source/lumatone_editor_library/listeners/midi_listener.h"/>
+          <FILE id="WoEIah" name="status_listener.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/listeners/status_listener.h"/>
         </GROUP>
         <GROUP id="{CE5BB298-5499-7878-6949-D1DDA74CB063}" name="lumatone_midi_driver">
-          <FILE id="sbq8Ok" name="firmware_definitions.h" compile="0" resource="0"
+          <FILE id="ySlw7j" name="firmware_definitions.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/firmware_definitions.h"/>
-          <FILE id="gw7uAk" name="firmware_driver_listener.h" compile="0" resource="0"
+          <FILE id="gQrb9K" name="firmware_driver_listener.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/firmware_driver_listener.h"/>
-          <FILE id="ISbvfy" name="firmware_support.h" compile="0" resource="0"
+          <FILE id="yhk1n4" name="firmware_support.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/firmware_support.h"/>
-          <FILE id="rRZZft" name="firmware_sysex.cpp" compile="1" resource="0"
+          <FILE id="YNFpY7" name="firmware_sysex.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/firmware_sysex.cpp"/>
-          <FILE id="fSDOVk" name="firmware_sysex.h" compile="0" resource="0"
+          <FILE id="tjkggU" name="firmware_sysex.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/firmware_sysex.h"/>
-          <FILE id="W7Vu41" name="firmware_types.h" compile="0" resource="0"
+          <FILE id="WWFCi1" name="firmware_types.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"/>
-          <FILE id="Qxym0K" name="lumatone_midi_driver.cpp" compile="1" resource="0"
+          <FILE id="LrC7Qf" name="lumatone_midi_driver.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/lumatone_midi_driver.cpp"/>
-          <FILE id="F6mqvT" name="lumatone_midi_driver.h" compile="0" resource="0"
+          <FILE id="ORuZUx" name="lumatone_midi_driver.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/lumatone_midi_driver/lumatone_midi_driver.h"/>
-          <FILE id="dsilwk" name="midi_driver.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/lumatone_midi_driver/midi_driver.cpp"/>
-          <FILE id="bQpxTf" name="midi_driver.h" compile="0" resource="0" file="Source/lumatone_editor_library/lumatone_midi_driver/midi_driver.h"/>
+          <FILE id="zppVdh" name="midi_driver.cpp" compile="1" resource="0" file="Source/lumatone_editor_library/lumatone_midi_driver/midi_driver.cpp"/>
+          <FILE id="vDxpF0" name="midi_driver.h" compile="0" resource="0" file="Source/lumatone_editor_library/lumatone_midi_driver/midi_driver.h"/>
         </GROUP>
         <GROUP id="{74BD151B-B33B-7737-639A-3DDDB376026A}" name="mapping">
-          <FILE id="B0YTMh" name="lumatone_geometry.cpp" compile="1" resource="0"
+          <FILE id="XhtcN8" name="lumatone_geometry.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_geometry.cpp"/>
-          <FILE id="a1uw73" name="lumatone_geometry.h" compile="0" resource="0"
+          <FILE id="gnVVfZ" name="lumatone_geometry.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_geometry.h"/>
-          <FILE id="hBpuaw" name="lumatone_hex_map.cpp" compile="1" resource="0"
+          <FILE id="oPIXXP" name="lumatone_hex_map.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_hex_map.cpp"/>
-          <FILE id="HkUvFA" name="lumatone_hex_map.h" compile="0" resource="0"
+          <FILE id="T8eboU" name="lumatone_hex_map.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_hex_map.h"/>
-          <FILE id="bazbJp" name="lumatone_output_map.cpp" compile="1" resource="0"
+          <FILE id="pRjRNu" name="lumatone_output_map.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_output_map.cpp"/>
-          <FILE id="AzBBwY" name="lumatone_output_map.h" compile="0" resource="0"
+          <FILE id="Vkk2Hk" name="lumatone_output_map.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_output_map.h"/>
-          <FILE id="eshvNq" name="lumatone_tiling.cpp" compile="1" resource="0"
+          <FILE id="JHOxhr" name="lumatone_tiling.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_tiling.cpp"/>
-          <FILE id="IAmQ3M" name="lumatone_tiling.h" compile="0" resource="0"
+          <FILE id="Mcp92h" name="lumatone_tiling.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/mapping/lumatone_tiling.h"/>
         </GROUP>
         <GROUP id="{4D2817B1-C9FD-06CF-A23C-1ECAEE026B12}" name="midi">
-          <FILE id="OGOm73" name="lumatone_midi_manager.cpp" compile="1" resource="0"
+          <FILE id="TdUXCp" name="lumatone_midi_manager.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/midi/lumatone_midi_manager.cpp"/>
-          <FILE id="N4hJDD" name="lumatone_midi_manager.h" compile="0" resource="0"
+          <FILE id="rbHaAJ" name="lumatone_midi_manager.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/midi/lumatone_midi_manager.h"/>
-          <FILE id="NaG100" name="lumatone_midi_state.cpp" compile="1" resource="0"
+          <FILE id="ygiuDS" name="lumatone_midi_state.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/midi/lumatone_midi_state.cpp"/>
-          <FILE id="lVFGUJ" name="lumatone_midi_state.h" compile="0" resource="0"
+          <FILE id="wOxmAH" name="lumatone_midi_state.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/midi/lumatone_midi_state.h"/>
         </GROUP>
         <GROUP id="{96A5768E-50F9-8CD0-21C8-1967BB876754}" name="palettes">
-          <FILE id="KtOy8I" name="colour_edit_textbox.cpp" compile="1" resource="0"
+          <FILE id="O2trfG" name="colour_edit_textbox.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_edit_textbox.cpp"/>
-          <FILE id="jAQj1h" name="colour_edit_textbox.h" compile="0" resource="0"
+          <FILE id="Effgxq" name="colour_edit_textbox.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_edit_textbox.h"/>
-          <FILE id="SVLvza" name="colour_palette_file.h" compile="0" resource="0"
+          <FILE id="MiQg4K" name="colour_palette_file.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_palette_file.h"/>
-          <FILE id="S0RrBu" name="colour_picker_panel.h" compile="0" resource="0"
+          <FILE id="xFolCe" name="colour_picker_panel.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_picker_panel.h"/>
-          <FILE id="NdH5Qs" name="colour_selection_broadcaster.h" compile="0"
+          <FILE id="Pd4isq" name="colour_selection_broadcaster.h" compile="0"
                 resource="0" file="Source/lumatone_editor_library/palettes/colour_selection_broadcaster.h"/>
-          <FILE id="rC3aXX" name="colour_selection_group.h" compile="0" resource="0"
+          <FILE id="FHLZgO" name="colour_selection_group.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/colour_selection_group.h"/>
-          <FILE id="jA0Mp2" name="hex_group_palette.h" compile="0" resource="0"
+          <FILE id="ovqZqY" name="hex_group_palette.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/hex_group_palette.h"/>
-          <FILE id="KvbanO" name="palette_base.h" compile="0" resource="0" file="Source/lumatone_editor_library/palettes/palette_base.h"/>
-          <FILE id="olE8pR" name="palette_library.h" compile="0" resource="0"
+          <FILE id="ddXaxX" name="palette_base.h" compile="0" resource="0" file="Source/lumatone_editor_library/palettes/palette_base.h"/>
+          <FILE id="O0GY8L" name="palette_library.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/palette_library.h"/>
-          <FILE id="ConWpc" name="polygon_palette.h" compile="0" resource="0"
+          <FILE id="etd0qS" name="polygon_palette.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/palettes/polygon_palette.h"/>
         </GROUP>
         <GROUP id="{48970EA5-5D00-763F-C8D7-6E8A79B1AE9A}" name="ui">
-          <FILE id="LDZsa9" name="key_component.cpp" compile="1" resource="0"
+          <FILE id="FVsYq0" name="key_component.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/ui/key_component.cpp"/>
-          <FILE id="qdqRtd" name="key_component.h" compile="0" resource="0" file="Source/lumatone_editor_library/ui/key_component.h"/>
-          <FILE id="sahawU" name="keyboard_component.cpp" compile="1" resource="0"
+          <FILE id="NGRQSP" name="key_component.h" compile="0" resource="0" file="Source/lumatone_editor_library/ui/key_component.h"/>
+          <FILE id="sb4c60" name="keyboard_component.cpp" compile="1" resource="0"
                 file="Source/lumatone_editor_library/ui/keyboard_component.cpp"/>
-          <FILE id="vBTQ6b" name="keyboard_component.h" compile="0" resource="0"
+          <FILE id="VYfSpx" name="keyboard_component.h" compile="0" resource="0"
                 file="Source/lumatone_editor_library/ui/keyboard_component.h"/>
         </GROUP>
       </GROUP>
       <GROUP id="{A84833B1-9747-EEF6-6786-AB6C17666566}" name="mapping_editors">
-        <FILE id="J117ja" name="CurvesArea.cpp" compile="1" resource="0" file="Source/mapping_editors/CurvesArea.cpp"/>
-        <FILE id="z0tzYo" name="CurvesArea.h" compile="0" resource="0" file="Source/mapping_editors/CurvesArea.h"/>
-        <FILE id="E2TkIo" name="KeyEditorControls.cpp" compile="1" resource="0"
+        <FILE id="yPwOTw" name="BatchTools.cpp" compile="1" resource="0" file="Source/mapping_editors/BatchTools.cpp"/>
+        <FILE id="o6knWB" name="BatchTools.h" compile="0" resource="0" file="Source/mapping_editors/BatchTools.h"/>
+        <FILE id="OneLz9" name="BatchToolsColourControls.cpp" compile="1" resource="0"
+              file="Source/mapping_editors/BatchToolsColourControls.cpp"/>
+        <FILE id="b0MUoa" name="BatchToolsColourControls.h" compile="0" resource="0"
+              file="Source/mapping_editors/BatchToolsColourControls.h"/>
+        <FILE id="TKmLy0" name="CurvesArea.cpp" compile="1" resource="0" file="Source/mapping_editors/CurvesArea.cpp"/>
+        <FILE id="VZMDRB" name="CurvesArea.h" compile="0" resource="0" file="Source/mapping_editors/CurvesArea.h"/>
+        <FILE id="yLOAlM" name="KeyEditorControls.cpp" compile="1" resource="0"
               file="Source/mapping_editors/KeyEditorControls.cpp"/>
-        <FILE id="r6cNde" name="KeyEditorControls.h" compile="0" resource="0"
+        <FILE id="e41PYu" name="KeyEditorControls.h" compile="0" resource="0"
               file="Source/mapping_editors/KeyEditorControls.h"/>
-        <FILE id="H3hgXi" name="KeyEditorPanel.cpp" compile="1" resource="0"
+        <FILE id="Io57VA" name="KeyEditorPanel.cpp" compile="1" resource="0"
               file="Source/mapping_editors/KeyEditorPanel.cpp"/>
-        <FILE id="Dddkfo" name="KeyEditorPanel.h" compile="0" resource="0"
+        <FILE id="XQPSyn" name="KeyEditorPanel.h" compile="0" resource="0"
               file="Source/mapping_editors/KeyEditorPanel.h"/>
-        <FILE id="m5oD1T" name="KeySelectionController.cpp" compile="1" resource="0"
+        <FILE id="JNnSrh" name="KeySelectionController.cpp" compile="1" resource="0"
               file="Source/mapping_editors/KeySelectionController.cpp"/>
-        <FILE id="A3wbFW" name="KeySelectionController.h" compile="0" resource="0"
+        <FILE id="AwHYYx" name="KeySelectionController.h" compile="0" resource="0"
               file="Source/mapping_editors/KeySelectionController.h"/>
-        <FILE id="aCtiRr" name="MappingSettingsControls.cpp" compile="1" resource="0"
+        <FILE id="LsjT2D" name="MappingSettingsControls.cpp" compile="1" resource="0"
               file="Source/mapping_editors/MappingSettingsControls.cpp"/>
-        <FILE id="UK6V2J" name="MappingSettingsControls.h" compile="0" resource="0"
+        <FILE id="slAntP" name="MappingSettingsControls.h" compile="0" resource="0"
               file="Source/mapping_editors/MappingSettingsControls.h"/>
-        <FILE id="XKELix" name="MappingSettingsPanel.cpp" compile="1" resource="0"
+        <FILE id="PsPmhn" name="MappingSettingsPanel.cpp" compile="1" resource="0"
               file="Source/mapping_editors/MappingSettingsPanel.cpp"/>
-        <FILE id="GH1Zox" name="MappingSettingsPanel.h" compile="0" resource="0"
+        <FILE id="K82Yl2" name="MappingSettingsPanel.h" compile="0" resource="0"
               file="Source/mapping_editors/MappingSettingsPanel.h"/>
-        <FILE id="o8cynC" name="MultiSelectControls.cpp" compile="1" resource="0"
+        <FILE id="uuWE4w" name="MultiSelectControls.cpp" compile="1" resource="0"
               file="Source/mapping_editors/MultiSelectControls.cpp"/>
-        <FILE id="zWmxsw" name="MultiSelectControls.h" compile="0" resource="0"
+        <FILE id="hHNXh6" name="MultiSelectControls.h" compile="0" resource="0"
               file="Source/mapping_editors/MultiSelectControls.h"/>
       </GROUP>
       <GROUP id="{35CC27C6-03A2-DB42-5097-FAEE1A13AAF4}" name="ScaleStructureController">
-        <FILE id="y1LDBL" name="GroupHandle.cpp" compile="1" resource="0" file="Source/ScaleStructureController/GroupHandle.cpp"/>
-        <FILE id="IENVXr" name="GroupHandle.h" compile="0" resource="0" file="Source/ScaleStructureController/GroupHandle.h"/>
-        <FILE id="B8dMog" name="GroupingCircle.cpp" compile="1" resource="0"
+        <FILE id="jYSFyW" name="GroupHandle.cpp" compile="1" resource="0" file="Source/ScaleStructureController/GroupHandle.cpp"/>
+        <FILE id="vnPdRK" name="GroupHandle.h" compile="0" resource="0" file="Source/ScaleStructureController/GroupHandle.h"/>
+        <FILE id="L4XebB" name="GroupingCircle.cpp" compile="1" resource="0"
               file="Source/ScaleStructureController/GroupingCircle.cpp"/>
-        <FILE id="Zpj60z" name="GroupingCircle.h" compile="0" resource="0"
+        <FILE id="uHa074" name="GroupingCircle.h" compile="0" resource="0"
               file="Source/ScaleStructureController/GroupingCircle.h"/>
-        <FILE id="TyLGRu" name="NoteNames.cpp" compile="1" resource="0" file="Source/ScaleStructureController/NoteNames.cpp"/>
-        <FILE id="J1049X" name="NoteNames.h" compile="0" resource="0" file="Source/ScaleStructureController/NoteNames.h"/>
-        <FILE id="f1bcP3" name="NumberSelector.cpp" compile="1" resource="0"
+        <FILE id="YfPH0U" name="NoteNames.cpp" compile="1" resource="0" file="Source/ScaleStructureController/NoteNames.cpp"/>
+        <FILE id="IfPsqa" name="NoteNames.h" compile="0" resource="0" file="Source/ScaleStructureController/NoteNames.h"/>
+        <FILE id="w0tCPY" name="NumberSelector.cpp" compile="1" resource="0"
               file="Source/ScaleStructureController/NumberSelector.cpp"/>
-        <FILE id="ScOF2a" name="NumberSelector.h" compile="0" resource="0"
+        <FILE id="Sg99tC" name="NumberSelector.h" compile="0" resource="0"
               file="Source/ScaleStructureController/NumberSelector.h"/>
-        <FILE id="Q2WdLF" name="ScaleDesignWindow.cpp" compile="1" resource="0"
+        <FILE id="w40yNQ" name="ScaleDesignWindow.cpp" compile="1" resource="0"
               file="Source/ScaleStructureController/ScaleDesignWindow.cpp"/>
-        <FILE id="Syrvni" name="ScaleDesignWindow.h" compile="0" resource="0"
+        <FILE id="vzTi2X" name="ScaleDesignWindow.h" compile="0" resource="0"
               file="Source/ScaleStructureController/ScaleDesignWindow.h"/>
-        <FILE id="JbCs7C" name="ScaleMath.h" compile="0" resource="0" file="Source/ScaleStructureController/ScaleMath.h"/>
-        <FILE id="p5DGEp" name="ScaleStructure.cpp" compile="1" resource="0"
+        <FILE id="R9nJk2" name="ScaleMath.h" compile="0" resource="0" file="Source/ScaleStructureController/ScaleMath.h"/>
+        <FILE id="DepB2C" name="ScaleStructure.cpp" compile="1" resource="0"
               file="Source/ScaleStructureController/ScaleStructure.cpp"/>
-        <FILE id="qVfnX1" name="ScaleStructure.h" compile="0" resource="0"
+        <FILE id="hYooxM" name="ScaleStructure.h" compile="0" resource="0"
               file="Source/ScaleStructureController/ScaleStructure.h"/>
-        <FILE id="be5hQC" name="ScaleStructureComponent.cpp" compile="1" resource="0"
+        <FILE id="YnGhSD" name="ScaleStructureComponent.cpp" compile="1" resource="0"
               file="Source/ScaleStructureController/ScaleStructureComponent.cpp"/>
-        <FILE id="TW8xK3" name="ScaleStructureComponent.h" compile="0" resource="0"
+        <FILE id="sNxlHQ" name="ScaleStructureComponent.h" compile="0" resource="0"
               file="Source/ScaleStructureController/ScaleStructureComponent.h"/>
-        <FILE id="Z2g8Z6" name="Symmetry.h" compile="0" resource="0" file="Source/ScaleStructureController/Symmetry.h"/>
-        <FILE id="LMkoCI" name="TransparentDropDown.h" compile="0" resource="0"
+        <FILE id="ZpAik4" name="Symmetry.h" compile="0" resource="0" file="Source/ScaleStructureController/Symmetry.h"/>
+        <FILE id="Etg6G1" name="TransparentDropDown.h" compile="0" resource="0"
               file="Source/ScaleStructureController/TransparentDropDown.h"/>
       </GROUP>
       <GROUP id="{ED6EFCF5-37E3-4001-8357-9EBC07D69E7E}" name="Settings">
-        <FILE id="dei4Oj" name="CalibrationDlg.cpp" compile="1" resource="0"
+        <FILE id="R0ELpP" name="CalibrationDlg.cpp" compile="1" resource="0"
               file="Source/Settings/CalibrationDlg.cpp"/>
-        <FILE id="bzV9T4" name="CalibrationDlg.h" compile="0" resource="0"
+        <FILE id="G3a4uC" name="CalibrationDlg.h" compile="0" resource="0"
               file="Source/Settings/CalibrationDlg.h"/>
-        <FILE id="rhxnGj" name="FirmwareDlg.cpp" compile="1" resource="0" file="Source/Settings/FirmwareDlg.cpp"/>
-        <FILE id="GV8dBv" name="FirmwareDlg.h" compile="0" resource="0" file="Source/Settings/FirmwareDlg.h"/>
-        <FILE id="wayPPb" name="MidiSettingsDlg.cpp" compile="1" resource="0"
+        <FILE id="VWtoSM" name="FirmwareDlg.cpp" compile="1" resource="0" file="Source/Settings/FirmwareDlg.cpp"/>
+        <FILE id="Kf2aYm" name="FirmwareDlg.h" compile="0" resource="0" file="Source/Settings/FirmwareDlg.h"/>
+        <FILE id="lQHgWr" name="MidiSettingsDlg.cpp" compile="1" resource="0"
               file="Source/Settings/MidiSettingsDlg.cpp"/>
-        <FILE id="cWXfG5" name="MidiSettingsDlg.h" compile="0" resource="0"
+        <FILE id="yO2ZQM" name="MidiSettingsDlg.h" compile="0" resource="0"
               file="Source/Settings/MidiSettingsDlg.h"/>
-        <FILE id="S8ZH1c" name="PresetSettingsDlg.cpp" compile="1" resource="0"
+        <FILE id="olqwyV" name="PresetSettingsDlg.cpp" compile="1" resource="0"
               file="Source/Settings/PresetSettingsDlg.cpp"/>
-        <FILE id="cvBBRG" name="PresetSettingsDlg.h" compile="0" resource="0"
+        <FILE id="MSfrM2" name="PresetSettingsDlg.h" compile="0" resource="0"
               file="Source/Settings/PresetSettingsDlg.h"/>
-        <FILE id="pIxWBn" name="SettingsContainer.cpp" compile="1" resource="0"
+        <FILE id="otbMN0" name="SettingsContainer.cpp" compile="1" resource="0"
               file="Source/Settings/SettingsContainer.cpp"/>
-        <FILE id="yq45Pm" name="SettingsContainer.h" compile="0" resource="0"
+        <FILE id="OBHlot" name="SettingsContainer.h" compile="0" resource="0"
               file="Source/Settings/SettingsContainer.h"/>
-        <FILE id="GrJdnt" name="WheelsCalibrationComponent.h" compile="0" resource="0"
+        <FILE id="nergQm" name="WheelsCalibrationComponent.h" compile="0" resource="0"
               file="Source/Settings/WheelsCalibrationComponent.h"/>
       </GROUP>
       <GROUP id="{6AA20F17-9DB4-9F29-9B8E-EBD6C7443067}" name="tuning">
-        <FILE id="GUpshp" name="Interval.h" compile="0" resource="0" file="Source/tuning/Interval.h"/>
-        <FILE id="pMJoal" name="NotationDefinition.cpp" compile="1" resource="0"
+        <FILE id="iwRstr" name="Interval.h" compile="0" resource="0" file="Source/tuning/Interval.h"/>
+        <FILE id="NP4Wkb" name="NotationDefinition.cpp" compile="1" resource="0"
               file="Source/tuning/NotationDefinition.cpp"/>
-        <FILE id="UjQ6h8" name="NotationDefinition.h" compile="0" resource="0"
+        <FILE id="gxTkuO" name="NotationDefinition.h" compile="0" resource="0"
               file="Source/tuning/NotationDefinition.h"/>
-        <FILE id="R7TOfo" name="NotationTable.cpp" compile="1" resource="0"
+        <FILE id="sf954X" name="NotationTable.cpp" compile="1" resource="0"
               file="Source/tuning/NotationTable.cpp"/>
-        <FILE id="k6zzyw" name="NotationTable.h" compile="0" resource="0" file="Source/tuning/NotationTable.h"/>
-        <FILE id="hxt1Ew" name="TuningDefinition.cpp" compile="1" resource="0"
+        <FILE id="b0gpTB" name="NotationTable.h" compile="0" resource="0" file="Source/tuning/NotationTable.h"/>
+        <FILE id="QY2wNK" name="TuningDefinition.cpp" compile="1" resource="0"
               file="Source/tuning/TuningDefinition.cpp"/>
-        <FILE id="HkxEv9" name="TuningDefinition.h" compile="0" resource="0"
+        <FILE id="ALwJ1W" name="TuningDefinition.h" compile="0" resource="0"
               file="Source/tuning/TuningDefinition.h"/>
-        <FILE id="aq6Cwi" name="TuningTable.cpp" compile="1" resource="0" file="Source/tuning/TuningTable.cpp"/>
-        <FILE id="N70ubZ" name="TuningTable.h" compile="0" resource="0" file="Source/tuning/TuningTable.h"/>
+        <FILE id="uWnI9a" name="TuningTable.cpp" compile="1" resource="0" file="Source/tuning/TuningTable.cpp"/>
+        <FILE id="S2ICF5" name="TuningTable.h" compile="0" resource="0" file="Source/tuning/TuningTable.h"/>
       </GROUP>
-      <FILE id="L0eO72" name="colour_palette_component.cpp" compile="1" resource="0"
+      <FILE id="Dur0cI" name="colour_palette_component.cpp" compile="1" resource="0"
             file="Source/colour_palette_component.cpp"/>
-      <FILE id="qfXiJJ" name="colour_palette_component.h" compile="0" resource="0"
+      <FILE id="PaER2e" name="colour_palette_component.h" compile="0" resource="0"
             file="Source/colour_palette_component.h"/>
-      <FILE id="BXT1sX" name="colour_view_component.cpp" compile="1" resource="0"
+      <FILE id="ypid2y" name="colour_view_component.cpp" compile="1" resource="0"
             file="Source/colour_view_component.cpp"/>
-      <FILE id="hsPErQ" name="colour_view_component.h" compile="0" resource="0"
+      <FILE id="bbxaYb" name="colour_view_component.h" compile="0" resource="0"
             file="Source/colour_view_component.h"/>
-      <FILE id="wyQIUh" name="ColourPaletteWindow.cpp" compile="1" resource="0"
+      <FILE id="CXiv82" name="ColourPaletteWindow.cpp" compile="1" resource="0"
             file="Source/ColourPaletteWindow.cpp"/>
-      <FILE id="L99204" name="ColourPaletteWindow.h" compile="0" resource="0"
+      <FILE id="NqRtoY" name="ColourPaletteWindow.h" compile="0" resource="0"
             file="Source/ColourPaletteWindow.h"/>
-      <FILE id="NMLFAB" name="FileBrowserComponent.h" compile="0" resource="0"
+      <FILE id="sP322S" name="FileBrowserComponent.h" compile="0" resource="0"
             file="Source/FileBrowserComponent.h"/>
-      <FILE id="mauwNQ" name="FirmwareTransfer.cpp" compile="1" resource="0"
+      <FILE id="X1KpSX" name="FirmwareTransfer.cpp" compile="1" resource="0"
             file="Source/FirmwareTransfer.cpp"/>
-      <FILE id="Lh9xNA" name="FirmwareTransfer.h" compile="0" resource="0"
+      <FILE id="l2wyH5" name="FirmwareTransfer.h" compile="0" resource="0"
             file="Source/FirmwareTransfer.h"/>
-      <FILE id="Fc55k9" name="GlobalSettingsArea.cpp" compile="1" resource="0"
+      <FILE id="c76JKn" name="GlobalSettingsArea.cpp" compile="1" resource="0"
             file="Source/GlobalSettingsArea.cpp"/>
-      <FILE id="jrBsTV" name="GlobalSettingsArea.h" compile="0" resource="0"
+      <FILE id="P5imsv" name="GlobalSettingsArea.h" compile="0" resource="0"
             file="Source/GlobalSettingsArea.h"/>
-      <FILE id="uDrPYi" name="LocalisationMap.h" compile="0" resource="0"
+      <FILE id="HWJZYh" name="LocalisationMap.h" compile="0" resource="0"
             file="Source/LocalisationMap.h"/>
-      <FILE id="Nj1GgL" name="LumatoneEditorFontLibrary.h" compile="0" resource="0"
+      <FILE id="foCLAq" name="LumatoneEditorFontLibrary.h" compile="0" resource="0"
             file="Source/LumatoneEditorFontLibrary.h"/>
-      <FILE id="t8fh1Z" name="LumatoneEditorFonts.h" compile="0" resource="0"
+      <FILE id="ANZlRA" name="LumatoneEditorFonts.h" compile="0" resource="0"
             file="Source/LumatoneEditorFonts.h"/>
-      <FILE id="pIWNGP" name="LumatoneEditorLookAndFeel.h" compile="0" resource="0"
+      <FILE id="dSe0pQ" name="LumatoneEditorLookAndFeel.h" compile="0" resource="0"
             file="Source/LumatoneEditorLookAndFeel.h"/>
-      <FILE id="lhHnaQ" name="LumatoneEditorState.cpp" compile="1" resource="0"
+      <FILE id="ZMvGEU" name="LumatoneEditorState.cpp" compile="1" resource="0"
             file="Source/LumatoneEditorState.cpp"/>
-      <FILE id="uRGzEF" name="LumatoneEditorState.h" compile="0" resource="0"
+      <FILE id="sWqkqd" name="LumatoneEditorState.h" compile="0" resource="0"
             file="Source/LumatoneEditorState.h"/>
-      <FILE id="UXuhFB" name="LumatoneEditorStyleCommon.h" compile="0" resource="0"
+      <FILE id="nhvzf5" name="LumatoneEditorStyleCommon.h" compile="0" resource="0"
             file="Source/LumatoneEditorStyleCommon.h"/>
-      <FILE id="tDHK21" name="LumatoneMenu.cpp" compile="1" resource="0"
+      <FILE id="hgPJjK" name="LumatoneMenu.cpp" compile="1" resource="0"
             file="Source/LumatoneMenu.cpp"/>
-      <FILE id="z7WK6g" name="LumatoneMenu.h" compile="0" resource="0" file="Source/LumatoneMenu.h"/>
-      <FILE id="jQ1lDZ" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
-      <FILE id="fi4UCA" name="Main.h" compile="0" resource="0" file="Source/Main.h"/>
-      <FILE id="bU4K78" name="MainComponent.cpp" compile="1" resource="0"
+      <FILE id="ZOgDCe" name="LumatoneMenu.h" compile="0" resource="0" file="Source/LumatoneMenu.h"/>
+      <FILE id="oLVZma" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="NWtGh6" name="Main.h" compile="0" resource="0" file="Source/Main.h"/>
+      <FILE id="ILlPc2" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
-      <FILE id="THXCCF" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
-      <FILE id="qxyO34" name="MainWindow.cpp" compile="1" resource="0" file="Source/MainWindow.cpp"/>
-      <FILE id="XrLQet" name="MainWindow.h" compile="0" resource="0" file="Source/MainWindow.h"/>
-      <FILE id="GmyjPY" name="MappingLogic.cpp" compile="1" resource="0"
+      <FILE id="EZbWyp" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="sxQo8m" name="MainWindow.cpp" compile="1" resource="0" file="Source/MainWindow.cpp"/>
+      <FILE id="p9pDQn" name="MainWindow.h" compile="0" resource="0" file="Source/MainWindow.h"/>
+      <FILE id="NjtOkn" name="MappingLogic.cpp" compile="1" resource="0"
             file="Source/MappingLogic.cpp"/>
-      <FILE id="R8sVyu" name="MappingLogic.h" compile="0" resource="0" file="Source/MappingLogic.h"/>
-      <FILE id="hdxN74" name="MidiEditArea.cpp" compile="1" resource="0"
+      <FILE id="CORW3s" name="MappingLogic.h" compile="0" resource="0" file="Source/MappingLogic.h"/>
+      <FILE id="nQHLEd" name="MidiEditArea.cpp" compile="1" resource="0"
             file="Source/MidiEditArea.cpp"/>
-      <FILE id="B7aeBI" name="MidiEditArea.h" compile="0" resource="0" file="Source/MidiEditArea.h"/>
-      <FILE id="UT03Oi" name="NoteOnOffVelocityCurveDialog.cpp" compile="1"
+      <FILE id="dyQN2z" name="MidiEditArea.h" compile="0" resource="0" file="Source/MidiEditArea.h"/>
+      <FILE id="jgfopY" name="NoteOnOffVelocityCurveDialog.cpp" compile="1"
             resource="0" file="Source/NoteOnOffVelocityCurveDialog.cpp"/>
-      <FILE id="tjVa97" name="NoteOnOffVelocityCurveDialog.h" compile="0"
+      <FILE id="Fo1p96" name="NoteOnOffVelocityCurveDialog.h" compile="0"
             resource="0" file="Source/NoteOnOffVelocityCurveDialog.h"/>
-      <FILE id="bHq6aI" name="palette_edit_panel.h" compile="0" resource="0"
+      <FILE id="yTneyt" name="palette_edit_panel.h" compile="0" resource="0"
             file="Source/palette_edit_panel.h"/>
-      <FILE id="cuEv7Y" name="palette_selection_panel.h" compile="0" resource="0"
+      <FILE id="fC7L2I" name="palette_selection_panel.h" compile="0" resource="0"
             file="Source/palette_selection_panel.h"/>
-      <FILE id="h2kWy7" name="VelocityCurveComponents.cpp" compile="1" resource="0"
+      <FILE id="FhZNFz" name="VelocityCurveComponents.cpp" compile="1" resource="0"
             file="Source/VelocityCurveComponents.cpp"/>
-      <FILE id="Ibqngo" name="VelocityCurveComponents.h" compile="0" resource="0"
+      <FILE id="mHFqVo" name="VelocityCurveComponents.h" compile="0" resource="0"
             file="Source/VelocityCurveComponents.h"/>
-      <FILE id="wKzYcw" name="VelocityCurveDlgBase.cpp" compile="1" resource="0"
+      <FILE id="zH9cAQ" name="VelocityCurveDlgBase.cpp" compile="1" resource="0"
             file="Source/VelocityCurveDlgBase.cpp"/>
-      <FILE id="WO9i8o" name="VelocityCurveDlgBase.h" compile="0" resource="0"
+      <FILE id="b9t3yk" name="VelocityCurveDlgBase.h" compile="0" resource="0"
             file="Source/VelocityCurveDlgBase.h"/>
-      <FILE id="fY6nbl" name="VelocityCurveEditStrategy.cpp" compile="1"
+      <FILE id="J9w6Ks" name="VelocityCurveEditStrategy.cpp" compile="1"
             resource="0" file="Source/VelocityCurveEditStrategy.cpp"/>
-      <FILE id="dbxGmD" name="VelocityCurveEditStrategy.h" compile="0" resource="0"
+      <FILE id="ovK2rc" name="VelocityCurveEditStrategy.h" compile="0" resource="0"
             file="Source/VelocityCurveEditStrategy.h"/>
     </GROUP>
   </MAINGROUP>
