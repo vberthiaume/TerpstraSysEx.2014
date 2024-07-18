@@ -77,7 +77,8 @@ public:
     void updateTitle();
 
     // LumatoneEditor::EditorListener implementation
-    void newFileLoaded(juce::File file) override;
+    // void newFileLoaded(juce::File file) override;
+    // void layoutChanged(const LumatoneLayout& mappingData) override;
 
 private:
 

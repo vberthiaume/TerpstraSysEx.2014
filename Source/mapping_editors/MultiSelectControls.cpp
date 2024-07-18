@@ -202,7 +202,7 @@ void MultiSelectControls::resized()
     channelInput->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
 }
 
-void MultiSelectControls::completeMappingLoaded(const LumatoneLayout &mappingData)
+void MultiSelectControls::layoutChanged(const LumatoneLayout &mappingData)
 {
     auto layoutColours = mappingData.getLayoutColours();
     colourDropdown->setColourOptions(layoutColours);
@@ -220,7 +220,7 @@ void MultiSelectControls::boardChanged(const LumatoneBoard &boardData)
     //     colourDropdown->addItem(colour.toDisplayString(false), colourDropdown->getNumItems() + 1);
     // }
 
-    completeMappingLoaded(*getMappingData());
+    layoutChanged(*getMappingData());
 }
 
 void MultiSelectControls::keyChanged(int boardIndex, int keyIndex, const LumatoneKey &lumatoneKey)
@@ -228,7 +228,7 @@ void MultiSelectControls::keyChanged(int boardIndex, int keyIndex, const Lumaton
     // auto colourOptions = colourDropdown->getColourOptions();
     // if (!colourOptions.contains(lumatoneKey.getColour()))
     //     colourDropdown->addItem(lumatoneKey.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
-    completeMappingLoaded(*getMappingData());
+    layoutChanged(*getMappingData());
 }
 
 void MultiSelectControls::keySetChanged(juce::Array<MappedLumatoneKey> selection)
@@ -241,5 +241,5 @@ void MultiSelectControls::keySetChanged(juce::Array<MappedLumatoneKey> selection
 
     //     colourDropdown->addItem(key.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
     // }
-    completeMappingLoaded(*getMappingData());
+    layoutChanged(*getMappingData());
 }

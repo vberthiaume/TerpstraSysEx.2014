@@ -454,7 +454,7 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
 		// Add file to recent files list
 		editorState.recentFiles->addFile(editorState.currentFile);
 
-        getEditorListeners()->call(&LumatoneEditor::EditorListener::newFileLoaded, editorState.getCurrentFile());
+        // getEditorListeners()->call(&LumatoneEditor::EditorListener::newFileLoaded, editorState.getCurrentFile());
 
 		return true;
 	}

@@ -14,13 +14,13 @@ public:
     virtual ~EditorListener() {}
 
     // App Actions
-    virtual void completeMappingLoaded(const LumatoneLayout& mappingData) {}
+    virtual void layoutChanged(const LumatoneLayout& mappingData) {}
     virtual void boardChanged(const LumatoneBoard& boardData) {}
     virtual void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) {}
 
     virtual void keySetChanged(juce::Array<MappedLumatoneKey> selection) {}
 
-    virtual void newFileLoaded(juce::File file) {}
+    // virtual void newFileLoaded(juce::File file) {}
 
     //virtual void tableChanged(LumatoneConfigTable::TableType type, const juce::uint8* table, int tableSize) {}
 
@@ -91,7 +91,7 @@ public:
 
 protected:
 
-    virtual void completeMappingLoaded(const LumatoneLayout& mappingData)
+    virtual void layoutChanged(const LumatoneLayout& mappingData)
     {
         layoutWasUpdated();
     }

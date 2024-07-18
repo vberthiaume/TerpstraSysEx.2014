@@ -80,7 +80,7 @@ public:
 
 public:
     // LumatoneEditor::EditorListener Implementation
-    void completeMappingLoaded(const LumatoneLayout& mappingData) override;
+    void layoutChanged(const LumatoneLayout& mappingData) override;
     void boardChanged(const LumatoneBoard& boardData) override;
     void contextChanged(LumatoneContext* newOrEmptyContext) override;
     void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;

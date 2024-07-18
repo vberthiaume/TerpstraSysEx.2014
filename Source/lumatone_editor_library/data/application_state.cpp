@@ -248,7 +248,7 @@ void LumatoneApplicationState::setCompleteConfig(const LumatoneLayout &layoutIn)
         controller->sendCurrentCompleteConfig();
     }
 
-    editorListeners->call(&LumatoneEditor::EditorListener::completeMappingLoaded, *mappingData);
+    editorListeners->call(&LumatoneEditor::EditorListener::layoutChanged, *mappingData);
     editorListeners->call(&LumatoneEditor::EditorListener::expressionPedalSensitivityChanged, getExpressionSensitivity());
     editorListeners->call(&LumatoneEditor::EditorListener::invertFootControllerChanged, getInvertExpression());
     editorListeners->call(&LumatoneEditor::EditorListener::lightOnKeyStrokesChanged, getLightOnKeyStrokes());
@@ -269,7 +269,7 @@ void LumatoneApplicationState::setLayout(const LumatoneLayout &layoutIn)
         controller->sendCompleteMapping(layoutIn);
     }
 
-    editorListeners->call(&LumatoneEditor::EditorListener::completeMappingLoaded, *mappingData);
+    editorListeners->call(&LumatoneEditor::EditorListener::layoutChanged, *mappingData);
 }
 
 void LumatoneApplicationState::setBoard(const LumatoneBoard &boardIn, int boardId)

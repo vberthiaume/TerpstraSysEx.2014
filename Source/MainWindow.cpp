@@ -214,16 +214,23 @@ void MainWindow::updateTitle()
 	setName(windowTitle);
 }
 
-void MainWindow::newFileLoaded(juce::File file)
-{
-    updateTitle();
-}
+// void MainWindow::layoutChanged(const LumatoneLayout &mappingData)
+// {
+//         updateTitle();
+// }
+
+// void MainWindow::newFileLoaded(juce::File file)
+// {
+//     updateTitle();
+// }
 
 void MainWindow::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
 {
     LumatoneEditorState::handleStatePropertyChange(stateIn, property);
 
-    if (property == LumatoneEditorProperty::HasChangesToSave)
+    if (property == LumatoneEditorProperty::HasChangesToSave
+        || property == LumatoneEditorProperty::CurrentFile
+        )
     {
         updateTitle();
     }

@@ -34,7 +34,7 @@ public:
     void resized() override;
 
 private:
-    void completeMappingLoaded(const LumatoneLayout& mappingData) override;
+    void layoutChanged(const LumatoneLayout& mappingData) override;
     void boardChanged(const LumatoneBoard& boardData) override;
     void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;
     void keySetChanged(juce::Array<MappedLumatoneKey> selection) override;

@@ -24,7 +24,7 @@ LumatoneKeyboardComponent::LumatoneKeyboardComponent(const LumatoneApplicationSt
     addKeyListener(this);
     setWantsKeyboardFocus(true);
 
-    completeMappingLoaded(*getMappingData());
+    layoutChanged(*getMappingData());
     updateSelectedKeys(*getSelectedKeys());
 
     addEditorListener(this);
@@ -191,7 +191,7 @@ void LumatoneKeyboardComponent::setUiMode(LumatoneKeyboardComponent::UiMode mode
     uiMode = modeIn;
 }
 
-void LumatoneKeyboardComponent::completeMappingLoaded(const LumatoneLayout& mappingData)
+void LumatoneKeyboardComponent::layoutChanged(const LumatoneLayout& mappingData)
 {
     for (int boardIndex = 0; boardIndex < octaveBoards.size(); boardIndex++)
     {
