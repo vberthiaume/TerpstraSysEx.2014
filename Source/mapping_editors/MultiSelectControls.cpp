@@ -210,32 +210,36 @@ void MultiSelectControls::completeMappingLoaded(const LumatoneLayout &mappingDat
 
 void MultiSelectControls::boardChanged(const LumatoneBoard &boardData)
 {
-    auto boardColours = boardData.getBoardColours();
-    auto colourOptions = colourDropdown->getColourOptions();
-    for (auto colour : boardColours)
-    {
-        if (colourOptions.contains(colour))
-            continue;
+    // auto boardColours = boardData.getBoardColours();
+    // auto colourOptions = colourDropdown->getColourOptions();
+    // for (auto colour : boardColours)
+    // {
+    //     if (colourOptions.contains(colour))
+    //         continue;
 
-        colourDropdown->addItem(colour.toDisplayString(false), colourDropdown->getNumItems() + 1);
-    }
+    //     colourDropdown->addItem(colour.toDisplayString(false), colourDropdown->getNumItems() + 1);
+    // }
+
+    completeMappingLoaded(*getMappingData());
 }
 
 void MultiSelectControls::keyChanged(int boardIndex, int keyIndex, const LumatoneKey &lumatoneKey)
 {
-    auto colourOptions = colourDropdown->getColourOptions();
-    if (!colourOptions.contains(lumatoneKey.getColour()))
-        colourDropdown->addItem(lumatoneKey.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
+    // auto colourOptions = colourDropdown->getColourOptions();
+    // if (!colourOptions.contains(lumatoneKey.getColour()))
+    //     colourDropdown->addItem(lumatoneKey.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
+    completeMappingLoaded(*getMappingData());
 }
 
 void MultiSelectControls::keySetChanged(juce::Array<MappedLumatoneKey> selection)
 {
-    auto colourOptions = colourDropdown->getColourOptions();
-    for (auto key : selection)
-    {
-        if (colourOptions.contains(key.getColour()))
-            continue;
+    // auto colourOptions = colourDropdown->getColourOptions();
+    // for (auto key : selection)
+    // {
+    //     if (colourOptions.contains(key.getColour()))
+    //         continue;
 
-        colourDropdown->addItem(key.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
-    }
+    //     colourDropdown->addItem(key.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
+    // }
+    completeMappingLoaded(*getMappingData());
 }
