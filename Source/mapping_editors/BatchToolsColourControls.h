@@ -19,6 +19,7 @@
 
 class BatchToolsColourControls : public LumatoneEditorState
                                 , protected LumatoneEditorState::Controller
+                                , public LumatoneEditor::LayoutChangeListener
                                 , public juce::Component
 {
 public:
@@ -26,6 +27,19 @@ public:
     ~BatchToolsColourControls() override;
 
     void resized() override;
+
+private:
+    bool isSetToDefault() const;
+    void setHasChanges(bool changes);
+
+    void applyButtonCallback();
+    void resetButtonCallback();
+
+private:
+    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property) override;
+
+private:
+    void layoutWasUpdated() override;
 
 private:
 
@@ -40,6 +54,10 @@ private:
     std::unique_ptr<juce::TextButton>   applyButton;
     std::unique_ptr<juce::TextButton>   resetButton;
 
+    bool hasChanges = false;
+    std::shared_ptr<LumatoneLayout>     lastSavedLayout;
+
+private:
 
     const float marginParentX       = 0.02f;
     int contentMarginX;
