@@ -50,6 +50,7 @@ juce::Array<juce::Identifier> GetLumatoneEditorProperty()
 LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwareDriver &driverIn, juce::UndoManager *undoManagerIn)
     : LumatoneApplicationState(stateIn, driverIn, undoManagerIn)
     , editSelectionState(name + "_EditSelection", state)
+    , batchColourState(name + "_BatchColourState", state)
 {
     // DBG(name + " LumatoneEditorState created");
     appFonts = std::make_shared<LumatoneEditorFontLibrary>();
@@ -63,6 +64,7 @@ LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwa
 LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditorState &stateIn)
     : LumatoneApplicationState(name, stateIn)
     , editSelectionState(name, state)
+    , batchColourState(name, state)
     , appFonts(stateIn.appFonts)
     , lookAndFeel(stateIn.lookAndFeel)
     , recentFiles(stateIn.recentFiles)
@@ -109,6 +111,11 @@ juce::RecentlyOpenedFilesList& LumatoneEditorState::getRecentFiles()
 LumatoneKeyPropertyData LumatoneEditorState::getEditSelectionData() const
 {
     return editSelectionState.getData();
+}
+
+LumatoneEditor::BatchColourEditData LumatoneEditorState::getBatchColourEditData() const
+{
+    return batchColourState.getData();
 }
 
 const juce::Array<LumatoneEditorColourPalette> &LumatoneEditorState::getColourPalettes()
@@ -222,6 +229,21 @@ void LumatoneEditorState::Controller::setAssignKeyChannel(bool set, int channelI
 void LumatoneEditorState::Controller::setAssignCCFader(bool set, bool ccFaderDefaultIn)
 {
     editorState.editSelectionState.setCCFader(set, ccFaderDefaultIn);
+}
+
+void LumatoneEditorState::Controller::setBatchColourBrightness(float value)
+{
+    editorState.batchColourState.setBrightnessMultiplier(true, value);
+}
+
+void LumatoneEditorState::Controller::setBatchColourHueShift(float value)
+{
+    editorState.batchColourState.setHueShiftAmount(true, value);
+}
+
+void LumatoneEditorState::Controller::setBatchColourTempShift(float value)
+{
+    editorState.batchColourState.setTempShiftAmount(true, value);
 }
 
 void LumatoneEditorState::Controller::setWindowState(const juce::Rectangle<int> &windowBounds, juce::String stateString)
@@ -399,8 +421,6 @@ bool LumatoneEditorState::Controller::performAction(LumatoneAction *action, bool
 // Open a SysEx mapping from the file specified in currentFile
 bool LumatoneEditorState::Controller::resetToCurrentFile()
 {
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::newFileLoaded, editorState.getCurrentFile());
-
     if (editorState.getCurrentFile().getFullPathName().isEmpty())
     {
         // Replace with blank file
@@ -415,19 +435,26 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
 		// XXX StringArray format: platform-independent?
 		juce::StringArray stringArray;
 		editorState.getCurrentFile().readLines(stringArray);
-		LumatoneLayout keyMapping(stringArray);
+		LumatoneLayout keyMapping;
+        if (!keyMapping.fromStringArray(stringArray))
+        {
+	        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Open File Error", "The file " + editorState.getCurrentFile().getFullPathName() + " could not be read properly.");
+            return false;
+        }
+
+        // Mark file as unchanged (would prefer to  do this after, but this works better for callbacks)
+        editorState.setHasChangesToSave(false);
 
 		// Send configuration to controller, if connected
         editorState.setCompleteConfig(keyMapping);
-
-		// Mark file as unchanged
-        editorState.setHasChangesToSave(false);
 
         // Clear undo history
 		editorState.undoManager->clearUndoHistory();
 
 		// Add file to recent files list
 		editorState.recentFiles->addFile(editorState.currentFile);
+
+        getEditorListeners()->call(&LumatoneEditor::EditorListener::newFileLoaded, editorState.getCurrentFile());
 
 		return true;
 	}

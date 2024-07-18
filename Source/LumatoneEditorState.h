@@ -15,6 +15,7 @@
 #include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
 #include "./data/LumatoneEditSelectionState.h"
+#include "./data/LumatoneEditorBatchColourState.h"
 
 #define CHOOSE_FILE_NOOP [](bool) -> void {}
 
@@ -104,6 +105,8 @@ public:
 
     LumatoneKeyPropertyData getEditSelectionData() const;
 
+    LumatoneEditor::BatchColourEditData getBatchColourEditData() const;
+
     LumatoneEditorLookAndFeel& getEditorLookAndFeel() { return *lookAndFeel; }
 
     virtual const juce::Array<LumatoneEditorColourPalette>& getColourPalettes();
@@ -144,6 +147,7 @@ protected:
     EditorMode editorMode = EditorMode::OFFLINE;
 
     LumatoneEditSelectionState editSelectionState;
+    LumatoneEditorBatchColourState batchColourState;
 
 private:
     std::shared_ptr<LumatoneEditorFontLibrary>      appFonts;
@@ -217,6 +221,10 @@ public:
         void setAssignKeyNote(bool set, int noteIn);
         void setAssignKeyChannel(bool set, int channelIn);
         void setAssignCCFader(bool set, bool ccFaderDefaultIn);
+
+        void setBatchColourBrightness(float value);
+        void setBatchColourHueShift(float value);
+        void setBatchColourTempShift(float value);
 
         void setWindowState(const juce::Rectangle<int>& windowBounds, juce::String stateString);
 
