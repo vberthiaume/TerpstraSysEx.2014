@@ -23,6 +23,9 @@ namespace Lumatone {
 			resetSysExMapping = 0x200013,
 			importSysExMapping = 0x200014,
 
+			selectAll = 0x200020,
+			selectNone = 0x200021,
+
 			deleteOctaveBoard = 0x200100,
 			copyOctaveBoard = 0x200101,
 			pasteOctaveBoard = 0x200102,

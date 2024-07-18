@@ -18,6 +18,8 @@
 
 #include "LumatoneEditorLookAndFeel.h"
 
+#include "./actions/KeySelectionControlActions.h"
+
 #include "./lumatone_editor_library/device/lumatone_controller.h"
 #include "./lumatone_editor_library/device/activity_monitor.h"
 #include "./lumatone_editor_library/graphics/view_constants.h"
@@ -227,6 +229,9 @@ void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
 		Lumatone::Menu::commandIDs::resetSysExMapping,
 		Lumatone::Menu::commandIDs::importSysExMapping,
 
+		Lumatone::Menu::commandIDs::selectAll,
+		Lumatone::Menu::commandIDs::selectNone,
+
 		Lumatone::Menu::commandIDs::deleteOctaveBoard,
 		Lumatone::Menu::commandIDs::copyOctaveBoard,
 		Lumatone::Menu::commandIDs::pasteOctaveBoard,
@@ -262,7 +267,7 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
 
 	case Lumatone::Menu::commandIDs::saveSysExMappingAs:
 		result.setInfo("Save mapping as...", "Save the current mapping to new file", "File", 0);
-		result.addDefaultKeypress('a', ModifierKeys::commandModifier);
+		result.addDefaultKeypress('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier);
 		break;
 
 	case Lumatone::Menu::commandIDs::resetSysExMapping:
@@ -275,6 +280,17 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
 		result.addDefaultKeypress('i', ModifierKeys::commandModifier);
 		if (state.getConnectionState() != ConnectionState::ONLINE)
 			result.setActive(false);
+		break;
+
+	case Lumatone::Menu::commandIDs::selectAll:
+		result.setInfo("Select All", "Select All Keys", "Edit", 0);
+		result.addDefaultKeypress('a', ModifierKeys::ctrlModifier);
+		break;
+
+	case Lumatone::Menu::commandIDs::selectNone:
+		result.setInfo("Select None", "Reset key selection status", "Edit", 0);
+		result.addDefaultKeypress(KeyPress::escapeKey, ModifierKeys::noModifiers);
+		result.addDefaultKeypress('a', ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
 		break;
 
 	case Lumatone::Menu::commandIDs::deleteOctaveBoard:
@@ -362,6 +378,11 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 	case Lumatone::Menu::commandIDs::importSysExMapping:
 		return onRequestDeviceConfig();
 
+	case Lumatone::Menu::commandIDs::selectAll:
+		return selectAllKeys();
+	case Lumatone::Menu::commandIDs::selectNone:
+		return resetKeySelection();
+
 	case Lumatone::Menu::commandIDs::deleteOctaveBoard:
 		return deleteSubBoardData();
 	case Lumatone::Menu::commandIDs::copyOctaveBoard:
@@ -447,6 +468,16 @@ bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)>
 	bool success = saveMappingToFile(state.getCurrentFile());
     saveFileCallback(success);
 	return success;
+}
+
+bool TerpstraSysExApplication::selectAllKeys()
+{
+	return performAction(new SetKeySelectionAction(state, state.getMappingData()->getAllKeysMapped()));
+}
+
+bool TerpstraSysExApplication::resetKeySelection()
+{
+	return performAction(new SetKeySelectionAction(state, juce::Array<MappedLumatoneKey>()));
 }
 
 bool TerpstraSysExApplication::deleteSubBoardData()

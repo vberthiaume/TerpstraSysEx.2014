@@ -35,7 +35,7 @@ namespace Lumatone {
 			menu.addCommandItem(theManager, saveSysExMappingAs);
 			menu.addCommandItem(theManager, resetSysExMapping);
 			menu.addCommandItem(theManager, importSysExMapping);
-			
+
 			menu.addSeparator();
 
 			PopupMenu recentFilesMenu;
@@ -50,6 +50,8 @@ namespace Lumatone {
 
 		void MainMenuModel::createEditMenu(PopupMenu& menu)
 		{
+			menu.addCommandItem(theManager, selectAll);
+			menu.addCommandItem(theManager, selectNone);
 			menu.addCommandItem(theManager, deleteOctaveBoard);
 			menu.addCommandItem(theManager, copyOctaveBoard);
 			menu.addCommandItem(theManager, pasteOctaveBoard);

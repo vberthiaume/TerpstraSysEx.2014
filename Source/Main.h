@@ -58,6 +58,9 @@ public:
 
 	//bool saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToPalette=juce::File());
 
+	bool selectAllKeys();
+	bool resetKeySelection();
+
 	bool deleteSubBoardData();
 	bool copySubBoardData();
 	bool pasteSubBoardData();
@@ -89,7 +92,7 @@ private:
 	LumatoneEditorState		state;
 
 	std::unique_ptr<ApplicationCommandManager> commandManager;
-	
+
 	MainContentComponent* mainComponent;
 	std::unique_ptr<MainWindow> mainWindow;
 	std::unique_ptr<DialogWindow> dialogWindow;
