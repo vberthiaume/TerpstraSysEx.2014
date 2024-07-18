@@ -71,22 +71,26 @@ void SetKeySettingsAction::addToEditAassignment()
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignColourAction(LumatoneEditorState &stateIn, juce::Colour colourIn)
 {
-    return new SetKeySettingsAction(stateIn, true, false, false, false, false, colourIn);
+    bool valid = colourIn.isOpaque();
+    return new SetKeySettingsAction(stateIn, valid, false, false, false, false, colourIn);
 }
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyTypeAction(LumatoneEditorState &stateIn, LumatoneKeyType typeIn)
 {
-    return new SetKeySettingsAction(stateIn, false, true, false, false, false, juce::Colour(), typeIn);
+    bool valid = typeIn > LumatoneKeyType::disabledDefault && typeIn <= LumatoneKeyType::disabled;
+    return new SetKeySettingsAction(stateIn, false, valid, false, false, false, juce::Colour(), typeIn);
 }
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyNoteAction(LumatoneEditorState &stateIn, int noteIn)
 {
-    return new SetKeySettingsAction(stateIn, false, false, true, false, false, juce::Colour(), LumatoneKeyType(), noteIn);
+    bool valid = noteIn >= 0 && noteIn < 128;
+    return new SetKeySettingsAction(stateIn, false, false, valid, false, false, juce::Colour(), LumatoneKeyType(), noteIn);
 }
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyChannelAction(LumatoneEditorState &stateIn, int channelIn)
 {
-    return new SetKeySettingsAction(stateIn, false, false, false, true, false, juce::Colour(), LumatoneKeyType(), 0, channelIn);
+    bool valid = channelIn > 0 && channelIn <= 16;
+    return new SetKeySettingsAction(stateIn, false, false, false, valid, false, juce::Colour(), LumatoneKeyType(), 0, channelIn);
 }
 
 SetKeySettingsAction *SetKeySettingsAction::NewSetAssignCCFaderAction(LumatoneEditorState &stateIn, bool faderDefaultIn)
@@ -112,7 +116,9 @@ ApplyAssignmentsToSelectionAction::ApplyAssignmentsToSelectionAction(const Lumat
 
 bool ApplyAssignmentsToSelectionAction::perform()
 {
-    for (const MappedLumatoneKey key : previousData)
+    juce::Array<MappedLumatoneKey> updatedKeys;
+
+    for (const MappedLumatoneKey key : keySelection)
     {
         MappedLumatoneKey keyUpdate = key;
         if (newData.useColour)
@@ -127,6 +133,21 @@ bool ApplyAssignmentsToSelectionAction::perform()
             keyUpdate.setDefaultCCFader(newData.ccFaderDefault);
 
         setKey((const LumatoneKey&) keyUpdate, keyUpdate.boardIndex + 1, keyUpdate.keyIndex);
+        updatedKeys.add(keyUpdate);
+    }
+
+    if (!newData.useColour)
+    {
+        // todo param-only update (no colour)
+        sendSelectionParam(updatedKeys);
+    }
+    else if (newData.useType || newData.useNote || newData.useChannel || newData.ccFaderDefault)
+    {
+        sendSelectionParam(updatedKeys);
+    }
+    else
+    {
+        sendSelectionColours(updatedKeys);
     }
 
     updatedSelectedKeys();
@@ -136,11 +157,12 @@ bool ApplyAssignmentsToSelectionAction::perform()
 
 bool ApplyAssignmentsToSelectionAction::undo()
 {
-    for (const MappedLumatoneKey key : previousData)
-    {
-        setKey((const LumatoneKey&) key, key.boardIndex + 1, key.keyIndex);
-    }
+    // for (const MappedLumatoneKey key : previousData)
+    // {
+    //     setKey((const LumatoneKey&) key, key.boardIndex + 1, key.keyIndex);
+    // }
 
+    sendSelectionParam(previousData);
     updatedSelectedKeys();
 
     return true;
