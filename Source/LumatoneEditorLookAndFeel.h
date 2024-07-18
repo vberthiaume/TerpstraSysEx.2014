@@ -60,6 +60,49 @@ public:
     }
 
 public:
+
+    juce::ColourGradient getColourGradient(LumatoneEditorColourGradients gradientId, const juce::Rectangle<float>& area) const
+    {
+        switch (gradientId)
+        {
+            default:
+                break;
+
+            case LumatoneEditorColourGradients::ExpressionSlider:
+                return juce::ColourGradient::horizontal(
+                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMin),
+                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMax),
+                                        area);
+            case LumatoneEditorColourGradients::BrightnessSlider:
+                return juce::ColourGradient::horizontal(
+                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMin),
+                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMax),
+                                        area);
+
+            case LumatoneEditorColourGradients::HueSlider:
+            {
+                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::HueRotaryGradientMin), area.getTopLeft(),
+                                                              findColour(LumatoneEditorColourIDs::HueRotaryGradientMax), area.getTopRight(),
+                                                              false);
+                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::HueRotaryGradientMid));
+                return g;
+            }
+
+            case LumatoneEditorColourGradients::TemperatureSlider:
+            {
+                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::TempRotaryGradientMin), area.getTopLeft(),
+                                                              findColour(LumatoneEditorColourIDs::TempRotaryGradientMax), area.getTopRight(),
+                                                              false);
+                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::TempRotaryGradientMid));
+                return g;
+            }
+        }
+
+        return juce::ColourGradient();
+    }
+
+
+public:
     //==================================================================
     // LookAndFeel_V4 Implementation
 
@@ -538,6 +581,7 @@ public:
         g.setColour(textColour);
         g.drawFittedText(btn.getButtonText(), btn.getLocalBounds().withLeft(btn.getHeight() * 1.5f), Justification::centredLeft, 1);
     }
+
 
     //==================================================================
     //
@@ -1398,48 +1442,6 @@ private:
         setColour(AlertWindow::ColourIds::backgroundColourId, findColour(LumatoneEditorColourIDs::HeaderBackground));
         setColour(AlertWindow::ColourIds::textColourId, findColour(LumatoneEditorColourIDs::DescriptionText));
         setColour(AlertWindow::ColourIds::outlineColourId, findColour(LumatoneEditorColourIDs::MediumBackground));
-    }
-
-public:
-
-    juce::ColourGradient LumatoneEditorLookAndFeel::getColourGradient(LumatoneEditorColourGradients gradientId, const juce::Rectangle<float>& area) const
-    {
-        switch (gradientId)
-        {
-            default:
-                break;
-
-            case LumatoneEditorColourGradients::ExpressionSlider:
-                return juce::ColourGradient::horizontal(
-                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMin),
-                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMax),
-                                        area);
-            case LumatoneEditorColourGradients::BrightnessSlider:
-                return juce::ColourGradient::horizontal(
-                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMin),
-                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMax),
-                                        area);
-
-            case LumatoneEditorColourGradients::HueSlider:
-            {
-                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::HueRotaryGradientMin), area.getTopLeft(),
-                                                              findColour(LumatoneEditorColourIDs::HueRotaryGradientMax), area.getTopRight(),
-                                                              false);
-                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::HueRotaryGradientMid));
-                return g;
-            }
-
-            case LumatoneEditorColourGradients::TemperatureSlider:
-            {
-                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::TempRotaryGradientMin), area.getTopLeft(),
-                                                              findColour(LumatoneEditorColourIDs::TempRotaryGradientMax), area.getTopRight(),
-                                                              false);
-                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::TempRotaryGradientMid));
-                return g;
-            }
-        }
-
-        return juce::ColourGradient();
     }
 
 private:
