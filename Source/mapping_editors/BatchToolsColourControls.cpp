@@ -239,6 +239,10 @@ void BatchToolsColourControls::handleStatePropertyChange(juce::ValueTree stateIn
 
 void BatchToolsColourControls::layoutWasUpdated()
 {
-    if (!getHasChangesToSave())
+    auto desc = undoManager->getUndoDescription();
+    if (!desc.contains("BatchColour"))
         *lastSavedLayout = *getMappingData();
+    // if (!getHasChangesToSave())
+    //     *lastSavedLayout = *getMappingData();
+
 }
