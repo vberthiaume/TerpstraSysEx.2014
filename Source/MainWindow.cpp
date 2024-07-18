@@ -81,10 +81,10 @@ void MainWindow::closeButtonPressed()
     JUCEApplication::getInstance()->systemRequestedQuit();
 }
 
-BorderSize<int> MainWindow::getBorderThickness() const
-{
-    return BorderSize <int>(1);
-}
+//BorderSize<int> MainWindow::getBorderThickness() const
+//{
+//    return BorderSize <int>(1);
+//}
 
 bool MainWindow::isLargerThanCurrentScreen() const
 {

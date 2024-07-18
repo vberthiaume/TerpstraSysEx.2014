@@ -35,11 +35,11 @@ class MainWindow : public juce::DocumentWindow
 public:
     MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager);
 
-    virtual ~MainWindow() override;
+    ~MainWindow() override;
 
     void closeButtonPressed() override;
 
-    juce::BorderSize<int> getBorderThickness() const override;
+//    juce::BorderSize<int> getBorderThickness() const override;
 
     /* Note: Be careful if you override any DocumentWindow methods - the base
     class uses a lot of them, so by overriding you might break its functionality.
