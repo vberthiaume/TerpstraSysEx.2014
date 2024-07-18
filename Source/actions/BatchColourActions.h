@@ -58,6 +58,8 @@ public:
                                     , LumatoneEditor::BatchColourEditData editData
                                     , const juce::Array<MappedLumatoneKey>& keySelectionIn);
 
+    ~ApplyBatchColourAdjustments() override;
+
     bool perform() override;
     bool undo() override;
 

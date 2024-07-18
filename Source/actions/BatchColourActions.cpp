@@ -100,6 +100,11 @@ ApplyBatchColourAdjustments::ApplyBatchColourAdjustments(const LumatoneEditorSta
     }
 }
 
+ApplyBatchColourAdjustments::~ApplyBatchColourAdjustments()
+{
+    baseLayout = nullptr;
+}
+
 bool ApplyBatchColourAdjustments::perform()
 {
     if (fullLayout)
