@@ -328,3 +328,23 @@ bool InvertSustainEditAction::undo()
     state->setInvertSustain(previousData);
     return true;
 }
+
+LumatoneEditAction::LayoutUpdateAction::LayoutUpdateAction(LumatoneApplicationState *state, const LumatoneLayout& newLayoutIn, bool bufferKeyUpdates)
+    : LumatoneAction(state, "LayoutUpdateAction")
+    , previousData(*state->getMappingData())
+    , newData(newLayoutIn)
+    , useKeyBuffer(bufferKeyUpdates)
+{
+}
+
+bool LumatoneEditAction::LayoutUpdateAction::perform()
+{
+    state->setLayout(newData);
+    return true;
+}
+
+bool LumatoneEditAction::LayoutUpdateAction::undo()
+{
+    state->setLayout(previousData);
+    return true;
+}

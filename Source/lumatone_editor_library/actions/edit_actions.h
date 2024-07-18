@@ -22,12 +22,12 @@ namespace LumatoneEditAction {
             int boardIndexIn,
             int keyIndexIn,
             bool setKeyType,
-            bool setChannel, 
+            bool setChannel,
             bool setNote,
             bool setColour,
             bool ccFaderDefault,
             LumatoneKeyType newKeyType = LumatoneKeyType::noteOnNoteOff,
-            int newChannelNumber = 0, 
+            int newChannelNumber = 0,
             int newNoteNumber = 0,
             juce::Colour newColour = juce::Colour(),
             bool newCCFaderDefault = true);
@@ -56,7 +56,7 @@ namespace LumatoneEditAction {
 
         bool perform() override;
         bool undo() override;
-        
+
         int getSizeInUnits() override { return sizeof(SingleNoteAssignAction); }
 
     private:
@@ -133,6 +133,29 @@ namespace LumatoneEditAction {
 		juce::Array<MappedLumatoneKey> newData;
     };
 
+    class LayoutUpdateAction : public LumatoneAction
+    {
+    public:
+        LayoutUpdateAction(LumatoneApplicationState* state, const LumatoneLayout& newSectionValue, bool bufferKeyUpdates=false);
+
+        LayoutUpdateAction(const LayoutUpdateAction& second)
+            : LumatoneAction(second.state, "LayoutUpdateAction")
+            , previousData(second.previousData)
+            , newData(second.newData)
+            , useKeyBuffer(second.useKeyBuffer)
+        {}
+
+        bool perform() override;
+        bool undo() override;
+        int getSizeInUnits() override { return sizeof(LayoutUpdateAction); }
+
+    private:
+        LumatoneLayout previousData;
+        LumatoneLayout newData;
+
+        bool useKeyBuffer;
+    };
+
     class InvertFootControllerEditAction : public LumatoneAction
     {
     public:
@@ -177,13 +200,13 @@ namespace LumatoneEditAction {
     {
     public:
         InvertSustainEditAction(LumatoneApplicationState* state, bool newValue);
-        
+
         InvertSustainEditAction(const InvertSustainEditAction& second)
             : LumatoneAction(second.state, "InvertSustainEdit")
             , previousData(second.previousData)
             , newData(second.newData)
         {}
-        
+
         bool perform() override;
         bool undo() override;
         int getSizeInUnits() override { return sizeof(InvertSustainEditAction); }
