@@ -268,6 +268,23 @@ MappedLumatoneKey LumatoneLayout::getMappedKey(int boardIndex, int keyIndex) con
     return MappedLumatoneKey(keyData, boardIndex, keyIndex);
 }
 
+juce::Array<MappedLumatoneKey> LumatoneLayout::getAllKeysMapped() const
+{
+    juce::Array<MappedLumatoneKey> keys;
+
+    for (int b = 0; b < getNumBoards(); b++)
+    {
+        const LumatoneBoard& board = boards[b];
+
+        for (int k = 0; k < board.getNumKeys(); k++)
+        {
+            keys.add(MappedLumatoneKey(board.getKey(k), b, k));
+        }
+    }
+
+    return keys;
+}
+
 void LumatoneLayout::setKey(const LumatoneKey &keyIn, int boardIndex, int keyIndex)
 {
     boards[boardIndex].setKey(keyIn, keyIndex);
@@ -415,9 +432,12 @@ bool LumatoneLayout::isEmpty() const
 
 void LumatoneLayout::operator=(const LumatoneLayout& toCopy)
 {
+    numBoards = toCopy.numBoards;
+
     for (int i = 0; i < numBoards; i++)
     {
         boards[i] = toCopy.getBoard(i);
+        octaveBoardSize = boards[i].getNumKeys();
     }
 
     afterTouchActive = toCopy.afterTouchActive;
@@ -435,7 +455,7 @@ void LumatoneLayout::operator=(const LumatoneLayout& toCopy)
     updateState();
 }
 
-void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
+bool LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
 {
     clearAll(true);
 
@@ -454,7 +474,10 @@ void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
                 boardIndex = currentLine.substring(pos1 + 6, pos2).getIntValue();
             }
             else
+            {
                 jassert(false);
+                return false;
+            }
         }
         else if ((pos1 = currentLine.indexOf("Key_")) >= 0)
         {
@@ -470,10 +493,16 @@ void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
                         boards[boardIndex].theKeys[keyIndex].setNoteOrCC(keyValue);
                     }
                     else
+                    {
                         jassert(false);
+                        return false;
+                    }
                 }
                 else
+                {
                     jassert(false);
+                    return false;
+                }
             }
         }
         else if ((pos1 = currentLine.indexOf("Chan_")) >= 0)
@@ -502,10 +531,16 @@ void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
                             hasFiftySixKeys = true;
                     }
                     else
+                    {
                         jassert(false);
+                        return false;
+                    }
                 }
                 else
+                {
                     jassert(false);
+                    return false;
+                }
             }
         }
         else if ((pos1 = currentLine.indexOf("Col_")) >= 0)
@@ -520,10 +555,16 @@ void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
                     if (keyIndex >= 0 && keyIndex < 56)
                         boards[boardIndex].theKeys[keyIndex].setColour(juce::Colour(colValue).withAlpha(1.0f));
                     else
+                    {
                         jassert(false);
+                        return false;
+                    }
                 }
                 else
+                {
                     jassert(false);
+                    return false;
+                }
             }
         }
         else if ((pos1 = currentLine.indexOf("KTyp_")) >= 0)
@@ -544,11 +585,17 @@ void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
                             boards[boardIndex].theKeys[keyIndex].setKeyType((LumatoneKeyType)keyValue);
                     }
                     else
+                    {
                         jassert(false);
+                        return false;
+                    }
                 }
             }
             else
+            {
                 jassert(false);
+                return false;
+            }
         }
         else if ((pos1 = currentLine.indexOf("CCInvert_")) >= 0)
         {
@@ -558,7 +605,10 @@ void LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
                 if (keyIndex >= 0 && keyIndex < 56)
                         boards[boardIndex].theKeys[keyIndex].setDefaultCCFader(false);
                 else
+                {
                     jassert(false);
+                    return false;
+                }
             }
         }
 

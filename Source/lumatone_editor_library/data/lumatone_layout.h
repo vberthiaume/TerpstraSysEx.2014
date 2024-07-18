@@ -95,7 +95,7 @@ public:
 
 	void operator=(const LumatoneLayout& toCopy);
 
-	void fromStringArray(const juce::StringArray& stringArray);
+	bool fromStringArray(const juce::StringArray& stringArray);
 	juce::StringArray toStringArray() const;
 
 	juce::ValueTree getState() const { return state; }
@@ -123,6 +123,8 @@ public:
 
 	const LumatoneKey& getKey(int boardIndex, int keyIndex) const;
 	MappedLumatoneKey getMappedKey(int boardIndex, int keyIndex) const;
+
+	juce::Array<MappedLumatoneKey> getAllKeysMapped() const;
 
 	virtual void setKey(const LumatoneKey& keyIn, int boardIndex, int keyIndex);
 	virtual void setKey(MappedLumatoneKey keyIn);
