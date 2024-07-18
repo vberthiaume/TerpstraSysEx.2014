@@ -30,36 +30,34 @@ public:
 
     virtual void selectionChanged() {}
 
+    virtual void firmwareVersionChanged() {}
 
-    // Firmware Actions
-    virtual void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) {}
-    virtual void keyColourChanged(int boardIndex, int keyIndex, juce::Colour keyColour) {}
-
+    // Mapping Options
+    virtual void lightOnKeyStrokesChanged(bool lightOn) {}
+    virtual void aftertouchToggled(bool enabled) {}
     virtual void expressionPedalSensitivityChanged(unsigned char value) {}
     virtual void invertFootControllerChanged(bool inverted) {}
+    virtual void invertSustainToggled(bool inverted) {}
 
+    virtual void velocityConfigChanged() {}
+    virtual void calibrateAftertouchToggled(bool active) {}
+    virtual void aftertouchConfigChanged() {}
+    virtual void lumatouchConfigChanged() {}
+
+    // Global Options
     virtual void macroButtonActiveColourChanged(juce::Colour colour) {}
     virtual void macroButtonInactiveColourChanged(juce::Colour colour) {}
 
-    virtual void lightOnKeyStrokesChanged(bool lightOn) {}
-
-    virtual void velocityConfigChanged() {}
-
-    virtual void aftertouchToggled(bool enabled) {}
-    virtual void calibrateAftertouchToggled(bool active) {}
-
-    virtual void aftertouchConfigChanged() {}
-
     virtual void calibrateKeysRequested() {}
     virtual void calibratePitchModWheelToggled(bool active) {}
-
-    virtual void lumatouchConfigChanged() {}
-
-    virtual void firmwareVersionChanged() {}
-    virtual void pingSent(juce::uint8 pingId) {}
-
     virtual void peripheralChannelsChanged(int pitchWheelChannel, int modWheelChannel, int expressionChannel, int sustainChannel) {}
-    virtual void invertSustainToggled(bool inverted) {}
+
+    // Firmware Actions
+    // virtual void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) {}
+    // virtual void keyColourChanged(int boardIndex, int keyIndex, juce::Colour keyColour) {}
+
+    // virtual void pingSent(juce::uint8 pingId) {}
+
 
 };
 
@@ -80,6 +78,44 @@ public:
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditorEmitter)
+};
+
+
+class LayoutChangeListener : public EditorListener
+{
+public:
+
+    virtual ~LayoutChangeListener() override {}
+
+    virtual void layoutWasUpdated() = 0;
+
+protected:
+
+    virtual void completeMappingLoaded(const LumatoneLayout& mappingData)
+    {
+        layoutWasUpdated();
+    }
+
+    virtual void boardChanged(const LumatoneBoard& boardData)
+    {
+        layoutWasUpdated();
+    }
+
+    virtual void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey)
+    {
+        layoutWasUpdated();
+    }
+
+    virtual void keySetChanged(juce::Array<MappedLumatoneKey> selection)
+    {
+        layoutWasUpdated();
+    }
+
+    // virtual void newFileLoaded(juce::File file)
+    // {
+    //     layoutWasUpdated();
+    // }
+
 };
 
 }
