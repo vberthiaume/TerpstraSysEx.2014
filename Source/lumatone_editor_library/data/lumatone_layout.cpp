@@ -683,6 +683,8 @@ bool LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
     //        boards[boardIndex].theKeys[55] = TerpstraKey();
     //    }
     //}
+    
+    return true;
 }
 
 juce::StringArray LumatoneLayout::toStringArray() const
