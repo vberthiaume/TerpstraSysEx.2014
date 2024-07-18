@@ -340,7 +340,7 @@ void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLuma
 
     for (auto mappedKey : selection)
     {
-        controller->sendKeyColourConfig(mappedKey.boardIndex, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
+        controller->sendKeyColourConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
     }
 
     //if (signalEditorListeners)
