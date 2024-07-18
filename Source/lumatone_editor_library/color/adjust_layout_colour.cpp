@@ -37,7 +37,7 @@ bool AdjustLayoutColour::rotateHue(float change, LumatoneKey& key)
         )
         return false;
 
-    key.getColour() = key.getColour().withRotatedHue(change);
+    key.setColour(key.getColour().withRotatedHue(change));
     return true;
 }
 
@@ -79,7 +79,7 @@ bool AdjustLayoutColour::multiplyBrightness(float change, LumatoneKey& key)
     if (key.getColour().isTransparent())
         return false;
 
-     key.getColour() = key.getColour().withMultipliedBrightness(change);
+     key.setColour(key.getColour().withMultipliedBrightness(change));
      return true;
 }
 
@@ -121,7 +121,7 @@ bool AdjustLayoutColour::multiplySaturation(float change, LumatoneKey& key)
     if (key.getColour().isTransparent())
         return false;
 
-    key.getColour() = key.getColour().withMultipliedSaturation(change);
+    key.setColour(key.getColour().withMultipliedSaturation(change));
     return true;
 }
 
@@ -206,9 +206,9 @@ bool AdjustLayoutColour::adjustWhiteBalance(int newWhitePoint, LumatoneKey& key)
 void AdjustLayoutColour::adjustWhiteBalanceRgb(int newWhitePoint, LumatoneKey& key)
 {
     auto newWhiteColour = kelvinToColour(newWhitePoint);
-    key.getColour() = juce::Colour(LumatoneEditor::roundToUint8(key.getColour().getRed() * newWhiteColour.getFloatRed()),
+    key.setColour(juce::Colour(LumatoneEditor::roundToUint8(key.getColour().getRed() * newWhiteColour.getFloatRed()),
                             LumatoneEditor::roundToUint8(key.getColour().getGreen() * newWhiteColour.getFloatGreen()),
-                            LumatoneEditor::roundToUint8(key.getColour().getBlue() * newWhiteColour.getFloatBlue()));
+                            LumatoneEditor::roundToUint8(key.getColour().getBlue() * newWhiteColour.getFloatBlue())));
 }
 
 void AdjustLayoutColour::adjustWhiteBalanceLab(int newWhitePoint, LumatoneKey& key)
@@ -224,7 +224,7 @@ void AdjustLayoutColour::adjustWhiteBalanceLab(int newWhitePoint, LumatoneKey& k
         colourLab.B + (newWhiteLab.B - oldWhiteLab.B) / 3.0f,
         };
 
-    key.getColour() = labToRgb(adjustedLab);
+    key.setColour(labToRgb(adjustedLab));
 }
 
 void AdjustLayoutColour::setGradient(SetGradientOptions options)
