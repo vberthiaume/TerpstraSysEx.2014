@@ -396,7 +396,11 @@ bool TerpstraSysExApplication::openSysExMapping()
 	fileChooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
-			setCurrentFile(chooser.getResult());
+			juce::File result = chooser.getResult();
+			if (!result.existsAsFile() || !result.hasFileExtension("ltn"))
+				return;
+
+			setCurrentFile(result);
 			if (resetToCurrentFile())
 			{
 				// Clear undo history
