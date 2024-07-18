@@ -234,21 +234,27 @@ void LumatoneKeyboardComponent::keyChanged(int boardIndex, int keyIndex, const L
     keyUpdateCallback(boardIndex, keyIndex, lumatoneKey);
 }
 
-void LumatoneKeyboardComponent::keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData)
-{
-    keyUpdateCallback(boardIndex, keyIndex, keyData);
-}
+// void LumatoneKeyboardComponent::keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData)
+// {
+//     keyUpdateCallback(boardIndex, keyIndex, keyData);
+// }
 
-void LumatoneKeyboardComponent::keyColourChanged(int boardIndex, int keyIndex, juce::Colour keyColour)
-{
-    keyUpdateCallback(boardIndex, keyIndex, getKey(boardIndex, keyIndex));
-}
+// void LumatoneKeyboardComponent::keyColourChanged(int boardIndex, int keyIndex, juce::Colour keyColour)
+// {
+//     keyUpdateCallback(boardIndex, keyIndex, getKey(boardIndex, keyIndex));
+// }
 
 void LumatoneKeyboardComponent::keySetChanged(juce::Array<MappedLumatoneKey> selection)
 {
+
     // auto paintKey = renderMode != LumatoneComponentRenderMode::MaxRes;
     // if (renderMode == LumatoneComponentRenderMode::MaxRes)
     //     rerender();
+
+    for (const MappedLumatoneKey& key : selection)
+    {
+        keyUpdateCallback(key.boardIndex, key.keyIndex, key);
+    }
 }
 
 void LumatoneKeyboardComponent::selectionChanged()

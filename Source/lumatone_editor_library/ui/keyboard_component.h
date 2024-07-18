@@ -84,8 +84,8 @@ public:
     void boardChanged(const LumatoneBoard& boardData) override;
     void contextChanged(LumatoneContext* newOrEmptyContext) override;
     void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;
-    void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) override;
-    void keyColourChanged(int octaveNumber, int keyNumber, juce::Colour keyColour) override;
+    // void keyConfigChanged(int boardIndex, int keyIndex, const LumatoneKey& keyData) override;
+    // void keyColourChanged(int octaveNumber, int keyNumber, juce::Colour keyColour) override;
     void keySetChanged(juce::Array<MappedLumatoneKey> selection) override;
     void selectionChanged() override;
 private:
