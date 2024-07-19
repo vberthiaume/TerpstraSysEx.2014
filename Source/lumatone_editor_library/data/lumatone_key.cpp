@@ -14,7 +14,7 @@ LumatoneKey::LumatoneKey(LumatoneKeyType newKeyType)
 {
     noteNumber = 0;
     channelNumber = 1;
-    colour = juce::Colour();
+    colour = juce::Colours::black;
     keyType = newKeyType;
     ccFaderDefault = true;
 

@@ -39,7 +39,7 @@ struct LumatoneKeyPropertyData
     bool useChannel = false;
     bool useCCFaderDefault = false;
 
-    juce::Colour colour = juce::Colour();
+    juce::Colour colour = juce::Colours::black;
     LumatoneKeyType type = LumatoneKeyType::disabledDefault;
     int note = -1;
     int channel = -1;
