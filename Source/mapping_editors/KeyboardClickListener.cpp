@@ -1,33 +1,33 @@
-#include "KeySelectionController.h"
+#include "KeyboardClickListener.h"
 
 #include "../actions/KeySelectionControlActions.h"
 
-KeySelectionController::KeySelectionController(const LumatoneEditorState &stateIn, LumatoneKeyboardComponent *keyboardComponentIn)
-    : LumatoneEditorState("LumatoneKeySelectionController", stateIn)
+KeyboardClickListener::KeyboardClickListener(const LumatoneEditorState &stateIn, LumatoneKeyboardComponent *keyboardComponentIn)
+    : LumatoneEditorState("LumatoneKeyboardClickListener", stateIn)
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , keyboardComponent(keyboardComponentIn)
 {
     keyboardComponent->addListener(this);
 }
 
-KeySelectionController::~KeySelectionController()
+KeyboardClickListener::~KeyboardClickListener()
 {
     keyboardComponent->removeListener(this);
 }
 
-void KeySelectionController::handleKeyUp(int keyNum)
+void KeyboardClickListener::handleKeyUp(int keyNum)
 {
 
 }
 
-void KeySelectionController::handleKeyDown(int keyNum)
+void KeyboardClickListener::handleKeyDown(int keyNum)
 {
     lastKeyDown = keyNum;
     // make quicker?
     toggleKeySelection(keyNum);
 }
 
-void KeySelectionController::handleKeyHold(int key, float xDistance, float yDistance)
+void KeyboardClickListener::handleKeyHold(int key, float xDistance, float yDistance)
 {
     if (key != lastKeyDown)
     {
@@ -36,7 +36,7 @@ void KeySelectionController::handleKeyHold(int key, float xDistance, float yDist
     }
 }
 
-void KeySelectionController::toggleKeySelection(int keyNum)
+void KeyboardClickListener::toggleKeySelection(int keyNum)
 {
     bool isSelected = false;
     for (const MappedLumatoneKey& key : *getSelectedKeys())

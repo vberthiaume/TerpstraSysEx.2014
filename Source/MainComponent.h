@@ -18,7 +18,7 @@
 
 class LumatoneKeyboardComponent;
 
-class KeySelectionController;
+class KeyboardClickListener;
 class MidiEditArea;
 class KeyEditorPanel;
 class MappingSettingsPanel;
@@ -120,7 +120,7 @@ private:
 
 	//==============================================================================
 
-	std::unique_ptr<KeySelectionController>	keySelectionController;
+	std::unique_ptr<KeyboardClickListener>	keyboardClickListener;
 
 	//==============================================================================
 	// Position and Size helpers

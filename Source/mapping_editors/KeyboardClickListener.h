@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    KeySelectionController.h
+    KeyboardClickListener.h
     Created: 15 June 2024
     Author:  Vincenzo
 
@@ -15,14 +15,14 @@
 #include "../lumatone_editor_library/ui/keyboard_component.h"
 
 // Maybe KeyboardComponentSelectionController
-class KeySelectionController : public LumatoneEditorState
+class KeyboardClickListener : public LumatoneEditorState
                              , private LumatoneEditorState::Controller
                              , public LumatoneKeyboardComponent::Listener
 {
 public:
 
-    KeySelectionController(const LumatoneEditorState& stateIn, LumatoneKeyboardComponent* keyboardComponent);
-    ~KeySelectionController() override;
+    KeyboardClickListener(const LumatoneEditorState& stateIn, LumatoneKeyboardComponent* keyboardComponent);
+    ~KeyboardClickListener() override;
 
 
     // LumatoneKeyboardComponent::Listener

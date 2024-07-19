@@ -16,7 +16,7 @@
 
 #include "MidiEditArea.h"
 
-#include "mapping_editors/KeySelectionController.h"
+#include "mapping_editors/KeyboardClickListener.h"
 #include "mapping_editors/KeyEditorPanel.h"
 #include "mapping_editors/MappingSettingsPanel.h"
 #include "GlobalSettingsArea.h"
@@ -47,7 +47,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	addAndMakeVisible(allKeysOverview.get());
 
 	// Listens to key selection and creates selection edit actions
-	keySelectionController = std::make_unique<KeySelectionController>(*this, allKeysOverview.get());
+	keyboardClickListener = std::make_unique<KeyboardClickListener>(*this, allKeysOverview.get());
 
 	// Edit function area
 	// noteEditArea.reset(new NoteEditArea(stateIn));
@@ -145,7 +145,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 MainContentComponent::~MainContentComponent()
 {
-	keySelectionController = nullptr;
+	keyboardClickListener = nullptr;
 
 	copiedSubBoardData = nullptr;
 
