@@ -362,6 +362,12 @@ public:
 
         g.setColour(colour);
         g.fillPath(getButtonShape(btn));
+
+        if (btn.isColourSpecified(LumatoneEditorColourIDs::OutlineColourId))
+        {
+            g.setColour(btn.findColour(LumatoneEditorColourIDs::OutlineColourId));
+            g.strokePath(getButtonShape(btn), PathStrokeType(1.5f));
+        }
     }
 
     void drawButtonText(Graphics& g, TextButton& btn, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
@@ -371,7 +377,8 @@ public:
         if (properties.contains(LumatoneEditorStyleIDs::textButtonIconHashCode))
         {
             int bkgdColourId = (shouldDrawButtonAsDown) ? TextButton::ColourIds::buttonOnColourId : TextButton::ColourIds::buttonColourId;
-            drawButtonBackground(g, btn, btn.findColour(bkgdColourId), shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
+            juce::Colour bkgdColour = btn.findColour(bkgdColourId);
+            drawButtonBackground(g, btn, bkgdColour, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 
             int colourId = shouldDrawButtonAsDown ? TextButton::ColourIds::textColourOnId : TextButton::ColourIds::textColourOffId;
             Colour textColour = btn.findColour(colourId);
@@ -439,7 +446,9 @@ public:
                 PathStrokeType stroke(1.5f);
                 stroke.setEndStyle(PathStrokeType::EndCapStyle::rounded);
                 stroke.setJointStyle(PathStrokeType::JointStyle::curved);
-
+                juce::Colour iconColour = textColour;
+                float iconScale = 1.0f;
+                int iconXOffset = 0.0;
                 switch (LumatoneEditorIcon(iconCode))
                 {
                 // Using X for now
@@ -461,13 +470,23 @@ public:
                     iconPath = saveIconPath;
                     break;
                 }
+                case LumatoneEditorIcon::ColourPicker:
+                {
+                    iconPath = colourPickerPath;
+                    iconScale = 0.04f;
+                    iconXOffset = iconW * 0.3333f;
+                    iconColour = bkgdColour.contrasting();
+                    stroke.setStrokeThickness(1.0f);
+                    break;
+                }
                 default:
                     break;
                 }
 
-                auto transform = AffineTransform::scale(iconW, iconH).followedBy(AffineTransform::translation(iconX, iconY));
+                auto transform = AffineTransform::scale(iconW * iconScale, iconH * iconScale)
+                     .followedBy(AffineTransform::translation(iconX + iconXOffset, iconY));
                 iconPath.applyTransform(transform);
-                g.setColour(textColour);
+                g.setColour(iconColour);
                 g.strokePath(iconPath, stroke);
             }
 
@@ -846,7 +865,7 @@ public:
         if (buttonW > 0)
         {
             g.setColour(textColour);
-            g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowLight, buttonH * 0.5f).withHorizontalScale(2.0f));
+            g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowLight, buttonH * 0.5f).withHorizontalScale(1.5f));
             g.drawFittedText("v", realButtonX, 0, box.getHeight(), box.getHeight(), Justification::centred, 1);
         }
     }
@@ -1375,6 +1394,7 @@ private:
         saveIconPath = getSaveIconPath();
         arrowUpIconPath = getArrowPath(Point<float>(0.5f, 0.96f), Point<float>(0.5f, 0.08f), 0.55, 0.333f);
         arrowDownIconPath = getArrowPath(Point<float>(0.5f, 0.08f), Point<float>(0.5f, 0.96f), 0.55, 0.667f);
+        colourPickerPath = getPickerIconPath();
     }
 
     /// <summary>
@@ -1453,6 +1473,7 @@ private:
     Path arrowDownIconPath;
 //    Path ccPolarityDefaultIconPath;
 //    Path ccPolarityInvertedIconPath;
+    Path colourPickerPath;
 
     // Default graphics constants
     const float buttonRoundedCornerScalar = 0.2f;
