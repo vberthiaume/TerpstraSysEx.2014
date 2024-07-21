@@ -46,6 +46,7 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
         performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
     });
     addAndMakeVisible(colourDropdown.get());
+    colourDropdown->setShowPicker(true);
 
     keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeComboSelect");
     keyTypeCombo->setEditableText (false);

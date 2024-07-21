@@ -3,40 +3,59 @@
 #include "../LumatoneEditorStyleCommon.h"
 
 ColourDropdownSelector::ColourDropdownSelector(juce::String name, bool editable)
-    : juce::ComboBox(name)
+    : juce::Component(name)
 {
-    setEditableText(editable);
-    getProperties().set(LumatoneEditorStyleIDs::comboBoxEditorRestrictedChars, "0123456789ABCDEFabcdef");
-    getProperties().set(LumatoneEditorStyleIDs::comboBoxEditorRestrictedLength, 6);
-    getProperties().set(LumatoneEditorStyleIDs::comboBoxRenderColourItems, true);
+    colourEditorBox = std::make_unique<juce::ComboBox>("ColourEditorBox");
+    colourEditorBox->setEditableText(editable);
+    colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxEditorRestrictedChars, "0123456789ABCDEFabcdef");
+    colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxEditorRestrictedLength, 6);
+    colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxRenderColourItems, true);
+    colourEditorBox->onChange = [&](){ valueChangedCallback(); };
+    addAndMakeVisible(colourEditorBox.get());
 
-    onChange = [&](){ valueChangedCallback(); };
+    colourPickerButton = std::make_unique<juce::TextButton>(name + "_ColourPickerButton", juce::translate("Select colour by clicking on key"));
+    colourPickerButton->setButtonText("");
+    colourPickerButton->setClickingTogglesState(true);
+    colourPickerButton->onClick = [&](){ togglePickerListenForColour(colourPickerButton->getToggleState()); };
+    colourPickerButton->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ColourPicker);
+    addChildComponent(colourPickerButton.get());
 }
 
 ColourDropdownSelector::~ColourDropdownSelector()
 {
+    colourPickerButton = nullptr;
+    colourEditorBox = nullptr;
 }
 
 void ColourDropdownSelector::paint(juce::Graphics &g)
 {
-    juce::ComboBox::paint(g);
+
 }
 
 void ColourDropdownSelector::resized()
 {
-    juce::ComboBox::resized();
+    if (showPicker)
+    {
+        colourEditorBox->setBounds(getLocalBounds().withTrimmedRight(getHeight()));
+    }
+    else
+    {
+        colourEditorBox->setBounds(getLocalBounds());
+    }
+
+    colourPickerButton->setBounds(getLocalBounds().withLeft(getLocalBounds().getWidth() - getHeight()));
 }
 
 void ColourDropdownSelector::setColourOptions(const juce::Array<juce::Colour> &colours)
 {
-    clear(juce::NotificationType::dontSendNotification);
+    colourEditorBox->clear(juce::NotificationType::dontSendNotification);
     int id = 1;
     for (const juce::Colour& c : colours)
     {
-        addItem(c.toDisplayString(false), id++);
+        colourEditorBox->addItem(c.toDisplayString(false), id++);
     }
 
-    findIdealComboBoxNumColumns(this, getNumItems());
+    findIdealComboBoxNumColumns(colourEditorBox.get(), colourEditorBox->getNumItems());
 }
 
 void ColourDropdownSelector::setShowDropdown(bool show)
@@ -47,6 +66,7 @@ void ColourDropdownSelector::setShowDropdown(bool show)
 void ColourDropdownSelector::setShowPicker(bool show)
 {
     showPicker = show;
+    colourPickerButton->setVisible(show);
 }
 
 void ColourDropdownSelector::setOnValueChangeCallback(std::function<void()> callbackIn)
@@ -57,9 +77,9 @@ void ColourDropdownSelector::setOnValueChangeCallback(std::function<void()> call
 juce::Array<juce::Colour> ColourDropdownSelector::getColourOptions() const
 {
     juce::Array<juce::Colour> options;
-    for (int i = 0; i < getNumItems(); i++)
+    for (int i = 0; i < colourEditorBox->getNumItems(); i++)
     {
-        options.add(juce::Colour::fromString("ff" + getItemText(i)));
+        options.add(juce::Colour::fromString("ff" + colourEditorBox->getItemText(i)));
     }
 
     return options;
@@ -77,12 +97,12 @@ juce::Colour ColourDropdownSelector::getSelectedColour()
 
 void ColourDropdownSelector::deselectColour()
 {
-    setSelectedId(0, juce::NotificationType::sendNotification);
+    colourEditorBox->setSelectedId(0, juce::NotificationType::sendNotification);
 }
 
 juce::Colour ColourDropdownSelector::parseInput() const
 {
-    juce::String text = getText();
+    juce::String text = colourEditorBox->getText();
 
     // Skip odd-numbered lengths and those less than 6 for RGB
     if (text.length() % 2 == 1 || text.length() != 6)
@@ -104,7 +124,7 @@ void ColourDropdownSelector::valueChangedCallback()
 {
     juce::Colour selectedColour = lastSetColour;
 
-    if (getSelectedId() == 0)
+    if (colourEditorBox->getSelectedId() == 0)
     {
         juce::Colour parsedColour = parseInput();
         if (parsedColour.isOpaque())
@@ -112,7 +132,7 @@ void ColourDropdownSelector::valueChangedCallback()
             selectedColour = parsedColour;
 
             // force lowercase
-            setText(parsedColour.toDisplayString(false), juce::NotificationType::dontSendNotification);
+            colourEditorBox->setText(parsedColour.toDisplayString(false), juce::NotificationType::dontSendNotification);
         }
         else
         {
@@ -122,7 +142,7 @@ void ColourDropdownSelector::valueChangedCallback()
     }
     else
     {
-        selectedColour = juce::Colour::fromString("ff" + getText());
+        selectedColour = juce::Colour::fromString("ff" + colourEditorBox->getText());
     }
 
     if (selectedColour != lastSetColour)
@@ -132,4 +152,9 @@ void ColourDropdownSelector::valueChangedCallback()
     }
 
     callback();
+}
+
+void ColourDropdownSelector::togglePickerListenForColour(bool listening)
+{
+    colourPickerButton->setColour(LumatoneEditorColourIDs::OutlineColourId, juce::Colours::white);
 }

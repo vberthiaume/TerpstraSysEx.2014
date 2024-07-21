@@ -15,7 +15,7 @@
 
 #include "../lumatone_editor_library/palettes/colour_selection_group.h"
 
-class ColourDropdownSelector : public juce::ComboBox
+class ColourDropdownSelector : public juce::Component
                              , public ColourSelectionBroadcaster
                              , public ColourSelectionListener
 {
@@ -47,19 +47,19 @@ private:
 
     void valueChangedCallback();
 
+    void togglePickerListenForColour(bool listening);
+
 private:
 
-    using juce::ComboBox::onChange; // don't allow public mutation
-
-
-    // juce::Array<juce::Colour> colourOptions;
+    std::unique_ptr<juce::ComboBox>     colourEditorBox;
+    std::unique_ptr<juce::TextButton>   colourPickerButton;
 
     juce::Colour lastSetColour;
 
     std::function<void()> callback = [](){};
 
     bool showDropdown = true;
-    bool showPicker = true;
+    bool showPicker = false;
 
 };
 
