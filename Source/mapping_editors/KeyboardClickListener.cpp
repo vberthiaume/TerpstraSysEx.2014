@@ -8,6 +8,7 @@ KeyboardClickListener::KeyboardClickListener(const LumatoneEditorState &stateIn,
     , keyboardComponent(keyboardComponentIn)
 {
     keyboardComponent->addListener(this);
+    addColourSelectionBroadcaster(this);
 }
 
 KeyboardClickListener::~KeyboardClickListener()
@@ -25,6 +26,12 @@ void KeyboardClickListener::handleKeyDown(int keyNum)
     lastKeyDown = keyNum;
     // make quicker?
     toggleKeySelection(keyNum);
+
+    auto keyCoord = getMappingData()->keyNumToKeyCoord(keyNum);
+    const LumatoneKey& key = getMappingData()->getKey(keyCoord.boardIndex, keyCoord.keyIndex);
+    lastKeyColour = key.getColour();
+
+    selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastKeyColour);
 }
 
 void KeyboardClickListener::handleKeyHold(int key, float xDistance, float yDistance)
@@ -34,6 +41,11 @@ void KeyboardClickListener::handleKeyHold(int key, float xDistance, float yDista
         lastKeyDown = key;
         toggleKeySelection(key);
     }
+}
+
+juce::Colour KeyboardClickListener::getSelectedColour()
+{
+    return lastKeyColour;
 }
 
 void KeyboardClickListener::toggleKeySelection(int keyNum)

@@ -13,11 +13,12 @@
 
 #include "../LumatoneEditorState.h"
 #include "../lumatone_editor_library/ui/keyboard_component.h"
-
+#include "../lumatone_editor_library/palettes/colour_selection_broadcaster.h"
 // Maybe KeyboardComponentSelectionController
 class KeyboardClickListener : public LumatoneEditorState
                              , private LumatoneEditorState::Controller
                              , public LumatoneKeyboardComponent::Listener
+                             , public ColourSelectionBroadcaster
 {
 public:
 
@@ -33,6 +34,11 @@ public:
 
 private:
 
+    juce::Colour getSelectedColour() override;
+    void deselectColour() override {}
+
+private:
+
     void toggleKeySelection(int keyNum);
 
 private:
@@ -40,6 +46,9 @@ private:
     LumatoneKeyboardComponent* keyboardComponent;
 
     int lastKeyDown = -1;
+
+    juce::Colour lastKeyColour;
+
 };
 
 #endif // LUMATONE_KEY_SELECTION_CONTROLLER_H
