@@ -13,6 +13,7 @@ KeyboardClickListener::KeyboardClickListener(const LumatoneEditorState &stateIn,
 
 KeyboardClickListener::~KeyboardClickListener()
 {
+    removeColourSelectionBroadcaster(this);
     keyboardComponent->removeListener(this);
 }
 
