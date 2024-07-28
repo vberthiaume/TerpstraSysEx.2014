@@ -61,6 +61,8 @@ public:
 
     void setSelected(bool selected);
 
+    void setShowMidiInfo(bool showInfo, bool onlySelected);
+
     bool selected() const { return isSelected; }
     bool clicked() const { return isClicked; }
     bool mouseOver() const { return mouseIsOver; }
@@ -104,8 +106,19 @@ private:
 
     juce::Rectangle<float> selectBounds;
 
+    bool showMidiInfo = true;
+    bool showOnlySelectedInfo = true;
+
     const float selectedDotScalar = 0.15f;
 
+    int midiNumberHeight;
+    int channelNumberY;
+    int noteNumberY;
+    const float channelNumberYHeight = 0.1f;
+    const float channelNumberFontScalar = 0.6;
+
+    juce::Rectangle<int> channelNumberArea;
+    juce::Rectangle<int> midiNumberArea;
 };
 
 #endif LUMATONE_KEY_COMPONENT_H

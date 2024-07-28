@@ -106,6 +106,14 @@ void LumatoneKeyDisplay::paint(juce::Graphics& g)
         g.setColour(juce::Colour(0xff333333));
         g.fillEllipse(selectBounds);
     }
+
+    if (showMidiInfo && (isSelected && showOnlySelectedInfo) || !showOnlySelectedInfo)
+    {
+        g.setColour(juce::Colour(0xff333333));
+        g.drawFittedText(juce::String(getMidiChannel()), channelNumberArea, juce::Justification::centred, 1);
+        g.drawFittedText(juce::String(getMidiNumber()), midiNumberArea, juce::Justification::centred, 1);
+    }
+
 }
 
 void LumatoneKeyDisplay::resized()
@@ -116,6 +124,20 @@ void LumatoneKeyDisplay::resized()
                                         , getHeight() * 0.5f - dotOffset
                                         , dotSize
                                         , dotSize);
+
+    midiNumberHeight = (int)((0.5f-channelNumberYHeight)*getHeight());
+    noteNumberY = juce::roundToInt(getHeight() * 0.5);
+    channelNumberY = noteNumberY - midiNumberHeight;
+
+    channelNumberArea = juce::Rectangle<int>(0, channelNumberY, getWidth(), midiNumberHeight);
+    midiNumberArea = juce::Rectangle<int>(0, noteNumberY, getWidth(), midiNumberHeight);
+
+    if (showMidiInfo && isSelected)
+    {
+        int infoMarginY = (int)((float)getHeight()*selectedDotScalar);
+        channelNumberArea = channelNumberArea.withTrimmedBottom(infoMarginY);
+        midiNumberArea = midiNumberArea.withTrimmedTop(infoMarginY);
+    }
 }
 
 void LumatoneKeyDisplay::parentHierarchyChanged()
@@ -248,7 +270,17 @@ void LumatoneKeyDisplay::setLumatoneKey(const LumatoneKey &lumatoneKey, juce::Co
 void LumatoneKeyDisplay::setSelected(bool selected)
 {
     isSelected = selected;
+    if (showMidiInfo)
+        resized();
+    // else
     repaintIfInteractive();
+}
+
+void LumatoneKeyDisplay::setShowMidiInfo(bool showInfo, bool onlyShowSelected)
+{
+    showMidiInfo = showInfo;
+    showOnlySelectedInfo = onlyShowSelected;
+    resized();
 }
 
 void LumatoneKeyDisplay::clearUiState()
