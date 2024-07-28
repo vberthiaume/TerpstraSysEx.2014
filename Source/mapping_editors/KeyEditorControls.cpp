@@ -36,7 +36,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     lblKeySettings->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
     addAndMakeVisible(lblKeySettings.get());
 
-    colourTextEditor = std::make_unique<ColourTextEditor>("colourTextEditor", "000000");
+    colourTextEditor = std::make_unique<ColourTextEditor>("colourTextEditor", "");
     addAndMakeVisible(colourTextEditor.get());
 
     colourSubwindow = std::make_unique<ColourViewComponent>(juce::Colour(0xff5398b7));

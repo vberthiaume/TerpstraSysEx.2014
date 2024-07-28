@@ -990,6 +990,11 @@ public:
         g.fillRoundedRectangle(Rectangle<float>(0, 0, targetWidth, height), targetMargin);
     }
 
+    static float getPopupMenuColourItemSize(const juce::Font font)
+    {
+        return font.getStringWidth("DD") * 0.67f;
+    }
+
     void drawPopupMenuItemWithOptions(
         Graphics& g, const Rectangle<int>& area, bool isHighlighted, const PopupMenu::Item& item, const PopupMenu::Options& options) override
     {
@@ -1058,7 +1063,7 @@ public:
             g.setColour(itemColour);
 
             float textWidth = font.getStringWidth("DDDDDD ");
-            float colourSize = font.getStringWidth("DD") * 0.67f;
+            float colourSize = getPopupMenuColourItemSize(font);
             float colourY = juce::roundToInt((areaToUse.getHeight() - colourSize) * 0.5f);
             juce::Rectangle<int> colourArea(textArea.getX() + textWidth, colourY, colourSize, colourSize);
             g.fillRect(colourArea);
@@ -1090,6 +1095,17 @@ public:
 			{
 				idealHeight = target->getHeight();
 			}
+
+            if (target->getProperties()[LumatoneEditorStyleIDs::comboBoxPopupItemWidthOverride])
+            {
+                idealWidth = juce::roundToInt((float)target->getProperties()[LumatoneEditorStyleIDs::comboBoxPopupItemWidthOverride]);
+            }
+            else if (target->getProperties()[LumatoneEditorStyleIDs::comboBoxRenderColourItems])
+            {
+                juce::Font itemFont = getPopupMenuFont().withHeight(idealHeight * CONTROLBOXFONTHEIGHTSCALAR);
+                float colourSize = getPopupMenuColourItemSize(itemFont);
+                idealWidth = itemFont.getStringWidth("DDDDDD_") + colourSize;
+            }
 		}
 		else
 		  getDefaultLookAndFeel().getIdealPopupMenuItemSizeWithOptions(text, isSeparator, standardMenuItemHeight, idealWidth, idealHeight,

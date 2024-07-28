@@ -722,6 +722,9 @@ namespace LumatoneEditorStyleIDs
     // Check combo box items for colour hex strings, render if they pass
     static Identifier comboBoxRenderColourItems = Identifier("ComboBoxRenderColourItems");
 
+    // Override the width of the pop up items, to account for varied string lengths
+    static Identifier comboBoxPopupItemWidthOverride = Identifier("ComboBoxPopupItemWidthOverride");
+
     // Specify LumatoneEditorColourGradient id for rotary Slider
     static Identifier sliderRotaryColourGradient = Identifier("SliderRotaryColourGradient");
 }

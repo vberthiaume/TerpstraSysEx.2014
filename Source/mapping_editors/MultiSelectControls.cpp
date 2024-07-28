@@ -188,7 +188,15 @@ void MultiSelectControls::resized()
     resizeLabelWithHeight(lblKeyType.get(), labelHeight, controlLabelFontScalar);
 
     keyTypeCombo->setBounds(contentMarginWidth, lblKeyType->getBottom(), colourTypeColumnWidth, controlHeight);
-
+    auto keyTypeComboFont = getEditorLookAndFeel().getComboBoxFont(*keyTypeCombo);
+    float maxKeyTypeWidth = keyTypeCombo->getWidth();
+    for (int i = 0; i < keyTypeCombo->getNumItems(); i++)
+    {
+        float itemWidth = keyTypeComboFont.getStringWidth(keyTypeCombo->getItemText(i) + "_");
+        if (itemWidth > maxKeyTypeWidth)
+            maxKeyTypeWidth = itemWidth;
+    }
+    keyTypeCombo->getProperties().set(LumatoneEditorStyleIDs::comboBoxPopupItemWidthOverride, maxKeyTypeWidth);
 
     lblNote->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, headerHeight + contentMarginHeight);
     resizeLabelWithHeight(lblNote.get(), labelHeight, controlLabelFontScalar);
