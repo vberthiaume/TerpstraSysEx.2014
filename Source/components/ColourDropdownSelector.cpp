@@ -69,9 +69,33 @@ void ColourDropdownSelector::setShowPicker(bool show)
     colourPickerButton->setVisible(show);
 }
 
+void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool setText)
+{
+    if (!newColour.isOpaque())
+        return; // Don't allow transparency
+
+    if (newColour != lastSetColour)
+    {
+        lastSetColour = newColour;
+        selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastSetColour);
+    }
+
+    if (setText)
+    {
+        colourEditorBox->setText(lastSetColour.toDisplayString(false), juce::NotificationType::dontSendNotification);
+    }
+
+    callbackColourChanged();
+}
+
 void ColourDropdownSelector::setOnValueChangeCallback(std::function<void()> callbackIn)
 {
-    callback = callbackIn;
+    callbackColourChanged = callbackIn;
+}
+
+void ColourDropdownSelector::setColourPickerChangedCallback(std::function<void()> callback)
+{
+    callbackPickerChanged = callback;
 }
 
 juce::Array<juce::Colour> ColourDropdownSelector::getColourOptions() const
@@ -88,6 +112,18 @@ juce::Array<juce::Colour> ColourDropdownSelector::getColourOptions() const
 void ColourDropdownSelector::colourChangedCallback(ColourSelectionBroadcaster* source, juce::Colour newColour)
 {
     // todo
+    if (pickerIsListening)
+    {
+        setSelectedColour(newColour);
+
+        colourPickerButton->setToggleState(false, juce::NotificationType::sendNotification);
+        pickerIsListening = false;
+
+        colourPickerButton->setColour(juce::TextButton::ColourIds::buttonColourId, newColour);
+        colourPickerButton->setColour(juce::TextButton::ColourIds::buttonOnColourId, newColour);
+
+        // callbackPickerChanged();
+    }
 }
 
 juce::Colour ColourDropdownSelector::getSelectedColour()
@@ -145,16 +181,19 @@ void ColourDropdownSelector::valueChangedCallback()
         selectedColour = juce::Colour::fromString("ff" + colourEditorBox->getText());
     }
 
-    if (selectedColour != lastSetColour)
-    {
-        lastSetColour = selectedColour;
-        selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastSetColour);
-    }
-
-    callback();
+    setSelectedColour(selectedColour, false);
 }
 
 void ColourDropdownSelector::togglePickerListenForColour(bool listening)
 {
-    colourPickerButton->setColour(LumatoneEditorColourIDs::OutlineColourId, juce::Colours::white);
+    pickerIsListening = listening;
+    if (pickerIsListening)
+    {
+        colourPickerButton->setColour(LumatoneEditorColourIDs::OutlineColourId, juce::Colours::white);
+        callbackPickerChanged();
+    }
+    else
+    {
+        colourPickerButton->setColour(LumatoneEditorColourIDs::OutlineColourId, juce::Colour());
+    }
 }

@@ -45,6 +45,13 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
         auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
         performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
     });
+
+    addColourSelectionListener(colourDropdown.get());
+    colourDropdown->setColourPickerChangedCallback([&]()
+    {
+        addColourSelectionListener(colourDropdown.get());
+    });
+
     addAndMakeVisible(colourDropdown.get());
     colourDropdown->setShowPicker(true);
 

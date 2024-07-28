@@ -31,7 +31,10 @@ public:
     void setShowDropdown(bool show);
     void setShowPicker(bool show);
 
+    void setSelectedColour(juce::Colour newColour, bool setText=true);
+
     void setOnValueChangeCallback(std::function<void()> callback);
+    void setColourPickerChangedCallback(std::function<void()> callback);
 
     juce::Array<juce::Colour> getColourOptions() const;
 
@@ -55,8 +58,10 @@ private:
     std::unique_ptr<juce::TextButton>   colourPickerButton;
 
     juce::Colour lastSetColour;
+    bool pickerIsListening = false;
 
-    std::function<void()> callback = [](){};
+    std::function<void()> callbackColourChanged = [](){};
+    std::function<void()> callbackPickerChanged = [](){};
 
     bool showDropdown = true;
     bool showPicker = false;
