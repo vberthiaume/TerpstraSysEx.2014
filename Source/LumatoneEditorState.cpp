@@ -15,6 +15,8 @@
 #include "./lumatone_editor_library/device/lumatone_controller.h"
 #include "./lumatone_editor_library/listeners/editor_listener.h"
 
+#include "./lumatone_editor_library/palettes/colour_selection_group.h"
+
 
 static juce::File getDefaultUserDocumentsDirectory()
 {
@@ -59,6 +61,7 @@ LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwa
     loadPropertiesFile(nullptr);
 
     colourPalettes = std::make_shared<juce::Array<LumatoneEditorColourPalette>>();
+    colourSelectionGroup = std::make_shared<ColourSelectionGroup>("LumatoneEditorAppColourGroup");
 }
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditorState &stateIn)
@@ -70,6 +73,7 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditor
     , recentFiles(stateIn.recentFiles)
     , propertiesFile(stateIn.propertiesFile)
     , colourPalettes(stateIn.colourPalettes)
+    , colourSelectionGroup(stateIn.colourSelectionGroup)
 {
     // DBG(name + " LumatoneEditorState created");
 }
@@ -84,6 +88,8 @@ LumatoneEditorState::~LumatoneEditorState()
 {
     if (name == LumatoneEditorProperty::StateTree.toString())
         DBG(state.toXmlString());
+
+    colourSelectionGroup = nullptr;
 
     recentFiles = nullptr;
     propertiesFile = nullptr;
@@ -193,6 +199,26 @@ void LumatoneEditorState::setHasChangesToSave(bool hasChangesToSaveIn)
 {
     hasChangesToSave = hasChangesToSaveIn;
     setStateProperty(LumatoneEditorProperty::HasChangesToSave, hasChangesToSave);
+}
+
+void LumatoneEditorState::addColourSelectionBroadcaster(ColourSelectionBroadcaster *broadcasterIn)
+{
+    colourSelectionGroup->addSelector(broadcasterIn);
+}
+
+void LumatoneEditorState::removeColourSelectionBroadcaster(ColourSelectionBroadcaster *broadcasterIn)
+{
+    colourSelectionGroup->removeSelector(broadcasterIn);
+}
+
+void LumatoneEditorState::addColourSelectionListener(ColourSelectionListener *listenerIn)
+{
+    colourSelectionGroup->addColourSelectionListener(listenerIn);
+}
+
+void LumatoneEditorState::removeColourSelectionListener(ColourSelectionListener *listenerIn)
+{
+    colourSelectionGroup->removeColourSelectionListener(listenerIn);
 }
 
 bool LumatoneEditorState::doSendChangesToDevice() const

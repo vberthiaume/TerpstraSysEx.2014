@@ -24,6 +24,10 @@ class LumatoneEditorLookAndFeel;
 class LumatoneController;
 class LumatoneEditorColourPalette;
 
+class ColourSelectionBroadcaster;
+class ColourSelectionListener;
+class ColourSelectionGroup;
+
 namespace LumatoneEditorProperty
 {
     static const juce::Identifier StateTree = juce::Identifier("LumatoneEditorState");
@@ -125,6 +129,15 @@ public:
 
     juce::File getLastOpenedMappingsDirectory() const;
 
+
+private:
+    std::shared_ptr<ColourSelectionGroup> colourSelectionGroup;
+public:
+    void addColourSelectionBroadcaster(ColourSelectionBroadcaster* broadcasterIn);
+    void removeColourSelectionBroadcaster(ColourSelectionBroadcaster* broadcasterIn);
+
+    void addColourSelectionListener(ColourSelectionListener* listenerIn);
+    void removeColourSelectionListener(ColourSelectionListener* listenerIn);
 
 public:
     bool doSendChangesToDevice() const override;
