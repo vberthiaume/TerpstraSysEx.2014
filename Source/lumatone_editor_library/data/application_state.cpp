@@ -1,4 +1,5 @@
 #include "application_state.h"
+
 #include "../device/lumatone_controller.h"
 #include "../device/activity_monitor.h"
 #include "../color/colour_model.h"
@@ -11,6 +12,7 @@
 #include "../listeners/midi_listener.h"
 
 #include "../lumatone_midi_driver/lumatone_midi_driver.h"
+#include "../lumatone_midi_driver/firmware_types.h"
 
 juce::Array<juce::Identifier> getLumatoneApplicationProperties()
 {
@@ -36,6 +38,9 @@ LumatoneApplicationState::LumatoneApplicationState(juce::ValueTree stateIn, Luma
 
     selectedKeys = std::make_shared<juce::Array<MappedLumatoneKey>>();
 
+    receiveSettingsStatus = std::make_shared<FirmwareSupport::ReceiveSettingsStatus>();
+    receiveLayoutStatus = std::make_shared<FirmwareSupport::ReceiveLayoutStatus>();
+
     loadStateProperties(stateIn);
 }
 
@@ -51,6 +56,8 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const Lu
     , activityMonitor(stateIn.activityMonitor)
     , colourModel(stateIn.colourModel)
     , selectedKeys(stateIn.selectedKeys)
+    , receiveSettingsStatus(stateIn.receiveSettingsStatus)
+    , receiveLayoutStatus(stateIn.receiveLayoutStatus)
 {
     loadStateProperties(state);
 }
@@ -389,7 +396,7 @@ void LumatoneApplicationState::setInvertSustain(bool invert)
 
     if (doSendChangesToDevice())
     {
-        controller->invertSustainPedal(invert);
+        controller->setInvertSustainPedal(invert);
     }
 
     editorListeners->call(&LumatoneEditor::EditorListener::invertSustainToggled, invert);
@@ -561,6 +568,16 @@ void LumatoneApplicationState::Controller::updatedSelectedKeys()
     appState.editorListeners->call(&LumatoneEditor::EditorListener::selectionChanged);
 }
 
+FirmwareSupport::ReceiveSettingsStatus &LumatoneApplicationState::Controller::getReceivedSettingsStatus()
+{
+    return *appState.receiveSettingsStatus;
+}
+
+FirmwareSupport::ReceiveLayoutStatus &LumatoneApplicationState::Controller::getReceivedLayoutStatus()
+{
+    return *appState.receiveLayoutStatus;
+}
+
 bool LumatoneApplicationState::Controller::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
 {
     return appState.performLumatoneAction(action, undoable, newTransaction);
@@ -606,45 +623,57 @@ void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* 
     midiListeners->remove(listenerIn);
 }
 
-bool LumatoneApplicationState::Controller::requestCompleteConfigFromDevice()
+bool LumatoneApplicationState::Controller::requestCompleteDeviceConfig()
 {
     if (appState.connectionState != ConnectionState::ONLINE)
         return false;
 
-    requestSettingsFromDevice();
-    requestMappingFromDevice();
+    requestDeviceGlobalSettings();
+    requestDeviceMapping();
 
     return true;
 }
 
-bool LumatoneApplicationState::Controller::requestSettingsFromDevice()
+bool LumatoneApplicationState::Controller::requestDeviceGlobalSettings()
 {
     if (appState.connectionState != ConnectionState::ONLINE)
         return false;
+
+    // Reset state for tracking response progress
+    *appState.receiveSettingsStatus = FirmwareSupport::ReceiveSettingsStatus(appState.getLumatoneVersion());
+
+	// Velocity curve config
+	appState.controller->sendVelocityIntervalConfigRequest();
 
     // Macro button colours
     appState.controller->requestMacroButtonColours();
 
 	// General options
-	appState.controller->requestPresetFlags();
-	appState.controller->requestExpressionPedalSensitivity();
-
-	// Velocity curve config
-	appState.controller->sendVelocityIntervalConfigRequest();
-	appState.controller->sendVelocityConfigRequest();
-	appState.controller->sendFaderConfigRequest();
-	appState.controller->sendAftertouchConfigRequest();
+    appState.controller->getPeripheralChannels();
 
     return true;
 }
 
-bool LumatoneApplicationState::Controller::requestMappingFromDevice()
+bool LumatoneApplicationState::Controller::requestDeviceMapping()
 {
     if (appState.connectionState != ConnectionState::ONLINE)
         return false;
 
+    // Reset state for tracking response progress
+    *appState.receiveLayoutStatus = FirmwareSupport::ReceiveLayoutStatus(appState.getLumatoneVersion(), appState.getNumBoards());
+
     // Request MIDI channel, MIDI note, colour and key type config for all keys
-    appState.controller->sendGetCompleteMappingRequest();
+    appState.controller->sendGetAllBoardsMappingRequest();
+
+    // Request mapping look-up tables
+    appState.controller->sendVelocityConfigRequest();
+	appState.controller->sendFaderConfigRequest();
+	appState.controller->sendAftertouchConfigRequest();
+
+    // Request settings associated with mapping
+    appState.controller->requestExpressionPedalSensitivity();
+    appState.controller->requestPresetFlags();
+
     return true;
 }
 

@@ -164,6 +164,9 @@ private:
     std::shared_ptr<DeviceActivityMonitor> activityMonitor;
     std::shared_ptr<LumatoneColourModel> colourModel;
 
+    std::shared_ptr<FirmwareSupport::ReceiveSettingsStatus> receiveSettingsStatus;
+    std::shared_ptr<FirmwareSupport::ReceiveLayoutStatus> receiveLayoutStatus;
+
     bool contextIsSet = false;
 
 //================================================================================
@@ -174,24 +177,26 @@ public:
         Controller(LumatoneApplicationState& stateIn)
             : appState(stateIn) {}
 
-    virtual bool requestSettingsFromDevice();
-    virtual bool requestMappingFromDevice();
-    virtual bool requestCompleteConfigFromDevice();
+        virtual bool requestDeviceGlobalSettings();
+        virtual bool requestDeviceMapping();
+        virtual bool requestCompleteDeviceConfig();
 
-    void setInactiveMacroButtonColour(juce::Colour buttonColour);
-    void setActiveMacroButtonColour(juce::Colour buttonColour);
+        void setInactiveMacroButtonColour(juce::Colour buttonColour);
+        void setActiveMacroButtonColour(juce::Colour buttonColour);
 
-    void setSelectedKeys(juce::Array<MappedLumatoneKey> selection);
-    void addSelectedKey(int keyNum);
-    void removeSelectedKey(int keyNum);
+        void setSelectedKeys(juce::Array<MappedLumatoneKey> selection);
+        void addSelectedKey(int keyNum);
+        void removeSelectedKey(int keyNum);
 
     protected:
+        void updatedSelectedKeys();
 
-    void updatedSelectedKeys();
+        FirmwareSupport::ReceiveSettingsStatus& getReceivedSettingsStatus();
+        FirmwareSupport::ReceiveLayoutStatus& getReceivedLayoutStatus();
 
     public:
 
-    virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
+        virtual bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
 
     protected:
         juce::ListenerList<LumatoneEditor::EditorListener>* getEditorListeners() const { return appState.editorListeners.get(); }

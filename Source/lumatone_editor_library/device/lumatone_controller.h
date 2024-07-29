@@ -72,7 +72,7 @@ public:
     void sendGetMappingOfBoardRequest(int boardId);
 
     // Send request to receive the complete current mapping on the controller
-    void sendGetCompleteMappingRequest();
+    void sendGetAllBoardsMappingRequest();
 
     // Send parametrization of one key to the device
     void sendKeyParam(int boardId, int keyIndex, LumatoneKey keyData, bool signalEditorListeners=true, bool bufferKeyUpdates=false);
@@ -189,7 +189,7 @@ public:
     void getPeripheralChannels();
 
     // Invert the polarity of the sustain pedal
-    void invertSustainPedal(bool setInverted);
+    void setInvertSustainPedal(bool setInverted);
 
     // Reset preset mappings to factory mappings
     void resetPresetsToFactoryDefault();

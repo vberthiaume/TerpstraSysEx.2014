@@ -129,7 +129,7 @@ void LumatoneController::sendCurrentCompleteConfig(bool signalEditorListeners)
 	sendLightOnKeyStrokes(getMappingData()->getLightOnKeyStrokes());
 	sendInvertFootController(getMappingData()->getInvertExpression());
 	sendExpressionPedalSensivity(getMappingData()->getExpressionSensitivity());
-    invertSustainPedal(getMappingData()->getInvertSustain());
+    setInvertSustainPedal(getMappingData()->getInvertSustain());
 
 	// Velocity curve config
 	setVelocityIntervalConfig(getMappingData()->getConfigTable(LumatoneConfigTable::velocityInterval)->velocityValues);
@@ -146,7 +146,7 @@ void LumatoneController::sendGetMappingOfBoardRequest(int boardId)
     getFaderTypeConfig(boardId);
 }
 
-void LumatoneController::sendGetCompleteMappingRequest()
+void LumatoneController::sendGetAllBoardsMappingRequest()
 {
     for (int boardId = 1; boardId <= getNumBoards(); boardId++)
         sendGetMappingOfBoardRequest(boardId);
@@ -520,7 +520,7 @@ void LumatoneController::getPeripheralChannels()
         firmwareDriver.getPeripheralChannels();
 }
 
-void LumatoneController::invertSustainPedal(bool setInverted)
+void LumatoneController::setInvertSustainPedal(bool setInverted)
 {
     LumatoneState::setInvertSustain(setInverted);
 
@@ -571,7 +571,7 @@ void LumatoneController::onConnectionConfirmed()
 {
     checkingDeviceIsLumatone = false;
     currentDevicePairConfirmed = true;
-    
+
     if (getSerialNumber().isEmpty())
     {
         waitingForFirmwareVersion = true;
@@ -613,7 +613,7 @@ void LumatoneController::serialIdentityReceived(const int* serialBytes)
             sendGetFirmwareRevisionRequest();
         else
             onConnectionConfirmed();
-            
+
         setConnectionState(ConnectionState::ONLINE);
     }
 

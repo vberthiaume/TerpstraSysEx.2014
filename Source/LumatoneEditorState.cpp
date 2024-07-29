@@ -60,6 +60,8 @@ LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwa
 
     loadPropertiesFile(nullptr);
 
+    lastSavedLayout = std::make_shared<LumatoneLayout>();
+
     colourPalettes = std::make_shared<juce::Array<LumatoneEditorColourPalette>>();
     colourSelectionGroup = std::make_shared<ColourSelectionGroup>("LumatoneEditorAppColourGroup");
 }
@@ -437,7 +439,7 @@ bool LumatoneEditorState::Controller::performAction(LumatoneAction *action, bool
 {
     if (LumatoneApplicationState::Controller::performAction(action, undoable, newTransaction))
     {
-        setHasChangesToSave(true);
+
         return true;
     }
 
@@ -452,6 +454,7 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
         // Replace with blank file
 		LumatoneLayout defaultLayout;
         editorState.setCompleteConfig(defaultLayout);
+        *editorState.lastSavedLayout = defaultLayout;
         editorState.setHasChangesToSave(false);
         return true;
     }
@@ -473,6 +476,9 @@ bool LumatoneEditorState::Controller::resetToCurrentFile()
 
 		// Send configuration to controller, if connected
         editorState.setCompleteConfig(keyMapping);
+
+        // Save copy that doesn't get updated
+        *editorState.lastSavedLayout = keyMapping;
 
         // Clear undo history
 		editorState.undoManager->clearUndoHistory();
@@ -506,11 +512,11 @@ bool LumatoneEditorState::Controller::openRecentFile(int recentFileIndex)
     return setCurrentFile(editorState.recentFiles->getFile(recentFileIndex));
 }
 
-bool LumatoneEditorState::Controller::requestCompleteConfigFromDevice()
+bool LumatoneEditorState::Controller::requestCompleteDeviceConfig()
 {
     setHasChangesToSave(false);
     editorState.undoManager->clearUndoHistory();
-    return LumatoneApplicationState::Controller::requestCompleteConfigFromDevice();
+    return LumatoneApplicationState::Controller::requestCompleteDeviceConfig();
 }
 
 bool LumatoneEditorState::Controller::saveMappingToFile(juce::File fileToSave)

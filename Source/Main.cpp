@@ -686,7 +686,7 @@ bool TerpstraSysExApplication::onRequestDeviceConfig()
 	}
 
 	// resetSysExMapping();
-	requestCompleteConfigFromDevice();
+	requestCompleteDeviceConfig();
 
 	return true;
 }

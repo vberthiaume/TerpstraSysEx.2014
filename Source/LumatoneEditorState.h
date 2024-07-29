@@ -174,6 +174,8 @@ private:
 
     std::shared_ptr<juce::PropertiesFile>   propertiesFile;
 
+    std::shared_ptr<LumatoneLayout>         lastSavedLayout;
+
 protected:
 
     // Global UI constants
@@ -205,7 +207,7 @@ public:
         bool resetToCurrentFile();
         bool openRecentFile(int recentFileIndex);
 
-        virtual bool requestCompleteConfigFromDevice() override;
+        virtual bool requestCompleteDeviceConfig() override;
 
         void addPalette(const LumatoneEditorColourPalette& newPalette);
         bool deletePaletteFile(juce::File pathToPalette);
