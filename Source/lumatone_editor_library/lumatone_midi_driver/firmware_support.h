@@ -77,7 +77,7 @@ struct FirmwareSupport
 
 		else if ((versionIn.major < 0) | (versionIn.minor < 0) | (versionIn.revision < 0))
 			return LumatoneFirmware::ReleaseVersion::UNKNOWN_VERSION;
-		
+
         // MAJOR: 1
 		else if (versionIn.major == 1)
 		{
@@ -94,20 +94,20 @@ struct FirmwareSupport
 				else if (versionIn.revision >= 3)
 					return (LumatoneFirmware::ReleaseVersion)((int)LumatoneFirmware::ReleaseVersion::VERSION_1_0_3 + (versionIn.revision - 3));
 			}
-            
+
             // MINOR: 1
             else if (versionIn.minor == 1)
             {
                 if (versionIn.revision == 0)
                     return LumatoneFirmware::ReleaseVersion::VERSION_1_1_0;
             }
-            
+
             else if (versionIn.minor == 2)
             {
                 if (versionIn.revision == 0)
                     return LumatoneFirmware::ReleaseVersion::VERSION_1_2_0;
             }
-            
+
             return LumatoneFirmware::ReleaseVersion::FUTURE_VERSION;
 		}
 
@@ -180,7 +180,7 @@ struct FirmwareSupport
 	{
 		return msg.getSysExData()[CMD_ID];
 	}
-    
+
     static juce::String serialIdentityToString(const int* serialBytes)
     {
         return juce::String::toHexString(serialBytes, 6);
@@ -527,6 +527,72 @@ struct FirmwareSupport
 
 		return name + ": " + description;
 	}
+
+public:
+
+struct ReceiveSettingsStatus
+{
+	bool receivedVelocityIntervalTable = false;
+	bool receivedMacroButtonColours = false;
+	bool receivedPeripheralChannels = false;
+
+	LumatoneFirmware::ReleaseVersion version;
+
+	ReceiveSettingsStatus(LumatoneFirmware::ReleaseVersion versionIn = LumatoneFirmware::ReleaseVersion::FUTURE_VERSION)
+	 : version(versionIn) {}
+
+	bool completed() const
+	{
+		return receivedVelocityIntervalTable
+			&& (!FirmwareSupport::versionAcknowledgesCommand(version, GET_MACRO_LIGHT_INTENSITY) || receivedMacroButtonColours)
+			&& (!FirmwareSupport::versionAcknowledgesCommand(version, GET_PERIPHERAL_CHANNELS) || receivedPeripheralChannels)
+			;
+	}
+};
+
+struct ReceiveLayoutStatus
+{
+	int numBoards = 5;
+
+	int numRedConfigReceived = 0;
+	int numGreenConfigReceived = 0;
+	int numBlueConfigReceived = 0;
+	int numKeyTypeConfigReceived = 0;
+	int numNoteConfigReceived = 0;
+	int numChannelConfigReceived = 0;
+	int numFaderTypeConfigReceived = 0;
+
+	bool receivedExprPedalSensitivity = false;
+	bool receivedPresetFlags = false;
+
+	bool receivedVelocityTable = false;
+	bool receivedFaderTable = false;
+	bool receivedAftertouchTable = false;
+	bool receivedLumatouchTable = false; // currently not enabled
+
+	LumatoneFirmware::ReleaseVersion version;
+
+	ReceiveLayoutStatus(LumatoneFirmware::ReleaseVersion versionIn = LumatoneFirmware::ReleaseVersion::FUTURE_VERSION, int numBoardsIn=5)
+		: version(versionIn)
+		, numBoards(numBoardsIn) {}
+
+	bool completed() const
+	{
+		return numRedConfigReceived == numBoards
+			&& numGreenConfigReceived == numBoards
+			&& numBlueConfigReceived == numBoards
+			&& numKeyTypeConfigReceived == numBoards
+			&& numNoteConfigReceived == numBoards
+			&& numChannelConfigReceived == numBoards
+			&& numFaderTypeConfigReceived == numBoards
+			&& receivedVelocityTable
+			&& receivedFaderTable
+			&& receivedAftertouchTable
+			&& (!FirmwareSupport::versionAcknowledgesCommand(version, GET_EXPRESSION_PEDAL_SENSITIVIY) || receivedExprPedalSensitivity)
+			&& (!FirmwareSupport::versionAcknowledgesCommand(version, GET_PRESET_FLAGS) || receivedPresetFlags)
+			;
+	}
+};
 
 };
 

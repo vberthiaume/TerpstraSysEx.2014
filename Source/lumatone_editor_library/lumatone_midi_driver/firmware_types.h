@@ -137,8 +137,8 @@ struct Version
 
 	juce::String toString() const { return juce::String(major) + "." + juce::String(minor) + "." + juce::String(revision); }
 
-	juce::String toDisplayString() const 
-	{ 
+	juce::String toDisplayString() const
+	{
 		juce::String str = juce::String(major) + "." + juce::String(minor);
 		if (revision > 0)
 			str += ("." + juce::String(revision));
@@ -196,7 +196,7 @@ struct Version
 		// Return special definition for 55-keys version
 		else if (versionIn == ReleaseVersion::VERSION_55_KEYS)
 			return Version(0, 0, 55);
-		
+
 		return Version(0, 0, 0);
 	}
 };
