@@ -88,8 +88,8 @@ juce::ValueTree LumatoneState::loadStateProperties(juce::ValueTree stateIn)
 
 void LumatoneState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
 {
-    // Ignore any changes from parents
-    if (stateIn != state || !stateIn.isAChildOf(state))
+    // Only acknowledge changes to this node 
+    if (stateIn != state)
         return;
 
     if (property == LumatoneStateProperty::LastConnectedSerialNumber)
