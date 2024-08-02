@@ -15,19 +15,14 @@
 #include "../listeners/editor_listener.h"
 
 LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& driverIn)
-    : LumatoneApplicationState("LumatoneController", stateIn)
-    , LumatoneApplicationState::DeviceController(static_cast<LumatoneApplicationState&>(*this))
+    : LumatoneState("LumatoneController", stateIn)
     , LumatoneApplicationMidiController(stateIn, driverIn)
     , firmwareDriver(driverIn)
     , updateBuffer(driverIn, stateIn)
     // , LumatoneSandboxLogger("LumatoneController")
 {
-    firmwareDriver.addDriverListener(this);
-
     eventManager = std::make_unique<LumatoneEventManager>(firmwareDriver, stateIn);
     eventManager->addFirmwareListener(this);
-
-    addStatusListener(this);
 }
 
 LumatoneController::~LumatoneController()
@@ -37,7 +32,7 @@ LumatoneController::~LumatoneController()
 
 juce::ValueTree LumatoneController::loadStateProperties(juce::ValueTree stateIn)
 {
-    LumatoneApplicationState::loadStateProperties(stateIn);
+    LumatoneState::loadStateProperties(stateIn);
     return state;
 }
 
@@ -115,8 +110,6 @@ void LumatoneController::sendCompleteMapping(const LumatoneLayout& mappingData, 
 {
     for (int boardId = 1; boardId <= getNumBoards(); boardId++)
         sendAllParamsOfBoard(boardId, &mappingData.getBoard(boardId - 1), false, bufferKeyUpdates);
-
-    clearContext();
 }
 
 void LumatoneController::sendCurrentCompleteConfig(bool signalEditorListeners)
@@ -590,7 +583,7 @@ void LumatoneController::onConnectionConfirmed()
 
 void LumatoneController::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
 {
-    LumatoneApplicationState::handleStatePropertyChange(stateIn, property);
+    LumatoneState::handleStatePropertyChange(stateIn, property);
 
     if (waitingForFirmwareVersion && property == LumatoneStateProperty::LastConnectedFirmwareVersion)
     {
