@@ -530,13 +530,13 @@ void MidiEditArea::onOpenConnectionToDevice(juce::String dialogTitle)
 		if (retc == 0) // Import
 		{
 			// TODO non getLumatoneController call
-			LumatoneEditorState::Controller::requestCompleteDeviceConfig();
 			setEditMode(EditorMode::ONLINE);
+			LumatoneEditorState::Controller::requestCompleteDeviceConfig();
 		}
 		else if (retc == 1) // Send
 		{
-			LumatoneEditorState::setCompleteConfig(*getMappingData());
 			setEditMode(EditorMode::ONLINE);
+			LumatoneEditorState::setCompleteConfig(*getMappingData());
 		}
 		else if (retc == 2) // Offline
 		{
