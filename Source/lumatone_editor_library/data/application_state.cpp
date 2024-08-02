@@ -31,15 +31,16 @@ LumatoneApplicationState::LumatoneApplicationState(juce::ValueTree stateIn, Luma
     firmwareListeners = std::make_shared<juce::ListenerList<LumatoneEditor::FirmwareListener>>();
     midiListeners = std::make_shared<juce::ListenerList<LumatoneEditor::MidiListener>>();
 
-    layoutContext = std::make_shared<LumatoneContext>(*mappingData);
-	controller = std::make_shared<LumatoneController>(*this, driverIn);
-    activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, &driverIn);
-    colourModel = std::make_shared<LumatoneColourModel>();
-
     selectedKeys = std::make_shared<juce::Array<MappedLumatoneKey>>();
 
     receiveSettingsStatus = std::make_shared<FirmwareSupport::ReceiveSettingsStatus>();
     receiveLayoutStatus = std::make_shared<FirmwareSupport::ReceiveLayoutStatus>();
+
+    layoutContext = std::make_shared<LumatoneContext>(*mappingData);
+    colourModel = std::make_shared<LumatoneColourModel>();
+
+	controller = std::make_shared<LumatoneController>(*this, driverIn);
+    activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, &driverIn);
 
     loadStateProperties(stateIn);
 }
@@ -275,6 +276,8 @@ void LumatoneApplicationState::setLayout(const LumatoneLayout &layoutIn)
     {
         controller->sendCompleteMapping(layoutIn);
     }
+
+    clearContext();
 
     editorListeners->call(&LumatoneEditor::EditorListener::layoutChanged, *mappingData);
 }
@@ -628,7 +631,7 @@ bool LumatoneApplicationState::Controller::requestCompleteDeviceConfig()
     if (appState.connectionState != ConnectionState::ONLINE)
         return false;
 
-    requestDeviceGlobalSettings();
+    // requestDeviceGlobalSettings();
     requestDeviceMapping();
 
     return true;
@@ -689,8 +692,11 @@ void LumatoneApplicationState::Controller::setActiveMacroButtonColour(juce::Colo
 
 void LumatoneApplicationState::DeviceController::setConnectionState(ConnectionState newState, bool sendNotification)
 {
+    bool stateChanged = deviceAppState.connectionState != newState;
+
     deviceAppState.connectionState = newState;
     deviceAppState.setStateProperty(LumatoneApplicationProperty::ConnectionStateId, juce::var((int)deviceAppState.connectionState));
+
     if (sendNotification)
         getStatusListeners()->call(&LumatoneEditor::StatusListener::connectionStateChanged, deviceAppState.connectionState);
 }

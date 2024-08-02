@@ -159,13 +159,16 @@ public:
 private:
     LumatoneFirmwareDriver& firmwareDriver;
 
-    std::shared_ptr<LumatoneContext> layoutContext;
-	std::shared_ptr<LumatoneController> controller;
-    std::shared_ptr<DeviceActivityMonitor> activityMonitor;
-    std::shared_ptr<LumatoneColourModel> colourModel;
-
     std::shared_ptr<FirmwareSupport::ReceiveSettingsStatus> receiveSettingsStatus;
     std::shared_ptr<FirmwareSupport::ReceiveLayoutStatus> receiveLayoutStatus;
+
+    std::shared_ptr<LumatoneContext> layoutContext;
+    std::shared_ptr<LumatoneColourModel> colourModel;
+	
+    // Anything inheriting from this state should come after shared data
+    std::shared_ptr<LumatoneController> controller;
+    std::shared_ptr<DeviceActivityMonitor> activityMonitor;
+
 
     bool contextIsSet = false;
 
@@ -236,6 +239,7 @@ public:
 private:
     friend class Controller;
     friend class DeviceController;
+    friend class LumatoneController;
 };
 
 #endif // LUMATONE_APPLICATION_STATE_H
