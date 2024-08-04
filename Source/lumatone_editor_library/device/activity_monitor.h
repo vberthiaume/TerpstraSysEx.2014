@@ -26,8 +26,8 @@ class LumatoneFirmwareDriver;
 
 class DeviceActivityMonitor : protected LumatoneApplicationState
                             , protected LumatoneApplicationState::DeviceController
-                            , public juce::Timer
                             , protected LumatoneFirmwareDriverListener
+                            , public juce::Timer
 {
     
 public:
@@ -41,7 +41,7 @@ public:
     
 public:
 
-    DeviceActivityMonitor(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver* midiDriverIn);
+    DeviceActivityMonitor(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& midiDriverIn);
     ~DeviceActivityMonitor() override;
 
     DetectConnectionMode getMode() const { return deviceConnectionMode; }
@@ -72,7 +72,21 @@ public:
 
     // Turn off device monitoring and idle
     void stopMonitoringDevice();
-    
+
+
+    //=========================================================================
+    // Methods for changing what device is used
+
+    void setMidiInput(int deviceIndex, bool test = true) override;
+    void setMidiOutput(int deviceIndex, bool test = true) override;
+
+    //=========================================================================
+    // Copied from LumatoneEventManager
+
+    bool handleSerialIdentityResponse(const juce::MidiMessage& msg);
+    // void handleFirmwareRevisionResponse(const juce::MidiMessage& msg);
+    // void handlePingResponse(const juce::MidiMessage& msg);
+
 private:
 
     //=========================================================================
@@ -104,6 +118,8 @@ private:
     /// </summary>
     void checkDetectionStatus();
 
+    void testCurrentOutput();
+
     /// <summary>
     /// Increments the output index and sends a Get Serial Identity message to this next output to listen for a response 
     /// </summary>
@@ -133,7 +149,7 @@ private:
     void removeFailedPingDevice(const juce::MidiMessage& msg);
 
     void establishConnection(int inputIndex, int outputIndex);
-    void onDisconnection();
+    void onDisconnection(bool redetectIfEnabled=true);
 
     static int getPingIdFromResponse(const juce::MidiMessage& msg);
     
@@ -144,13 +160,12 @@ protected:
 
     void midiMessageReceived(juce::MidiInput* source, const juce::MidiMessage& midiMessage) override;
     void noAnswerToMessage(juce::MidiDeviceInfo expectedDevice, const juce::MidiMessage& midiMessage) override;
-    void midiSendQueueSize(int queueSizeIn) override { sentQueueSize = queueSizeIn; }
     
     void midiMessageSent(juce::MidiOutput*, const juce::MidiMessage&) override {}
 
 private:
 
-    LumatoneFirmwareDriver*     midiDriver;
+    LumatoneFirmwareDriver&     firmwareDriver;
 
     DetectConnectionMode    deviceConnectionMode   = DetectConnectionMode::idle;
     bool                    deviceDetectInProgress = false;
@@ -161,15 +176,22 @@ private:
     int                     detectRoutineTimeoutMs = 1000;
     int                     inactivityTimeoutMs  = 3000;
 
-    int                     sentQueueSize = 0;
-
+    int                                 testInputIndex = -1;
     int                                 testOutputIndex = -1;
+
     juce::Array<juce::MidiDeviceInfo>   outputDevices;
     juce::Array<juce::MidiDeviceInfo>   inputDevices;
     juce::Array<unsigned int>           outputPingIds;
 
+    juce::String                        confirmedSerial;
+    LumatoneFirmware::ReleaseVersion    confirmedVersion;
+
     int                     confirmedInputIndex = -1;
     int                     confirmedOutputIndex = -1;
+    
+    bool                    checkingDeviceIsLumatone    = false;
+    // bool                    currentDevicePairConfirmed  = false;
+    bool                    waitingForFirmwareVersion   = false;
 
     bool                    detectDevicesIfDisconnected = true;
     bool                    checkConnectionOnInactivity = true;
