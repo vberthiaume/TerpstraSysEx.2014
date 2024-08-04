@@ -941,8 +941,12 @@ void LumatoneFirmwareDriver::handleIncomingMidiMessage(juce::MidiInput* source, 
         {
             // Start delay timer, after which message will be sent again
             timerType = TimerType::delayWhileDeviceBusy;
-            DBG("Starting Busy Timer");
-            startTimer(busyTimeDelayInMilliseconds);
+            if (!isTimerRunning())
+            {
+                DBG("Starting Busy Timer");
+                hasMsgWaitingForAck = false;
+                startTimer(busyTimeDelayInMilliseconds);
+            }
         }
         else
         {
