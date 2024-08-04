@@ -17,7 +17,6 @@
 
 #include "./lumatone_editor_library/palettes/colour_selection_group.h"
 
-
 static juce::File getDefaultUserDocumentsDirectory()
 {
     return File::getSpecialLocation(File::userDocumentsDirectory).getChildFile("Lumatone Editor");
@@ -31,7 +30,7 @@ static juce::File getDefaultUserPalettesDirectory()
     return getDefaultUserDocumentsDirectory().getChildFile("Palettes");
 }
 
-juce::Array<juce::Identifier> GetLumatoneEditorProperty()
+juce::Array<juce::Identifier> GetLumatoneEditorProperties()
 {
     juce::Array<juce::Identifier> properties;
     properties.add(LumatoneEditorProperty::HasChangesToSave);
@@ -78,6 +77,7 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditor
     , colourSelectionGroup(stateIn.colourSelectionGroup)
 {
     // DBG(name + " LumatoneEditorState created");
+    loadStateProperties(stateIn.state);
 }
 
 LumatoneEditorState::LumatoneEditorState(const LumatoneEditorState &stateIn)
@@ -287,16 +287,14 @@ juce::ValueTree LumatoneEditorState::loadStateProperties(juce::ValueTree stateIn
                              ? stateIn
                              : juce::ValueTree(LumatoneEditorProperty::StateTree);
 
-    // TODO load editor properties
+    // LumatoneApplicationState::loadStateProperties(newState);
 
     // DBG("LumatoneApplicationState::loadStateProperties:\n" + newState.toXmlString());
-    for (auto property : getLumatoneApplicationProperties())
+    for (auto property : GetLumatoneEditorProperties())
     {
         if (newState.hasProperty(property))
             handleStatePropertyChange(newState, property);
     }
-
-    LumatoneState::loadStateProperties(newState);
 
     return newState;
 }
@@ -596,3 +594,4 @@ void LumatoneEditorState::Controller::setDeveloperMode(bool developerModeOn)
     editorState.setStateProperty(LumatoneEditorProperty::DeveloperModeOn, editorState.inDeveloperMode);
     savePropertyBoolValue(LumatoneEditorProperty::DeveloperModeOn, developerModeOn);
 }
+

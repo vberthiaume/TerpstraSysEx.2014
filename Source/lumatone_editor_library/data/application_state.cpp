@@ -2,6 +2,8 @@
 
 #include "../device/lumatone_controller.h"
 #include "../device/activity_monitor.h"
+#include "../device/lumatone_event_manager.h"
+
 #include "../color/colour_model.h"
 #include "../data/lumatone_context.h"
 #include "../actions/lumatone_action.h"
@@ -39,8 +41,9 @@ LumatoneApplicationState::LumatoneApplicationState(juce::ValueTree stateIn, Luma
     layoutContext = std::make_shared<LumatoneContext>(*mappingData);
     colourModel = std::make_shared<LumatoneColourModel>();
 
+    eventManager = std::make_shared<LumatoneEventManager>(*this, driverIn);
 	controller = std::make_shared<LumatoneController>(*this, driverIn);
-    activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, &driverIn);
+    activityMonitor = std::make_shared<DeviceActivityMonitor>(*this, driverIn);
 
     loadStateProperties(stateIn);
 }
@@ -52,13 +55,14 @@ LumatoneApplicationState::LumatoneApplicationState(juce::String nameIn, const Lu
     , statusListeners(stateIn.statusListeners)
     , firmwareListeners(stateIn.firmwareListeners)
     , midiListeners(stateIn.midiListeners)
-    , layoutContext(stateIn.layoutContext)
-    , controller(stateIn.controller)
-    , activityMonitor(stateIn.activityMonitor)
-    , colourModel(stateIn.colourModel)
     , selectedKeys(stateIn.selectedKeys)
     , receiveSettingsStatus(stateIn.receiveSettingsStatus)
     , receiveLayoutStatus(stateIn.receiveLayoutStatus)
+    , layoutContext(stateIn.layoutContext)
+    , colourModel(stateIn.colourModel)
+    , eventManager(stateIn.eventManager)
+    , controller(stateIn.controller)
+    , activityMonitor(stateIn.activityMonitor)
 {
     loadStateProperties(state);
 }
@@ -70,10 +74,17 @@ LumatoneApplicationState::LumatoneApplicationState(const LumatoneApplicationStat
 
 LumatoneApplicationState::~LumatoneApplicationState()
 {
-    layoutContext = nullptr;
     activityMonitor = nullptr;
     controller = nullptr;
+    eventManager = nullptr;
     colourModel = nullptr;
+    layoutContext = nullptr;
+    receiveLayoutStatus = nullptr;
+    receiveSettingsStatus = nullptr;
+    midiListeners = nullptr;
+    firmwareListeners = nullptr;
+    statusListeners = nullptr;
+    editorListeners = nullptr;
 }
 
 ConnectionState LumatoneApplicationState::getConnectionState() const
@@ -171,23 +182,23 @@ void LumatoneApplicationState::setActiveMacroButtonColour(juce::Colour buttonCol
 
 juce::ValueTree LumatoneApplicationState::loadStateProperties(juce::ValueTree stateIn)
 {
-    juce::ValueTree newState = (stateIn.hasType(LumatoneStateProperty::LumatoneState))
-                             ? stateIn
-                             : juce::ValueTree(LumatoneStateProperty::LumatoneState);
+    // juce::ValueTree newState = stateIn.isValid()
+    //                          ? stateIn
+    //                          : juce::ValueTree(LumatoneStateProperty::DefaultState);
 
-    LumatoneState::loadStateProperties(newState);
+    // LumatoneState::loadStateProperties(newState);
 
     // DBG("LumatoneApplicationState::loadStateProperties:\n" + newState.toXmlString());
     for (auto property : getLumatoneApplicationProperties())
     {
-        if (newState.hasProperty(property))
-            handleStatePropertyChange(newState, property);
+        if (stateIn.hasProperty(property))
+            handleStatePropertyChange(stateIn, property);
     }
 
     // if (name.contains("Copy"))
     //     DBG(juce::String("Loaded ") + name + juce::String(" properties"));
 
-    return newState;
+    return stateIn;
 }
 
 void LumatoneApplicationState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
@@ -274,7 +285,7 @@ void LumatoneApplicationState::setLayout(const LumatoneLayout &layoutIn)
 
     if (doSendChangesToDevice())
     {
-        controller->sendCompleteMapping(layoutIn);
+        controller->sendCompleteMapping(layoutIn, false, false);
     }
 
     clearContext();
@@ -721,12 +732,12 @@ void LumatoneApplicationState::DeviceController::setMidiInput(int deviceIndex, b
 {
     auto deviceInfo = getMidiInputList()[deviceIndex];
     deviceAppState.setStateProperty(LumatoneApplicationProperty::LastInputDeviceId, deviceInfo.identifier);
-    deviceAppState.controller->setDriverMidiInput(deviceIndex, test);
+    deviceAppState.activityMonitor->setMidiInput(deviceIndex, test);
 }
 
 void LumatoneApplicationState::DeviceController::setMidiOutput(int deviceIndex, bool test)
 {
     auto deviceInfo = getMidiOutputList()[deviceIndex];
     deviceAppState.setStateProperty(LumatoneApplicationProperty::LastOutputDeviceId, deviceInfo.identifier);
-    deviceAppState.controller->setDriverMidiOutput(deviceIndex, test);
+    deviceAppState.activityMonitor->setMidiOutput(deviceIndex, test);
 }

@@ -41,6 +41,9 @@ LumatoneState::LumatoneState(juce::ValueTree stateIn, juce::UndoManager *undoMan
     mappingData = std::make_shared<LumatoneLayout>();
     midiKeyMap = std::make_shared<LumatoneOutputMap>(mappingData.get());
 
+    if (!stateIn.isValid())
+        state = juce::ValueTree(LumatoneStateProperty::DefaultState);
+        
     state = loadStateProperties(stateIn);
     state.addListener(this);
 
@@ -73,17 +76,17 @@ LumatoneState::~LumatoneState()
 
 juce::ValueTree LumatoneState::loadStateProperties(juce::ValueTree stateIn)
 {
-    juce::ValueTree newState = stateIn.isValid()
-                             ? stateIn
-                             : juce::ValueTree(LumatoneStateProperty::DefaultState);
+    // juce::ValueTree newState = stateIn.isValid()
+    //                          ? stateIn
+    //                          : juce::ValueTree(LumatoneStateProperty::DefaultState);
 
     for (auto property : getLumatoneStateProperties())
     {
-        if (newState.hasProperty(property))
-            handleStatePropertyChange(newState, property);
+        if (stateIn.hasProperty(property))
+            handleStatePropertyChange(stateIn, property);
     }
 
-    return newState;
+    return stateIn;
 }
 
 void LumatoneState::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
@@ -205,11 +208,13 @@ void LumatoneState::sendSelectionColours(const juce::Array<MappedLumatoneKey>& s
 void LumatoneState::setAftertouchEnabled(bool enabled)
 {
     mappingData->setAftertouchEnabled(enabled);
+    setStateProperty(LumatoneStateProperty::AftertouchEnabled, enabled);
 }
 
 void LumatoneState::setLightOnKeyStrokes(bool enabled)
 {
     mappingData->setLightOnKeyStrokes(enabled);
+    setStateProperty(LumatoneStateProperty::LightsOnAfterKeystroke, enabled);
 }
 
 LumatoneFirmware::ReleaseVersion LumatoneState::getLumatoneVersion() const
@@ -259,21 +264,25 @@ const FirmwareSupport& LumatoneState::getFirmwareSupport() const
 void LumatoneState::setInvertExpression(bool invert)
 {
     mappingData->setInvertExpression(invert);
+    setStateProperty(LumatoneStateProperty::InvertExpression, invert);
 }
 
 void LumatoneState::setInvertSustain(bool invert)
 {
     mappingData->setInvertSustain(invert);
+    setStateProperty(LumatoneStateProperty::InvertSustain, invert);
 }
 
 void LumatoneState::setExpressionSensitivity(juce::uint8 sensitivity)
 {
     mappingData->setExpressionSensitivity(sensitivity);
+    setStateProperty(LumatoneStateProperty::ExpressionSensitivity, sensitivity);
 }
 
 void LumatoneState::setConfigTable(LumatoneConfigTable::TableType type, const LumatoneConfigTable& table)
 {
     mappingData->setConfigTable(type, table.velocityValues);
+    // todo update value tree state
 }
 
 void LumatoneState::setInactiveMacroButtonColour(juce::Colour buttonColour)
