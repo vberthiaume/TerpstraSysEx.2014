@@ -22,6 +22,7 @@ public:
     int getIntProperty(const juce::Identifier key, int fallback) const;
     juce::String getStringProperty(const juce::Identifier key, juce::String fallback = juce::String()) const;
 
+    juce::String toString() const;
 
 protected:
     void setStateProperty(const juce::Identifier& id, juce::var value);

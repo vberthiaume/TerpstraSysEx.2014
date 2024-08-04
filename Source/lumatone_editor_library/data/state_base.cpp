@@ -33,6 +33,11 @@ juce::String LumatoneStateBase::getStringProperty(const juce::Identifier key, ju
     return prop.toString();
 }
 
+juce::String LumatoneStateBase::toString() const
+{
+    return state.toXmlString();
+}
+
 void LumatoneStateBase::valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier &property)
 {
     handleStatePropertyChange(treeWhosePropertyHasChanged, property);
