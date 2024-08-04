@@ -79,32 +79,20 @@ void LumatoneFirmwareDriver::sendMessageNow(const juce::MidiMessage &msg)
 
 void LumatoneFirmwareDriver::notifyMessageReceived(juce::MidiInput* source, const juce::MidiMessage& midiMessage)
 {
-// #if MIDI_DRIVER_USE_LOCK
-//     const juce::MessageManagerLock lock;
-// #endif
-//     juce::MessageManager::callAsync([this, source, midiMessage]{
-//         for (auto collector : listeners) collector->midiMessageReceived(source, midiMessage);
-//     });
     listeners.call(&LumatoneFirmwareDriverListener::midiMessageReceived, source, midiMessage);
 }
 
 void LumatoneFirmwareDriver::notifyMessageSent(juce::MidiOutput* target, const juce::MidiMessage& midiMessage)
 {
-    // Currently unused
-// #if MIDI_DRIVER_USE_LOCK
-//     const juce::MessageManagerLock lock;
-// #endif
 
-//     juce::MessageManager::callAsync([this, target, midiMessage]{
-//         for (auto collector : listeners) collector->midiMessageSent(target, midiMessage);
-//     });
 }
 
 void LumatoneFirmwareDriver::notifySendQueueSize()
 {
     auto size = sysexQueue.size();
+
     // for (auto collector : listeners) collector->midiSendQueueSize(size);
-    listeners.call(&LumatoneFirmwareDriverListener::midiSendQueueSize, size);
+    // listeners.call(&LumatoneFirmwareDriverListener::midiSendQueueSize, size);
 }
 
 // void LumatoneFirmwareDriver::notifyLogMessage(juce::String textMessage, ErrorLevel errorLevel)

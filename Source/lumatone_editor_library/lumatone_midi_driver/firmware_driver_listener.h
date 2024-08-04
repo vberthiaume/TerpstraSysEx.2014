@@ -13,22 +13,31 @@
 
 #include <JuceHeader.h>
 
-// juce::MidiMessageCollector version of previous TerpstraMidiDriver::Listener, as to keep the Midi thread lightweight
-class LumatoneFirmwareDriverListener : protected juce::MidiMessageCollector
+class LumatoneFirmwareDriverListener
 {
     juce::MidiBuffer messagesSentQueue;
 
 public:
     virtual ~LumatoneFirmwareDriverListener() {}
     
+    // Called asynchronously on message thread
     virtual void midiMessageReceived(juce::MidiInput* source, const juce::MidiMessage& message) = 0;
-    virtual void midiMessageSent(juce::MidiOutput* target, const juce::MidiMessage& message) = 0;
-    virtual void midiSendQueueSize(int size) = 0;
+
+    // Called asynchronously on message thread
+    virtual void midiMessageSent(juce::MidiOutput* target, const juce::MidiMessage& message) { }
+
+
+    virtual void midiSendQueueSize(int size) { sendQueueSize = size; }
     // virtual void generalLogMessage(juce::String textMessage, ErrorLevel errorLevel) {}
 
-    // Realtime messages before a device is connected - not for heavy processing!
-    virtual void noAnswerToMessage(juce::MidiDeviceInfo expectedDevice, const juce::MidiMessage& message) = 0;
-//		virtual void testMessageReceived(int testInputIndex, const juce::MidiMessage& midiMessage) {};
+    // Realtime message - not for heavy processing!
+    virtual void noAnswerToMessage(juce::MidiDeviceInfo expectedDevice, const juce::MidiMessage& message) { }
+
+
+    int getSendQueueSize() { return sendQueueSize; }
+
+protected:
+    int sendQueueSize = 0;
 };
 
 #endif
