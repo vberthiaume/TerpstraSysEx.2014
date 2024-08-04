@@ -183,8 +183,6 @@ private:
 
     juce::Array<MappedLumatoneKey>      lastKeySelection;
 
-    // std::unique_ptr<juce::Label> lblFirmwareVersion;
-
     //==============================================================================
     // UI Data
 

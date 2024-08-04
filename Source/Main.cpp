@@ -105,6 +105,11 @@ void TerpstraSysExApplication::shutdown()
 
 	savePropertiesFile();
 
+	// juce::String stateStr =state.toString();
+	// auto lines = juce::StringArray::fromLines(stateStr); 
+	// for (auto line : lines)
+	// 	DBG(line);
+
 	if (state.firmwareUpdateCompleted())
 		FirmwareTransfer::exitLibSsh2();
 

@@ -115,6 +115,8 @@ private:
 	std::unique_ptr<juce::Label> 			lblAppName;
 	std::unique_ptr<juce::Label> 			lblAppVersion;
 
+    std::unique_ptr<juce::Label>			lblFirmwareVersion;
+
 	// Buffer for copy/paste of sub board data
 	std::unique_ptr<LumatoneBoard>			copiedSubBoardData;
 
@@ -161,7 +163,7 @@ private:
 
 	const float btnYFromImageTop			= 0.02;
 	const float saveLoadW					= 0.08f;
-	const float saveloadMarginW				= 0.0034f;
+	const float saveLoadMarginW				= 0.0034f;
 
 
     const float popupWidth                  = 0.4f;

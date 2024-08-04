@@ -116,6 +116,11 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	lblAppVersion->setColour(Label::ColourIds::textColourId, Colour(0xff777777));
 	addAndMakeVisible(lblAppVersion.get());
 
+	lblFirmwareVersion = std::make_unique<juce::Label>("lblFirmwareVersion", "");
+	lblFirmwareVersion->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
+	lblFirmwareVersion->setColour(Label::ColourIds::textColourId, juce::Colour(0xff777777));
+	addAndMakeVisible(lblFirmwareVersion.get());
+
 
 	addStatusListener(this);
 
@@ -508,9 +513,9 @@ void MainContentComponent::resized()
 	allKeysOverview->setBounds(contentMargin, midiAreaHeight, contentWidth, controlsLabelYPos - midiAreaHeight);
 
 	int btnHeight = roundToInt(getHeight() * fileButtonH);
-	int btnMargin = roundToInt(getWidth() * saveloadMarginW);
+	int btnMargin = roundToInt(contentWidth * saveLoadMarginW);
 	int saveLoadWidth = roundToInt(getWidth() * saveLoadW);
-	int btnY = allKeysOverview->getY() - roundToInt(getHeight() * btnYFromImageTop);
+	int btnY = allKeysOverview->getY() - (allKeysOverview->getHeight() * btnYFromImageTop);
 
 	int halfWidthX = roundToInt(getWidth() * 0.5f);
 
@@ -539,7 +544,11 @@ void MainContentComponent::resized()
 
 	resizeLabelWithHeight(lblAppVersion.get(), roundToInt(lblAppName->getHeight() * 0.75f));
 	lblAppVersion->setTopLeftPosition(lblAppName->getRight(), lblAppName->getBottom() - lblAppVersion->getHeight());
+
+    // resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
+    lblFirmwareVersion->setBounds(allKeysOverview->getX(), allKeysOverview->getBottom(), btnHeight * 0.6f, contentWidth);
 }
+
 void MainContentComponent::resizeEditSectionTabs()
 {
 	int sectionTabsMargin = proportionOfWidth(sectionTabsMarginW);
@@ -580,8 +589,13 @@ void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, co
 	{
 		updateDeveloperMode();
 	}
-	if (property == LumatoneApplicationProperty::NumKeySelected)
+	else if (property == LumatoneApplicationProperty::NumKeySelected)
 	{
 		lblSelectedKeys->setText(stateIn[property].toString() + " Keys Selected", juce::NotificationType::dontSendNotification);
+	}
+	else if (property == LumatoneStateProperty::LastConnectedFirmwareVersion)
+	{
+		auto string = juce::String("Firmware version: " + getFirmwareVersion().toDisplayString());
+		lblFirmwareVersion->setText(string, juce::NotificationType::sendNotification);
 	}
 }

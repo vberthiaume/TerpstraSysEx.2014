@@ -83,10 +83,6 @@ void LumatoneKeyboardComponent::resized()
 
     octaveLineY = lumatoneBounds.getBottom() + juce::roundToInt(getHeight() * octaveLineYRatio);
 
-    // int btnHeight = juce::roundToInt(getHeight() * saveLoadH);
-    //resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
-    // lblFirmwareVersion->setTopLeftPosition(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 0.6f);
-
     keyWidth = juce::roundToInt(lumatoneBounds.getWidth() * keyW);
     keyHeight = juce::roundToInt(lumatoneBounds.getHeight() * keyH);
 
