@@ -204,7 +204,7 @@ void KeyEditorControls::resized()
 
     colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, h);
     colourPalettePanel->setIndentSize(contentMarginHeight, false);
-    colourPalettePanel->setTabBarDepth(headerHeight, false);
+    colourPalettePanel->setTabBarDepth(headerHeight, true);
 }
 
 void KeyEditorControls::selectionChanged()
