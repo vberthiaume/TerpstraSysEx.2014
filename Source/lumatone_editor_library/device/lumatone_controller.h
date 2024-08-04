@@ -14,21 +14,16 @@
 #include "./key_update_buffer.h"
 
 #include "../listeners/status_listener.h"
-#include "../listeners/firmware_listener.h"
 
-#include "../data/application_state.h"
+#include "../data/lumatone_state.h"
 #include "../midi/lumatone_midi_manager.h"
 
-class LumatoneEventManager;
-class LumatoneAction;
-
 //==============================================================================
-// Helper class for parsing and comparing (todo) firmware versions
+// Lumatone version-aware class for sending commands to the device
 
 
 class LumatoneController :  private LumatoneState
                          ,  public LumatoneApplicationMidiController
-                         ,  protected LumatoneEditor::FirmwareListener
                         //  , private LumatoneSandboxLogger
 {
 public:
@@ -37,22 +32,6 @@ public:
     ~LumatoneController() override;
 
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
-
-    //============================================================================
-    // Methods to configure firmware communication parameters
-
-    void setDriverMidiInput(int deviceIndex, bool test = true);
-    void setDriverMidiOutput(int deviceIndex, bool test = true);
-
-    bool connectionConfirmed() const;
-private:
-    void onConnectionConfirmed();
-
-public:
-    //============================================================================
-    // Status Listener implementation
-
-    void connectionStateChanged(ConnectionState newState) override;
 
 public:
     //============================================================================
@@ -205,17 +184,9 @@ public:
 private:
     // juce::ValueTree::Listener implementation
 
-    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
+    // void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
 protected:
-    //============================================================================
-    // LumatoneEditor::FirmwareListener implementation - use to establish device connection
-
-    void serialIdentityReceived(const int* serialBytes) override;
-
-    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
-
-    void pingResponseReceived(unsigned int pingValue) override;
 
     //============================================================================
     // Test functions
@@ -225,12 +196,6 @@ protected:
 private:
     LumatoneFirmwareDriver& firmwareDriver;
     LumatoneKeyUpdateBuffer updateBuffer;
-
-    std::unique_ptr<LumatoneEventManager>   eventManager;
-
-    bool    checkingDeviceIsLumatone    = false;
-    bool    currentDevicePairConfirmed  = false;
-    bool    waitingForFirmwareVersion   = false;
 };
 
 #endif // LUMATONE_CONTROLLER_H

@@ -14,6 +14,8 @@
 #include "../lumatone_midi_driver/lumatone_midi_driver.h"
 #include "../listeners/editor_listener.h"
 
+#include "../lumatone_midi_driver/firmware_sysex.h"
+
 LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& driverIn)
     : LumatoneState("LumatoneController", stateIn)
     , LumatoneApplicationMidiController(stateIn, driverIn)
@@ -21,13 +23,10 @@ LumatoneController::LumatoneController(const LumatoneApplicationState& stateIn, 
     , updateBuffer(driverIn, stateIn)
     // , LumatoneSandboxLogger("LumatoneController")
 {
-    eventManager = std::make_unique<LumatoneEventManager>(firmwareDriver, stateIn);
-    eventManager->addFirmwareListener(this);
 }
 
 LumatoneController::~LumatoneController()
 {
-    firmwareDriver.removeDriverListener(this);
 }
 
 juce::ValueTree LumatoneController::loadStateProperties(juce::ValueTree stateIn)
@@ -36,60 +35,6 @@ juce::ValueTree LumatoneController::loadStateProperties(juce::ValueTree stateIn)
     return state;
 }
 
-void LumatoneController::connectionStateChanged(ConnectionState newState)
-{
-    switch (newState)
-    {
-    case ConnectionState::DISCONNECTED:
-        currentDevicePairConfirmed = false;
-        break;
-
-    case ConnectionState::ONLINE:
-        onConnectionConfirmed();
-        return;
-
-    default:
-        break;
-    }
-
-    //statusListeners.call(&LumatoneEditor::StatusListener::connectionStateChanged, newState);
-}
-
-
-// int LumatoneController::getMidiInputIndex() const
-// {
-//     return firmwareDriver.getMidiInputIndex();
-// }
-
-// int LumatoneController::getMidiOutputIndex() const
-// {
-//     return firmwareDriver.getMidiOutputIndex();
-// }
-
-void LumatoneController::setDriverMidiInput(int deviceIndex, bool test)
-{
-    const bool changed = firmwareDriver.getMidiInputIndex() != deviceIndex;
-    firmwareDriver.setMidiInput(deviceIndex);
-
-    if (changed)
-        currentDevicePairConfirmed = false;
-
-    if (test && deviceIndex >= 0)
-        testCurrentDeviceConnection();
-}
-
-void LumatoneController::setDriverMidiOutput(int deviceIndex, bool test)
-{
-    const bool changed = firmwareDriver.getMidiOutputIndex() != deviceIndex;
-
-    firmwareDriver.setMidiOutput(deviceIndex);
-
-    if (changed)
-        currentDevicePairConfirmed = false;
-
-    if (test && deviceIndex >= 0)
-        testCurrentDeviceConnection();
-}
 
 /*
 ==============================================================================
@@ -187,9 +132,6 @@ unsigned int LumatoneController::sendTestMessageToDevice(int deviceIndex, unsign
         firmwareDriver.sendGetSerialIdentityRequest(deviceIndex);
     }
 
-    // lastTestDeviceSent = deviceIndex;
-    checkingDeviceIsLumatone = true;
-
     return value;
 }
 
@@ -198,8 +140,6 @@ void LumatoneController::testCurrentDeviceConnection()
     // On confirmed connection send connection listener message
     if (firmwareDriver.hasDevicesDefined())
     {
-        checkingDeviceIsLumatone = true;
-
         if (getSerialNumber().isNotEmpty() && getLumatoneVersion() >= LumatoneFirmware::ReleaseVersion::VERSION_1_0_9)
         {
             pingLumatone(0xf);
@@ -209,10 +149,6 @@ void LumatoneController::testCurrentDeviceConnection()
         {
             sendGetSerialIdentityRequest();
         }
-    }
-    else
-    {
-        currentDevicePairConfirmed = false;
     }
 }
 
@@ -555,84 +491,3 @@ void LumatoneController::requestMacroButtonColours()
         firmwareDriver.sendGetMacroLightIntensity();
 }
 
-bool LumatoneController::connectionConfirmed() const
-{
-    return firmwareDriver.hasDevicesDefined() && currentDevicePairConfirmed;
-}
-
-void LumatoneController::onConnectionConfirmed()
-{
-    checkingDeviceIsLumatone = false;
-    currentDevicePairConfirmed = true;
-
-    if (getSerialNumber().isEmpty())
-    {
-        waitingForFirmwareVersion = true;
-        sendGetSerialIdentityRequest();
-    }
-    else if (getSerialNumber() != SERIAL_55_KEYS)
-    {
-        waitingForFirmwareVersion = true;
-        sendGetFirmwareRevisionRequest();
-    }
-    else
-    {
-        waitingForFirmwareVersion = false;
-    }
-}
-
-void LumatoneController::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
-{
-    LumatoneState::handleStatePropertyChange(stateIn, property);
-
-    if (waitingForFirmwareVersion && property == LumatoneStateProperty::LastConnectedFirmwareVersion)
-    {
-        waitingForFirmwareVersion = false;
-    }
-}
-
-// LumatoneEditor::FirmwareListener Implementation
-
-void LumatoneController::serialIdentityReceived(const int* serialBytes)
-{
-    juce::String serialNumber = firmwareSupport.serialIdentityToString(serialBytes);
-    DBG("Device serial is: " + serialNumber);
-
-    setConnectedSerialNumber(serialNumber);
-
-    if (checkingDeviceIsLumatone)
-    {
-        if (serialNumber != SERIAL_55_KEYS)
-            sendGetFirmwareRevisionRequest();
-        else
-            onConnectionConfirmed();
-
-        setConnectionState(ConnectionState::ONLINE);
-    }
-
-    if (waitingForFirmwareVersion)
-    {
-        sendGetFirmwareRevisionRequest();
-    }
-}
-
-void LumatoneController::firmwareRevisionReceived(LumatoneFirmware::Version version)
-{
-    // setFirmwareVersion(version, true);
-    waitingForFirmwareVersion = false;
-
-    if (checkingDeviceIsLumatone)
-    {
-        onConnectionConfirmed();
-        setConnectionState(ConnectionState::ONLINE);
-    }
-}
-
-void LumatoneController::pingResponseReceived(unsigned int pingValue)
-{
-    if (checkingDeviceIsLumatone)
-    {
-        onConnectionConfirmed();
-        setConnectionState(ConnectionState::ONLINE);
-    }
-}
