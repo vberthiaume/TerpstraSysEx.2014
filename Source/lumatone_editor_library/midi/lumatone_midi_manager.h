@@ -69,12 +69,8 @@ protected:
     void handleAftertouch(LumatoneMidiState* midiState, int midiChannel, int midiNote, juce::uint8 aftertouch) override;
     void handleController(LumatoneMidiState* midiState, int midiChannel, int midiNote, juce::uint8 controller) override;
 
-
-    // LumatoneFirmwareDriver::Collector implementation
+    // LumatoneFirmwareDriverListener implementation
 	void midiMessageReceived(juce::MidiInput* source, const juce::MidiMessage& message) override;
-    void midiMessageSent(juce::MidiOutput* target, const juce::MidiMessage& message) override {}
-    void midiSendQueueSize(int size) override {}
-    void noAnswerToMessage(juce::MidiDeviceInfo expectedDevice, const juce::MidiMessage& message) override {}
 
 private:
 

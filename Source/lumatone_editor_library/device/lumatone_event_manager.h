@@ -8,61 +8,27 @@
   ==============================================================================
 */
 
-#pragma once
+#ifndef LUMATONE_EVENT_MANAGER_H
+#define LUMATONE_EVENT_MANAGER_H
 
 #include "../data/application_state.h"
 #include "../midi/lumatone_midi_state.h"
-#include "../lumatone_midi_driver/firmware_driver_listener.h"
-#include "../listeners/firmware_listener.h"
+#include "../lumatone_midi_driver/response_queue.h"
 
 class LumatoneEventManager : public LumatoneApplicationState
-                           , public LumatoneMidiState
                            , private LumatoneApplicationState::Controller
-                           , private LumatoneFirmwareDriverListener
-                           , private LumatoneEditor::FirmwareListener
-                           , private juce::Timer
+                           , public LumatoneResponseQueueReader
 {
 
 public:
-    LumatoneEventManager(LumatoneFirmwareDriver& midiDriver, const LumatoneApplicationState& stateIn);
+    LumatoneEventManager(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& midiDriver);
     ~LumatoneEventManager() override;
-
-private:
-
-    void timerCallback() override;
 
 protected:
     //============================================================================
-    // Implementation of LumatoneFirmwareDriver::Listener
-
-    virtual void midiMessageReceived(juce::MidiInput* source, const juce::MidiMessage& midiMessage) override;
-    virtual void midiMessageSent(juce::MidiOutput* target, const juce::MidiMessage& midiMessage) override;
-    virtual void midiSendQueueSize(int queueSize) override;
-    //virtual void generalLogMessage(juce::String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel) override;
-    virtual void noAnswerToMessage(juce::MidiDeviceInfo expectedDevice, const juce::MidiMessage& midiMessage) override;
-
-    //============================================================================
-    // Implementation of LumatoneEditor::FirmwareListener
-    void octaveColourConfigReceived(int boardId, juce::uint8 rgbFlag, const int* colourData) override;
-    void octaveChannelConfigReceived(int octaveIndex, const int* channelData) override;
-    void octaveNoteConfigReceived(int octaveIndex, const int* noteData) override;
-    void keyTypeConfigReceived(int boardId, const int* keyTypeData) override;
-
-    void macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour) override;
-
-    void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
-
-private:
-    juce::ListenerList<LumatoneEditor::FirmwareListener> firmwareListeners;
-public:
-    void    addFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn) { firmwareListeners.add(listenerIn); }
-    void removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn) { firmwareListeners.remove(listenerIn); }
-
-//private:
-//    ListenerList<MidiListener> midiListeners;
-//public:
-//    void    addMidiListener(MidiListener* listenerIn) { midiListeners.add(listenerIn); }
-//    void removeMidiListener(MidiListener* listenerIn) { midiListeners.remove(listenerIn); }
+    // LumatoneResponseQueue implementation
+    FirmwareSupport::Error handleResponse(const juce::MidiMessage& midiMessage) override;
+    void handleResponseError(FirmwareSupport::Error errorToHandle, int commandReceived, const juce::MidiMessage& msg) override;
 
 private:
     //============================================================================
@@ -118,22 +84,8 @@ private:
 
     FirmwareSupport::Error handleGetMacroLightIntensityResponse(const juce::MidiMessage& midiMessage);
 
-    void handleMidiDriverError(FirmwareSupport::Error errorToHandle, int commandReceived = -1);
-
-    // Buffer read helpers
-    FirmwareSupport::Error getBufferErrorCode(const juce::uint8* sysExData);
-    FirmwareSupport::Error handleBufferCommand(const juce::MidiMessage& midiMessage);
-
-
 private:
     LumatoneFirmwareDriver&     midiDriver;
-
-    const int                   bufferReadTimeoutMs = 30;
-    const int                   bufferReadSize = 16;
-    bool                        bufferReadRequested = false;
-
-    std::atomic<int>            readQueueSize;
-    int                         sendQueueSize = 0;
-
-    int                         verbose = 0;
 };
+
+#endif // LUMATONE_EVENT_MANAGER_H

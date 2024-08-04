@@ -70,6 +70,51 @@ struct FirmwareSupport
 		}
 	}
 
+	static FirmwareSupport::Error parseResponseError(const juce::uint8* sysExData)
+	{
+		switch (sysExData[MSG_STATUS])
+		{
+		case LumatoneFirmware::ReturnCode::NACK:  // Not recognized
+			//errorVisualizer.setErrorLevel(
+			//    LumatoneFirmwareDriver::ErrorLevel::error,
+			//    "Not Recognized");
+			return FirmwareSupport::Error::unknownCommand;
+			break;
+
+		case LumatoneFirmware::ReturnCode::ACK:  // Acknowledged, OK
+			//errorVisualizer.setErrorLevel(
+			//    LumatoneFirmwareDriver::ErrorLevel::noError,
+			//    "Ack");
+			break;
+
+		case LumatoneFirmware::ReturnCode::BUSY: // Controller busy
+			//errorVisualizer.setErrorLevel(
+			//    LumatoneFirmwareDriver::ErrorLevel::warning,
+			//    "Busy");
+			return FirmwareSupport::Error::deviceIsBusy;
+			break;
+
+		case LumatoneFirmware::ReturnCode::ERROR:    // Error
+			//errorVisualizer.setErrorLevel(
+			//    LumatoneFirmwareDriver::ErrorLevel::error,
+			//    "Error from device");
+			return FirmwareSupport::Error::externalError;
+			break;
+
+		case TEST_ECHO:
+			return FirmwareSupport::Error::messageIsAnEcho;
+			break;
+
+		default:
+			//errorVisualizer.setErrorLevel(
+			//    LumatoneFirmwareDriver::ErrorLevel::noError,
+			//    "");
+			break;
+		}
+
+		return FirmwareSupport::Error::noError;
+	}
+
 	static LumatoneFirmware::ReleaseVersion getReleaseVersion(LumatoneFirmware::Version versionIn)
 	{
 		if (!(versionIn.major | versionIn.minor | versionIn.revision))

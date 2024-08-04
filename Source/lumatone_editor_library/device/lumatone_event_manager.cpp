@@ -14,16 +14,16 @@
 #include "../lumatone_midi_driver/firmware_sysex.h"
 
 #include "../listeners/editor_listener.h"
+#include "../listeners/firmware_listener.h"
 
-LumatoneEventManager::LumatoneEventManager(LumatoneFirmwareDriver& midiDriverIn, const LumatoneApplicationState& stateIn)
+LumatoneEventManager::LumatoneEventManager(const LumatoneApplicationState& stateIn, LumatoneFirmwareDriver& midiDriverIn)
     : LumatoneApplicationState("LumatoneEventManager", stateIn)
     , LumatoneApplicationState::Controller(static_cast<LumatoneApplicationState&>(*this))
     , midiDriver(midiDriverIn)
 {
     midiDriver.addDriverListener(this);
-    addFirmwareListener(this);
 
-    juce::MidiMessageCollector::reset(bufferReadTimeoutMs);
+    // juce::MidiMessageCollector::reset(bufferReadTimeoutMs);
 }
 
 LumatoneEventManager::~LumatoneEventManager()
@@ -33,52 +33,6 @@ LumatoneEventManager::~LumatoneEventManager()
 
 //=============================================================================
 // Communication and broadcasting
-
-void LumatoneEventManager::midiMessageReceived(juce::MidiInput* source, const juce::MidiMessage& midiMessage)
-{
-    //bool connected = state.getConnectionState() >= ConnectionState::SEARCHING;
-    //if (connected)
-    //{
-        if (midiMessage.isSysEx())
-        {
-            addMessageToQueue(midiMessage);
-            readQueueSize.store(readQueueSize.load() + 1);
-
-            if (!bufferReadRequested)
-            {
-                bufferReadRequested = true;
-                startTimer(bufferReadTimeoutMs);
-            }
-        }
-    //}
-
-    if (!midiMessage.isSysEx())
-    {
-        processNextMidiEvent(midiMessage);
-    }
-}
-
-void LumatoneEventManager::midiMessageSent(juce::MidiOutput* target, const juce::MidiMessage& midiMessage) { }
-
-void LumatoneEventManager::midiSendQueueSize(int queueSize)
-{
-    sendQueueSize = queueSize;
-}
-
-//void LumatoneEventManager::generalLogMessage(juce::String textMessage, LumatoneFirmwareDriver::ErrorLevel errorLevel) { }
-
-void LumatoneEventManager::noAnswerToMessage(juce::MidiDeviceInfo expectedDevice, const juce::MidiMessage& midiMessage)
-{
-    if (midiMessage.isSysEx())
-    {
-        //    callAfterDelay(bufferReadTimeoutMs, [&]() { firmwareListeners.call(&LumatoneEditor::FirmwareListener::noAnswerToCommand, midiMessage.getSysExData()[CMD_ID]); });
-
-        //if (currentDevicePairConfirmed)
-        //    statusListeners.call(&LumatoneEditor::StatusListener::connectionLost);
-        //else
-        //    statusListeners.call(&LumatoneEditor::StatusListener::connectionFailed);
-    }
-}
 
 FirmwareSupport::Error LumatoneEventManager::handleOctaveConfigResponse(
     const juce::MidiMessage& midiMessage,
@@ -152,7 +106,35 @@ FirmwareSupport::Error LumatoneEventManager::handleLEDConfigResponse(const juce:
                 break;
         }
 
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::octaveColourConfigReceived, boardId, colourCode, colourData);
+        int boardIndex = boardId - 1;
+
+        for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
+        {
+            auto newValue = colourData[keyIndex];
+
+            juce::Colour colour = getKey(boardIndex, keyIndex).getColour();
+            if (colourCode == 0)
+            {
+                colour = juce::Colour(newValue, colour.getGreen(), colour.getBlue());
+            }
+            else if (colourCode == 1)
+            {
+                colour = juce::Colour(colour.getRed(), newValue, colour.getBlue());
+            }
+            else if (colourCode == 2)
+            {
+                colour = juce::Colour(colour.getRed(), colour.getGreen(), newValue);
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            LumatoneState::setKeyColour(colour, boardId, keyIndex);
+        }
+
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::octaveColourConfigReceived, boardId, colourCode, colourData);
+        getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
     }
 
     return errorCode;
@@ -169,8 +151,24 @@ FirmwareSupport::Error LumatoneEventManager::handleChannelConfigResponse(const j
     };
     auto callback = [&](int boardId, void* data)
     {
+        int boardIndex = boardId - 1;
+        const int* channelData = (int*) data;
+
+        for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
+        {
+            juce::uint8 ch = channelData[keyIndex];
+            if (ch == 0 || ch > 16)
+                ch = 1;
+
+            auto key = getKey(boardIndex, keyIndex);
+            key.setChannelNumber(ch);
+            LumatoneState::setKeyConfig(key, boardId, keyIndex);
+        }
+
         getReceivedLayoutStatus().numChannelConfigReceived++;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::octaveChannelConfigReceived, boardId, (int*)data);
+
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::octaveChannelConfigReceived, boardId, channelData);
+        getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
     };
     return handleOctaveConfigResponse(midiMessage, unpack, callback);
 }
@@ -182,8 +180,22 @@ FirmwareSupport::Error LumatoneEventManager::handleNoteConfigResponse(const juce
     };
     auto callback = [&](int boardId, void* data)
     {
+        int boardIndex = boardId - 1;
+        const int* noteData = (int*)data;
+        for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
+        {
+            int note = noteData[keyIndex];
+            if (note < 0 || note > 127)
+                note = 0;
+
+            auto key = getKey(boardIndex, keyIndex);
+            key.setNoteOrCC(noteData[keyIndex]);
+            LumatoneState::setKeyConfig(key, boardId, keyIndex);
+        }
+
         getReceivedLayoutStatus().numNoteConfigReceived++;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::octaveNoteConfigReceived, boardId, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::octaveNoteConfigReceived, boardId, noteData);
+        getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
     };
     return handleOctaveConfigResponse(midiMessage, unpack, callback);
 }
@@ -195,8 +207,20 @@ FirmwareSupport::Error LumatoneEventManager::handleKeyTypeConfigResponse(const j
     };
     auto callback = [&](int boardId, void* data)
     {
+        int boardIndex = boardId - 1;
+        const int* keyTypeData = (int*)data;
+        for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
+        {
+            auto type = LumatoneKeyType(keyTypeData[keyIndex]);
+
+            auto key = getKey(boardIndex, keyIndex);
+            key.setKeyType(type);
+            LumatoneState::setKeyConfig(key, boardId, keyIndex);
+        }
+
         getReceivedLayoutStatus().numKeyTypeConfigReceived++;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::keyTypeConfigReceived, boardId, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::keyTypeConfigReceived, boardId, keyTypeData);
+        getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
     };
     return handleOctaveConfigResponse(midiMessage, unpack, callback);
 }
@@ -209,7 +233,7 @@ FirmwareSupport::Error LumatoneEventManager::handleVelocityConfigResponse(const 
     auto callback = [&](void* data)
     {
         getReceivedLayoutStatus().receivedVelocityTable = true;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::velocityConfigReceived, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::velocityConfigReceived, (int*)data);
     };
     return handleTableConfigResponse(midiMessage, unpack, callback);
 }
@@ -222,7 +246,7 @@ FirmwareSupport::Error LumatoneEventManager::handleAftertouchConfigResponse(cons
     auto callback = [&](void* data)
     {
         getReceivedLayoutStatus().receivedAftertouchTable = true;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::aftertouchConfigReceived, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::aftertouchConfigReceived, (int*)data);
     };
     return handleTableConfigResponse(midiMessage, unpack, callback);
 }
@@ -235,7 +259,7 @@ FirmwareSupport::Error LumatoneEventManager::handleVelocityIntervalConfigRespons
     auto callback = [&](void* data)
     {
         getReceivedSettingsStatus().receivedVelocityIntervalTable = true;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::velocityIntervalConfigReceived, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::velocityIntervalConfigReceived, (int*)data);
     };
     return handleTableConfigResponse(midiMessage, unpack, callback);
 }
@@ -248,7 +272,7 @@ FirmwareSupport::Error LumatoneEventManager::handleFaderConfigResponse(const juc
     auto callback = [&](void* data)
     {
         getReceivedLayoutStatus().receivedFaderTable = true;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::faderConfigReceived, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::faderConfigReceived, (int*)data);
     };
     return handleTableConfigResponse(midiMessage, unpack, callback);
 }
@@ -261,7 +285,7 @@ FirmwareSupport::Error LumatoneEventManager::handleFaderTypeConfigResponse(const
     auto callback = [&](int boardId, void* data)
     {
         getReceivedLayoutStatus().numFaderTypeConfigReceived++;
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::faderTypeConfigReceived, boardId, (int*)data);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::faderTypeConfigReceived, boardId, (int*)data);
     };
     return handleOctaveConfigResponse(midiMessage, unpack, callback);
 }
@@ -273,7 +297,8 @@ FirmwareSupport::Error LumatoneEventManager::handleSerialIdentityResponse(const 
     if (errorCode != FirmwareSupport::Error::noError)
         return errorCode;
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::serialIdentityReceived, serialBytes);
+    setConnectedSerialNumber(firmwareSupport.serialIdentityToString(serialBytes));
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::serialIdentityReceived, serialBytes);
 
     return errorCode;
 }
@@ -300,7 +325,7 @@ FirmwareSupport::Error LumatoneEventManager::handleFirmwareRevisionResponse(cons
     setLumatoneVersion(releaseVersion, true);
 
     DBG("Firmware version is: " + version.toString());
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::firmwareRevisionReceived, version);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::firmwareRevisionReceived, version);
 
     return FirmwareSupport::Error::noError;
 }
@@ -310,7 +335,7 @@ FirmwareSupport::Error LumatoneEventManager::handleLumatouchConfigResponse(const
     auto unpack = [&](const juce::MidiMessage& msg, int* data) {
         return LumatoneSysEx::unpackGetLumatouchConfigResponse(msg, data);
     };
-    auto callback = [&](void* data) { firmwareListeners.call(&LumatoneEditor::FirmwareListener::lumatouchConfigReceived, (int*)data); };
+    auto callback = [&](void* data) { getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::lumatouchConfigReceived, (int*)data); };
     return handleTableConfigResponse(midiMessage, unpack, callback);
 }
 
@@ -322,7 +347,7 @@ FirmwareSupport::Error LumatoneEventManager::handlePingResponse(const juce::Midi
     if (errorCode != FirmwareSupport::Error::noError)
         return errorCode;
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::pingResponseReceived, value);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::pingResponseReceived, value);
 
     return errorCode;
 }
@@ -339,7 +364,7 @@ FirmwareSupport::Error LumatoneEventManager::handleGetPeripheralChannelResponse(
 
     getReceivedSettingsStatus().receivedPeripheralChannels = true;
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::peripheralMidiChannelsReceived, channelSettings);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::peripheralMidiChannelsReceived, channelSettings);
 
     return errorCode;
 }
@@ -354,14 +379,19 @@ FirmwareSupport::Error LumatoneEventManager::handleGetPresetFlagsResponse(const 
         presetFlags.sustainPedalInverted
     );
 
-    mappingData->setLightOnKeyStrokes(presetFlags.polyphonicAftertouch);
-    mappingData->setAftertouchEnabled(presetFlags.polyphonicAftertouch);
-    mappingData->setInvertExpression(presetFlags.expressionPedalInverted);
-    mappingData->setInvertSustain(presetFlags.sustainPedalInverted);
+    LumatoneState::setLightOnKeyStrokes(presetFlags.lightsOnKeystroke);
+    LumatoneState::setAftertouchEnabled(presetFlags.polyphonicAftertouch);
+    LumatoneState::setInvertSustain(presetFlags.sustainPedalInverted);
+    LumatoneState::setInvertExpression(presetFlags.expressionPedalInverted);
 
     getReceivedLayoutStatus().receivedPresetFlags = true;
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::presetFlagsReceived, presetFlags);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::presetFlagsReceived, presetFlags);
+
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::lightOnKeyStrokesChanged, presetFlags.lightsOnKeystroke);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::aftertouchToggled, presetFlags.polyphonicAftertouch);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::invertSustainToggled, presetFlags.sustainPedalInverted);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::invertFootControllerChanged, presetFlags.expressionPedalInverted);
 
     return errorCode;
 }
@@ -371,11 +401,12 @@ FirmwareSupport::Error LumatoneEventManager::handleGetExpressionPedalSensitivity
     int sensitivity = 127;
     auto errorCode = LumatoneSysEx::unpackGetExpressionPedalSensitivityResponse(midiMessage, sensitivity);
 
-    mappingData->setExpressionSensitivity(sensitivity);
+    LumatoneState::setExpressionSensitivity(sensitivity);
 
     getReceivedLayoutStatus().receivedExprPedalSensitivity = true;
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::expressionPedalSensitivityReceived, sensitivity);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::expressionPedalSensitivityReceived, sensitivity);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::expressionPedalSensitivityChanged, sensitivity);
 
     return errorCode;
 }
@@ -393,6 +424,8 @@ FirmwareSupport::Error LumatoneEventManager::handleGetMacroLightIntensityRespons
     LumatoneState::setInactiveMacroButtonColour(inactiveColour);
 
     getReceivedSettingsStatus().receivedMacroButtonColours = true;
+
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::macroButtonColoursReceived, inactiveColour, activeColour);
 
     getEditorListeners()->call(&LumatoneEditor::EditorListener::macroButtonActiveColourChanged, activeColour);
     getEditorListeners()->call(&LumatoneEditor::EditorListener::macroButtonInactiveColourChanged, inactiveColour);
@@ -418,6 +451,7 @@ FirmwareSupport::Error LumatoneEventManager::handlePeripheralCalibrationData(con
         break;
     default:
         errorCode = FirmwareSupport::Error::messageIsNotResponseToCommand;
+        break;
     }
 
     if (errorCode != FirmwareSupport::Error::noError)
@@ -434,7 +468,7 @@ FirmwareSupport::Error LumatoneEventManager::handleExpressionPedalCalibrationDat
 
     auto errorCode = LumatoneSysEx::unpackExpressionPedalCalibrationPayload(midiMessage, minBound, maxBound, isValid);
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::pedalCalibrationDataReceived, minBound, maxBound, isValid);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::pedalCalibrationDataReceived, minBound, maxBound, isValid);
 
     return errorCode;
 }
@@ -450,80 +484,11 @@ FirmwareSupport::Error LumatoneEventManager::handleWheelsCalibrationData(const j
         calibrationData.maxMod
     );
 
-    firmwareListeners.call(&LumatoneEditor::FirmwareListener::wheelsCalibrationDataReceived, calibrationData);
+    getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::wheelsCalibrationDataReceived, calibrationData);
     return errorCode;
 }
 
-void LumatoneEventManager::handleMidiDriverError(FirmwareSupport::Error errorToHandle, int commandReceived)
-{
-    switch (errorToHandle)
-    {
-    case FirmwareSupport::Error::noError:
-    case FirmwareSupport::Error::messageIsAnEcho:
-    case FirmwareSupport::Error::commandNotImplemented:
-        return;
-
-    // case FirmwareSupport::Error::messageHasInvalidStatusByte:
-    //     return;
-
-    case FirmwareSupport::Error::deviceIsBusy:
-        DBG("DEVICE IS BUSY from command " + juce::String::toHexString(commandReceived));
-        return;
-
-    default:
-        DBG("ERROR from command " + juce::String::toHexString(commandReceived) + ": " + firmwareSupport.errorToString(errorToHandle));
-    }
-
-    jassertfalse;
-}
-
-
-FirmwareSupport::Error LumatoneEventManager::getBufferErrorCode(const juce::uint8* sysExData)
-{
-    switch (sysExData[MSG_STATUS])
-    {
-    case LumatoneFirmware::ReturnCode::NACK:  // Not recognized
-        //errorVisualizer.setErrorLevel(
-        //    LumatoneFirmwareDriver::ErrorLevel::error,
-        //    "Not Recognized");
-        return FirmwareSupport::Error::unknownCommand;
-        break;
-
-    case LumatoneFirmware::ReturnCode::ACK:  // Acknowledged, OK
-        //errorVisualizer.setErrorLevel(
-        //    LumatoneFirmwareDriver::ErrorLevel::noError,
-        //    "Ack");
-        break;
-
-    case LumatoneFirmware::ReturnCode::BUSY: // Controller busy
-        //errorVisualizer.setErrorLevel(
-        //    LumatoneFirmwareDriver::ErrorLevel::warning,
-        //    "Busy");
-        return FirmwareSupport::Error::deviceIsBusy;
-        break;
-
-    case LumatoneFirmware::ReturnCode::ERROR:    // Error
-        //errorVisualizer.setErrorLevel(
-        //    LumatoneFirmwareDriver::ErrorLevel::error,
-        //    "Error from device");
-        return FirmwareSupport::Error::externalError;
-        break;
-
-    case TEST_ECHO:
-        return FirmwareSupport::Error::messageIsAnEcho;
-        break;
-
-    default:
-        //errorVisualizer.setErrorLevel(
-        //    LumatoneFirmwareDriver::ErrorLevel::noError,
-        //    "");
-        break;
-    }
-
-    return FirmwareSupport::Error::noError;
-}
-
-FirmwareSupport::Error LumatoneEventManager::handleBufferCommand(const juce::MidiMessage& midiMessage)
+FirmwareSupport::Error LumatoneEventManager::handleResponse(const juce::MidiMessage& midiMessage)
 {
     auto sysExData = midiMessage.getSysExData();
     unsigned int cmd = sysExData[CMD_ID];
@@ -560,7 +525,7 @@ FirmwareSupport::Error LumatoneEventManager::handleBufferCommand(const juce::Mid
         return handleSerialIdentityResponse(midiMessage);
 
     case CALIBRATE_PITCH_MOD_WHEEL:
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::calibratePitchModWheelAnswer, (LumatoneFirmware::ReturnCode)sysExData[MSG_STATUS]);
+        getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::calibratePitchModWheelAnswer, (LumatoneFirmware::ReturnCode)sysExData[MSG_STATUS]);
         return FirmwareSupport::Error::noError;
 
     case GET_LUMATOUCH_CONFIG:
@@ -610,156 +575,26 @@ FirmwareSupport::Error LumatoneEventManager::handleBufferCommand(const juce::Mid
     return FirmwareSupport::Error::unknownCommand;
 }
 
-void LumatoneEventManager::timerCallback()
+void LumatoneEventManager::handleResponseError(FirmwareSupport::Error errorToHandle, int commandReceived, const juce::MidiMessage& msg)
 {
-    stopTimer();
-
-    juce::MidiBuffer readBuffer;
-    removeNextBlockOfMessages(readBuffer, bufferReadSize);
-    for (auto event : readBuffer)
+    switch (errorToHandle)
     {
-        bool configMsg = false;
-        auto midiMessage = event.getMessage();
-        if (midiMessage.isSysEx())
-        {
-            auto sysExData = midiMessage.getSysExData();
-            auto cmd = sysExData[CMD_ID];
+    case FirmwareSupport::Error::noError:
+    case FirmwareSupport::Error::messageIsAnEcho:
+    case FirmwareSupport::Error::commandNotImplemented:
+        return;
 
-            configMsg = cmd < 0x2;
+    // case FirmwareSupport::Error::messageHasInvalidStatusByte:
+    //     return;
 
+    case FirmwareSupport::Error::deviceIsBusy:
+        DBG("DEVICE IS BUSY from command " + juce::String::toHexString(commandReceived));
+        return;
 
-            #if JUCE_DEBUG
-                if (verbose > 1)
-                    DBG("READ: " + midiMessage.getDescription());
-            #endif
-
-            auto errorCode = getBufferErrorCode(sysExData);
-            handleMidiDriverError(errorCode, cmd);
-
-            if (sysExData[MSG_STATUS] == 1)
-            {
-                errorCode = handleBufferCommand(midiMessage);
-                handleMidiDriverError(errorCode, cmd);
-            }
-        }
-
-        // Ignore non-sysex messages
+    default:
+        DBG("ERROR from command " + juce::String::toHexString(commandReceived) + ": " + FirmwareSupport::errorToString(errorToHandle));
+        break;
     }
 
-    auto bufferSize = juce::jlimit(0, 999999, readQueueSize.load() - bufferReadSize);
-    readQueueSize.store(bufferSize);
-
-    if (bufferSize != 0)
-        startTimer(bufferReadTimeoutMs);
-
-    bufferReadRequested = false;
-}
-
-void LumatoneEventManager::octaveColourConfigReceived(int boardId, juce::uint8 rgbFlag, const int* colourData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        auto newValue = colourData[keyIndex];
-
-        juce::Colour colour = getKey(boardIndex, keyIndex).getColour();
-        if (rgbFlag == 0)
-        {
-            colour = juce::Colour(newValue, colour.getGreen(), colour.getBlue());
-        }
-        else if (rgbFlag == 1)
-        {
-            colour = juce::Colour(colour.getRed(), newValue, colour.getBlue());
-        }
-        else if (rgbFlag == 2)
-        {
-            colour = juce::Colour(colour.getRed(), colour.getGreen(), newValue);
-        }
-        else
-        {
-            jassertfalse;
-        }
-
-        LumatoneState::setKeyColour(colour, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneEventManager::octaveChannelConfigReceived(int boardId, const int* channelData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        juce::uint8 ch = channelData[keyIndex];
-        if (ch == 0 || ch > 16)
-            ch = 1;
-
-        auto key = getKey(boardIndex, keyIndex);
-        key.setChannelNumber(ch);
-        LumatoneState::setKeyConfig(key, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneEventManager::octaveNoteConfigReceived(int boardId, const int* noteData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        int note = noteData[keyIndex];
-        if (note < 0 || note > 127)
-            note = 0;
-
-        auto key = getKey(boardIndex, keyIndex);
-        key.setNoteOrCC(noteData[keyIndex]);
-        LumatoneState::setKeyConfig(key, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneEventManager::keyTypeConfigReceived(int boardId, const int* keyTypeData)
-{
-    int boardIndex = boardId - 1;
-
-    for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-    {
-        auto type = LumatoneKeyType(keyTypeData[keyIndex]);
-
-        auto key = getKey(boardIndex, keyIndex);
-        key.setKeyType(type);
-        LumatoneState::setKeyConfig(key, boardId, keyIndex);
-    }
-
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
-}
-
-void LumatoneEventManager::macroButtonColoursReceived(juce::Colour inactiveColour, juce::Colour activeColour)
-{
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::macroButtonInactiveColourChanged, inactiveColour);
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::macroButtonActiveColourChanged, activeColour);
-}
-
-void LumatoneEventManager::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
-{
-    LumatoneState::setLightOnKeyStrokes(presetFlags.lightsOnKeystroke);
-    setStateProperty(LumatoneStateProperty::LightsOnAfterKeystroke, presetFlags.lightsOnKeystroke);
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::lightOnKeyStrokesChanged, presetFlags.lightsOnKeystroke);
-
-    LumatoneState::setAftertouchEnabled(presetFlags.polyphonicAftertouch);
-    setStateProperty(LumatoneStateProperty::AftertouchEnabled, presetFlags.polyphonicAftertouch);
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::aftertouchToggled, presetFlags.polyphonicAftertouch);
-
-    LumatoneState::setInvertSustain(presetFlags.sustainPedalInverted);
-    setStateProperty(LumatoneStateProperty::InvertSustain, presetFlags.sustainPedalInverted);
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::invertSustainToggled, presetFlags.sustainPedalInverted);
-
-    LumatoneState::setInvertExpression(presetFlags.expressionPedalInverted);
-    setStateProperty(LumatoneStateProperty::InvertExpression, presetFlags.expressionPedalInverted);
-    getEditorListeners()->call(&LumatoneEditor::EditorListener::invertFootControllerChanged, presetFlags.expressionPedalInverted);
+    jassertfalse;
 }
