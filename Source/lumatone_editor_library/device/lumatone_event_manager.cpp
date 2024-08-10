@@ -135,6 +135,11 @@ FirmwareSupport::Error LumatoneEventManager::handleLEDConfigResponse(const juce:
 
         getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::octaveColourConfigReceived, boardId, colourCode, colourData);
         getEditorListeners()->call(&LumatoneEditor::EditorListener::boardChanged, getBoard(boardIndex));
+
+        if (getReceivedLayoutStatus().completed())
+        {
+            getEditorListeners()->call(&LumatoneEditor::EditorListener::layoutImported, *getMappingData());
+        }
     }
 
     return errorCode;
