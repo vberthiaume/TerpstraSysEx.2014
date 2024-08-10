@@ -676,9 +676,6 @@ bool LumatoneApplicationState::Controller::requestDeviceMapping()
     // Reset state for tracking response progress
     *appState.receiveLayoutStatus = FirmwareSupport::ReceiveLayoutStatus(appState.getLumatoneVersion(), appState.getNumBoards());
 
-    // Request MIDI channel, MIDI note, colour and key type config for all keys
-    appState.controller->sendGetAllBoardsMappingRequest();
-
     // Request mapping look-up tables
     appState.controller->sendVelocityConfigRequest();
 	appState.controller->sendFaderConfigRequest();
@@ -687,6 +684,10 @@ bool LumatoneApplicationState::Controller::requestDeviceMapping()
     // Request settings associated with mapping
     appState.controller->requestExpressionPedalSensitivity();
     appState.controller->requestPresetFlags();
+
+    // Request MIDI channel, MIDI note, colour and key type config for all keys
+    // This is last as to be determinate if other settings/tables are added
+    appState.controller->sendGetAllBoardsMappingRequest();
 
     return true;
 }

@@ -75,13 +75,15 @@ void LumatoneController::sendCurrentCompleteConfig(bool signalEditorListeners)
 
 void LumatoneController::sendGetMappingOfBoardRequest(int boardId)
 {
-    getRedLEDConfig(boardId);
-    getGreenLEDConfig(boardId);
-    getBlueLEDConfig(boardId);
     getChannelConfig(boardId);
     getNoteConfig(boardId);
     getKeyTypeConfig(boardId);
     getFaderTypeConfig(boardId);
+
+    // Send last in case other key properties are added in the future
+    getRedLEDConfig(boardId);
+    getGreenLEDConfig(boardId);
+    getBlueLEDConfig(boardId);
 }
 
 void LumatoneController::sendGetAllBoardsMappingRequest()
@@ -490,4 +492,3 @@ void LumatoneController::requestMacroButtonColours()
     if (firmwareSupport.versionAcknowledgesCommand(getLumatoneVersion(), GET_MACRO_LIGHT_INTENSITY))
         firmwareDriver.sendGetMacroLightIntensity();
 }
-
