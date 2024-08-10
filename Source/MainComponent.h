@@ -14,6 +14,7 @@
 
 #include "./lumatone_editor_library/data/lumatone_layout.h"
 #include "./lumatone_editor_library/listeners/status_listener.h"
+#include "./lumatone_editor_library/listeners/editor_listener.h"
 #include "./lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
 class LumatoneKeyboardComponent;
@@ -32,7 +33,9 @@ class GlobalSettingsArea;
 */
 class MainContentComponent : public juce::Component
 						   , public LumatoneEditorState
+						   , public LumatoneEditorState::Controller
 						   , public LumatoneEditor::StatusListener
+						   , public LumatoneEditor::EditorListener
 						   , public juce::ChangeListener
 						   , public juce::Button::Listener
 {
@@ -71,6 +74,8 @@ public:
 	// Implementation of LumatoneEditor::StatusListener
 	void connectionStateChanged(ConnectionState state) override;
 
+	// Implementation of LumatoneEditor::EditorListener
+	void layoutImported(const LumatoneLayout& mappingData) override;
 
 	//==============================================================================
 	// Implementation of LumatoneEditorState

@@ -33,6 +33,7 @@
 //==============================================================================
 MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager)
 	: LumatoneEditorState("MainComponent", stateIn)
+	, LumatoneEditorState::Controller(*this)
 	, copiedSubBoardData(std::make_unique<LumatoneBoard>())
 {
 	setName("MainContentComponent");
@@ -310,6 +311,13 @@ void MainContentComponent::updateDeveloperMode()
 void MainContentComponent::connectionStateChanged(ConnectionState state)
 {
 	btnImportFile->setEnabled(state == ConnectionState::ONLINE);
+}
+
+void MainContentComponent::layoutImported(const LumatoneLayout &mappingData)
+{
+	setCurrentFile(juce::File(), false);
+    undoManager->clearUndoHistory();
+	setHasChangesToSave(false);
 }
 
 //void MainContentComponent::octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData)
