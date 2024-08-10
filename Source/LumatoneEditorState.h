@@ -148,8 +148,6 @@ protected:
 
     void loadPropertiesFile(juce::PropertiesFile* properties);
 
-    void setHasChangesToSave(bool hasChangesToSave);
-
 protected:
     bool hasChangesToSave = false;
     bool hasChangesToSend = false;
@@ -207,15 +205,13 @@ public:
         bool resetToCurrentFile();
         bool openRecentFile(int recentFileIndex);
 
-        virtual bool requestCompleteDeviceConfig() override;
-
         void addPalette(const LumatoneEditorColourPalette& newPalette);
         bool deletePaletteFile(juce::File pathToPalette);
 
         void setColourPalettes(const juce::Array<LumatoneEditorColourPalette>& palettesIn);
         void loadColourPalettesFromFile();
 
-        bool setCurrentFile(juce::File fileToOpen);
+        bool setCurrentFile(juce::File fileToOpen, bool loadFile=true);
         bool saveMappingToFile(juce::File fileToSave);
 
         juce::PropertiesFile* getPropertiesFile() const { return editorState.propertiesFile.get(); }
@@ -226,7 +222,7 @@ public:
         void savePropertyIntValue(const  juce::Identifier& id, int value);
         void savePropertyStringValue(const  juce::Identifier& id, juce::String value);
 
-        void setHasChangesToSave(bool hasChanges) { editorState.setHasChangesToSave(hasChanges); }
+        void setHasChangesToSave(bool hasChanges);
         void setCalibrationMode(bool calibrationModeOn);
         void setDeveloperMode(bool developerModeOn);
         void setEditMode(EditorMode editMode);
