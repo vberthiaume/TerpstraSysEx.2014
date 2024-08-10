@@ -181,31 +181,6 @@ void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* propertiesF
 	// globalSettingsArea->saveStateToPropertiesFile(propertiesFile);
 }
 
-// Set the currentSectionKey mapping to be edited to the value passed in parameter
-//void MainContentComponent::setData(LumatoneLayout& newData, bool withRefresh)
-//{
-//	*mappingData = newData;
-//
-//	noteEditArea->onSetData(newData);
-//
-//	if (withRefresh)
-//	{
-//		refreshAllFields();
-//	}
-//}
-//
-//void MainContentComponent::deleteAll(bool withRefresh)
-//{
-//	LumatoneLayout keyMapping;
-//	setData(keyMapping, withRefresh);
-//}
-//
-//// Copy the edited mapping to the variable passed as parameter
-//void MainContentComponent::getData(LumatoneLayout& newData)
-//{
-//	newData = *getMappingData();
-//}
-
 // TabbedButtonBar *MainContentComponent::getOctaveBoardSelectorTab()
 // {
 // 	return  noteEditArea->getOctaveBoardSelectorTab();
@@ -319,115 +294,6 @@ void MainContentComponent::layoutImported(const LumatoneLayout &mappingData)
     undoManager->clearUndoHistory();
 	setHasChangesToSave(false);
 }
-
-//void MainContentComponent::octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData)
-//{
-//	for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-//	{
-//		// LumatoneKey& keyData = getBoard(octaveIndex - 1)->theKeys[keyIndex];
-//		// auto newValue = colourData[keyIndex];
-//
-//		// if (rgbFlag == 0)
-//		// {
-//		// 	keyData.colour = Colour(newValue, keyData.colour.getGreen(), keyData.colour.getBlue());
-//		// }
-//		// else if (rgbFlag == 1)
-//		// {
-//		// 	keyData.colour = Colour(keyData.colour.getRed(), newValue, keyData.colour.getBlue());
-//		// }
-//		// else if (rgbFlag == 2)
-//		// {
-//		// 	keyData.colour = Colour(keyData.colour.getRed(), keyData.colour.getGreen(), newValue);
-//		// }
-//		// else
-//		// 	jassertfalse;
-//	}
-//
-//	refreshKeyDataFields();
-//}
-//
-//void MainContentComponent::octaveChannelConfigReceived(int octaveIndex, const int* channelData)
-//{
-//	for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-//	{
-//		// Check channel values?
-//		// getBoard(octaveIndex - 1)->theKeys[keyIndex].channelNumber = channelData[keyIndex];
-//	}
-//
-//	refreshKeyDataFields();
-//}
-//
-//void MainContentComponent::octaveNoteConfigReceived(int octaveIndex, const int* noteData)
-//{
-//	for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-//	{
-//		// Check note values?
-//		// getBoard(octaveIndex - 1)->theKeys[keyIndex].noteNumber = noteData[keyIndex];
-//	}
-//
-//	refreshKeyDataFields();
-//}
-//
-//void MainContentComponent::keyTypeConfigReceived(int octaveIndex, const int* keyTypeData)
-//{
-//	for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-//	{
-//		// Check type values?
-//		// getBoard(octaveIndex - 1)->theKeys[keyIndex].keyType = LumatoneKeyType(keyTypeData[keyIndex]);
-//	}
-//
-//	refreshKeyDataFields();
-//}
-//
-//void MainContentComponent::velocityConfigReceived(const int* velocityData)
-//{
-//	// mappingData.velocityTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
-//	// for (int i = 0; i < 128; i++)
-//	// 	mappingData.velocityTable.velocityValues[i] = velocityData[127 - i]; // Reversed
-//	curvesArea->loadFromMapping();
-//}
-//
-//void MainContentComponent::aftertouchConfigReceived(const int* aftertouch)
-//{
-//	// mappingData.afterTouchTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
-//	// memmove(mappingData.afterTouchTable.velocityValues, aftertouch, sizeof(int) * 128);
-//	curvesArea->loadFromMapping();
-//}
-//
-//void MainContentComponent::velocityIntervalConfigReceived(const int* velocityData)
-//{
-//	// memmove(mappingData.table, velocityData, sizeof(int) * VELOCITYINTERVALTABLESIZE);
-//	curvesArea->loadFromMapping();
-//}
-//
-//void MainContentComponent::faderConfigReceived(const int* faderData)
-//{
-//	// mappingData.faderTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
-//	// memmove(mappingData.faderTable.velocityValues, faderData, sizeof(int) * 128);
-//	curvesArea->loadFromMapping();
-//}
-//
-//void MainContentComponent::faderTypeConfigReceived(int octaveIndex, const int* faderTypeData)
-//{
-//	for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-//	{
-//		// getBoard(octaveIndex - 1)->theKeys[keyIndex].ccFaderDefault = faderTypeData[keyIndex];
-//	}
-//}
-//
-//void MainContentComponent::lumatouchConfigReceived(const int* lumatouchData)
-//{
-//	// mappingData.lumaTouchTable.editStrategy = LumatoneConfigTable::DrawMode::freeDrawing;
-//	// memmove(mappingData.lumaTouchTable.velocityValues, lumatouchData, sizeof(int) * 128);
-//	curvesArea->loadFromMapping();
-//}
-
-//void MainContentComponent::firmwareRevisionReceived(LumatoneFirmware::Version version)
-//{
-//	// Make sure changes happen in proper order
-//	//noteEditArea->resetOctaveSize();
-//	//allKeysOverview->resetOctaveSize();
-//}
 
 void MainContentComponent::changeListenerCallback(ChangeBroadcaster *source)
 {
@@ -571,23 +437,6 @@ void MainContentComponent::resizeEditSectionTabs()
 	int leftMargin = lblEditTitle->getWidth() + roundToInt(sectionTabsMargin * 0.5f);
 	sectionTabBar->setBounds(sectionTabBar->getBounds().withTrimmedLeft(leftMargin).withWidth(sectionTabsWidth));
 }
-
-//
-// void MainContentComponent::refreshKeyDataFields()
-//{
-//	noteEditArea->refreshKeyFields();
-//	// allKeysOverview->mappingUpdateCallback();
-//	// juce::Timer::callAfterDelay(1, [&]() { allKeysOverview->refreshMappingData(); });
-//}
-//
-// void MainContentComponent::refreshAllFields()
-//{
-//	refreshKeyDataFields();
-//	generalOptionsArea->loadFromMapping();
-//	pedalSensitivityDlg->loadFromMapping();
-//	curvesArea->loadFromMapping();
-//	curvesArea->repaint();
-//}
 
 void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property)
 {

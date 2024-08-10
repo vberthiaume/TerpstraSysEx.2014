@@ -106,7 +106,7 @@ void TerpstraSysExApplication::shutdown()
 	savePropertiesFile();
 
 	// juce::String stateStr =state.toString();
-	// auto lines = juce::StringArray::fromLines(stateStr); 
+	// auto lines = juce::StringArray::fromLines(stateStr);
 	// for (auto line : lines)
 	// 	DBG(line);
 
@@ -508,7 +508,8 @@ bool TerpstraSysExApplication::pasteModifiedSubBoardData(CommandID commandID)
     case Lumatone::Menu::pasteOctaveBoardColours:
     case Lumatone::Menu::pasteOctaveBoardChannels:
     case Lumatone::Menu::pasteOctaveBoardTypes:
-        return performAction(((MainContentComponent*)(mainWindow->getContentComponent()))->createModifiedPasteCurrentSectionAction(commandID));
+        // return performAction(((MainContentComponent*)(mainWindow->getContentComponent()))->createModifiedPasteCurrentSectionAction(commandID));
+		return false;
     default:
         jassertfalse;
         return false;
