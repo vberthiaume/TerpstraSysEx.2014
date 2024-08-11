@@ -109,8 +109,6 @@ public:
 
 protected:
     void setConnectedSerialNumber(juce::String serialNumberIn);
-    void setFirmwareVersion(LumatoneFirmware::Version& versionIn, bool writeToState=false);
-
     void setLumatoneVersion(LumatoneFirmware::ReleaseVersion versionIn, bool writeToState=false);
 
 protected:

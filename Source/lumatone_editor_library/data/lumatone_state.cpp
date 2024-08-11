@@ -57,7 +57,12 @@ LumatoneState::LumatoneState(juce::String nameIn, const LumatoneState &stateIn)
     , mappingData(stateIn.mappingData)
     , midiKeyMap(stateIn.midiKeyMap)
 {
-    state = loadStateProperties(stateIn.state);
+    if (stateIn.state.isValid())
+        state = stateIn.state;
+    else
+        state = juce::ValueTree(LumatoneStateProperty::DefaultState);
+
+    loadStateProperties(state);
     state.addListener(this);
 }
 
@@ -101,10 +106,9 @@ void LumatoneState::handleStatePropertyChange(juce::ValueTree stateIn, const juc
     }
     else if (property == LumatoneStateProperty::LastConnectedFirmwareVersion)
     {
-        setLumatoneVersion(
-            LumatoneFirmware::ReleaseVersion((int)stateIn.getProperty(property, (int)LumatoneFirmware::ReleaseVersion::FUTURE_VERSION))
-            );
-        firmwareVersion = LumatoneFirmware::Version::fromReleaseVersion(determinedVersion);
+        int value = (int)stateIn.getProperty(property, (int)LumatoneFirmware::ReleaseVersion::FUTURE_VERSION);
+        LumatoneFirmware::ReleaseVersion version = LumatoneFirmware::ReleaseVersion(value);
+        setLumatoneVersion(version);
     }
     else if (property == LumatoneStateProperty::InactiveMacroButtonColour)
     {
@@ -139,15 +143,10 @@ void LumatoneState::setConnectedSerialNumber(juce::String serialNumberIn)
     }
 }
 
-void LumatoneState::setFirmwareVersion(LumatoneFirmware::Version& versionIn, bool writeToState)
-{
-    firmwareVersion = LumatoneFirmware::Version(versionIn);
-    setLumatoneVersion(firmwareSupport.getReleaseVersion(firmwareVersion), writeToState);
-}
-
 void LumatoneState::setLumatoneVersion(LumatoneFirmware::ReleaseVersion versionIn, bool writeToState)
 {
     determinedVersion = versionIn;
+    firmwareVersion = LumatoneFirmware::Version::fromReleaseVersion(determinedVersion);
 
     if (writeToState)
     {
