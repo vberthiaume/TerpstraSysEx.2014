@@ -21,7 +21,6 @@ PresetSettingsDlg::PresetSettingsDlg(const LumatoneEditorState& stateIn)
     addAndMakeVisible(resetPresetsBtn.get());
     resetPresetsBtn->addListener(this);
 
-    // getLumatoneController()->addFirmwareListener(this);
     setSupportedControls(getFirmwareVersion());
 
     flexBox.justifyContent = FlexBox::JustifyContent::flexStart;
@@ -30,7 +29,6 @@ PresetSettingsDlg::PresetSettingsDlg(const LumatoneEditorState& stateIn)
 
 PresetSettingsDlg::~PresetSettingsDlg()
 {
-    // getLumatoneController()->removeFirmwareListener(this);
     resetPresetsBtn = nullptr;
 }
 
@@ -62,11 +60,6 @@ void PresetSettingsDlg::buttonClicked(Button* btn)
     }
 }
 
-void PresetSettingsDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
-{
-    setSupportedControls(version);
-}
-
 void PresetSettingsDlg::setSupportedControls(LumatoneFirmware::Version version)
 {
     if (getFirmwareSupport().versionAcknowledgesCommand(version, RESET_DEFAULT_PRESETS))
@@ -79,5 +72,13 @@ void PresetSettingsDlg::setSupportedControls(LumatoneFirmware::Version version)
         resetPresetsBtn->setEnabled(false);
         resetPresetsBtn->setTooltip(juce::translate("This feature is not supported by your Lumatone firmware version."));
         // TODO: better approach for changing tooltips
+    }
+}
+
+void PresetSettingsDlg::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier & property)
+{
+    if (property == LumatoneStateProperty::LastConnectedFirmwareVersion)
+    {
+        setSupportedControls(getFirmwareVersion());
     }
 }

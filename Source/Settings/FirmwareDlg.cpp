@@ -59,7 +59,7 @@ FirmwareDlg::FirmwareDlg(const LumatoneEditorState& stateIn)
     addAndMakeVisible(firmwareStatusLabel.get());
     updateFirmwareVersionLabel();
 
-    // getLumatoneController()->addFirmwareListener(this);
+    addFirmwareListener(this);
 
     postMessage(translate("Select a firmware file and then click \"Begin Update\""));
 
@@ -71,7 +71,7 @@ FirmwareDlg::FirmwareDlg(const LumatoneEditorState& stateIn)
 
 FirmwareDlg::~FirmwareDlg()
 {
-    // getLumatoneController()->removeFirmwareListener(this);
+    removeFirmwareListener(this);
 }
 
 void FirmwareDlg::paint(Graphics& g)

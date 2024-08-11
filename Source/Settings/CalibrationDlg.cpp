@@ -69,7 +69,7 @@ CalibrationDlg::CalibrationDlg (const LumatoneEditorState& stateIn)
 
 	calibrationSelectorTab->addChangeListener(this);
 
-	// getLumatoneController()->addFirmwareListener(this);
+	addFirmwareListener(this);
 
     //[/UserPreSize]
 
@@ -86,7 +86,7 @@ CalibrationDlg::CalibrationDlg (const LumatoneEditorState& stateIn)
 CalibrationDlg::~CalibrationDlg()
 {
     //[Destructor_pre]. You can add your own custom destruction code here..
-	// getLumatoneController()->removeFirmwareListener(this);
+	removeFirmwareListener(this);
     //[/Destructor_pre]
 
     btnStart = nullptr;

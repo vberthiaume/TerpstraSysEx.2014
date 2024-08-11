@@ -49,15 +49,14 @@ MidiSettingsDlg::MidiSettingsDlg(const LumatoneEditorState& stateIn)
     flexBox.justifyContent = FlexBox::JustifyContent::flexStart;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
 
-    // getLumatoneController()->addFirmwareListener(this);
+    addFirmwareListener(this);
 
     setSupportedControls(getFirmwareVersion());
 }
 
 MidiSettingsDlg::~MidiSettingsDlg()
 {
-    // Not good when app closes with this window open...
-    // getLumatoneController()->removeFirmwareListener(this);
+    removeFirmwareListener(this);
 
     setMidiChannelHeader = nullptr;
     setMidiChannelLabels.clear();

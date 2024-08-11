@@ -19,7 +19,6 @@
 class PresetSettingsDlg : public Component
                         , LumatoneEditorState
                         , protected Button::Listener
-                        , protected LumatoneEditor::FirmwareListener
 
 {
 public:
@@ -35,10 +34,10 @@ public:
 
     void setSupportedControls(LumatoneFirmware::Version version);
 
-    //=========================================================================
-    // LumatoneEditor::FirmwareListener implementation
+	  //==============================================================================
+	  // Implementation of LumatoneEditorState
 
-    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+	  void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
 
 private:
