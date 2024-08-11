@@ -420,8 +420,8 @@ void MainContentComponent::resized()
 	resizeLabelWithHeight(lblAppVersion.get(), roundToInt(lblAppName->getHeight() * 0.75f));
 	lblAppVersion->setTopLeftPosition(lblAppName->getRight(), lblAppName->getBottom() - lblAppVersion->getHeight());
 
-    // resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
-    lblFirmwareVersion->setBounds(allKeysOverview->getX(), allKeysOverview->getBottom(), btnHeight * 0.6f, contentWidth);
+	juce::Rectangle<int> lumatoneBounds = allKeysOverview->getLocalGraphicBounds().translated(allKeysOverview->getX(), allKeysOverview->getY());
+    lblFirmwareVersion->setBounds(lumatoneBounds.getX(), lumatoneBounds.getBottom(), contentWidth, btnHeight * 0.7f);
 }
 
 void MainContentComponent::resizeEditSectionTabs()
@@ -455,5 +455,7 @@ void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, co
 	{
 		auto string = juce::String("Firmware version: " + getFirmwareVersion().toDisplayString());
 		lblFirmwareVersion->setText(string, juce::NotificationType::sendNotification);
+
+		requestDeviceGlobalSettings();
 	}
 }

@@ -79,6 +79,10 @@ public:
     void setUiMode(LumatoneKeyboardComponent::UiMode modeIn);
 
 public:
+
+    juce::Rectangle<int> getLocalGraphicBounds() const;
+
+public:
     // LumatoneEditor::EditorListener Implementation
     void layoutChanged(const LumatoneLayout& mappingData) override;
     void boardChanged(const LumatoneBoard& boardData) override;

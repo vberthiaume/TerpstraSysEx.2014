@@ -187,6 +187,11 @@ void LumatoneKeyboardComponent::setUiMode(LumatoneKeyboardComponent::UiMode mode
     uiMode = modeIn;
 }
 
+juce::Rectangle<int> LumatoneKeyboardComponent::getLocalGraphicBounds() const
+{
+    return lumatoneBounds;
+}
+
 void LumatoneKeyboardComponent::layoutChanged(const LumatoneLayout& mappingData)
 {
     for (int boardIndex = 0; boardIndex < octaveBoards.size(); boardIndex++)
