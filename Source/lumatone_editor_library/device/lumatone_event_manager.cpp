@@ -265,6 +265,11 @@ FirmwareSupport::Error LumatoneEventManager::handleVelocityIntervalConfigRespons
     {
         getReceivedSettingsStatus().receivedVelocityIntervalTable = true;
         getFirmwareListeners()->call(&LumatoneEditor::FirmwareListener::velocityIntervalConfigReceived, (int*)data);
+
+        if (getReceivedSettingsStatus().completed())
+        {
+            // todo?
+        }
     };
     return handleTableConfigResponse(midiMessage, unpack, callback);
 }

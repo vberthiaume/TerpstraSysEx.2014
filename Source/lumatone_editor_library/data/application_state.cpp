@@ -656,15 +656,15 @@ bool LumatoneApplicationState::Controller::requestDeviceGlobalSettings()
     // Reset state for tracking response progress
     *appState.receiveSettingsStatus = FirmwareSupport::ReceiveSettingsStatus(appState.getLumatoneVersion());
 
-	// Velocity curve config
-	appState.controller->sendVelocityIntervalConfigRequest();
-
     // Macro button colours
     appState.controller->requestMacroButtonColours();
 
 	// General options
     appState.controller->getPeripheralChannels();
 
+	// Velocity curve config
+	appState.controller->sendVelocityIntervalConfigRequest();
+    
     return true;
 }
 
