@@ -33,7 +33,7 @@
 //==============================================================================
 MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* commandManager)
 	: LumatoneEditorState("MainComponent", stateIn)
-	, LumatoneEditorState::Controller(*this)
+	, LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
 	, copiedSubBoardData(std::make_unique<LumatoneBoard>())
 {
 	setName("MainContentComponent");
@@ -124,6 +124,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 
 
 	addStatusListener(this);
+	addEditorListener(this);
 
 	// Initial size
 	// setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
