@@ -518,10 +518,24 @@ FirmwareSupport::Error LumatoneEventManager::handleResponse(const juce::MidiMess
     case GET_KEYTYPE_CONFIG:
         return handleKeyTypeConfigResponse(midiMessage);
 
+    case GET_MAX_THRESHOLD:
+    case GET_MIN_THRESHOLD:
+    case GET_AFTERTOUCH_MAX:
+    case GET_KEY_VALIDITY:
         // TODO
+        return FirmwareSupport::Error::noError;
 
     case GET_VELOCITY_CONFIG:
         return handleVelocityConfigResponse(midiMessage);
+
+    case GET_FADER_CONFIG:
+        return handleFaderConfigResponse(midiMessage);
+    
+    case GET_AFTERTOUCH_CONFIG:
+        return handleAftertouchConfigResponse(midiMessage);
+
+    case GET_VELOCITY_INTERVALS:
+        return handleVelocityIntervalConfigResponse(midiMessage);
 
     case GET_FADER_TYPE_CONFIGURATION:
         return handleFaderTypeConfigResponse(midiMessage);
@@ -561,6 +575,11 @@ FirmwareSupport::Error LumatoneEventManager::handleResponse(const juce::MidiMess
 
     case GET_MACRO_LIGHT_INTENSITY:
         return handleGetMacroLightIntensityResponse(midiMessage);
+
+    case GET_PITCH_AND_MOD_BOUNDS:
+    case GET_EXPRESSION_PEDAL_BOUNDS:
+        // TODO?
+        return FirmwareSupport::Error::noError;
 
     default:
         jassert(sysExData[MSG_STATUS] == LumatoneFirmware::ReturnCode::ACK);
