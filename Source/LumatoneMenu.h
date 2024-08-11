@@ -12,7 +12,7 @@
 
 #include <JuceHeader.h>
 
-#include "LumatoneEditorState.h"
+#include "./data/LumatoneEditorState.h"
 
 namespace Lumatone {
 	namespace Menu {

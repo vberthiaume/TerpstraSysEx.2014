@@ -20,7 +20,7 @@
 //[Headers] You can add your own extra header files here...
 #include "WheelsCalibrationComponent.h"
 
-#include "../LumatoneEditorLookAndFeel.h"
+#include "../style/LumatoneEditorLookAndFeel.h"
 
 #include "../lumatone_editor_library/graphics/view_constants.h"
 #include "../lumatone_editor_library/device/lumatone_controller.h"

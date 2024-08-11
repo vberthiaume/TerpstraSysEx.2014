@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-#include "../LumatoneEditorState.h"
+#include "../data/LumatoneEditorState.h"
 
 typedef enum {
     Calibration = 0,

@@ -10,7 +10,7 @@
 
 #include "SettingsContainer.h"
 
-#include "../LumatoneEditorLookAndFeel.h"
+#include "../style/LumatoneEditorLookAndFeel.h"
 
 #include "CalibrationDlg.h"
 #include "FirmwareDlg.h"

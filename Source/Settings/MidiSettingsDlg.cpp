@@ -10,7 +10,7 @@
 
 #include "MidiSettingsDlg.h"
 
-#include "../LumatoneEditorFontLibrary.h"
+#include "../style/LumatoneEditorFontLibrary.h"
 
 #include "../lumatone_editor_library/device/lumatone_controller.h"
 

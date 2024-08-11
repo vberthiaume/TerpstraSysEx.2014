@@ -11,7 +11,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-#include "../LumatoneEditorState.h"
+#include "../data/LumatoneEditorState.h"
 
 #include "../lumatone_editor_library/listeners/firmware_listener.h"
 #include "../lumatone_editor_library/lumatone_midi_driver/firmware_types.h"

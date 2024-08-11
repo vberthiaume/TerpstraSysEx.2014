@@ -12,11 +12,11 @@
 #include "Main.h"
 
 #include "MainWindow.h"
-#include "MainComponent.h"
+#include "./components/MainComponent.h"
 
-#include "FirmwareTransfer.h"
+#include "./firmware/FirmwareTransfer.h"
 
-#include "LumatoneEditorLookAndFeel.h"
+#include "./style/LumatoneEditorLookAndFeel.h"
 
 #include "./actions/KeySelectionControlActions.h"
 
@@ -25,8 +25,8 @@
 #include "./lumatone_editor_library/graphics/view_constants.h"
 #include "./lumatone_editor_library/palettes/colour_palette_file.h"
 
-#include "VelocityCurveDlgBase.h"
-#include "NoteOnOffVelocityCurveDialog.h"
+// #include "VelocityCurveDlgBase.h"
+// #include "NoteOnOffVelocityCurveDialog.h"
 #include "LumatoneMenu.h"
 
 //==============================================================================

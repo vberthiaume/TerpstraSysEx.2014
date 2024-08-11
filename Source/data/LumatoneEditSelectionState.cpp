@@ -1,6 +1,6 @@
                                                                                                                                                                                                                                                                                                                                                                                                                    #include "LumatoneEditSelectionState.h"
 #include "../lumatone_editor_library/data/lumatone_layout.h"
-#include "../LumatoneEditorState.h"
+#include "../data/LumatoneEditorState.h"
 
 static juce::Array<juce::Identifier> getEditSelectionProperties()
 {

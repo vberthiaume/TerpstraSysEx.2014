@@ -14,9 +14,9 @@
 
 #include "./lumatone_editor_library/lumatone_midi_driver/lumatone_midi_driver.h"
 
-#include "./LumatoneEditorState.h"
+#include "./data/LumatoneEditorState.h"
 
-#include "LocalisationMap.h"
+#include "./style/LocalisationMap.h"
 
 #define CHOOSE_FILE_NOOP [](bool) -> void {}
 

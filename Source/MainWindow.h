@@ -10,7 +10,7 @@
 #pragma once
 #include <JuceHeader.h>
 
-#include "LumatoneEditorState.h"
+#include "./data/LumatoneEditorState.h"
 
 #include "./lumatone_editor_library/listeners/editor_listener.h"
 

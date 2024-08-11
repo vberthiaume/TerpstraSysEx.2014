@@ -9,7 +9,6 @@
 */
 
 #include "LumatoneMenu.h"
-#include "./LumatoneEditorState.h"
 
 namespace Lumatone {
 	namespace Menu {

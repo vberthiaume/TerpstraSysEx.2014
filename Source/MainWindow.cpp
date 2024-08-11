@@ -8,13 +8,12 @@
 */
 
 #include "MainWindow.h"
-#include "MainComponent.h"
-
 #include "LumatoneMenu.h"
 
-#include "LumatoneEditorLookAndFeel.h"
-#include "./lumatone_editor_library/palettes/colour_palette_file.h"
+#include "./components/MainComponent.h"
+#include "./style/LumatoneEditorLookAndFeel.h"
 
+#include "./lumatone_editor_library/palettes/colour_palette_file.h"
 #include "./lumatone_editor_library/graphics/view_constants.h"
 
 MainWindow::MainWindow(const LumatoneEditorState& stateIn, juce::ApplicationCommandManager* cmdManager)

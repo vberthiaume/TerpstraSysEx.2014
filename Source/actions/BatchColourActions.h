@@ -11,7 +11,7 @@
 #ifndef LUMATONE_EDITOR_BATCH_COLOUR_ACTIONS_H
 #define LUMATONE_EDITOR_BATCH_COLOUR_ACTIONS_H
 
-#include "../LumatoneEditorState.h"
+#include "../data/LumatoneEditorState.h"
 #include "../lumatone_editor_library/actions/lumatone_action.h"
 #include "../data/LumatoneEditorBatchColourState.h"
 

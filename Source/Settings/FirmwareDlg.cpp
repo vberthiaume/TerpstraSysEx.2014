@@ -10,8 +10,8 @@
 
 #include "FirmwareDlg.h"
 
-#include "../LumatoneEditorLookAndFeel.h"
-#include "../LumatoneEditorFontLibrary.h"
+#include "../style/LumatoneEditorLookAndFeel.h"
+#include "../style/LumatoneEditorFontLibrary.h"
 
 #include "../lumatone_editor_library/device/lumatone_controller.h"
 

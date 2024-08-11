@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include "../LumatoneEditorState.h"
-#include "../FileBrowserComponent.h"
-#include "../FirmwareTransfer.h"
+#include "../data/LumatoneEditorState.h"
+#include "../controls/FileBrowserComponent.h"
+#include "../firmware/FirmwareTransfer.h"
 
 #include "../lumatone_editor_library/listeners/firmware_listener.h"
 
