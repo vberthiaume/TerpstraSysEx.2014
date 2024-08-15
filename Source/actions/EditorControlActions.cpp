@@ -132,22 +132,24 @@ bool ApplyAssignmentsToSelectionAction::perform()
         if (newData.ccFaderDefault)
             keyUpdate.setDefaultCCFader(newData.ccFaderDefault);
 
-        setKey((const LumatoneKey&) keyUpdate, keyUpdate.boardIndex + 1, keyUpdate.keyIndex);
+        LumatoneState::setKey((const LumatoneKey&) keyUpdate, keyUpdate.boardIndex + 1, keyUpdate.keyIndex);
         updatedKeys.add(keyUpdate);
     }
+
+    bool useBuffer = updatedKeys.size() > 48;
 
     if (!newData.useColour)
     {
         // todo param-only update (no colour)
-        sendSelectionParam(updatedKeys);
+        sendSelectionParam(updatedKeys, true, useBuffer);
     }
     else if (newData.useType || newData.useNote || newData.useChannel || newData.ccFaderDefault)
     {
-        sendSelectionParam(updatedKeys);
+        sendSelectionParam(updatedKeys, true, useBuffer);
     }
     else
     {
-        sendSelectionColours(updatedKeys);
+        sendSelectionColours(updatedKeys, true, useBuffer);
     }
 
     updatedSelectedKeys();

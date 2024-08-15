@@ -85,7 +85,7 @@ ApplyBatchColourAdjustments::ApplyBatchColourAdjustments(const LumatoneEditorSta
     newData = editData;
     previousData = getBatchColourEditData();
 
-    if (keySelectionIn.size() > 0 && keySelection.size() < (MAXNUMBOARDS * MAXBOARDSIZE)) // todo get actual number from each board
+    if (keySelectionIn.size() > 0 && keySelection.size() < (MAX_LUMATONE_BOARDS * MAX_LUMATONE_BOARD_KEYS)) // todo get actual number from each board
     {
         for (const MappedLumatoneKey& key : keySelectionIn)
         {
@@ -107,19 +107,19 @@ ApplyBatchColourAdjustments::~ApplyBatchColourAdjustments()
 
 bool ApplyBatchColourAdjustments::perform()
 {
-    if (fullLayout)
-    {
-        for (const MappedLumatoneKey& key : keySelection)
-        {
-            MappedLumatoneKey updatedKey = key;
-            applyColourAdjustmentToKey(updatedKey, newData);
-            updatedLayout.setKey(updatedKey, key.boardIndex, key.keyIndex);
-        }
+    // if (fullLayout)
+    // {
+    //     for (const MappedLumatoneKey& key : keySelection)
+    //     {
+    //         MappedLumatoneKey updatedKey = key;
+    //         applyColourAdjustmentToKey(updatedKey, newData);
+    //         updatedLayout.setKey(updatedKey, key.boardIndex, key.keyIndex);
+    //     }
 
-        setLayout(updatedLayout);
-    }
-    else
-    {
+    //     setLayout(updatedLayout);
+    // }
+    // else
+    // {
         juce::Array<MappedLumatoneKey> updatedKeys;
         for (const MappedLumatoneKey& key : keySelection)
         {
@@ -128,36 +128,39 @@ bool ApplyBatchColourAdjustments::perform()
             updatedKeys.add(updatedKey);
         }
 
-        sendSelectionColours(updatedKeys);
-    }
+        bool useBuffer = keySelection.size() > 48;
+        sendSelectionColours(updatedKeys, true, useBuffer);
+    // }
 
     return true;
 }
 
 bool ApplyBatchColourAdjustments::undo()
 {
-    if (fullLayout)
-    {
-        for (const MappedLumatoneKey& key : keySelection)
-        {
-            MappedLumatoneKey baseKey = baseLayout->getMappedKey(key.boardIndex, key.keyIndex);
-            applyColourAdjustmentToKey(baseKey, previousData);
-            updatedLayout.setKey(baseKey);
-        }
+    // if (fullLayout)
+    // {
+    //     for (const MappedLumatoneKey& key : keySelection)
+    //     {
+    //         MappedLumatoneKey baseKey = baseLayout->getMappedKey(key.boardIndex, key.keyIndex);
+    //         applyColourAdjustmentToKey(baseKey, previousData);
+    //         updatedLayout.setKey(baseKey);
+    //     }
 
-        setLayout(updatedLayout);
-    }
-    else
-    {
+    //     setLayout(updatedLayout);
+    // }
+    // else
+    // {
         for (MappedLumatoneKey& key : keySelection)
         {
             juce::Colour baseColour = baseLayout->getKey(key.boardIndex, key.keyIndex)
                                                  .getColour();
             key.setColour(baseColour);
-            applyColourAdjustmentToKey(key, previousData);
+            // applyColourAdjustmentToKey(key, previousData);
         }
-        sendSelectionParam(keySelection, true);
-    }
+
+        bool useBuffer = keySelection.size() > 48;
+        sendSelectionColours(keySelection, true, useBuffer);
+    // }
 
     return true;
 }
