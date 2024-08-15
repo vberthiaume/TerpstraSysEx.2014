@@ -73,6 +73,22 @@ void LumatoneController::sendCurrentCompleteConfig(bool signalEditorListeners)
 	setVelocityIntervalConfig(getMappingData()->getConfigTable(LumatoneConfigTable::velocityInterval)->velocityValues);
 }
 
+void LumatoneController::sendSelectionParam(const juce::Array<MappedLumatoneKey> &keyParamSet, bool signalEditorListeners, bool bufferKeyUpdates)
+{
+    for (const MappedLumatoneKey& mappedKey : keyParamSet)
+    {
+        sendKeyParam(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey), false, bufferKeyUpdates);
+    }
+}
+
+void LumatoneController::sendSelectionColours(const juce::Array<MappedLumatoneKey> &keyColourSet, bool signalEditorListeners, bool bufferKeyUpdates)
+{
+    for (const MappedLumatoneKey& mappedKey : keyColourSet)
+    {
+        sendKeyColourConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, mappedKey.getColour(), false, bufferKeyUpdates);
+    }
+}
+
 void LumatoneController::sendGetMappingOfBoardRequest(int boardId)
 {
     getChannelConfig(boardId);

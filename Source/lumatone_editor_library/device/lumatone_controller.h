@@ -41,9 +41,12 @@ public:
     void sendAllParamsOfBoard(int boardId, const LumatoneBoard* boardData, bool signalEditorListeners=true, bool bufferKeyUpdates=false);
 
     // Send and save a complete key mapping
-    void sendCompleteMapping(const LumatoneLayout& mappingData, bool signalEditorListeners=true, bool bufferKeyUpdates=true);
+    void sendCompleteMapping(const LumatoneLayout& mappingData, bool signalEditorListeners=true, bool bufferKeyUpdates=false);
 
     void sendCurrentCompleteConfig(bool signalEditorListeners=true);
+
+    void sendSelectionParam(const juce::Array<MappedLumatoneKey>& keyParamSet, bool signalEditorListeners=true, bool bufferKeyUpdates=false) override;
+    void sendSelectionColours(const juce::Array<MappedLumatoneKey>& keyColourSet, bool signalEditorListeners=true, bool bufferKeyUpdates=false) override;
 
     // Send request to receive the current mapping of one sub board on the controller
     void sendGetMappingOfBoardRequest(int boardId);

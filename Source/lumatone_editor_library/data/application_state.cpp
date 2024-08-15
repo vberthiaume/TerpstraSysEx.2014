@@ -346,10 +346,7 @@ void LumatoneApplicationState::sendSelectionParam(const juce::Array<MappedLumato
 {
     LumatoneState::sendSelectionParam(selection);
 
-    for (auto mappedKey : selection)
-    {
-        controller->sendKeyParam(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
-    }
+    controller->sendSelectionParam(selection, false, bufferKeyUpdates);
 
     //if (signalEditorListeners)
     editorListeners->call(&LumatoneEditor::EditorListener::keySetChanged, selection);
@@ -359,10 +356,7 @@ void LumatoneApplicationState::sendSelectionColours(const juce::Array<MappedLuma
 {
     LumatoneState::sendSelectionColours(selection);
 
-    for (auto mappedKey : selection)
-    {
-        controller->sendKeyColourConfig(mappedKey.boardIndex + 1, mappedKey.keyIndex, static_cast<const LumatoneKey&>(mappedKey));
-    }
+    controller->sendSelectionColours(selection, false, bufferKeyUpdates);
 
     //if (signalEditorListeners)
     editorListeners->call(&LumatoneEditor::EditorListener::keySetChanged, selection);
