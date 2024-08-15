@@ -45,12 +45,12 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     // addAndMakeVisible(colourSubwindow.get());
 
     colourDropdown = std::make_unique<ColourDropdownSelector>("AssignColourDropdown");
-    colourDropdown->setOnValueChangeCallback([&]()
-    {
-        performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, colourDropdown->getSelectedColour()));
-        if (colourDropdown->getSelectedColour() != juce::Colours::transparentBlack)
-            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
-    });
+    // colourDropdown->setOnValueChangeCallback([&]()
+    // {
+    //     performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, colourDropdown->getSelectedColour()));
+    //     if (colourDropdown->getSelectedColour() != juce::Colours::transparentBlack)
+    //         performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
+    // });
 
     // addColourSelectionListener(colourDropdown.get());
     // colourDropdown->setColourPickerChangedCallback([&]()
@@ -236,9 +236,10 @@ void KeyEditorControls::selectionChanged()
     if (newData.useColour)
     {
         setAssignKeyColour(newData.useColour, newData.colour);
-        // performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, newData.colour), true, false);
+        colourSelectionGroup->setSelectedColour(newData.colour, nullptr);
         // colourSubwindow->setColour(newData.colour.toString(), false);
-        colourDropdown->setSelectedColour(newData.colour);
+        // colourDropdown->setSelectedColour(newData.colour, false, false);
+        // performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, newData.colour), true, false);
 
         // if (newData.colour.isTransparent())
         //     colourTextEditor->setText("", juce::NotificationType::dontSendNotification);
@@ -248,7 +249,7 @@ void KeyEditorControls::selectionChanged()
     else
     {
         // colourSubwindow->setColour("", false);
-        colourDropdown->deselectColour();
+        colourDropdown->clearColour(false);
         // colourTextEditor->setText("", juce::NotificationType::dontSendNotification);
     }
 
@@ -272,35 +273,41 @@ void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const
 {
     LumatoneEditorState::handleStatePropertyChange(stateIn, property);
 
-    juce::var value = stateIn.getProperty(property);
+    // juce::var value = stateIn.getProperty(property);
 
-    if (property == LumatoneEditSelectionProperty::AssignKeyColour)
-    {
-        auto colourString = stateIn[property].toString();
-        // colourTextEditor->setText(colourString, juce::NotificationType::dontSendNotification);
-        // colourSubwindow->setColour(colourString, false);
-        colourDropdown->setSelectedColour(juce::Colour::fromString(colourString));
-    }
-    else if (property == LumatoneEditSelectionProperty::AssignKeyType)
-    {
-        keyTypeCombo->setSelectedId(((int)value) + 1, juce::NotificationType::dontSendNotification);
-    }
-    else if (property == LumatoneEditSelectionProperty::AssignKeyNote)
-    {
-        noteInput->setValue((int)value, juce::NotificationType::dontSendNotification);
-    }
-    else if (property == LumatoneEditSelectionProperty::AssignKeyChannel)
-    {
-        channelInput->setValue((int)value, juce::NotificationType::dontSendNotification);
-    }
-    else if (property == LumatoneEditSelectionProperty::AssignKeyCCFader)
-    {
+    // if (property == LumatoneEditSelectionProperty::AssignKeyColour)
+    // {
+    //     auto colourString = stateIn[property].toString();
+    //     // colourTextEditor->setText(colourString, juce::NotificationType::dontSendNotification);
+    //     // colourSubwindow->setColour(colourString, false);
+    //     colourDropdown->setSelectedColour(juce::Colour::fromString(colourString), true,  false);
+    // }
+    // else if (property == LumatoneEditSelectionProperty::AssignKeyType)
+    // {
+    //     keyTypeCombo->setSelectedId(((int)value) + 1, juce::NotificationType::dontSendNotification);
+    // }
+    // else if (property == LumatoneEditSelectionProperty::AssignKeyNote)
+    // {
+    //     noteInput->setValue((int)value, juce::NotificationType::dontSendNotification);
+    // }
+    // else if (property == LumatoneEditSelectionProperty::AssignKeyChannel)
+    // {
+    //     channelInput->setValue((int)value, juce::NotificationType::dontSendNotification);
+    // }
+    // else if (property == LumatoneEditSelectionProperty::AssignKeyCCFader)
+    // {
 
-    }
+    // }
 }
 
 void KeyEditorControls::colourChangedCallback(ColourSelectionBroadcaster *source, juce::Colour newColour)
 {
     performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, newColour));
-    performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()), true, false);
+
+    // A bit kludgey maybe
+    juce::Component* src = dynamic_cast<juce::Component*>(source);
+    if (src != nullptr && isParentOf(src))
+    {
+        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()), true, false);
+    }
 }

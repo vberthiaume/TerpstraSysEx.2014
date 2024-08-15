@@ -32,7 +32,7 @@ void KeyboardClickListener::handleKeyDown(int keyNum)
     const LumatoneKey& key = getMappingData()->getKey(keyCoord.boardIndex, keyCoord.keyIndex);
     lastKeyColour = key.getColour();
 
-    selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastKeyColour);
+    // selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastKeyColour);
 }
 
 void KeyboardClickListener::handleKeyHold(int key, float xDistance, float yDistance)

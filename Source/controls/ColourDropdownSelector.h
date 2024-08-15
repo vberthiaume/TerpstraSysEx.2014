@@ -31,7 +31,8 @@ public:
     void setShowDropdown(bool show);
     void setShowPicker(bool show);
 
-    void setSelectedColour(juce::Colour newColour, bool setText=true);
+    void setSelectedColour(juce::Colour newColour, bool sendNotification = true, bool doCallback = true);
+    void clearColour(bool sendNotification = true);
 
     void setOnValueChangeCallback(std::function<void()> callback);
     void setColourPickerChangedCallback(std::function<void()> callback);

@@ -69,7 +69,7 @@ void ColourDropdownSelector::setShowPicker(bool show)
     colourPickerButton->setVisible(show);
 }
 
-void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool setText)
+void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool sendNotification, bool doCallback)
 {
     if (!newColour.isOpaque())
         return; // Don't allow transparency
@@ -81,15 +81,22 @@ void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool setT
         colourPickerButton->setColour(juce::TextButton::ColourIds::buttonColourId, newColour);
         colourPickerButton->setColour(juce::TextButton::ColourIds::buttonOnColourId, newColour);
 
-        selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastSetColour);
+        if (sendNotification)
+            selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastSetColour);
     }
 
-    if (setText)
-    {
-        colourEditorBox->setText(lastSetColour.toDisplayString(false), juce::NotificationType::dontSendNotification);
-    }
+    // if (setText)
+    // {
+    colourEditorBox->setText(lastSetColour.toDisplayString(false), juce::NotificationType::dontSendNotification);
+    // }
 
-    callbackColourChanged();
+    if (doCallback)
+        callbackColourChanged();
+}
+
+void ColourDropdownSelector::clearColour(bool sendNotification)
+{
+    colourEditorBox->setSelectedId(0, sendNotification ? juce::NotificationType::sendNotification : juce::NotificationType::dontSendNotification);
 }
 
 void ColourDropdownSelector::setOnValueChangeCallback(std::function<void()> callbackIn)
@@ -124,6 +131,12 @@ void ColourDropdownSelector::colourChangedCallback(ColourSelectionBroadcaster* s
         pickerIsListening = false;
 
         // callbackPickerChanged();
+        return;
+    }
+    
+    if (source != this)
+    {
+        setSelectedColour(newColour, false, true);
     }
 }
 
@@ -134,7 +147,7 @@ juce::Colour ColourDropdownSelector::getSelectedColour()
 
 void ColourDropdownSelector::deselectColour()
 {
-    colourEditorBox->setSelectedId(0, juce::NotificationType::sendNotification);
+    clearColour();
 }
 
 juce::Colour ColourDropdownSelector::parseInput() const
@@ -182,7 +195,7 @@ void ColourDropdownSelector::valueChangedCallback()
         selectedColour = juce::Colour::fromString("ff" + colourEditorBox->getText());
     }
 
-    setSelectedColour(selectedColour, false);
+    setSelectedColour(selectedColour, true, true);
 }
 
 void ColourDropdownSelector::togglePickerListenForColour(bool listening)
