@@ -75,7 +75,7 @@ NoteEditArea::NoteEditArea (const LumatoneEditorState& stateIn)
 	octaveBoardSelectorTab.reset(new TabbedButtonBar(TabbedButtonBar::Orientation::TabsAtTop));
 	addAndMakeVisible(octaveBoardSelectorTab.get());
 
-	for (int i = 0; i < MAXNUMBOARDS; i++)
+	for (int i = 0; i < MAX_LUMATONE_BOARDS; i++)
 	{
 		octaveBoardSelectorTab->addTab(translate("Section") + " " + String(i + 1), juce::Colours::lightgrey, i + 1);
 	}
@@ -247,7 +247,7 @@ void NoteEditArea::mouseDown (const juce::MouseEvent& e)
 			{
 				// Perform the edit, according to edit mode. Including sending to device
 				auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-				jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS&& keyIndex >= 0 && keyIndex < getOctaveBoardSize());
+				jassert(setSelection >= 0 && setSelection < MAX_LUMATONE_BOARDS&& keyIndex >= 0 && keyIndex < getOctaveBoardSize());
 
 				int editMode = editFunctionsTab->getCurrentTabIndex();
 				switch (editMode)
@@ -314,7 +314,7 @@ void NoteEditArea::changeListenerCallback(ChangeBroadcaster *source)
 	if (source == octaveBoardSelectorTab.get())
 	{
 		auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-		jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS);
+		jassert(setSelection >= 0 && setSelection < MAX_LUMATONE_BOARDS);
 
 		setKeyFieldValues(getBoard(setSelection));
 	}
@@ -362,7 +362,7 @@ void NoteEditArea::changeSingleKeySelection(int newSelection)
 void NoteEditArea::refreshKeyFields()
 {
 	auto setSelection = octaveBoardSelectorTab->getCurrentTabIndex();
-	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS);
+	jassert(setSelection >= 0 && setSelection < MAX_LUMATONE_BOARDS);
 	setKeyFieldValues(getBoard(setSelection));
 }
 

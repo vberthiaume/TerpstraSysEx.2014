@@ -743,7 +743,7 @@ void IsomorphicMassAssign::colourChangedCallback(ColourSelectionBroadcaster* sou
 bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
 {
 	bool mappingChanged = false;
-	jassert(setSelection >= 0 && setSelection < MAXNUMBOARDS && keySelection >= 0 && keySelection < getOctaveBoardSize());
+	jassert(setSelection >= 0 && setSelection < MAX_LUMATONE_BOARDS && keySelection >= 0 && keySelection < getOctaveBoardSize());
 
 	int startNoteIndex = this->startingPointBox->getSelectedItemIndex();
 	if (this->mappingLogic != nullptr && startNoteIndex >= 0)
@@ -755,7 +755,7 @@ bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
 
         Point<int>startPos = boardGeometry.coordinatesForKey(setSelection, keySelection); // Get the coordinates of the clicked key.
 
-        for (int boardIx = 0; boardIx < MAXNUMBOARDS; boardIx++) { // For each board
+        for (int boardIx = 0; boardIx < MAX_LUMATONE_BOARDS; boardIx++) { // For each board
             for (int keyIx = 0; keyIx < getOctaveBoardSize(); keyIx++) { // For each key on that board
                 Point<int> keyPos = boardGeometry.coordinatesForKey(boardIx, keyIx); // Get the coordinates of the key to assign.
                 Point<int> keyOffset = keyPos - startPos; // Get the offset of the key to assign, relative to where the user clicked.

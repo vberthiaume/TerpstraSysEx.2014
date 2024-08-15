@@ -18,8 +18,8 @@ LumatoneKey::LumatoneKey(LumatoneKeyType newKeyType)
     keyType = newKeyType;
     ccFaderDefault = true;
 
-    state = juce::ValueTree(LumatoneKeyProperty::State);
-    updateState();
+    // state = juce::ValueTree(LumatoneKeyProperty::State);
+    // updateState();
 }
 
 LumatoneKey::LumatoneKey(LumatoneKeyType newKeyType, int newChannelNumber, int newNoteNumber, juce::Colour newColour, bool invertCCFader)
@@ -30,8 +30,8 @@ LumatoneKey::LumatoneKey(LumatoneKeyType newKeyType, int newChannelNumber, int n
     colour = newColour;
     ccFaderDefault = invertCCFader;
 
-    state = juce::ValueTree(LumatoneKeyProperty::State);
-    updateState();
+    // state = juce::ValueTree(LumatoneKeyProperty::State);
+    // updateState();
 }
 
 LumatoneKey::LumatoneKey(juce::ValueTree keyStateIn)
@@ -42,9 +42,20 @@ LumatoneKey::LumatoneKey(juce::ValueTree keyStateIn)
     {
         stateToCopy = keyStateIn;
     }
+// 
+    // state = stateToCopy;
+    refreshFromState(stateToCopy);
+}
 
-    state = stateToCopy;
-    refreshFromState();
+LumatoneKey::LumatoneKey(const LumatoneKey &keyToCopy)
+ : keyType(keyToCopy.keyType)
+ , noteNumber(keyToCopy.noteNumber)
+ , channelNumber(keyToCopy.channelNumber)
+ , colour(keyToCopy.colour)
+ , ccFaderDefault(keyToCopy.ccFaderDefault)
+{
+    // state = juce::ValueTree(LumatoneKeyProperty::State);
+    // updateState();
 }
 
 bool LumatoneKey::configIsEqual(const LumatoneKey &compare) const
@@ -70,37 +81,37 @@ void LumatoneKey::operator=(const LumatoneKey &keyToCopy)
     noteNumber = keyToCopy.noteNumber;
     colour = keyToCopy.colour;
     ccFaderDefault = keyToCopy.ccFaderDefault;
-    updateState();
+    // updateState();
 }
 
 void LumatoneKey::setKeyType(LumatoneKeyType typeIn)
 {
     keyType = typeIn;
-    state.setProperty(LumatoneKeyProperty::Type, keyType, nullptr);
+    // state.setProperty(LumatoneKeyProperty::Type, keyType, nullptr);
 }
 
 void LumatoneKey::setColour(juce::Colour colourIn)
 {
     colour = colourIn;
-    state.setProperty(LumatoneKeyProperty::Colour, colour.toString(), nullptr);
+    // state.setProperty(LumatoneKeyProperty::Colour, colour.toString(), nullptr);
 }
 
 void LumatoneKey::setNoteOrCC(int noteOrCC)
 {
     noteNumber = noteOrCC;
-    state.setProperty(LumatoneKeyProperty::MidiNote, noteNumber, nullptr);
+    // state.setProperty(LumatoneKeyProperty::MidiNote, noteNumber, nullptr);
 }
 
 void LumatoneKey::setChannelNumber(int channelIn)
 {
     channelNumber = channelIn;
-    state.setProperty(LumatoneKeyProperty::MidiChnl, channelNumber, nullptr);
+    // state.setProperty(LumatoneKeyProperty::MidiChnl, channelNumber, nullptr);
 }
 
 void LumatoneKey::setDefaultCCFader(bool defaultCCFader)
 {
     ccFaderDefault = defaultCCFader;
-    state.setProperty(LumatoneKeyProperty::DefaultCCFader, ccFaderDefault, nullptr);
+    // state.setProperty(LumatoneKeyProperty::DefaultCCFader, ccFaderDefault, nullptr);
 }
 
 void LumatoneKey::setConfig(const LumatoneKey& config)
@@ -109,32 +120,38 @@ void LumatoneKey::setConfig(const LumatoneKey& config)
     channelNumber = config.channelNumber;
     ccFaderDefault = config.ccFaderDefault;
     keyType = config.keyType;
-    updateState();
+    // updateState();
 }
 
 juce::ValueTree LumatoneKey::getState() const
 {
-    return state;
-}
-
-void LumatoneKey::updateState()
-{
-    // juce::ValueTree newState(LumatoneKeyProperty::State);
+    juce::ValueTree state = juce::ValueTree(LumatoneKeyProperty::State);
     state.setProperty(LumatoneKeyProperty::Type, keyType, nullptr);
     state.setProperty(LumatoneKeyProperty::Colour, colour.toString(), nullptr);
     state.setProperty(LumatoneKeyProperty::MidiNote, noteNumber, nullptr);
     state.setProperty(LumatoneKeyProperty::MidiChnl, channelNumber, nullptr);
     state.setProperty(LumatoneKeyProperty::DefaultCCFader, ccFaderDefault, nullptr);
-    // state.copyPropertiesFrom(newState, nullptr);
+    return state;
 }
 
-void LumatoneKey::refreshFromState()
+// void LumatoneKey::updateState()
+// {
+//     // juce::ValueTree newState(LumatoneKeyProperty::State);
+//     state.setProperty(LumatoneKeyProperty::Type, keyType, nullptr);
+//     state.setProperty(LumatoneKeyProperty::Colour, colour.toString(), nullptr);
+//     state.setProperty(LumatoneKeyProperty::MidiNote, noteNumber, nullptr);
+//     state.setProperty(LumatoneKeyProperty::MidiChnl, channelNumber, nullptr);
+//     state.setProperty(LumatoneKeyProperty::DefaultCCFader, ccFaderDefault, nullptr);
+//     // state.copyPropertiesFrom(newState, nullptr);
+// }
+
+void LumatoneKey::refreshFromState(const juce::ValueTree& stateIn)
 {
-    keyType = (LumatoneKeyType)(int)state.getProperty(LumatoneKeyProperty::Type, (int)LumatoneKeyType::disabled);
-    colour = juce::Colour::fromString(state.getProperty(LumatoneKeyProperty::Colour, juce::Colours::transparentBlack.toString()).toString());
-    noteNumber = (int)state.getProperty(LumatoneKeyProperty::MidiNote, 0);
-    channelNumber = (int)state.getProperty(LumatoneKeyProperty::MidiChnl, 1);
-    ccFaderDefault = (bool)state.getProperty(LumatoneKeyProperty::DefaultCCFader, false);
+    keyType         = (LumatoneKeyType)(int)stateIn.getProperty(LumatoneKeyProperty::Type, (int)LumatoneKeyType::disabled);
+    colour          = juce::Colour::fromString(stateIn.getProperty(LumatoneKeyProperty::Colour, juce::Colours::transparentBlack.toString()).toString());
+    noteNumber      = (int)stateIn.getProperty(LumatoneKeyProperty::MidiNote, 0);
+    channelNumber   = (int)stateIn.getProperty(LumatoneKeyProperty::MidiChnl, 1);
+    ccFaderDefault  = (bool)stateIn.getProperty(LumatoneKeyProperty::DefaultCCFader, false);
 }
 
 

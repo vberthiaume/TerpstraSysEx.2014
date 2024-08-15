@@ -24,13 +24,13 @@ LumatoneBoard::LumatoneBoard(LumatoneKeyType newKeyType, int numKeysIn, int boar
         theKeys[i] = LumatoneKey(newKeyType);
 
     //key_idx = 0;
-    state = juce::ValueTree(LumatoneBoardProperty::State);
-    updateState();
+    // state = juce::ValueTree(LumatoneBoardProperty::State);
+    // updateState();
 }
 
 LumatoneBoard::LumatoneBoard(const LumatoneBoard& copyBoard)
 {
-    state = juce::ValueTree(LumatoneBoardProperty::State);
+    // state = juce::ValueTree(LumatoneBoardProperty::State);
     board_idx = copyBoard.board_idx;
     operator=(copyBoard);
 }
@@ -41,8 +41,8 @@ LumatoneBoard::LumatoneBoard(juce::ValueTree stateIn)
     if (stateIn.hasType(LumatoneBoardProperty::State))
         stateToCopy = stateIn;
 
-    state = stateToCopy;
-    refreshFromState();
+    // state = stateToCopy;
+    refreshFromState(stateToCopy);
 }
 
 void LumatoneBoard::operator=(const LumatoneBoard& copyBoard)
@@ -54,7 +54,7 @@ void LumatoneBoard::operator=(const LumatoneBoard& copyBoard)
         theKeys[i] = copyBoard.getKey(i);
     }
 
-    updateState();
+    // updateState();
 }
 
 bool LumatoneBoard::isEmpty() const
@@ -66,6 +66,19 @@ bool LumatoneBoard::isEmpty() const
             return false;
 
     return true;
+}
+
+juce::ValueTree LumatoneBoard::getState() const
+{
+    juce::ValueTree newState(LumatoneBoardProperty::State);
+
+    newState.setProperty(LumatoneBoardProperty::Id, board_idx, nullptr);
+    for (int i = 0; i < numKeys; i++)
+    {
+        newState.addChild(theKeys[i].getState(), i, nullptr);
+    }
+
+    return newState;
 }
 
 int LumatoneBoard::getNumKeys() const
@@ -165,22 +178,23 @@ juce::Array<LumatoneKeyCoord> LumatoneBoard::getKeysWithColour(const juce::Colou
     return keyCoords;
 }
 
-void LumatoneBoard::updateState()
+// void LumatoneBoard::updateState()
+// {
+//     juce::ValueTree newState(LumatoneBoardProperty::State);
+
+//     newState.setProperty(LumatoneBoardProperty::Id, board_idx, nullptr);
+//     for (int i = 0; i < numKeys; i++)
+//     {
+//         newState.addChild(theKeys[i].getState(), i, nullptr);
+//     }
+
+//     state.copyPropertiesAndChildrenFrom(newState, nullptr);
+// }
+
+void LumatoneBoard::refreshFromState(const juce::ValueTree& state)
 {
-    juce::ValueTree newState(LumatoneBoardProperty::State);
-
-    newState.setProperty(LumatoneBoardProperty::Id, board_idx, nullptr);
-    for (int i = 0; i < numKeys; i++)
-    {
-        newState.addChild(theKeys[i].getState(), i, nullptr);
-    }
-
-    state.copyPropertiesAndChildrenFrom(newState, nullptr);
-}
-
-void LumatoneBoard::refreshFromState()
-{
-    board_idx = (int)state[LumatoneBoardProperty::Id];
+    juce::var defaultIndex = 0;
+    board_idx = (int)state.getProperty(LumatoneBoardProperty::Id, defaultIndex);
 
     for (int i = 0; i < numKeys; i++)
     {

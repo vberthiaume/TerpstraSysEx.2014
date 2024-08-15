@@ -29,7 +29,7 @@ public:
     struct MapBoard
     {
         int size = 0;
-        MappedKey keys[MAXBOARDSIZE];
+        MappedKey keys[MAX_LUMATONE_BOARD_KEYS];
 
         MapBoard(int octaveBoardSize = 0)
         {
@@ -74,7 +74,7 @@ private:
     LumatoneGeometry lumatoneGeometry;
 
     //juce::Array<MapBoard> boards;
-    MapBoard boards[MAXNUMBOARDS];
+    MapBoard boards[MAX_LUMATONE_BOARDS];
 
     Hex::Point originPoint;
     int originBoardIndex = 0;
