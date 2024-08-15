@@ -22,6 +22,8 @@
 
 #define MIDI_DRIVER_USE_LOCK JUCE_WINDOWS //|| JUCE_LINUX
 
+#define MIDI_DRIVER_DEBUG 0 //JUCE_DEBUG 
+
 LumatoneFirmwareDriver::LumatoneFirmwareDriver(HostMode hostModeIn, int numBoardsIn)
     : hostMode(hostModeIn)
     , numBoards(numBoardsIn)
@@ -866,7 +868,7 @@ void LumatoneFirmwareDriver::sendCurrentMessage()
     jassert(!isTimerRunning());
     jassert(hasMsgWaitingForAck);
 
-// #if JUCE_DEBUG
+// #if MIDI_DRIVER_DEBUG
 //     if (currentMsgWaitingForAck.isSysEx())
 //     {
 //         auto sysExData = currentMsgWaitingForAck.getSysExData();
@@ -878,7 +880,7 @@ void LumatoneFirmwareDriver::sendCurrentMessage()
     sendMessageNow(currentMsgWaitingForAck);        // send it
 
     // Notify listeners
-    #if JUCE_DEBUG
+    #if MIDI_DRIVER_DEBUG
     {
         juce::String msg = "SENT: " + FirmwareSupport::getCommandDescription(currentMsgWaitingForAck);
         // DBG("SENT: " + currentMsgWaitingForAck.getDescription());
@@ -895,7 +897,7 @@ void LumatoneFirmwareDriver::sendCurrentMessage()
 
 void LumatoneFirmwareDriver::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
 {
-#if JUCE_DEBUG
+#if MIDI_DRIVER_DEBUG
     if (message.isSysEx())
     {
         auto msg = "RCVD: " + FirmwareSupport::getCommandDescription(message);
