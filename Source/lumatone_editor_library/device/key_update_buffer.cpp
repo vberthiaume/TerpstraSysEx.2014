@@ -5,7 +5,25 @@ LumatoneKeyUpdateBuffer::LumatoneKeyUpdateBuffer(LumatoneFirmwareDriver& driverI
     : firmwareDriver(driverIn)
     , LumatoneState("LumatoneKeyUpdateBuffer", state)
 {
-    keysToUpdate.remapTable(280);
+    // updatedLayout.remapTable(280);
+
+    for (int b = 0; b < MAX_LUMATONE_BOARDS; b++)
+    {
+        if (b < getNumBoards())
+        {
+            const LumatoneBoard& board = getBoard(b);
+            for (int k = 0; k < MAX_LUMATONE_BOARD_KEYS; k++)
+            {
+                if (k < board.getNumKeys())
+                {
+                    const LumatoneKey& key = board.getKey(k);
+                    int index = b * MAX_LUMATONE_BOARD_KEYS + k;
+                    keysToUpdate[index] = nullptr;
+                    lastUpdatedKeys[index] = LumatoneKey();
+                }
+            }
+        }
+    }
 }
 
 LumatoneKeyUpdateBuffer::~LumatoneKeyUpdateBuffer()
@@ -35,64 +53,105 @@ void LumatoneKeyUpdateBuffer::sendKeyColourConfig(int boardId, int keyIndex, juc
 
 void LumatoneKeyUpdateBuffer::updateKeyConfig(int boardIndex, int keyIndex, const LumatoneKey& config)
 {
-    juce::ScopedLock l(lock);
+    // juce::ScopedLock l(lock);
     // while (!lock.tryEnter()) {}
 
-    auto keyNum = getKeyNum(boardIndex, keyIndex);
-    MappedLumatoneKey currentUpdateData = keysToUpdate[keyNum];
-
     const LumatoneKey& currentKey = getKey(boardIndex, keyIndex);
-    preUpdateLayout.setKey(currentKey, boardIndex, keyIndex);
 
-    if (currentKey == config)
-    {
-        keysToUpdate.set(keyNum, MappedLumatoneKey());
-    }
-    else if (currentUpdateData.boardIndex < 0 || currentUpdateData.keyIndex < 0)
-    {
-        auto updateKey = MappedLumatoneKey(config, boardIndex, keyIndex);
-        updateKey.setColour(currentKey.getColour());
-        keysToUpdate.set(keyNum, updateKey);
-    }
-    else if (!currentUpdateData.configIsEqual(config))
-    {
-        auto updateKey = MappedLumatoneKey(config, boardIndex, keyIndex);
-        updateKey.setColour(currentUpdateData.getColour());
-        keysToUpdate.set(keyNum, updateKey);
-    }
+    int index = boardIndex * MAX_LUMATONE_BOARD_KEYS + keyIndex;
+    const LumatoneKey& lastUpdatedKey = lastUpdatedKeys[index];
+    const LumatoneKey** keyPtr = &keysToUpdate[index];
 
-    startTimer(updateMs);
+    // if (/*currentKey == config && */lastUpdatedKey == config)
+    // {
+    //     *keyPtr = nullptr;
+    // }
+    // else
+    // {
+        *keyPtr = &currentKey;
+    // }
+
+    if (!isTimerRunning())
+    {
+        // processUpdates();
+        startTimer(updateMs);
+    }
 }
 
 void LumatoneKeyUpdateBuffer::updateKeyColour(int boardIndex, int keyIndex, juce::Colour colour)
 {
-    juce::ScopedLock l(lock);
+    // juce::ScopedLock l(lock);
     // while (!lock.tryEnter()) {}
 
-    auto keyNum = getKeyNum(boardIndex, keyIndex);
-    MappedLumatoneKey currentUpdateData = keysToUpdate[keyNum];
     const LumatoneKey& currentKey = getKey(boardIndex, keyIndex);
-    preUpdateLayout.setKey(currentKey, boardIndex, keyIndex);
 
-    if (currentKey.getColour() == colour && currentKey.configIsEqual(currentUpdateData))
-    {
-        keysToUpdate.set(keyNum, MappedLumatoneKey());
-    }
-    else if (currentUpdateData.boardIndex < 0 || currentUpdateData.keyIndex < 0)
-    {
-        auto updateKey = MappedLumatoneKey(currentKey, boardIndex, keyIndex);
-        updateKey.setColour(colour);
-        keysToUpdate.set(keyNum, updateKey);
-    }
-    else if (currentUpdateData.isColour(colour))
-    {
-        auto updateKey = MappedLumatoneKey(currentUpdateData, boardIndex, keyIndex);
-        updateKey.setColour(colour);
-        keysToUpdate.set(keyNum, updateKey);
-    }
+    int index = boardIndex * MAX_LUMATONE_BOARD_KEYS + keyIndex;
+    const LumatoneKey& lastUpdatedKey = lastUpdatedKeys[index];
+    const LumatoneKey** keyPtr = &keysToUpdate[boardIndex * MAX_LUMATONE_BOARD_KEYS + keyIndex];
 
+    // if (/*currentKey.isColour(colour) &&*/ lastUpdatedKey.isColour(colour))
+    // {
+    //     *keyPtr = nullptr;
+    // }
+    // else
+    // {
+        *keyPtr = &currentKey;
+    // }
 
-    startTimer(updateMs);
+    if (!isTimerRunning())
+    {
+        // processUpdates();
+        startTimer(updateMs);
+    }
+}
+
+void LumatoneKeyUpdateBuffer::processUpdates()
+{
+    // DBG("<<<< process updates >>>>");
+
+    for (int board = 0; board < MAX_LUMATONE_BOARDS; board++)
+    {
+        int boardId = board + 1;
+        for (int keyIndex = 0; keyIndex < MAX_LUMATONE_BOARD_KEYS; keyIndex++)
+        {
+            int index = board * MAX_LUMATONE_BOARD_KEYS + keyIndex;
+            const LumatoneKey** key = &keysToUpdate[index];
+            if (key == nullptr || *key == nullptr)
+                continue; 
+
+            const LumatoneKey& keyUpdate = **key;
+
+            // const LumatoneKey& currentKey = getKey(board, keyIndex);
+            const LumatoneKey& lastUpdatedKey = lastUpdatedKeys[index];
+            if (!lastUpdatedKey.configIsEqual(keyUpdate))
+                firmwareDriver.sendKeyFunctionParameters(boardId, keyIndex, keyUpdate.getMidiNumber(), keyUpdate.getMidiChannel(), keyUpdate.getType(), keyUpdate.isCCFaderDefault());
+
+            if (!lastUpdatedKey.colourIsEqual(keyUpdate))
+            {
+                auto colour = keyUpdate.getColour();
+                if (getLumatoneVersion() >= LumatoneFirmware::ReleaseVersion::VERSION_1_0_11)
+                    firmwareDriver.sendKeyLightParameters(boardId, keyIndex, colour.getRed(), colour.getGreen(), colour.getBlue());
+                else
+                    firmwareDriver.sendKeyLightParameters_Version_1_0_0(boardId, keyIndex, colour.getRed() * 0.5f, colour.getGreen() * 0.5f, colour.getBlue() * 0.5f);
+            }
+
+            *key = nullptr;
+            lastUpdatedKeys[index] = keyUpdate;
+        }
+    }
+}
+
+void LumatoneKeyUpdateBuffer::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
+{
+    LumatoneState::handleStatePropertyChange(stateIn, property);
+
+    // juce::ValueTree lumatoneStateTree = state.getChildWithName(LumatoneConfigProperty::State);
+    // if (stateIn ==  lumatoneStateTree || stateIn.isAChildOf(lumatoneStateTree))
+    // {
+    //     // layout updated
+
+    //     DBG("key update buffer layout update");
+    // }
 }
 
 void LumatoneKeyUpdateBuffer::timerCallback()
@@ -102,34 +161,6 @@ void LumatoneKeyUpdateBuffer::timerCallback()
     if (! lock.tryEnter())
         return;
 
-    int keyNum = 0;
-    for (int board = 0; board < getNumBoards(); board++)
-    {
-        int boardId = board + 1;
-        for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
-        {
-            auto keyUpdate = keysToUpdate[keyNum];
-            if (keyUpdate.boardIndex >= 0 && keyUpdate.keyIndex >= 0)
-            {
-                // auto currentKey = getKey(board, keyIndex);
-                auto currentKey = preUpdateLayout.getKey(board, keyIndex);
-                if (!currentKey.configIsEqual(keyUpdate))
-                    firmwareDriver.sendKeyFunctionParameters(boardId, keyIndex, keyUpdate.getMidiNumber(), keyUpdate.getMidiChannel(), keyUpdate.getType(), keyUpdate.isCCFaderDefault());
-
-                if (!currentKey.colourIsEqual(keyUpdate))
-                {
-                    auto colour = keyUpdate.getColour();
-                    if (getLumatoneVersion() >= LumatoneFirmware::ReleaseVersion::VERSION_1_0_11)
-                        firmwareDriver.sendKeyLightParameters(boardId, keyIndex, colour.getRed(), colour.getGreen(), colour.getBlue());
-                    else
-                        firmwareDriver.sendKeyLightParameters_Version_1_0_0(boardId, keyIndex, colour.getRed() * 0.5f, colour.getGreen() * 0.5f, colour.getBlue() * 0.5f);
-                }
-            }
-
-            keysToUpdate.set(keyNum, MappedLumatoneKey());
-            keyNum++;
-        }
-    }
-
-
+    // DBG(">>>> buffer timer callback <<<<");
+    processUpdates();
 }

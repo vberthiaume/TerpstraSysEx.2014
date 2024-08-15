@@ -25,17 +25,22 @@ private:
     void updateKeyConfig(int boardIndex, int keyIndex, const LumatoneKey& config);
     void updateKeyColour(int boardIndex, int keyIndex, juce::Colour colour);
 
+    void processUpdates();
+
+private:
+
+    void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
+
 private:
 
     juce::CriticalSection lock;
 
     LumatoneFirmwareDriver& firmwareDriver;
 
-    juce::HashMap<int, MappedLumatoneKey> keysToUpdate;
+    const LumatoneKey* keysToUpdate[MAX_LUMATONE_KEYS];
+    LumatoneKey lastUpdatedKeys[MAX_LUMATONE_KEYS];
 
-    LumatoneLayout preUpdateLayout;
-
-    int updateMs = 300;
+    int updateMs = 700;
 };
 
 #endif LUMATONE_UPDATE_BUFFER_H
