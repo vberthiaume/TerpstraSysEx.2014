@@ -110,6 +110,11 @@ public:
         }
     }
 
+    void setSelectedColour(juce::Colour newColour, ColourSelectionBroadcaster* source)
+    {
+        selectorListeners.call(&ColourSelectionListener::colourChangedCallback, source, newColour);
+    }
+
     //=========================================================================
 
     /// <summary>
