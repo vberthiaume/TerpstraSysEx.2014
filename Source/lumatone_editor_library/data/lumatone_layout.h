@@ -74,7 +74,8 @@ public:
 A complete key mapping
 ==============================================================================
 */
-#define MAXNUMBOARDS 5
+#define MAX_LUMATONE_BOARDS 5
+#define MAX_LUMATONE_KEYS MAX_LUMATONE_BOARDS * MAX_LUMATONE_BOARD_KEYS
 
 // Number of entries in the velocity interval table
 #define VELOCITYINTERVALTABLESIZE 127
@@ -82,7 +83,7 @@ A complete key mapping
 class LumatoneLayout
 {
 private:
-	LumatoneBoard boards[MAXNUMBOARDS];
+	LumatoneBoard boards[MAX_LUMATONE_BOARDS];
 
 public:
 	LumatoneLayout(int numBoards=5, int octaveBoardSize=56, bool initializeWithNotes=false);
@@ -156,7 +157,7 @@ public:
 	LumatoneKeyCoord keyNumToKeyCoord(int keyNum) const;
 
 public:
-	static LumatoneLayout IdentityMapping(int numBoards=MAXNUMBOARDS, int octaveBoardSize=56, LumatoneKeyType keyType=LumatoneKeyType::noteOnNoteOff);
+	static LumatoneLayout IdentityMapping(int numBoards=MAX_LUMATONE_BOARDS, int octaveBoardSize=56, LumatoneKeyType keyType=LumatoneKeyType::noteOnNoteOff);
 
 private:
 

@@ -14,7 +14,7 @@
 #include "../data/lumatone_editor_common.h"
 #include "lumatone_key.h"
 
-#define MAXBOARDSIZE 56
+#define MAX_LUMATONE_BOARD_KEYS 56
 
 namespace LumatoneBoardProperty
 {
@@ -29,7 +29,7 @@ class LumatoneLayout;
 class LumatoneBoard
 {
 public:
-    LumatoneBoard(LumatoneKeyType newKeyType = LumatoneKeyType::disabled, int numKeysIn=MAXBOARDSIZE, int boardIndex = 0);
+    LumatoneBoard(LumatoneKeyType newKeyType = LumatoneKeyType::disabled, int numKeysIn=MAX_LUMATONE_BOARD_KEYS, int boardIndex = 0);
     LumatoneBoard(const LumatoneBoard& copyBoard);
     LumatoneBoard(juce::ValueTree stateIn);
 
@@ -38,7 +38,7 @@ public:
     int getBoardIndex() const { return board_idx; }
     bool isEmpty() const;
 
-    juce::ValueTree getState() const { return state; }
+    juce::ValueTree getState() const;
 
     int getNumKeys() const;
     const LumatoneKey& getKey(int index) const;
@@ -54,16 +54,16 @@ public:
     juce::Array<LumatoneKeyCoord> getKeysWithColour(const juce::Colour& c) const;
 
 private:
-    void updateState();
-    void refreshFromState();
+    // void updateState();
+    void refreshFromState(const juce::ValueTree& state);
 
 private:
-    LumatoneKey        theKeys[MAXBOARDSIZE];
+    LumatoneKey        theKeys[MAX_LUMATONE_BOARD_KEYS];
     int                board_idx;
 
     int numKeys;
 
-    juce::ValueTree state;
+    // juce::ValueTree state;
 
     friend class LumatoneLayout;
 };

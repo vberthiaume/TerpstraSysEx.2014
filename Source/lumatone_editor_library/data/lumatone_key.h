@@ -54,6 +54,7 @@ public:
     LumatoneKey(LumatoneKeyType newKeyType = LumatoneKeyType::disabled);
     LumatoneKey(LumatoneKeyType newKeyType, int newChannelNumber, int newNoteNumber, juce::Colour newColour, bool invertCCFader = false);
     LumatoneKey(juce::ValueTree keyStateIn);
+    LumatoneKey(const LumatoneKey& keyToCopy);
 
     bool isEmpty() const { return channelNumber == 0; }
 
@@ -96,17 +97,17 @@ public:
     juce::ValueTree getState() const;
 
 private:
-    void updateState();
-    void refreshFromState();
+    // void updateState();
+    void refreshFromState(const juce::ValueTree& stateIn);
 
 private:
-    LumatoneKeyType    keyType;
-    int                noteNumber;
-    int                channelNumber;
-    juce::Colour       colour;
-    bool               ccFaderDefault;
+    LumatoneKeyType     keyType;
+    int                 noteNumber;
+    int                 channelNumber;
+    juce::Colour        colour;
+    bool                ccFaderDefault;
 
-    juce::ValueTree     state;
+    // juce::ValueTree     state;
 
 };
 

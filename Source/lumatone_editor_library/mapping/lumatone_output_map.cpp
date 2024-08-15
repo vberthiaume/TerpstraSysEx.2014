@@ -33,7 +33,7 @@ void LumatoneOutputMap::render(const LumatoneLayout& layout, juce::HashMap<juce:
     {
         for (int keyIndex = 0; keyIndex < layout.getOctaveBoardSize(); keyIndex++)
         {
-            auto key = layout.getKey(boardIndex, keyIndex);
+            const LumatoneKey& key = layout.getKey(boardIndex, keyIndex);
 
             juce::String midiHash = juce::String(key.getMidiChannel()) + "," + juce::String(key.getMidiNumber());
             auto mappedKeys = map[midiHash];
