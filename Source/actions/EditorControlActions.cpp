@@ -169,3 +169,43 @@ bool ApplyAssignmentsToSelectionAction::undo()
 
     return true;
 }
+
+SetCurrentFileAction::SetCurrentFileAction(const LumatoneEditorState& stateIn, juce::File file)
+    : LumatoneEditorState("SetCurrentFileAction", stateIn)
+    , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
+    , LumatoneAction(this, "SetCurrentFileAction")
+    , newFile(file)
+{
+    previousFile = getCurrentFile();
+    previousMappingData = shareMappingData();
+    previousKeySelection.addArray(*getSelectedKeys());
+}
+
+SetCurrentFileAction::~SetCurrentFileAction()
+{
+    previousMappingData = nullptr;
+}
+
+bool SetCurrentFileAction::perform()
+{
+    setCurrentFile(newFile);
+    if (resetToCurrentFile())
+    {
+        // Clear undo history
+        // undoManager.clearUndoHistory();
+
+        clearSelectedKeys();
+        return true;
+    }
+
+    return false;
+}
+
+bool SetCurrentFileAction::undo()
+{
+    if (previousFile.existsAsFile())
+        setCurrentFile(previousFile);
+    setCompleteConfig(*previousMappingData);
+    setSelectedKeys(previousKeySelection);
+    return true;
+}

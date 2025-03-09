@@ -84,4 +84,25 @@ private:
 
 };
 
+class SetCurrentFileAction : public LumatoneEditorState
+                                , private LumatoneEditorState::Controller
+                                , public LumatoneAction
+{
+public:
+
+    SetCurrentFileAction(const LumatoneEditorState& stateIn, juce::File file);
+    ~SetCurrentFileAction() override;
+    bool perform() override;
+    bool undo() override;
+
+    int getSizeInUnits() override { return sizeof(SetCurrentFileAction); }
+
+private:
+
+    juce::File previousFile;
+    juce::File newFile;
+    std::shared_ptr<LumatoneLayout> previousMappingData;
+    juce::Array<MappedLumatoneKey> previousKeySelection;
+};
+
 #endif // LUMATONE_EDITOR_CONTROL_ACTIONS_H

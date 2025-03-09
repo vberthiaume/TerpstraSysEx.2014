@@ -18,6 +18,7 @@
 
 #include "./style/LumatoneEditorLookAndFeel.h"
 
+#include "./actions/EditorControlActions.h"|
 #include "./actions/KeySelectionControlActions.h"
 
 #include "./lumatone_editor_library/device/lumatone_controller.h"
@@ -426,12 +427,7 @@ bool TerpstraSysExApplication::openSysExMapping()
 			if (!result.existsAsFile() || !result.hasFileExtension("ltn"))
 				return;
 
-			setCurrentFile(result);
-			if (resetToCurrentFile())
-			{
-				// Clear undo history
-				undoManager.clearUndoHistory();
-			}
+			performAction(new SetCurrentFileAction(state, result));
 		});
 
 	return true;
