@@ -88,7 +88,8 @@ public:
         for (int i = 0; i < getNumberOfSwatches(); i++)
         {
             juce::Path p = swatchPaths[i];
-            p.applyTransform(transform);
+            if (p.getLength() > 0 && !transform.isSingularity())
+                p.applyTransform(transform);
             swatchPaths.set(i, p);
         }
     }
@@ -137,7 +138,7 @@ private:
 
     const float margin = 0.024f;
     float width = 1, height = 1;
-    
+
     int numColumns = 0;
     int numRows = 0;
 
@@ -148,16 +149,16 @@ class TenHexagonPalette : public HexagonPalette
 {
     juce::Array<juce::Point<int>> createCoordinates()
     {
-        juce::Array<juce::Point<int>> coords = { 
-			juce::Point<int>(1, 0), 
-			juce::Point<int>(2, 0), 
+        juce::Array<juce::Point<int>> coords = {
+			juce::Point<int>(1, 0),
+			juce::Point<int>(2, 0),
 			juce::Point<int>(3, 0),
-			juce::Point<int>(0, 1), 
-			juce::Point<int>(1, 1), 
-			juce::Point<int>(2, 1), 
+			juce::Point<int>(0, 1),
+			juce::Point<int>(1, 1),
+			juce::Point<int>(2, 1),
 			juce::Point<int>(3, 1),
-			juce::Point<int>(0, 2), 
-			juce::Point<int>(1, 2), 
+			juce::Point<int>(0, 2),
+			juce::Point<int>(1, 2),
 			juce::Point<int>(2, 2)
         };
 

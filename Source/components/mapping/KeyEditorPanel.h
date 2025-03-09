@@ -16,7 +16,7 @@
 
 class KeyEditorControls;
 class MultiSelectControls;
-class BatchTools;
+class BatchToolsPanel;
 
 class KeyEditorPanel : public juce::Component
                      , public LumatoneEditorState
@@ -32,7 +32,7 @@ private:
 
     std::unique_ptr<KeyEditorControls>    keyEditorControls;
     std::unique_ptr<MultiSelectControls>  multiSelectControls;
-    std::unique_ptr<BatchTools>           batchTools;
+    std::unique_ptr<BatchToolsPanel>      batchTools;
 
     juce::Rectangle<float>  keySettingsAndMultiSelectArea;
     juce::Rectangle<float>  keySettingsArea;

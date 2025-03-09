@@ -170,10 +170,10 @@ void GlobalSettingsArea::resized()
     int calbrateBtnHeight = roundToInt(getHeight() * calibrateHeight);
     int calibrateWidth = getLookAndFeel().getTextButtonWidthToFitText(*settingsButton, calbrateBtnHeight);
 
-    float controlsMargin = roundToInt(getHeight() * 0.1f);
-    float colourEditHeight = proportionOfHeight(controlsHeight);
-    float controlY = proportionOfHeight((1 - controlsHeight) / 2.0f);
-    float colourButtonWidth = colourEditHeight * colourButtonAspect;
+    int controlsMargin = juce::roundToInt(getHeight() * 0.1f);
+    int colourEditHeight = proportionOfHeight(controlsHeight);
+    int controlY = proportionOfHeight((1 - controlsHeight) / 2.0f);
+    int colourButtonWidth = juce::roundToInt(colourEditHeight * colourButtonAspect);
     Font colourLabelsFont = getAppFonts().getFont(LumatoneEditorFont::FranklinGothic, colourEditHeight * 1.1f);
 
     int startMargin = proportionOfWidth(marginXRatio);
@@ -273,11 +273,11 @@ void GlobalSettingsArea::setDeveloperMode(bool devModeOn)
     repaint();
 }
 
-void GlobalSettingsArea::connectionStateChanged(ConnectionState state)
+void GlobalSettingsArea::connectionStateChanged(ConnectionState stateIn)
 {
-    settingsButton->setEnabled(state == ConnectionState::ONLINE);
-    inactiveMacroButtonColourEdit->setEnabled(state == ConnectionState::ONLINE);
-    activeMacroButtonColourEdit->setEnabled(state == ConnectionState::ONLINE);
+    settingsButton->setEnabled(stateIn == ConnectionState::ONLINE);
+    inactiveMacroButtonColourEdit->setEnabled(stateIn == ConnectionState::ONLINE);
+    activeMacroButtonColourEdit->setEnabled(stateIn == ConnectionState::ONLINE);
 }
 
 // void GlobalSettingsArea::connectionFaile()

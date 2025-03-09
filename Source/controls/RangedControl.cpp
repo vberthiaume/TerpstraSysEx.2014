@@ -21,6 +21,7 @@ RangedControl::~RangedControl()
 
 void RangedControl::resized()
 {
+    component->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, CONTROLBOXFONTHEIGHTSCALAR);
     component->setBounds(getLocalBounds());
 }
 

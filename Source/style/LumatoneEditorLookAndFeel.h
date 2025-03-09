@@ -747,13 +747,12 @@ public:
             juce::String maxValue = juce::String(roundToInt(sliderRange.getStart()));
             juce::String longestValue = (minValue.length() > maxValue.length()) ? minValue : maxValue;
 
-            for (int n = 0; n < sld.getNumDecimalPlacesToDisplay(); n++)
+            // +1 for extra margin
+            int numPlaces = longestValue.length() + sld.getNumDecimalPlacesToDisplay() + 1;
+            for (int n = 0; n < numPlaces; n++)
             {
                 longestValue += "_";
             }
-
-            // extra margin
-            longestValue += "_";
 
             float fontHeight = sld.getHeight() * fontHeightScalar * 0.8f;
 
@@ -761,8 +760,7 @@ public:
 
             int labelMaxWidth = textBoxFont.getStringWidth(longestValue);
 
-            sld.setTextBoxStyle(sld.getTextBoxPosition(), false, labelMaxWidth, roundToInt(fontHeight));
-
+            sld.setTextBoxStyle(sld.getTextBoxPosition(), false, labelMaxWidth, sld.getHeight());
 
             return label;
         }
@@ -870,11 +868,11 @@ public:
         }
     }
 
-    Font getComboBoxFont(ComboBox& box) override
+    juce::Font getComboBoxFont(juce::ComboBox& box) override
     {
-        Font font = getAppFont(LumatoneEditorFont::GothamNarrowMedium, box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
+        juce::Font font = getAppFont(LumatoneEditorFont::GothamNarrowMedium, box.getHeight() * CONTROLBOXFONTHEIGHTSCALAR);
 
-        NamedValueSet& properties = box.getProperties();
+        juce::NamedValueSet& properties = box.getProperties();
         if (properties.contains(LumatoneEditorStyleIDs::fontOverride))
         {
             int overrideIndex = properties[LumatoneEditorStyleIDs::fontOverride];
@@ -894,16 +892,17 @@ public:
         return font;
     }
 
-    Label* createComboBoxTextBox(ComboBox& box) override
+    juce::Label* createComboBoxTextBox(juce::ComboBox& box) override
     {
-        Label* l = new Label(box.getName(), box.getText());
+        juce::Label* l = new juce::Label(box.getName(), box.getText());
 
-        Colour textColour = box.findColour(ComboBox::ColourIds::textColourId);
+        juce::Colour textColour = box.findColour(juce::ComboBox::ColourIds::textColourId);
 
         if (!box.isEnabled())
             textColour = textColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
 
-        l->setColour(Label::ColourIds::textColourId, textColour);
+        l->setColour(juce::Label::ColourIds::textColourId, textColour);
+        l->setColour(juce::Label::ColourIds::backgroundColourId, box.findColour(juce::ComboBox::ColourIds::backgroundColourId));
 
         for (auto prop : box.getProperties())
             l->getProperties().set(prop.name, prop.value);
@@ -1060,20 +1059,23 @@ public:
         else if (renderColour && item.text.length() == 6)
         {
             juce::Colour itemColour = juce::Colour::fromString("ff" + item.text);
-            g.setColour(itemColour);
+            if (itemColour.isOpaque())
+            {
+                g.setColour(itemColour);
 
-            float textWidth = font.getStringWidth("DDDDDD ");
-            float colourSize = getPopupMenuColourItemSize(font);
-            float colourY = juce::roundToInt((areaToUse.getHeight() - colourSize) * 0.5f);
-            juce::Rectangle<int> colourArea(textArea.getX() + textWidth, colourY, colourSize, colourSize);
-            g.fillRect(colourArea);
+                float textWidth = font.getStringWidth("DDDDDD ");
+                float colourSize = getPopupMenuColourItemSize(font);
+                float colourY = juce::roundToInt((areaToUse.getHeight() - colourSize) * 0.5f);
+                juce::Rectangle<int> colourArea(textArea.getX() + textWidth, colourY, colourSize, colourSize);
+                g.fillRect(colourArea);
 
-            Colour backgroundColour = (target->getProperties().contains(LumatoneEditorStyleIDs::popupMenuBackgroundColour))
-                ? Colour::fromString(target->getProperties()[LumatoneEditorStyleIDs::popupMenuBackgroundColour].toString()).withMultipliedSaturation(1.5f) // Box colour will always be highlighted
-                : findColour(LumatoneEditorColourIDs::MenuBarBackground);
+                Colour backgroundColour = (target->getProperties().contains(LumatoneEditorStyleIDs::popupMenuBackgroundColour))
+                    ? Colour::fromString(target->getProperties()[LumatoneEditorStyleIDs::popupMenuBackgroundColour].toString()).withMultipliedSaturation(1.5f) // Box colour will always be highlighted
+                    : findColour(LumatoneEditorColourIDs::MenuBarBackground);
 
-            g.setColour(juce::Colour::contrasting(backgroundColour, itemColour));
-            g.drawRect(colourArea);
+                g.setColour(juce::Colour::contrasting(backgroundColour, itemColour));
+                g.drawRect(colourArea);
+            }
         }
     }
 

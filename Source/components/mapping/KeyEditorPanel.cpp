@@ -3,7 +3,7 @@
 
 #include "./KeyEditorControls.h"
 #include "./MultiSelectControls.h"
-#include "./BatchTools.h"
+#include "./BatchToolsPanel.h"
 
 KeyEditorPanel::KeyEditorPanel(const LumatoneEditorState &stateIn)
   : juce::Component("KeyEditorPanel")
@@ -15,7 +15,7 @@ KeyEditorPanel::KeyEditorPanel(const LumatoneEditorState &stateIn)
     multiSelectControls = std::make_unique<MultiSelectControls>(stateIn);
     addAndMakeVisible(multiSelectControls.get());
 
-    batchTools = std::make_unique<BatchTools>(stateIn);
+    batchTools = std::make_unique<BatchToolsPanel>(stateIn);
     addAndMakeVisible(batchTools.get());
 }
 
@@ -48,15 +48,13 @@ void KeyEditorPanel::resized()
     int batchToolsAreaWidth = juce::roundToInt(w * batchToolsAreaW);
     batchToolsArea = juce::Rectangle<float>(w - batchToolsAreaWidth, areaMargin, batchToolsAreaWidth, areaHeight);
 
-    contentMargin = juce::roundToInt(windowH * contentMarginWidthWindowH);
+    contentMargin = juce::roundToInt(windowH * contentBorderMarginWidthWindowH);
     keyEditorControls->setBounds(keySettingsAndMultiSelectArea.reduced(contentMargin)
                                                               .withWidth(roundToInt(keySettingsAndMultiSelectArea.getWidth() * keySettingsComponentAreaW))
                                                               .toNearestInt());
 
-    multiSelectWidth = roundToInt(keySettingsAndMultiSelectArea.getWidth() * multiSelectComponentAreaW);
-    multiSelectControls->setBounds(keySettingsAndMultiSelectArea.reduced(contentMargin)
-                                                                .withLeft(keySettingsAndMultiSelectArea.getRight() - multiSelectWidth - contentMargin)
-                                                                .toNearestInt());
+    multiSelectWidth = keySettingsAndMultiSelectArea.getWidth() - keyEditorControls->getRight() - (contentMargin * 2);
+    multiSelectControls->setBounds(keyEditorControls->getRight() + contentMargin, keyEditorControls->getY(), multiSelectWidth, keyEditorControls->getHeight());
 
     batchTools->setBounds(batchToolsArea.reduced(contentMargin).toNearestInt());
 }

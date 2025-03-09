@@ -324,6 +324,11 @@ static void resizeLabelWithHeight(Label* label, int height, float fontHeightScal
 {
     label->setFont(label->getFont().withHeight(height * fontHeightScalar));
     label->setSize(roundToInt(label->getFont().getStringWidthFloat(label->getText() + textSuffix)), height);
+
+    // float width = overrideWidth;
+    // if (width <= 0)
+    //     roundToInt(label->getFont().getStringWidthFloat(label->getText() + textSuffix));
+    // label->setSize(width, height);
 }
 
 //static void positionLabelWithHeight(Label* label, int xPosition, int yPosition, int height, float fontHeightScalar = 1.0f, String textSuffix = "_")

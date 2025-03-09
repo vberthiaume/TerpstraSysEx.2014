@@ -1,11 +1,11 @@
-#include "BatchTools.h"
+#include "BatchToolsPanel.h"
 
 #include "./BatchToolsColourControls.h"
 
 #include "../../style/LumatoneEditorLookAndFeel.h"
 
 
-BatchTools::BatchTools(const LumatoneEditorState & stateIn)
+BatchToolsPanel::BatchToolsPanel(const LumatoneEditorState & stateIn)
     : LumatoneEditorState("BatchToolsControls", stateIn)
     , juce::Component("BatchToolsControls")
 {
@@ -21,16 +21,16 @@ BatchTools::BatchTools(const LumatoneEditorState & stateIn)
     batchToolsLabel = std::make_unique<juce::Label>("BatchToolsLabel", "Batch Tools");
     batchToolsLabel->setJustificationType(juce::Justification::centredLeft);
     batchToolsLabel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
-    batchToolsLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
+    batchToolsLabel->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     addAndMakeVisible(batchToolsLabel.get());
 }
 
-BatchTools::~BatchTools()
+BatchToolsPanel::~BatchToolsPanel()
 {
     tabs = nullptr;
 }
 
-void BatchTools::paint(juce::Graphics &g)
+void BatchToolsPanel::paint(juce::Graphics &g)
 {
     g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlAreaBackground));
     g.fillPath(controlPath);
@@ -39,7 +39,7 @@ void BatchTools::paint(juce::Graphics &g)
     g.fillPath(headerPath);
 }
 
-void BatchTools::resized()
+void BatchToolsPanel::resized()
 {
     tabs->setBounds(getLocalBounds());
 

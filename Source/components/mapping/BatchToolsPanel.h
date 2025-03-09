@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    BatchTools.h
+    BatchToolsPanel.h
     Created: 16 July 2024
     Author:  Vincenzo
 
@@ -17,12 +17,12 @@
 class BatchToolsColourControls;
 
 
-class BatchTools : public LumatoneEditorState
+class BatchToolsPanel : public LumatoneEditorState
                  , public juce::Component
 {
 public:
-    BatchTools(const LumatoneEditorState& stateIn);
-    ~BatchTools() override;
+    BatchToolsPanel(const LumatoneEditorState& stateIn);
+    ~BatchToolsPanel() override;
 
     void paint(juce::Graphics& g) override;
     void resized() override;

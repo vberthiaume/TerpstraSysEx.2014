@@ -46,6 +46,8 @@ public:
     juce::Colour getSelectedColour() override;
     void deselectColour() override;
 
+    void setEditText(bool enableTextEdit);
+
 private:
     juce::Colour parseInput() const;
 

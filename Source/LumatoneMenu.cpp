@@ -43,7 +43,7 @@ namespace Lumatone {
 
 #if ! JUCE_MAC
 			menu.addSeparator();
-			menu.addCommandItem(theManager, StandardApplicationCommandIDs::quit);
+			menu.addCommandItem(theManager, juce::StandardApplicationCommandIds::quit);
 #endif
 		}
 
