@@ -166,7 +166,7 @@ private:
 
     std::shared_ptr<LumatoneContext>        layoutContext;
     std::shared_ptr<LumatoneColourModel>    colourModel;
-	
+
     // Anything inheriting from this state should come after shared data
     std::shared_ptr<LumatoneEventManager>   eventManager;
     std::shared_ptr<LumatoneController>     controller;
@@ -191,8 +191,9 @@ public:
         void setActiveMacroButtonColour(juce::Colour buttonColour);
 
         void setSelectedKeys(juce::Array<MappedLumatoneKey> selection);
-        void addSelectedKey(int keyNum);
-        void removeSelectedKey(int keyNum);
+        void addKeyToSelection(int keyNum);
+        void removeKeyFromSelection(int keyNum);
+        void clearSelectedKeys();
 
     protected:
         void updatedSelectedKeys();

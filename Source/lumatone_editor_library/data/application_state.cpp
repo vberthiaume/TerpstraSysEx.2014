@@ -489,6 +489,7 @@ void LumatoneApplicationState::Controller::updateSelectionState(LumatoneApplicat
 
     selectionState.setPropertyExcludingListener(&stateIn, LumatoneApplicationProperty::NumKeySelected, selection.size(), nullptr);
 
+
     // DBG(stateIn.state.toXmlString());
 }
 
@@ -501,7 +502,7 @@ void LumatoneApplicationState::Controller::setSelectedKeys(juce::Array<MappedLum
     getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
 }
 
-void LumatoneApplicationState::Controller::addSelectedKey(int keyNum)
+void LumatoneApplicationState::Controller::addKeyToSelection(int keyNum)
 {
     LumatoneKeyCoord coords = appState.mappingData->keyNumToKeyCoord(keyNum);
     const MappedLumatoneKey key = appState.mappingData->getMappedKey(coords.boardIndex, coords.keyIndex);
@@ -540,7 +541,7 @@ void LumatoneApplicationState::Controller::addSelectedKey(int keyNum)
     getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
 }
 
-void LumatoneApplicationState::Controller::removeSelectedKey(int keyNum)
+void LumatoneApplicationState::Controller::removeKeyFromSelection(int keyNum)
 {
     LumatoneKeyCoord coords = appState.mappingData->keyNumToKeyCoord(keyNum);
     const MappedLumatoneKey key = appState.mappingData->getMappedKey(coords.boardIndex, coords.keyIndex);
@@ -562,6 +563,14 @@ void LumatoneApplicationState::Controller::removeSelectedKey(int keyNum)
         updateSelectionState(appState, *appState.selectedKeys);
         getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
     }
+}
+
+void LumatoneApplicationState::Controller::clearSelectedKeys()
+{
+    juce::Array<MappedLumatoneKey> emptySelection;
+    appState.selectedKeys->swapWith(emptySelection);
+    updateSelectionState(appState, *appState.selectedKeys);
+    getEditorListeners()->call(&LumatoneEditor::EditorListener::selectionChanged);
 }
 
 void LumatoneApplicationState::Controller::updatedSelectedKeys()
@@ -658,7 +667,7 @@ bool LumatoneApplicationState::Controller::requestDeviceGlobalSettings()
 
 	// Velocity curve config
 	appState.controller->sendVelocityIntervalConfigRequest();
-    
+
     return true;
 }
 
