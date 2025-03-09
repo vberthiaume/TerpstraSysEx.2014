@@ -62,15 +62,15 @@ struct BatchColourEditData
         return sqrtf((tempShift + 1581.731f) / 52000.0f) + 0.105769f;
     }
 
-    static int TempShiftMapFromNorm(float value)
+    static int TempShiftMapFromNorm(double value)
     {
         // Linear
         if (value <= 0.5)
         {
-            return 11000 * value + 1000;
+            return juce::roundToInt(11000.0 * value + 1000.0);
         }
 
-        return 52000*(value - 0.5)*(value - 0.5) + 41000*(value - 0.5) + 6500;
+        return juce::roundToInt(52000.0 * (value - 0.5) * (value - 0.5) + 41000.0 * (value - 0.5) + 6500.0);
     }
 };
 
@@ -95,7 +95,7 @@ protected:
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
-    void loadPropertiesFile(juce::PropertiesFile* properties) override { };
+    void loadPropertiesFile(juce::PropertiesFile*) override { };
 
 private:
 

@@ -25,7 +25,7 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
 {
     lblMultiSelect = std::make_unique<juce::Label>("lblMultiSelect", "Multi-Select");
     lblMultiSelect->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::LabelBlue));
-    lblMultiSelect->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
+    lblMultiSelect->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     addAndMakeVisible(lblMultiSelect.get());
 
     colourTextEditor = std::make_unique<ColourTextEditor>("colourSelectEditor", "000000");
@@ -54,17 +54,17 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     });
 
     addAndMakeVisible(colourDropdown.get());
-    colourDropdown->setShowPicker(true);
+    colourDropdown->setShowPicker(false);
 
     keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeComboSelect");
     keyTypeCombo->setEditableText (false);
     keyTypeCombo->setJustificationType (juce::Justification::centredLeft);
     keyTypeCombo->setTextWhenNothingSelected (juce::String());
-    keyTypeCombo->setTextWhenNoChoicesAvailable (juce::translate("(no choices)"));
-    keyTypeCombo->addItem (juce::translate("Note on/Note off"), 1);
-    keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
-    keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
-    keyTypeCombo->addItem (juce::translate("Disabled"), 4);
+    keyTypeCombo->setTextWhenNoChoicesAvailable (juce::translate("(none)"));
+    // keyTypeCombo->addItem (juce::translate("Note on/Note off"), 1);
+    // keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
+    // keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
+    // keyTypeCombo->addItem (juce::translate("Disabled"), 4);
     keyTypeCombo->onChange = [&]()
     {
         LumatoneKeyPropertyData properties;
@@ -89,6 +89,24 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     });
     addAndMakeVisible(noteInput.get());
 
+    notesDropDown = std::make_unique<juce::ComboBox>("notesDropDown");
+    notesDropDown->setEditableText (true);
+    notesDropDown->setJustificationType (juce::Justification::centredLeft);
+    notesDropDown->setTextWhenNothingSelected (juce::String());
+    notesDropDown->setTextWhenNoChoicesAvailable (juce::translate("(none)"));
+    notesDropDown->getProperties().set(LumatoneEditorStyleIDs::popupMenuMaxColumns, (juce::var)8);
+    notesDropDown->onChange = [&]()
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useNote = true;
+        properties.note = notesDropDown->getText().getIntValue();
+
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    };
+    addAndMakeVisible(notesDropDown.get());
+
+
     channelInput = std::make_unique<RangedControl>("channelInputSelect", 1, 16, RangedControl::Style::DropdownBox);
     channelInput->setValueChangedCallback([&]()
     {
@@ -100,6 +118,24 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
         performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
     });
     addAndMakeVisible(channelInput.get());
+
+    channelsDropDown = std::make_unique<juce::ComboBox>("channelsDropDown");
+    channelsDropDown->setEditableText (true);
+    channelsDropDown->setJustificationType (juce::Justification::centredLeft);
+    channelsDropDown->setTextWhenNothingSelected (juce::String());
+    channelsDropDown->setTextWhenNoChoicesAvailable (juce::translate("(none)"));
+    channelsDropDown->getProperties().set(LumatoneEditorStyleIDs::popupMenuMaxColumns, (juce::var)4);
+    channelsDropDown->onChange = [&]()
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useChannel = true;
+        properties.channel = channelsDropDown->getText().getIntValue();
+
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    };
+    addAndMakeVisible(channelsDropDown.get());
+
 
     lblColour = std::make_unique<juce::Label>("lblColour", "Colour");
     lblColour->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
@@ -127,6 +163,9 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
 MultiSelectControls::~MultiSelectControls()
 {
     removeEditorListener(this);
+
+    channelsDropDown = nullptr;
+    notesDropDown = nullptr;
 
     lblChannel = nullptr;
     lblNote = nullptr;
@@ -159,16 +198,17 @@ void MultiSelectControls::resized()
     auto roundedCornerSize = getRoundedRectCornerSize();
     labelMarginWidth = roundToInt(roundedCornerSize * 0.5f);
 
-    headerHeight = roundToInt(h * headerH);
+    float windowH = getWindowBounds().getHeight();
+    headerHeight = roundToInt(windowH * contentLabelHeightWindowH);
     headerPath = getConnectedRoundedRectPath(getLocalBounds().withBottom(headerHeight + 1).toFloat(), roundedCornerSize, juce::Button::ConnectedEdgeFlags::ConnectedOnBottom);
     controlPath = getConnectedRoundedRectPath(getLocalBounds().withTop(headerHeight).toFloat(), roundedCornerSize, juce::Button::ConnectedEdgeFlags::ConnectedOnTop);
 
-    contentMarginWidth = roundToInt(getParentWidth() * contentMarginParentW);
+    contentMarginWidth = roundToInt(getParentWidth() * contentMarginWidthWindowH);
     contentMarginHeight = roundToInt(h * controlMarginH);
 
-    labelHeight = roundToInt(headerHeight * labelToHeaderH);
+    labelHeight = roundToInt(headerHeight * contentLabelFontScalar);
     lblMultiSelect->setTopLeftPosition(contentMarginWidth, 0);
-    resizeLabelWithHeight(lblMultiSelect.get(), headerHeight, labelToHeaderH);
+    resizeLabelWithHeight(lblMultiSelect.get(), headerHeight, contentLabelFontScalar);
 
     controlLabelHeight = roundToInt(h * controlLabelH);
 
@@ -177,11 +217,11 @@ void MultiSelectControls::resized()
 
     colourTypeColumnWidth = roundToInt(w * colourTypeColumnW);
 
-    noteChannelColumnWidth = roundToInt(w * noteChannelColumnW);
-    noteChannelColumnX = (int)w - noteChannelColumnWidth - roundToInt(contentMarginWidth * 0.5f);
+    noteChannelColumnX = (contentMarginWidth*2) + colourTypeColumnWidth;
+    noteChannelColumnWidth = getWidth() - noteChannelColumnX - contentMarginWidth;
 
     lblColour->setTopLeftPosition(contentMarginWidth + labelMarginWidth, headerHeight + contentMarginHeight);
-    resizeLabelWithHeight(lblColour.get(), labelHeight, controlLabelFontScalar);
+    resizeLabelWithHeight(lblColour.get(), controlLabelHeight, controlLabelFontScalar);
 
     colourButtonMargin = lblColour->getFont().getStringWidth(" ");
     colourButtonWidth = roundToInt(getParentWidth() * colourButtonParentW) - colourButtonMargin;
@@ -193,7 +233,7 @@ void MultiSelectControls::resized()
     colourDropdown->setBounds(contentMarginWidth, lblColour->getBottom(), colourTextBoxWidth + colourButtonWidth, controlHeight);
 
     lblKeyType->setTopLeftPosition(contentMarginWidth + labelMarginWidth, colourTextEditor->getBottom() + controlMarginHeight);
-    resizeLabelWithHeight(lblKeyType.get(), labelHeight, controlLabelFontScalar);
+    resizeLabelWithHeight(lblKeyType.get(), controlLabelHeight, controlLabelFontScalar);
 
     keyTypeCombo->setBounds(contentMarginWidth, lblKeyType->getBottom(), colourTypeColumnWidth, controlHeight);
     auto keyTypeComboFont = getEditorLookAndFeel().getComboBoxFont(*keyTypeCombo);
@@ -207,22 +247,34 @@ void MultiSelectControls::resized()
     keyTypeCombo->getProperties().set(LumatoneEditorStyleIDs::comboBoxPopupItemWidthOverride, maxKeyTypeWidth);
 
     lblNote->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, headerHeight + contentMarginHeight);
-    resizeLabelWithHeight(lblNote.get(), labelHeight, controlLabelFontScalar);
+    resizeLabelWithHeight(lblNote.get(), controlLabelHeight, controlLabelFontScalar);
 
     noteInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, roundToInt(noteInput->getWidth() * 0.75f), roundToInt(noteInput->getHeight() * 0.8f));
-    noteInput->setBounds(noteChannelColumnX, lblNote->getBottom(), noteChannelColumnWidth, controlHeight);
+    // noteInput->setBounds(noteChannelColumnX, lblNote->getBottom(), noteChannelColumnWidth, controlHeight);
+    notesDropDown->setBounds(noteChannelColumnX, lblNote->getBottom(), noteChannelColumnWidth, controlHeight);
 
-    lblChannel->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, noteInput->getBottom() + controlMarginHeight);
-    resizeLabelWithHeight(lblChannel.get(), labelHeight, controlLabelFontScalar);
+    // lblChannel->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, noteInput->getBottom() + controlMarginHeight);
+    lblChannel->setTopLeftPosition(noteChannelColumnX + labelMarginWidth, notesDropDown->getBottom() + controlMarginHeight);
+    resizeLabelWithHeight(lblChannel.get(), controlLabelHeight, controlLabelFontScalar);
 
     channelInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, roundToInt(channelInput->getWidth() * 0.6f), roundToInt(channelInput->getHeight() * 0.8f));
-    channelInput->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
+    // channelInput->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
+    channelsDropDown->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
 }
 
 void MultiSelectControls::layoutChanged(const LumatoneLayout &mappingData)
 {
     auto layoutColours = mappingData.getLayoutColours();
-    colourDropdown->setColourOptions(layoutColours);
+    updateColours(layoutColours, UpdateType::REPLACE);
+
+    auto layoutTypes = mappingData.getLayoutKeyTypes();
+    updateKeyTypes(layoutTypes, UpdateType::REPLACE);
+
+    auto layoutNotes = mappingData.getLayoutKeyNotes();
+    updateKeyNotes(layoutNotes, UpdateType::REPLACE);
+
+    auto layoutChannels = mappingData.getLayoutKeyChannels();
+    updateKeyChannels(layoutChannels, UpdateType::REPLACE);
 }
 
 void MultiSelectControls::boardChanged(const LumatoneBoard &boardData)
@@ -236,7 +288,6 @@ void MultiSelectControls::boardChanged(const LumatoneBoard &boardData)
 
     //     colourDropdown->addItem(colour.toDisplayString(false), colourDropdown->getNumItems() + 1);
     // }
-
     layoutChanged(*getMappingData());
 }
 
@@ -259,4 +310,74 @@ void MultiSelectControls::keySetChanged(juce::Array<MappedLumatoneKey> selection
     //     colourDropdown->addItem(key.getColour().toDisplayString(false), colourDropdown->getNumItems() + 1);
     // }
     layoutChanged(*getMappingData());
+}
+
+void MultiSelectControls::updateColours(const juce::Array<juce::Colour> &colours, UpdateType type)
+{
+    juce::Array<juce::Colour> newOptions = colours;
+    if (type == UpdateType::MERGE)
+    {
+
+    }
+
+    colourDropdown->setColourOptions(newOptions);
+}
+
+void MultiSelectControls::updateKeyTypes(const juce::Array<LumatoneKeyType> &types, UpdateType type)
+{
+    juce::Array<LumatoneKeyType> newOptions = types;
+    if (type == UpdateType::MERGE)
+    {
+
+    }
+
+    keyTypeCombo->clear();
+    for (auto type : newOptions)
+    {
+        switch (type)
+        {
+            case LumatoneKeyType::noteOnNoteOff:
+                keyTypeCombo->addItem (juce::translate("Note on/Note off"), 1);
+                break;
+            case LumatoneKeyType::continuousController:
+                keyTypeCombo->addItem (juce::translate("Continuous controller"), 2);
+                break;
+            case LumatoneKeyType::lumaTouch:
+                keyTypeCombo->addItem (juce::translate("Lumatouch"), 3);
+                break;
+            default:
+                keyTypeCombo->addItem (juce::translate("Disabled"), 4);
+                break;
+        }
+    }
+}
+
+void MultiSelectControls::updateKeyNotes(const juce::Array<int> &notes, UpdateType type)
+{
+    juce::Array<int> newOptions = notes;
+    if (type == UpdateType::MERGE)
+    {
+
+    }
+
+    notesDropDown->clear();
+    for (int note : newOptions)
+    {
+        notesDropDown->addItem(juce::String(note), note+1);
+    }
+}
+
+void MultiSelectControls::updateKeyChannels(const juce::Array<int> &channels, UpdateType type)
+{
+    juce::Array<int> newOptions = channels;
+    if (type == UpdateType::MERGE)
+    {
+
+    }
+
+    channelsDropDown->clear();
+    for (int ch : newOptions)
+    {
+        channelsDropDown->addItem(juce::String(ch), ch+1);
+    }
 }

@@ -178,9 +178,10 @@ protected:
 
     // Global UI constants
 
-    const float contentMarginWidthWindowH   = 2.0e-2f;
+    const float contentBorderMarginWidthWindowH     = 0.02f;    // "padding" around content sections
+    const float contentMarginWidthWindowH           = 0.013f;    // margin within content sections
 
-    const float contentLabelHeightWindowH   = 4.0e-2f;
+    const float contentLabelHeightWindowH   = 0.033f;
     const float contentLabelFontScalar      = 0.5f;
 
     const float controlContentSmallMarginHeightWindowH  = 1.3e-2f;

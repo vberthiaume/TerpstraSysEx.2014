@@ -25,6 +25,11 @@ class MultiSelectControls : public LumatoneEditorState
                           , public juce::Component
                           , protected LumatoneEditor::EditorListener
 {
+    typedef enum {
+      REPLACE = 0,
+      MERGE = 1
+    } UpdateType;
+
 public:
     MultiSelectControls(const LumatoneEditorState& stateIn);
 
@@ -40,6 +45,12 @@ private:
     void keySetChanged(juce::Array<MappedLumatoneKey> selection) override;
 
 private:
+    void updateColours(const juce::Array<juce::Colour>& colours, UpdateType type);
+    void updateKeyTypes(const juce::Array<LumatoneKeyType>& types, UpdateType type);
+    void updateKeyNotes(const juce::Array<int>& notes, UpdateType type);
+    void updateKeyChannels(const juce::Array<int>& channels, UpdateType type);
+
+private:
 
     std::unique_ptr<juce::Label>    lblMultiSelect;
 
@@ -50,6 +61,9 @@ private:
     std::unique_ptr<juce::ComboBox>   keyTypeCombo;
     std::unique_ptr<RangedControl>    noteInput;
     std::unique_ptr<RangedControl>    channelInput;
+
+    std::unique_ptr<juce::ComboBox>   notesDropDown;
+    std::unique_ptr<juce::ComboBox>   channelsDropDown;
 
     std::unique_ptr<juce::Label>    lblColour;
     std::unique_ptr<juce::Label>    lblKeyType;
@@ -70,7 +84,6 @@ private:
 
     int labelHeight;
     int labelMarginWidth;
-    const float labelToHeaderH        = 0.5f;
 
     int colourTextBoxWidth;
     int colourButtonMargin;

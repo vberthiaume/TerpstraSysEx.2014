@@ -72,6 +72,7 @@ LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditor
     , lookAndFeel(stateIn.lookAndFeel)
     , recentFiles(stateIn.recentFiles)
     , propertiesFile(stateIn.propertiesFile)
+    , lastSavedLayout(stateIn.lastSavedLayout)
     , colourPalettes(stateIn.colourPalettes)
     , colourSelectionGroup(stateIn.colourSelectionGroup)
 {
