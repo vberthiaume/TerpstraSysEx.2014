@@ -448,45 +448,49 @@ LumatoneKeyDisplay* LumatoneKeyboardComponent::getKeyFromMouseEvent(const juce::
 
 void LumatoneKeyboardComponent::mouseMove(const juce::MouseEvent& e)
 {
-    const int mouseIndex = e.source.getIndex();
-    auto lastOver = keysOverPerMouse[mouseIndex];
-
+    // auto lastOver = keysOverPerMouse[mouseIndex];
     LumatoneKeyCoord keyCoord;
     auto key = getKeyFromMouseEvent(e);
-    if (key)
-    {
-        keyCoord = key->getCoord();
-    }
 
     // if (state.isKeyCoordValid(lastOver))
     // {
     //     auto lastOverForMouse = octaveBoards[lastOver.boardIndex]->keyMiniDisplay[lastOver.keyIndex];
     // }
 
+    mouseMoveInternal(e, key);
+}
 
-    keysOverPerMouse.set(mouseIndex, keyCoord);
+void LumatoneKeyboardComponent::mouseMoveInternal(const juce::MouseEvent&e, LumatoneKeyDisplay* key)
+{
+    if (key == nullptr)
+        return;
+    const int mouseIndex = e.source.getIndex();
+    keysOverPerMouse.set(mouseIndex, key->getKeyCoord());
 }
 
 void LumatoneKeyboardComponent::mouseDown(const juce::MouseEvent& e)
 {
     auto key = getKeyFromMouseEvent(e);
-    if (key)
-    {
-        lumatoneKeyDown(key->getBoardIndex(), key->getKeyIndex());
-        lastMouseKeyDown = key;
+    mouseDownInternal(e, key);
+}
 
-        keysDownPerMouse.set(e.source.getIndex(), key->getCoord());
-        keysOn.addIfNotAlreadyThere(key);
-    }
+void LumatoneKeyboardComponent::mouseDownInternal(const juce::MouseEvent &e, LumatoneKeyDisplay* key)
+{
+    lumatoneKeyDown(key->getBoardIndex(), key->getKeyIndex());
+    lastMouseKeyDown = key;
+
+    keysDownPerMouse.set(e.source.getIndex(), key->getCoord());
+    keysOn.addIfNotAlreadyThere(key);
 }
 
 void LumatoneKeyboardComponent::mouseUp(const juce::MouseEvent& e)
 {
-    if (e.mods.isShiftDown())
-    {
+    mouseUpInternal(e, nullptr);
+}
 
-    }
-    else if (lastMouseKeyDown)
+void LumatoneKeyboardComponent::mouseUpInternal(const juce::MouseEvent &e, LumatoneKeyDisplay *key)
+{
+    if (lastMouseKeyDown)
     {
         lumatoneKeyUp(lastMouseKeyDown->getBoardIndex(), lastMouseKeyDown->getKeyIndex());
         keysOn.removeFirstMatchingValue(lastMouseKeyDown);
@@ -497,6 +501,12 @@ void LumatoneKeyboardComponent::mouseUp(const juce::MouseEvent& e)
 
 void LumatoneKeyboardComponent::mouseDrag(const juce::MouseEvent& e)
 {
+    auto key = getKeyFromMouseEvent(e);
+    mouseDragInternal(e, key);
+}
+
+void LumatoneKeyboardComponent::mouseDragInternal(const juce::MouseEvent &e, LumatoneKeyDisplay *key)
+{
     const int mouseIndex = e.source.getIndex();
     auto lastDownCoord = keysDownPerMouse[mouseIndex];
 
@@ -504,10 +514,6 @@ void LumatoneKeyboardComponent::mouseDrag(const juce::MouseEvent& e)
     if (getMappingData()->isKeyCoordValid(lastDownCoord))
         mouseKeyLastDown = octaveBoards[lastDownCoord.boardIndex]->keyMiniDisplay[lastDownCoord.keyIndex];
 
-
-    bool onNewKey = false;
-
-    auto key = getKeyFromMouseEvent(e);
     LumatoneKeyCoord keyCoord;
     if (key)
     {
@@ -516,7 +522,7 @@ void LumatoneKeyboardComponent::mouseDrag(const juce::MouseEvent& e)
 
     bool validKey = getMappingData()->isKeyCoordValid(keyCoord);
     bool keyChanged = lastDownCoord != keyCoord;
-    onNewKey = validKey && (mouseKeyLastDown == nullptr || keyChanged);
+    bool onNewKey = validKey && (mouseKeyLastDown == nullptr || keyChanged);
 
     bool setLastNoteOff = !e.mods.isShiftDown() && (onNewKey || !validKey);
     if (mouseKeyLastDown != nullptr && setLastNoteOff)
@@ -537,6 +543,8 @@ void LumatoneKeyboardComponent::mouseDrag(const juce::MouseEvent& e)
 
         lastMouseKeyOver = key;
         lastMouseKeyDown = key;
+
+        mouseDragInternalOnNewKey(e, key);
     }
     else if (!e.mods.isShiftDown())
     {
@@ -608,13 +616,11 @@ void LumatoneKeyboardComponent::modifierKeysChanged(const juce::ModifierKeys& mo
     {
         shiftHeld = true;
     }
-
-    if (shiftHeld && !modifiers.isShiftDown())
+    else if (shiftHeld && !modifiers.isShiftDown())
     {
         shiftHeld = false;
 
-        clearHeldNotes();
-
+        // clearHeldNotes();
     }
 
     //if (!altHeld && modifiers.isAltDown())
@@ -654,7 +660,7 @@ void LumatoneKeyboardComponent::keyDownInternal(int boardIndex, int keyIndex, ju
     if (uiMode == UiMode::Controller)
     {
         auto keyNum = mappingData->keyCoordToKeyNum(boardIndex, keyIndex);
-        listeners.call(&Listener::handleKeyDown, keyNum);
+        // listeners.call(&Listener::handleKeyDown, keyNum);
     }
     else switch (key->getType())
     {
@@ -680,7 +686,7 @@ void LumatoneKeyboardComponent::keyUpInternal(int boardIndex, int keyIndex)
 
     if (uiMode == UiMode::Controller)
     {
-        listeners.call(&Listener::handleKeyUp, mappingData->keyCoordToKeyNum(boardIndex, keyIndex));
+        // listeners.call(&Listener::handleKeyUp, mappingData->keyCoordToKeyNum(boardIndex, keyIndex));
     }
     else switch (key->getType())
     {

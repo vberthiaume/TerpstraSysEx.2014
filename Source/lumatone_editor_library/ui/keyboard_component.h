@@ -44,26 +44,6 @@ public:
     };
 
 public:
-    class Listener
-    {
-    public:
-        /*
-            Callback for virtual key pressed.
-        */
-        virtual void handleKeyDown(int keyNum) {}
-
-        /*
-            Callback for virtual key released.
-        */
-        virtual void handleKeyUp(int keyNum) {}
-
-        /*
-            Callback for virtual key dragged.
-        */
-        virtual void handleKeyHold(int key, float xDistance, float yDistance) {}
-    };
-
-public:
     LumatoneKeyboardComponent(const LumatoneApplicationState& stateIn);
     ~LumatoneKeyboardComponent() override;
 
@@ -115,20 +95,27 @@ private:
     // Playing mode implementations
     void updateKeyState(int boardIndex, int keyIndex, bool keyIsDown);
 
-protected:
-    juce::ListenerList<LumatoneKeyboardComponent::Listener> listeners;
-public:
-    void addListener(LumatoneKeyboardComponent::Listener* listenerIn) { listeners.add(listenerIn); }
-    void removeListener(LumatoneKeyboardComponent::Listener* listenerIn) { listeners.remove(listenerIn); }
+// protected:
+//     juce::ListenerList<LumatoneKeyboardComponent::Listener> listeners;
+// public:
+//     void addListener(LumatoneKeyboardComponent::Listener* listenerIn) { listeners.add(listenerIn); }
+//     void removeListener(LumatoneKeyboardComponent::Listener* listenerIn) { listeners.remove(listenerIn); }
 
 protected:
+
+    LumatoneKeyDisplay* getKeyFromMouseEvent(const juce::MouseEvent& e);
+
     // juce::Component UI implementations
     void mouseMove(const juce::MouseEvent& e) override;
+    void mouseMoveInternal(const juce::MouseEvent&e, LumatoneKeyDisplay* key);
     void mouseDown(const juce::MouseEvent& e) override;
+    void mouseDownInternal(const juce::MouseEvent&e, LumatoneKeyDisplay* key);
     void mouseUp(const juce::MouseEvent& e) override;
+    void mouseUpInternal(const juce::MouseEvent&e, LumatoneKeyDisplay* key);
     void mouseDrag(const juce::MouseEvent& e) override;
+    void mouseDragInternal(const juce::MouseEvent& e, LumatoneKeyDisplay* key);
+    virtual void mouseDragInternalOnNewKey(const juce::MouseEvent& e, LumatoneKeyDisplay* key) {};
 
-private:
     bool keyStateChanged(bool isKeyDown) override;
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
     void modifierKeysChanged(const juce::ModifierKeys& modifiers) override;
@@ -157,7 +144,6 @@ private:
 
 
 private:
-    LumatoneKeyDisplay* getKeyFromMouseEvent(const juce::MouseEvent& e);
 
     void rerender();
 
