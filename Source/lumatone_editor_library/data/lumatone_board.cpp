@@ -124,6 +124,47 @@ juce::Array<juce::Colour> LumatoneBoard::getBoardColours() const
     return boardColours;
 }
 
+juce::Array<LumatoneKeyType> LumatoneBoard::getBoardKeyTypes() const
+{
+    juce::Array<LumatoneKeyType> boardKeyTypes;
+
+    for (int i = 0; i < numKeys; i++)
+    {
+        if (!boardKeyTypes.contains(theKeys[i].getType()))
+            boardKeyTypes.add(theKeys[i].getType());
+    }
+
+    return boardKeyTypes;
+}
+
+juce::Array<int> LumatoneBoard::getBoardKeyNotes() const
+{
+    juce::Array<int> keyNotes;
+    auto compare = juce::DefaultElementComparator<int>();
+
+    for (int i = 0; i < numKeys; i++)
+    {
+        if (!keyNotes.contains(theKeys[i].getMidiNumber()))
+            keyNotes.addSorted(compare, theKeys[i].getMidiNumber());
+    }
+
+    return keyNotes;
+}
+
+juce::Array<int> LumatoneBoard::getBoardKeyChannels() const
+{
+    juce::Array<int> keyChannels;
+    auto compare = juce::DefaultElementComparator<int>();
+
+    for (int i = 0; i < numKeys; i++)
+    {
+        if (!keyChannels.contains(theKeys[i].getMidiChannel()))
+            keyChannels.addSorted(compare, theKeys[i].getMidiChannel());
+    }
+
+    return keyChannels;
+}
+
 juce::Array<LumatoneKeyCoord> LumatoneBoard::getKeysWithProperties(LumatoneKeyPropertyData properties) const
 {
     juce::Array<LumatoneKeyCoord> keyCoords;

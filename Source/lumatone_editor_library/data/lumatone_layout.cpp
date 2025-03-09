@@ -683,7 +683,7 @@ bool LumatoneLayout::fromStringArray(const juce::StringArray& stringArray)
     //        boards[boardIndex].theKeys[55] = TerpstraKey();
     //    }
     //}
-    
+
     return true;
 }
 
@@ -787,6 +787,52 @@ juce::Array<juce::Colour> LumatoneLayout::getLayoutColours() const
     }
 
     return layoutColours;
+}
+
+
+juce::Array<LumatoneKeyType> LumatoneLayout::getLayoutKeyTypes() const
+{
+    juce::Array<LumatoneKeyType> keyTypes;
+
+    for (int i = 0; i < numBoards; i++)
+    {
+        const LumatoneBoard& board = getBoard(i);
+        for (LumatoneKeyType type : board.getBoardKeyTypes())
+            if (!keyTypes.contains(type))
+                keyTypes.add(type);
+    }
+
+    return keyTypes;
+}
+
+juce::Array<int> LumatoneLayout::getLayoutKeyNotes() const
+{
+    juce::Array<int> keyNotes;
+
+    for (int i = 0; i < numBoards; i++)
+    {
+        const LumatoneBoard& board = getBoard(i);
+        for (int note : board.getBoardKeyNotes())
+            if (!keyNotes.contains(note))
+                keyNotes.add(note);
+    }
+
+    return keyNotes;
+}
+
+juce::Array<int> LumatoneLayout::getLayoutKeyChannels() const
+{
+    juce::Array<int> keyChannels;
+
+    for (int i = 0; i < numBoards; i++)
+    {
+        const LumatoneBoard& board = getBoard(i);
+        for (int ch : board.getBoardKeyChannels())
+            if (!keyChannels.contains(ch))
+                keyChannels.add(ch);
+    }
+
+    return keyChannels;
 }
 
 juce::Array<LumatoneKeyCoord> LumatoneLayout::getKeysWithProperties(LumatoneKeyPropertyData properties) const
