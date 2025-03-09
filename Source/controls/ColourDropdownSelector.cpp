@@ -7,6 +7,7 @@ ColourDropdownSelector::ColourDropdownSelector(juce::String name, bool editable)
 {
     colourEditorBox = std::make_unique<juce::ComboBox>("ColourEditorBox");
     colourEditorBox->setEditableText(editable);
+    colourEditorBox->setTextWhenNoChoicesAvailable(juce::translate("(none)"));
     colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxEditorRestrictedChars, "0123456789ABCDEFabcdef");
     colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxEditorRestrictedLength, 6);
     colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxRenderColourItems, true);
@@ -78,9 +79,16 @@ void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool send
     {
         lastSetColour = newColour;
 
-        colourPickerButton->setColour(juce::TextButton::ColourIds::buttonColourId, newColour);
-        colourPickerButton->setColour(juce::TextButton::ColourIds::buttonOnColourId, newColour);
-
+        if (showPicker)
+        {
+            colourPickerButton->setColour(juce::TextButton::ColourIds::buttonColourId, newColour);
+            colourPickerButton->setColour(juce::TextButton::ColourIds::buttonOnColourId, newColour);
+        }
+        else
+        {
+            colourEditorBox->setColour(juce::ComboBox::ColourIds::backgroundColourId, newColour);
+            colourEditorBox->setColour(juce::ComboBox::ColourIds::textColourId, newColour.contrasting());
+        }
         if (sendNotification)
             selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastSetColour);
     }
@@ -133,11 +141,11 @@ void ColourDropdownSelector::colourChangedCallback(ColourSelectionBroadcaster* s
         // callbackPickerChanged();
         return;
     }
-    
-    if (source != this)
-    {
-        setSelectedColour(newColour, false, true);
-    }
+
+    auto sourceComponent = dynamic_cast<juce::Component*>(source);
+    bool isParent = sourceComponent != nullptr && sourceComponent->isParentOf(this);
+    if (!isParent && source != this)
+        setSelectedColour(newColour, false, false);
 }
 
 juce::Colour ColourDropdownSelector::getSelectedColour()
@@ -148,6 +156,11 @@ juce::Colour ColourDropdownSelector::getSelectedColour()
 void ColourDropdownSelector::deselectColour()
 {
     clearColour();
+}
+
+void ColourDropdownSelector::setEditText(bool enableTextEdit)
+{
+    colourEditorBox->setEditableText(enableTextEdit);
 }
 
 juce::Colour ColourDropdownSelector::parseInput() const

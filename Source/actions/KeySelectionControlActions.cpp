@@ -1,5 +1,15 @@
 #include "KeySelectionControlActions.h"
 
+static juce::Colour getColourFromSelectedKeys(const juce::Array<MappedLumatoneKey>* selectedKeys)
+{
+    if (selectedKeys->size() > 0)
+    {
+        return selectedKeys->getUnchecked(0).getColour();
+    }
+
+    return juce::Colour();
+}
+
 AddOrRemoveKeySelectionAction::AddOrRemoveKeySelectionAction(const LumatoneEditorState &stateIn, int keyNumIn, bool removeIn)
 	: LumatoneEditorState("AddOrRemoveKeySelectionAction", stateIn)
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
@@ -17,11 +27,11 @@ bool AddOrRemoveKeySelectionAction::perform()
 {
     if (remove)
     {
-        removeSelectedKey(keyNum);
+        removeKeyFromSelection(keyNum);
     }
     else
     {
-        addSelectedKey(keyNum);
+        addKeyToSelection(keyNum);
     }
 
     return true;
@@ -31,11 +41,11 @@ bool AddOrRemoveKeySelectionAction::undo()
 {
     if (remove)
     {
-        addSelectedKey(keyNum);
+        addKeyToSelection(keyNum);
     }
     else
     {
-        removeSelectedKey(keyNum);
+        removeKeyFromSelection(keyNum);
     }
 
     return true;
@@ -49,7 +59,12 @@ SetKeySelectionAction::SetKeySelectionAction(const LumatoneEditorState &stateIn,
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , LumatoneAction(this, "SetKeySelectionAction")
 {
-    previousSelection.addArray(*getSelectedKeys());
+    previousSelectedColour = juce::Colour();
+    if (getSelectedKeys()->size() > 0)
+    {
+        previousSelection.addArray(*getSelectedKeys());
+        previousSelectedColour = getSelectedKeys()->getUnchecked(0).getColour();
+    }
     newSelection.addArray(newSelectionIn);
 }
 
@@ -60,12 +75,15 @@ SetKeySelectionAction::~SetKeySelectionAction()
 bool SetKeySelectionAction::perform()
 {
     setSelectedKeys(newSelection);
+    juce::Colour newColour = getColourFromSelectedKeys(getSelectedKeys());
+    setAssignKeyColour(newColour.isOpaque(), newColour);
     return true;
 }
 
 bool SetKeySelectionAction::undo()
 {
     setSelectedKeys(previousSelection);
+    setAssignKeyColour(previousSelectedColour.isOpaque(), previousSelectedColour);
     return true;
 }
 

@@ -24,6 +24,7 @@
 */
 class ColourPaletteComponent  : public TenHexagonPalette
                               , public ColourSelectionBroadcaster
+                              , public ColourSelectionListener
 {
 public:
     ColourPaletteComponent(juce::String nameIn);
@@ -47,6 +48,8 @@ public:
     juce::Colour getSelectedColour() override;
 
     void deselectColour() override;
+
+    void colourChangedCallback(ColourSelectionBroadcaster* source, juce::Colour newColour) override;
 };
 
 //==============================================================================

@@ -14,7 +14,6 @@
 #include "../data/LumatoneEditorState.h"
 #include "../lumatone_editor_library/actions/lumatone_action.h"
 #include "../data/LumatoneEditSelectionState.h"
-
 class AddOrRemoveKeySelectionAction : public LumatoneEditorState
                                     , private LumatoneEditorState::Controller
                                     , public LumatoneAction
@@ -55,6 +54,8 @@ private:
 
     juce::Array<MappedLumatoneKey> previousSelection;
     juce::Array<MappedLumatoneKey> newSelection;
+
+    juce::Colour previousSelectedColour;
 };
 
 

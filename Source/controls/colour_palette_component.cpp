@@ -98,6 +98,14 @@ void ColourPaletteComponent::deselectColour()
     Palette::setSelectedSwatchNumber(-1);
 }
 
+void ColourPaletteComponent::colourChangedCallback(ColourSelectionBroadcaster *source, juce::Colour newColour)
+{
+    if (source != this)
+    {
+        deselectColour();
+    }
+}
+
 //==============================================================================
 // PaletteControlGroup Definitions
 
