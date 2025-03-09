@@ -28,8 +28,8 @@ public:
     {
         colourPicker.reset(new juce::ColourSelector(
               juce::ColourSelector::ColourSelectorOptions::editableColour
-            + juce::ColourSelector::ColourSelectorOptions::showColourAtTop
-            + juce::ColourSelector::ColourSelectorOptions::showColourspace
+            // + juce::ColourSelector::ColourSelectorOptions::showColourAtTop
+            + juce::ColourSelector::ColourSelectorOptions::showColourspace, 0, 0
         ));
 
         colourPicker->setName("ColourPicker");

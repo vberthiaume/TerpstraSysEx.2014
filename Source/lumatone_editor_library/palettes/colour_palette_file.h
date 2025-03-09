@@ -54,7 +54,7 @@ public:
         author = paletteAuthor;
         notes = paletteNotes;
     }
-    
+
     LumatoneEditorColourPalette clone() const { return LumatoneEditorColourPalette(colourPalette, name, author, notes); }
 
     int size() const { return colourPalette.size(); }
@@ -252,9 +252,9 @@ private:
     void setModifiedIfChanged(const T& originalValue, const T& newValue) { if (originalValue != newValue) modifiedSinceLastSave = true; }
 
 private:
-    
+
     juce::Array<juce::Colour> colourPalette;
-    
+
     juce::String name = "";
     juce::String author = "";
     juce::String notes = "";
@@ -265,6 +265,8 @@ private:
     juce::String pathToFile = "";
     bool modifiedSinceLastSave = true;
 };
+
+using LumatoneEditorColourPalettes = juce::Array<LumatoneEditorColourPalette>;
 
 class LumatoneEditorPaletteSorter : juce::DefaultElementComparator<const LumatoneEditorColourPalette&>
 {
