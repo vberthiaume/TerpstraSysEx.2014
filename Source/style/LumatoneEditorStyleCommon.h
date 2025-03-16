@@ -45,11 +45,11 @@
 /// <param name="roundedCornerSize"></param>
 /// <param name="connectedFlags"></param>
 /// <returns></returns>
-static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCornerSize, int connectedFlags)
+static juce::Path getConnectedRoundedRectPath(juce::Rectangle<float> bounds, float roundedCornerSize, int connectedFlags)
 {
-    Path rect;
-    Point<float> origin = bounds.getPosition();
-    Point<float> endpoint = bounds.getBottomRight();
+    juce::Path rect;
+    juce::Point<float> origin = bounds.getPosition();
+    juce::Point<float> endpoint = bounds.getBottomRight();
 
     // TODO: finish implementing 3 and 12
     if (connectedFlags == 0 || connectedFlags == 3 || connectedFlags == 12)
@@ -62,7 +62,7 @@ static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCo
 
     int xTo, yTo;
 
-    if (connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnTop || connectedFlags & Button::ConnectedOnLeft)
+    if (connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnTop || connectedFlags & juce::Button::ConnectedOnLeft)
     {
         rect.startNewSubPath(origin);
     }
@@ -71,7 +71,7 @@ static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCo
         rect.addArc(origin.x, origin.y, roundedCornerSize, roundedCornerSize, PATH_PI_2_CCW, 0, true);
     }
 
-    if (connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnTop || connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnRight)
+    if (connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnTop || connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnRight)
     {
         rect.lineTo(endpoint.x, origin.y);
     }
@@ -82,7 +82,7 @@ static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCo
         rect.addArc(xTo, origin.y , roundedCornerSize, roundedCornerSize, 0, PATH_PI_2_CW);
     }
 
-    if (connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnBottom || connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnRight)
+    if (connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnBottom || connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnRight)
     {
         rect.lineTo(endpoint);
     }
@@ -90,17 +90,17 @@ static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCo
     {
         yTo = endpoint.y - roundedCornerSize;
         rect.lineTo(endpoint.x, yTo);
-        rect.addArc(endpoint.x - roundedCornerSize, yTo, roundedCornerSize, roundedCornerSize, PATH_PI_2_CW, MathConstants<float>::pi);
+        rect.addArc(endpoint.x - roundedCornerSize, yTo, roundedCornerSize, roundedCornerSize, PATH_PI_2_CW, juce::MathConstants<float>::pi);
     }
 
-    if (connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnBottom || connectedFlags & Button::ConnectedEdgeFlags::ConnectedOnLeft)
+    if (connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnBottom || connectedFlags & juce::Button::ConnectedEdgeFlags::ConnectedOnLeft)
     {
         rect.lineTo(origin.x, endpoint.y);
     }
     else
     {
         rect.lineTo(roundedCornerSize, endpoint.y);
-        rect.addArc(origin.x, endpoint.y - roundedCornerSize, roundedCornerSize, roundedCornerSize, -MathConstants<float>::pi, PATH_PI_2_CCW);
+        rect.addArc(origin.x, endpoint.y - roundedCornerSize, roundedCornerSize, roundedCornerSize, -juce::MathConstants<float>::pi, PATH_PI_2_CCW);
     }
 
     rect.closeSubPath();
@@ -108,9 +108,9 @@ static Path getConnectedRoundedRectPath(Rectangle<float> bounds, float roundedCo
 }
 
 // TODO: Integrate this into the above function somehow
-static Path getDiagonalRoundedCornersPath(Rectangle<float> bounds, float roundedCornerSize, bool roundedTopRightAndBottomLeft, bool hasPopup = false)
+static juce::Path getDiagonalRoundedCornersPath(juce::Rectangle<float> bounds, float roundedCornerSize, bool roundedTopRightAndBottomLeft, bool hasPopup = false)
 {
-    Path rect;
+    juce::Path rect;
     roundedCornerSize *= 2;
     int xTo, yTo;
 
@@ -132,7 +132,7 @@ static Path getDiagonalRoundedCornersPath(Rectangle<float> bounds, float rounded
         {
             xTo += roundedCornerSize;
             rect.lineTo(xTo, yTo);
-            rect.addArc(xTo - roundedCornerSize, yTo - roundedCornerSize, roundedCornerSize, roundedCornerSize, -MathConstants<float>::pi, PATH_PI_2_CCW);
+            rect.addArc(xTo - roundedCornerSize, yTo - roundedCornerSize, roundedCornerSize, roundedCornerSize, -juce::MathConstants<float>::pi, PATH_PI_2_CCW);
         }
         else
         {
@@ -150,7 +150,7 @@ static Path getDiagonalRoundedCornersPath(Rectangle<float> bounds, float rounded
         {
             yTo -= roundedCornerSize;
             rect.lineTo(xTo, yTo);
-            rect.addArc(xTo - roundedCornerSize, yTo, roundedCornerSize, roundedCornerSize, PATH_PI_2_CW, MathConstants<float>::pi);
+            rect.addArc(xTo - roundedCornerSize, yTo, roundedCornerSize, roundedCornerSize, PATH_PI_2_CW, juce::MathConstants<float>::pi);
         }
         else
         {
@@ -179,7 +179,7 @@ static Path getDiagonalRoundedCornersPath(Rectangle<float> bounds, float rounded
 /// <param name="fromRadians"></param>
 /// <param name="toRadians"></param>
 /// <param name="startAsNewSubPath"></param>
-static void addArcToPath(Path& pathIn, Rectangle<float>& ellipseBounds, float fromRadians, float toRadians, bool startAsNewSubPath)
+static void addArcToPath(juce::Path& pathIn, juce::Rectangle<float>& ellipseBounds, float fromRadians, float toRadians, bool startAsNewSubPath)
 {
     pathIn.addArc(
         ellipseBounds.getX(),
@@ -320,10 +320,10 @@ static void addArcToPath(Path& pathIn, Rectangle<float>& ellipseBounds, float fr
 //    setHeightRetainingAspectRatio(component, component->getNormalImage(), heightIn);
 //}
 
-static void resizeLabelWithHeight(Label* label, int height, float fontHeightScalar = 1.0f, String textSuffix = "_")
+static void resizeLabelWithHeight(juce::Label* label, int height, float fontHeightScalar = 1.0f, juce::String textSuffix = "_")
 {
     label->setFont(label->getFont().withHeight(height * fontHeightScalar));
-    label->setSize(roundToInt(label->getFont().getStringWidthFloat(label->getText() + textSuffix)), height);
+    label->setSize(juce::roundToInt(label->getFont().getStringWidthFloat(label->getText() + textSuffix)), height);
 
     // float width = overrideWidth;
     // if (width <= 0)
@@ -340,15 +340,15 @@ static void resizeLabelWithHeight(Label* label, int height, float fontHeightScal
 //    );
 //}
 
-static void resizeLabelWithWidth(Label* label, int width, float fontHeightScalar = 1.0f)
+static void resizeLabelWithWidth(juce::Label* label, int width, float fontHeightScalar = 1.0f)
 {
     float heightOverWidth = label->getFont().getHeight() / label->getFont().getStringWidthFloat(label->getText());
-    label->setSize(width, roundToInt(heightOverWidth * width));
+    label->setSize(width, juce::roundToInt(heightOverWidth * width));
     label->setFont(label->getFont().withHeight(label->getHeight() * fontHeightScalar * GLOBALFONTSCALAR));
 }
 
 // For scaling Labels down so they're not clipped or skewed
-static float scalarToFitString(String lineOfText, Font font, float width)
+static float scalarToFitString(juce::String lineOfText, juce::Font font, float width)
 {
     float scalar = 1.0f;
     float fullWidth = font.getStringWidthFloat(lineOfText);
@@ -360,7 +360,7 @@ static float scalarToFitString(String lineOfText, Font font, float width)
 }
 
 // For scaling Labels down so they're not clipped or skewed
-static float scalarToFitString(Label& labelIn)
+static float scalarToFitString(juce::Label& labelIn)
 {
     return scalarToFitString(labelIn.getText(), labelIn.getFont(), labelIn.getWidth());
 }
@@ -372,32 +372,32 @@ static float scalarToFitString(Label& labelIn)
 //    label->setFont(label->getFont().withHeight(label->getHeight() * fontHeightScalar * GLOBALFONTSCALAR));
 //}
 
-static void resizeToggleButtonWithHeight(ToggleButton* btn, Font font, int heightIn, String textSuffix = "_")
+static void resizeToggleButtonWithHeight(juce::ToggleButton* btn, juce::Font font, int heightIn, juce::String textSuffix = "_")
 {
     font.setHeight(font.getHeight() * GLOBALFONTSCALAR);
-    btn->setSize(btn->getHeight() + roundToInt(font.getStringWidth(btn->getButtonText() + textSuffix)), heightIn);
+    btn->setSize(btn->getHeight() + juce::roundToInt(font.getStringWidth(btn->getButtonText() + textSuffix)), heightIn);
 }
 
-static void drawPathToFillBounds(Graphics& g, const Path& path, Rectangle<float> boundsToFill)
+static void drawPathToFillBounds(juce::Graphics& g, const juce::Path& path, juce::Rectangle<float> boundsToFill)
 {
-    AffineTransform transform = RectanglePlacement().getTransformToFit(
+    juce::AffineTransform transform = juce::RectanglePlacement().getTransformToFit(
         path.getBounds(),
         boundsToFill
     );
 
-    g.strokePath(path, PathStrokeType(0.8f), transform);
+    g.strokePath(path, juce::PathStrokeType(0.8f), transform);
 }
 
 // Creates the Lumatone logomark in 1x1 floating bit path
-static Path createLogomark()
+static juce::Path createLogomark()
 {
-    Path logo;
-    Point<float> center(0.5f, 0.5f);
+    juce::Path logo;
+    juce::Point<float> center(0.5f, 0.5f);
 
     float phi2 = PHI * 2;
     float innerRad = 1.0f / phi2;
     float outerRad = phi2 * 0.125f;
-    float ang = MathConstants<float>::pi * 0.083333f;
+    float ang = juce::MathConstants<float>::pi * 0.083333f;
     float angOff = ang * 0.5f;
 
     logo.addPolygon(center, 6, innerRad, ang - angOff);
@@ -408,13 +408,13 @@ static Path createLogomark()
     return logo;
 }
 
-static Path getArrowPath(Point<float> start, Point<float> headPoint, float headWidth, float headHeight)
+static juce::Path getArrowPath(juce::Point<float> start, juce::Point<float> headPoint, float headWidth, float headHeight)
 {
     headWidth *= 0.5f;
-    auto left = Point<float>(start.x - headWidth, headHeight);
-    auto right = Point<float>(start.x + headWidth, headHeight);
+    auto left = juce::Point<float>(start.x - headWidth, headHeight);
+    auto right = juce::Point<float>(start.x + headWidth, headHeight);
 
-    Path path;
+    juce::Path path;
 
     path.startNewSubPath(start);
     path.lineTo(headPoint);
@@ -436,12 +436,12 @@ static juce::Path getFolderIcon(float folderHeight, float tabBaseX, float tabBas
     float tabBaseSlopeX = tabBaseX - 0.1f;
     float folderTop = 1.0f - folderHeight;
 
-    auto v0 = Point<float>(0.0f, folderTop);
-    auto v1 = Point<float>(0.0f, folderHeight);
-    auto v2 = Point<float>(1.0f, folderHeight);
-    auto v3 = Point<float>(1.0f, tabBaseY);
-    auto v4 = Point<float>(tabBaseX, tabBaseY);
-    auto v5 = Point<float>(tabBaseSlopeX, folderTop);
+    auto v0 = juce::Point<float>(0.0f, folderTop);
+    auto v1 = juce::Point<float>(0.0f, folderHeight);
+    auto v2 = juce::Point<float>(1.0f, folderHeight);
+    auto v3 = juce::Point<float>(1.0f, tabBaseY);
+    auto v4 = juce::Point<float>(tabBaseX, tabBaseY);
+    auto v5 = juce::Point<float>(tabBaseSlopeX, folderTop);
 
     path.startNewSubPath(v0);
     path.lineTo(v1);
@@ -454,30 +454,29 @@ static juce::Path getFolderIcon(float folderHeight, float tabBaseX, float tabBas
     return path;
 }
 
-
-static void drawFolderIconAt(Graphics& g, int x, int y, int width, int height, Colour folderColour, Colour arrowColour)
+static void drawFolderIconAt(juce::Graphics& g, int x, int y, int width, int height, juce::Colour folderColour, juce::Colour arrowColour)
 {
     float folderHeight = 1.0f;
-    Path folder = getFolderIcon(0.91f, 0.5f, 0.22f).createPathWithRoundedCorners(0.05f);
+    juce::Path folder = getFolderIcon(0.91f, 0.5f, 0.22f).createPathWithRoundedCorners(0.05f);
 
-    auto transform = AffineTransform::scale(width, height).followedBy(AffineTransform::translation(x, y));
+    auto transform = juce::AffineTransform::scale(width, height).followedBy(juce::AffineTransform::translation(x, y));
     folder.applyTransform(transform);
 
     g.setColour(folderColour);
     g.fillPath(folder);
 
-    Path arrowPath = getArrowPath(Point<float>(0.5f, folderHeight - 0.267f), Point<float>(0.5f, 0.35f), 0.2f, 0.46f);
+    juce::Path arrowPath = getArrowPath(juce::Point<float>(0.5f, folderHeight - 0.267f), juce::Point<float>(0.5f, 0.35f), 0.2f, 0.46f);
     arrowPath.applyTransform(transform);
 
-    PathStrokeType stroke(1.25f);
-    stroke.setEndStyle(PathStrokeType::EndCapStyle::rounded);
-    stroke.setJointStyle(PathStrokeType::JointStyle::curved);
+    juce::PathStrokeType stroke(1.25f);
+    stroke.setEndStyle(juce::PathStrokeType::EndCapStyle::rounded);
+    stroke.setJointStyle(juce::PathStrokeType::JointStyle::curved);
 
     g.setColour(arrowColour);
     g.strokePath(arrowPath, stroke);
 }
 
-static Path getSaveIconPath()
+static juce::Path getSaveIconPath()
 {
     float boxHeight = 0.6f;
     float boxWidth = 1.0f;
@@ -503,15 +502,15 @@ static Path getSaveIconPath()
     path.lineTo(v3);
     path.closeSubPath();
 
-    Path rounded = path.createPathWithRoundedCorners(0.01f);
+    juce::Path rounded = path.createPathWithRoundedCorners(0.01f);
 
-    Path arrow = getArrowPath(Point<float>(0.5f, 0.0f), Point<float>(0.5f, 0.667f), 0.4f, 0.5f);
+    juce::Path arrow = getArrowPath(juce::Point<float>(0.5f, 0.0f), juce::Point<float>(0.5f, 0.667f), 0.4f, 0.5f);
     rounded.addPath(arrow);
 
     return rounded;
 }
 
-static void getCCPolarityIconPath(bool inverted, Path& arrowPath, Path& faderPath)
+static void getCCPolarityIconPath(bool inverted, juce::Path& arrowPath, juce::Path& faderPath)
 {
     float glyphWidth = 0.25f;
 
@@ -526,7 +525,7 @@ static void getCCPolarityIconPath(bool inverted, Path& arrowPath, Path& faderPat
 
     if (inverted)
     {
-        arrowPath = getArrowPath(Point<float>(arrowX, y1), Point<float>(arrowX, y2), glyphWidth, y2 + arrowHeadDif);
+        arrowPath = getArrowPath(juce::Point<float>(arrowX, y1), juce::Point<float>(arrowX, y2), glyphWidth, y2 + arrowHeadDif);
 
         faderPath.startNewSubPath(faderEdge, y1);
         faderPath.lineTo(faderEdge, y2);
@@ -535,7 +534,7 @@ static void getCCPolarityIconPath(bool inverted, Path& arrowPath, Path& faderPat
     }
     else
     {
-        arrowPath = getArrowPath(Point<float>(arrowX, y2), Point<float>(arrowX, y1), glyphWidth, y1 - arrowHeadDif);
+        arrowPath = getArrowPath(juce::Point<float>(arrowX, y2), juce::Point<float>(arrowX, y1), glyphWidth, y1 - arrowHeadDif);
 
         faderPath.startNewSubPath(faderEdge, y1);
         faderPath.lineTo(faderMax, y1);
@@ -544,9 +543,9 @@ static void getCCPolarityIconPath(bool inverted, Path& arrowPath, Path& faderPat
     }
 }
 
-static Path getCloneIconPath()
+static juce::Path getCloneIconPath()
 {
-    // side-by-side
+// side-by-side
 //    float yMargin = 0.1f;
 //    float height = 1.0f - yMargin * 2.0f;
 //
@@ -561,10 +560,10 @@ static Path getCloneIconPath()
     float yMargin = 0.1f;
     float size = 0.5f;
 
-    auto leftRect = Rectangle<float>(xMargin, 1.0f - yMargin - size, size, size);
-    auto rightRect = Rectangle<float>(1.0f - xMargin - size, yMargin, size, size);
+    auto leftRect = juce::Rectangle<float>(xMargin, 1.0f - yMargin - size, size, size);
+    auto rightRect = juce::Rectangle<float>(1.0f - xMargin - size, yMargin, size, size);
 
-    auto path = Path();
+    auto path = juce::Path();
     path.addRoundedRectangle(leftRect, 0.1f, 0.1f);
     path.addRoundedRectangle(rightRect, 0.1f, 0.1f);
 
@@ -572,9 +571,9 @@ static Path getCloneIconPath()
 }
 
 // TODO: clean up / make a better routine with ImageCache usage
-static Image getCachedCloneImage()
+static juce::Image getCachedCloneImage()
 {
-    auto cloneImg = ImageCache::getFromHashCode((juce::int64)LumatoneAssets::ID::CloneIcon);
+    auto cloneImg = juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::ID::CloneIcon);
     if (cloneImg.isValid())
         return cloneImg;
 
@@ -582,17 +581,17 @@ static Image getCachedCloneImage()
     auto cloneIcon = getCloneIconPath();
     cloneIcon.scaleToFit(0, 0, 80, 80, true);
 
-    cloneImg = Image(Image::PixelFormat::ARGB, 100, 100, true);
-    Graphics cloneG(cloneImg);
-    cloneG.setColour(Colours::white.darker(0.1f));
-    cloneG.setOrigin(Point<int>(10, 10));
-    auto stroke = PathStrokeType(8.0f, PathStrokeType::JointStyle::curved);
+    cloneImg = juce::Image(juce::Image::PixelFormat::ARGB, 100, 100, true);
+    juce::Graphics cloneG(cloneImg);
+    cloneG.setColour(juce::Colours::white.darker(0.1f));
+    cloneG.setOrigin(juce::Point<int>(10, 10));
+    auto stroke = juce::PathStrokeType(8.0f, juce::PathStrokeType::JointStyle::curved);
     cloneG.strokePath(cloneIcon, stroke);
-    ImageCache::addImageToCache(cloneImg, (juce::int64)LumatoneAssets::ID::CloneIcon);
+    juce::ImageCache::addImageToCache(cloneImg, (juce::int64)LumatoneAssets::ID::CloneIcon);
     return cloneImg;
 }
 
-static Path getPickerIconPath()
+static juce::Path getPickerIconPath()
 {
     const unsigned char pathData[] = {
         110,109,106,188,149,65,199,75,13,65,98,47,221,143,65,226,122,26,65,126,106,144,65,33,176,46,65,0,0,151,65,250,126,58,65,108,
@@ -608,7 +607,7 @@ static Path getPickerIconPath()
         0,112,65,99,101,0,0
         };
 
-    Path path;
+    juce::Path path;
     path.loadPathFromData (pathData, sizeof (pathData));
     return path;
 }
@@ -674,87 +673,86 @@ enum LumatoneEditorColourGradients
 
 namespace LumatoneEditorStyleIDs
 {
-    // Index of LumatoneEditorFontCollection
-    static Identifier fontOverride = Identifier("AppFontIndex");
+    static juce::Identifier fontOverride = juce::Identifier("AppFontIndex");
     // TODO: Review with new Font access method
-    static Identifier fontOverrideTypefaceStyle = Identifier("ComponentTypefaceStyle");
+    static juce::Identifier fontOverrideTypefaceStyle = juce::Identifier("ComponentTypefaceStyle");
 
     // A component with text can have it scaled with this property
-    static Identifier fontHeightScalar = Identifier("FontHeightScalar");
+    static juce::Identifier fontHeightScalar = juce::Identifier("FontHeightScalar");
 
-    // Override background colour for a Label's TextEditor when being edited
-    static Identifier labelTextEditorBackgroundColour = Identifier("LabelTextEditorBackgroundColour");
+    // Override background colour for a juce::Label's juce::TextEditor when being edited
+    static juce::Identifier labelTextEditorBackgroundColour = juce::Identifier("LabelTextEditorBackgroundColour");
 
-    static Identifier labelMaximumLineCount = Identifier("LabelMaximumLineCount");
+    static juce::Identifier labelMaximumLineCount = juce::Identifier("LabelMaximumLineCount");
 
-    static Identifier tabbedButtonBarDepthScalar = Identifier("TabbedButtonBarDepthScalar");
+    static juce::Identifier tabbedButtonBarDepthScalar = juce::Identifier("TabbedButtonBarDepthScalar");
 
-    // The LumatoneEditorIcon hash code for an icon that should be displayed on a TextButton
-    static Identifier textButtonIconHashCode = Identifier("TextButtonIconHashCode");
+    // The LumatoneEditorIcon hash code for an icon that should be displayed on a juce::TextButton
+    static juce::Identifier textButtonIconHashCode = juce::Identifier("TextButtonIconHashCode");
 
-    // Choose where to put the icon on a TextButton
-    static Identifier textButtonIconPlacement = Identifier("TextButtonIconPlacement");
+    // Choose where to put the icon on a juce::TextButton
+    static juce::Identifier textButtonIconPlacement = juce::Identifier("TextButtonIconPlacement");
     enum TextButtonIconPlacement
     {
         LeftOfText = 0,
         RightOfText
     };
 
-    // A TextButton will have an invisible background and an underline if it's properties contains this
-    static Identifier textButtonHyperlinkFlag = Identifier("TextButtonHyperlinkFlag");
+    // A juce::TextButton will have an invisible background and an underline if it's properties contains this
+    static juce::Identifier textButtonHyperlinkFlag = juce::Identifier("TextButtonHyperlinkFlag");
 
-    static Identifier popupMenuMaxColumns = Identifier("PopupMenuMaxColumns");
+    static juce::Identifier popupMenuMaxColumns = juce::Identifier("PopupMenuMaxColumns");
     // Uses the width of the target component of a menu instead of parameters
-    static Identifier popupMenuTargetWidth = Identifier("PopupMenuTargetWidth");
+    static juce::Identifier popupMenuTargetWidth = juce::Identifier("PopupMenuTargetWidth");
 
-    static Identifier popupMenuBackgroundColour = Identifier("PopupMenuBackgroundColour");
+    static juce::Identifier popupMenuBackgroundColour = juce::Identifier("PopupMenuBackgroundColour");
 
-    static Identifier connectedEdgeFlags = Identifier("ConnectedEdgesFlags");
+    static juce::Identifier connectedEdgeFlags = juce::Identifier("ConnectedEdgesFlags");
 
     // Odd values will have top right and bottom left rounded corners
     // Even values will have top left and bottom right rounded corners
-    static Identifier roundedDiagonalCorners = Identifier("RoundedDiagonalCorners");
+    static juce::Identifier roundedDiagonalCorners = juce::Identifier("RoundedDiagonalCorners");
 
-    // Flag to not draw a value for Slider LookAndFeel methods
-    static Identifier sliderValueNull = Identifier("SliderValueNull");
+    // Flag to not draw a value for juce::Slider LookAndFeel methods
+    static juce::Identifier sliderValueNull = juce::Identifier("SliderValueNull");
 
-    // Apply set of characters to restrict combo box input to
-    static Identifier comboBoxEditorRestrictedChars = Identifier("ComboBoxEditorRestrictedChars");
-    static Identifier comboBoxEditorRestrictedLength = Identifier("ComboBoxEditorRestrictedLength");
+    // Apply set of characters to restrict juce::ComboBox input to
+    static juce::Identifier comboBoxEditorRestrictedChars = juce::Identifier("ComboBoxEditorRestrictedChars");
+    static juce::Identifier comboBoxEditorRestrictedLength = juce::Identifier("ComboBoxEditorRestrictedLength");
 
-    // Check combo box items for colour hex strings, render if they pass
-    static Identifier comboBoxRenderColourItems = Identifier("ComboBoxRenderColourItems");
+    // Check juce::ComboBox items for colour hex strings, render if they pass
+    static juce::Identifier comboBoxRenderColourItems = juce::Identifier("ComboBoxRenderColourItems");
 
     // Override the width of the pop up items, to account for varied string lengths
-    static Identifier comboBoxPopupItemWidthOverride = Identifier("ComboBoxPopupItemWidthOverride");
+    static juce::Identifier comboBoxPopupItemWidthOverride = juce::Identifier("ComboBoxPopupItemWidthOverride");
 
-    // Specify LumatoneEditorColourGradient id for rotary Slider
-    static Identifier sliderRotaryColourGradient = Identifier("SliderRotaryColourGradient");
+    // Specify LumatoneEditorColourGradient id for rotary juce::Slider
+    static juce::Identifier sliderRotaryColourGradient = juce::Identifier("SliderRotaryColourGradient");
 }
 
 // LookAndFeel doesn't have Slider IncDec button access in drawIncDecButtonsBackground
-class TextButtonMouseHighlight : public TextButton
+class TextButtonMouseHighlight : public juce::TextButton
 {
 
-    Colour highlightColour;
+    juce::Colour highlightColour;
 
 public:
 
-    TextButtonMouseHighlight(Colour highlightColourIn = Colour())
+    TextButtonMouseHighlight(juce::Colour highlightColourIn = juce::Colour())
         : highlightColour(highlightColourIn) {}
 
     ~TextButtonMouseHighlight() {}
 
-    void paint(Graphics& g) override
+    void paint(juce::Graphics& g) override
     {
-        TextButton::paint(g);
+        juce::TextButton::paint(g);
 
         if (isEnabled() && isMouseOver())
         {
             auto bounds = getLocalBounds().toFloat();
 
-            Colour c = (isMouseButtonDown()) ? highlightColour.overlaidWith(Colours::white.withAlpha(0.1f))
-                                             : highlightColour;
+            juce::Colour c = (isMouseButtonDown()) ? highlightColour.overlaidWith(juce::Colours::white.withAlpha(0.1f))
+                                                   : highlightColour;
             g.setColour(c);
             g.fillRoundedRectangle(bounds, getHeight() * 0.25f);
         }
@@ -800,7 +798,6 @@ static void findIdealComboBoxNumColumns(juce::ComboBox* box, int numItems)
                 maxColumns = 1;
         }
     }
-
 
     box->getProperties().set(LumatoneEditorStyleIDs::popupMenuMaxColumns, juce::var(maxColumns));
 }

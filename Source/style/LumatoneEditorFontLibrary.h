@@ -33,54 +33,54 @@ struct LumatoneEditorFontLibrary
 
         // In place of...
         // UniviaPro
-        fonts.add(Font("Tahoma", 12.0f, Font::plain));
+        fonts.add(juce::Font("Tahoma", 12.0f, juce::Font::plain));
 
         // UniviaProBold
-        fonts.add(Font("Tahoma", 12.0f, Font::bold));
+        fonts.add(juce::Font("Tahoma", 12.0f, juce::Font::bold));
 
         // FranklinGothic
-        fonts.add(Font("Arial", 12.0f, Font::plain));
+        fonts.add(juce::Font("Arial", 12.0f, juce::Font::plain));
 
         // GothamNarrowMedium
-        fonts.add(Font("Trebuchet MS", 12.0f, Font::plain));
+        fonts.add(juce::Font("Trebuchet MS", 12.0f, juce::Font::plain));
 
         // GothamNarrowMediumBold
-        fonts.add(Font("Trebuchet MS", 12.0f, Font::bold));
+        fonts.add(juce::Font("Trebuchet MS", 12.0f, juce::Font::bold));
 
         // GothamNarrowMediumItalic
-        fonts.add(Font("Trebuchet MS", 12.0f, Font::italic));
+        fonts.add(juce::Font("Trebuchet MS", 12.0f, juce::Font::italic));
 
         // GothamNarrowMediumLight
-        fonts.add(Font("Trebuchet MS", 12.0f, Font::plain));
+        fonts.add(juce::Font("Trebuchet MS", 12.0f, juce::Font::plain));
 
 #if USE_LICENSED_FONTS
 
         fonts.set(LumatoneEditorFont::UniviaPro,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::UniviaProRegular_ttf, BinaryData::UniviaProRegular_ttfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::UniviaProRegular_ttf, BinaryData::UniviaProRegular_ttfSize))
         );
 
         fonts.set(LumatoneEditorFont::UniviaProBold,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::UniviaProBold_ttf, BinaryData::UniviaProBold_ttfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::UniviaProBold_ttf, BinaryData::UniviaProBold_ttfSize))
         );
 
         fonts.set(LumatoneEditorFont::FranklinGothic,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::framd_ttf, BinaryData::framd_ttfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::framd_ttf, BinaryData::framd_ttfSize))
         );
 
         fonts.set(LumatoneEditorFont::GothamNarrowMedium,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowMedium_otf, BinaryData::GothamNarrowMedium_otfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowMedium_otf, BinaryData::GothamNarrowMedium_otfSize))
         );
 
         fonts.set(LumatoneEditorFont::GothamNarrowBold,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowBold_otf, BinaryData::GothamNarrowBold_otfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowBold_otf, BinaryData::GothamNarrowBold_otfSize))
         );
 
         fonts.set(LumatoneEditorFont::GothamNarrowItalic,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowLightItalic_otf, BinaryData::GothamNarrowLightItalic_otfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowLightItalic_otf, BinaryData::GothamNarrowLightItalic_otfSize))
         );
 
         fonts.set(LumatoneEditorFont::GothamNarrowLight,
-              Font(Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowLight_otf, BinaryData::GothamNarrowLight_otfSize))
+              juce::Font(juce::Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowLight_otf, BinaryData::GothamNarrowLight_otfSize))
         );
 
 #endif

@@ -29,74 +29,74 @@ class DeviceActivityMonitor;
 class TerpstraSysExApplication 	: public juce::JUCEApplication, private LumatoneEditorState::Controller
 {
 public:
-	//==============================================================================
-	TerpstraSysExApplication();
+    //==============================================================================
+    TerpstraSysExApplication();
 
-	const juce::String getApplicationName() override		{ return ProjectInfo::projectName; }
-	const juce::String getApplicationVersion() override   { return ProjectInfo::versionString; }
-	bool moreThanOneInstanceAllowed() override      { return true; }
+    const juce::String getApplicationName() override		{ return ProjectInfo::projectName; }
+    const juce::String getApplicationVersion() override   { return ProjectInfo::versionString; }
+    bool moreThanOneInstanceAllowed() override      { return true; }
 
-	void initialise(const String& commandLine) override;
-	void shutdown() override;
-	void systemRequestedQuit() override;
-	void anotherInstanceStarted(const String& commandLine) override;
+    void initialise(const juce::String& commandLine) override;
+    void shutdown() override;
+    void systemRequestedQuit() override;
+    void anotherInstanceStarted(const juce::String& commandLine) override;
 
-	void loadPropertiesFile();
+    void loadPropertiesFile();
 
-	//==============================================================================
-	// Menu functionality
-	void getAllCommands(juce::Array <juce::CommandID>& commands) override;
-	void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
-	bool perform(const juce::ApplicationCommandTarget::InvocationInfo& info) override;
+    //==============================================================================
+    // Menu functionality
+    void getAllCommands(juce::Array <juce::CommandID>& commands) override;
+    void getCommandInfo(juce::CommandID commandID, juce::ApplicationCommandInfo& result) override;
+    bool perform(const juce::ApplicationCommandTarget::InvocationInfo& info) override;
 
-	bool openSysExMapping();
-	bool saveSysExMapping(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
-	bool saveSysExMappingAs(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
-	bool resetSysExMapping();
+    bool openSysExMapping();
+    bool saveSysExMapping(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
+    bool saveSysExMappingAs(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
+    bool resetSysExMapping();
 
-	bool saveCurrentFile(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
+    bool saveCurrentFile(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 
-	//bool saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToPalette=juce::File());
+    //bool saveColourPalette(LumatoneEditorColourPalette& palette, juce::File pathToPalette=juce::File());
 
-	bool selectAllKeys();
-	bool resetKeySelection();
+    bool selectAllKeys();
+    bool resetKeySelection();
 
-	bool deleteSubBoardData();
-	bool copySubBoardData();
-	bool pasteSubBoardData();
+    bool deleteSubBoardData();
+    bool copySubBoardData();
+    bool pasteSubBoardData();
     bool pasteModifiedSubBoardData(juce::CommandID commandID);
     bool canPasteSubBoardData() const;
 
-	bool undo();
-	bool redo();
+    bool undo();
+    bool redo();
 
-	bool toggleDeveloperMode();
+    bool toggleDeveloperMode();
 
-	// bool generalOptionsDialog();
-	// bool noteOnOffVelocityCurveDialog();
-	// bool faderVelocityCurveDialog();
-	// bool aftertouchVelocityCurveDialog();
+    // bool generalOptionsDialog();
+    // bool noteOnOffVelocityCurveDialog();
+    // bool faderVelocityCurveDialog();
+    // bool aftertouchVelocityCurveDialog();
 
-	bool aboutTerpstraSysEx();
+    bool aboutTerpstraSysEx();
 
-	//==============================================================================
+    //==============================================================================
 private:
-	bool onRequestDeviceConfig();
+    bool onRequestDeviceConfig();
 
-	void setOpenDialogWindow(juce::DialogWindow* dialogWindowIn);
+    void setOpenDialogWindow(juce::DialogWindow* dialogWindowIn);
 
 private:
-	LumatoneFirmwareDriver	firmwareDriver;
-	juce::UndoManager 		undoManager;
+    LumatoneFirmwareDriver	firmwareDriver;
+    juce::UndoManager 		undoManager;
 
-	LumatoneEditorState		state;
+    LumatoneEditorState		state;
 
-	std::unique_ptr<ApplicationCommandManager> commandManager;
+    std::unique_ptr<juce::ApplicationCommandManager> commandManager;
 
-	MainContentComponent* mainComponent;
-	std::unique_ptr<MainWindow> mainWindow;
-	std::unique_ptr<DialogWindow> dialogWindow;
+    MainContentComponent* mainComponent;
+    std::unique_ptr<MainWindow> mainWindow;
+    std::unique_ptr<juce::DialogWindow> dialogWindow;
 
-	juce::TooltipWindow		tooltipWindow;
-	std::unique_ptr<juce::FileChooser> fileChooser;
+    juce::TooltipWindow		tooltipWindow;
+    std::unique_ptr<juce::FileChooser> fileChooser;
 };
