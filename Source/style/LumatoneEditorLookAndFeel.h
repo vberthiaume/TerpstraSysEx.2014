@@ -334,24 +334,24 @@ public:
     //
     //==================================================================
 
-    void drawButtonBackground(Graphics& g, Button& btn, const Colour& backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    void drawButtonBackground(juce::Graphics& g, juce::Button& btn, const juce::Colour& backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         // If it has Hyperlink flag, only draw a line under text if mouse is over
         if (btn.getProperties().contains(LumatoneEditorStyleIDs::textButtonHyperlinkFlag))
         {
             if (shouldDrawButtonAsHighlighted)
             {
-                g.setColour(btn.findColour(TextButton::ColourIds::textColourOffId));
-                float halfTextLength = getTextButtonFont(static_cast<TextButton&>(btn), btn.getHeight()).getStringWidthFloat(btn.getButtonText()) * 0.5f;
+                g.setColour(btn.findColour(juce::TextButton::ColourIds::textColourOffId));
+                float halfTextLength = getTextButtonFont(static_cast<juce::TextButton&>(btn), btn.getHeight()).getStringWidthFloat(btn.getButtonText()) * 0.5f;
                 float xCenter = btn.getWidth() * 0.5f;
                 float yLine = btn.proportionOfHeight(0.9f);
-                g.drawLine(roundToInt(xCenter - halfTextLength), yLine, roundToInt(xCenter + halfTextLength), yLine);
+                g.drawLine(juce::roundToInt(xCenter - halfTextLength), yLine, juce::roundToInt(xCenter + halfTextLength), yLine);
             }
 
             return;
         }
 
-        Colour colour = (btn.getToggleState()) ? btn.findColour(TextButton::ColourIds::buttonOnColourId) : backgroundColour;
+        juce::Colour colour = (btn.getToggleState()) ? btn.findColour(juce::TextButton::ColourIds::buttonOnColourId) : backgroundColour;
 
         if (!btn.isEnabled() && colour.isOpaque())
             colour = colour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
@@ -370,18 +370,18 @@ public:
         }
     }
 
-    void drawButtonText(Graphics& g, TextButton& btn, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    void drawButtonText(juce::Graphics& g, juce::TextButton& btn, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
-        NamedValueSet properties = btn.getProperties();
+        juce::NamedValueSet properties = btn.getProperties();
 
         if (properties.contains(LumatoneEditorStyleIDs::textButtonIconHashCode))
         {
-            int bkgdColourId = (shouldDrawButtonAsDown) ? TextButton::ColourIds::buttonOnColourId : TextButton::ColourIds::buttonColourId;
+            int bkgdColourId = (shouldDrawButtonAsDown) ? juce::TextButton::ColourIds::buttonOnColourId : TextButton::ColourIds::buttonColourId;
             juce::Colour bkgdColour = btn.findColour(bkgdColourId);
             drawButtonBackground(g, btn, bkgdColour, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 
-            int colourId = shouldDrawButtonAsDown ? TextButton::ColourIds::textColourOnId : TextButton::ColourIds::textColourOffId;
-            Colour textColour = btn.findColour(colourId);
+            int colourId = shouldDrawButtonAsDown ? juce::TextButton::ColourIds::textColourOnId : TextButton::ColourIds::textColourOffId;
+            juce::Colour textColour = btn.findColour(colourId);
 
             if (!btn.isEnabled())
                 textColour = findColour(LumatoneEditorColourIDs::InactiveText);
@@ -389,7 +389,7 @@ public:
             else if (shouldDrawButtonAsHighlighted)
                 textColour = textColour.brighter();
 
-            Font font = getTextButtonFont(btn, btn.getHeight() * GLOBALFONTSCALAR);
+                juce::Font font = getTextButtonFont(btn, btn.getHeight() * GLOBALFONTSCALAR);
             int margin = font.getStringWidth("  ");
             int textWidth = font.getStringWidth(btn.getButtonText());
 
@@ -418,7 +418,7 @@ public:
             int lineStart = roundToInt((btn.getWidth() - textWidth - margin - iconW) * 0.5f);
 
             int iconX = 0;
-            Rectangle<int> textBounds;
+            juce::Rectangle<int> textBounds;
 
             bool iconOnRight = (bool)properties[LumatoneEditorStyleIDs::textButtonIconPlacement];
             if (iconOnRight)
@@ -436,14 +436,14 @@ public:
             if (iconCode == LumatoneEditorIcon::LoadIcon)
             {
                 // Make a tad bit bigger
-                auto boundsAdj = Rectangle<float>(iconX, iconY, iconW, iconH);
+                auto boundsAdj = juce::Rectangle<float>(iconX, iconY, iconW, iconH);
                 boundsAdj.expand(iconW * 0.1f, iconH * 0.1f);
                 drawFolderIconAt(g, boundsAdj.getX(), boundsAdj.getY(), boundsAdj.getWidth(), boundsAdj.getHeight(), textColour, btn.findColour(bkgdColourId));
             }
             else
             {
-                Path iconPath;
-                PathStrokeType stroke(1.5f);
+                juce::Path iconPath;
+                juce::PathStrokeType stroke(1.5f);
                 stroke.setEndStyle(PathStrokeType::EndCapStyle::rounded);
                 stroke.setJointStyle(PathStrokeType::JointStyle::curved);
                 juce::Colour iconColour = textColour;
@@ -519,13 +519,13 @@ public:
         }
     }
 
-    Font getTextButtonFont(TextButton& btn, int buttonHeight) override
+    juce::Font getTextButtonFont(TextButton& btn, int buttonHeight) override
     {
         float fontHeight = (btn.getProperties().contains(LumatoneEditorStyleIDs::textButtonHyperlinkFlag))
             ? buttonHeight
             : buttonHeight / 1.75f;
 
-        Font font = getAppFont(LumatoneEditorFont::GothamNarrowMedium, fontHeight);
+        juce::Font font = getAppFont(LumatoneEditorFont::GothamNarrowMedium, fontHeight);
 
         NamedValueSet& properties = btn.getProperties();
         if (properties.contains(LumatoneEditorStyleIDs::fontOverride))
@@ -573,19 +573,25 @@ public:
         }
     }
 
-    void drawToggleButton(Graphics& g, ToggleButton& btn, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
+    juce::Font getToggleButtonFont(juce::ToggleButton& btn, float fontHeight = 0)
+    {
+    #if JUCE_MAC
+        float fontScalar = 1.0675f;
+    #else
+        float fontScalar = 1.125f;
+    #endif
+
+        if (fontHeight <= 0)
+            fontHeight = btn.getHeight();
+        return getAppFont(LumatoneEditorFont::GothamNarrowMedium, fontHeight * fontScalar);
+    }
+
+    void drawToggleButton(juce::Graphics& g, juce::ToggleButton& btn, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override
     {
         drawTickBox(g, btn, 0, 0, btn.getHeight(), btn.getHeight(), btn.getToggleState(), btn.isEnabled(),
             shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 
-#if JUCE_MAC
-        float fontScalar = 1.0675f;
-#else
-        float fontScalar = 1.125f;
-#endif
-        g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowMedium, btn.getHeight() * fontScalar));
-
-        Colour textColour = btn.findColour(ToggleButton::ColourIds::textColourId);
+        juce::Colour textColour = btn.findColour(ToggleButton::ColourIds::textColourId);
 
         if (shouldDrawButtonAsDown)
             textColour = textColour.darker();
@@ -596,9 +602,10 @@ public:
         else if (shouldDrawButtonAsHighlighted)
             textColour = textColour.brighter(0.1f);
 
-
         g.setColour(textColour);
-        g.drawFittedText(btn.getButtonText(), btn.getLocalBounds().withLeft(btn.getHeight() * 1.5f), Justification::centredLeft, 1);
+
+        g.setFont(getToggleButtonFont(btn));
+        g.drawFittedText(btn.getButtonText(), btn.getLocalBounds().withLeft(btn.getHeight() * 1.5f), juce::Justification::centredLeft, 1);
     }
 
 
