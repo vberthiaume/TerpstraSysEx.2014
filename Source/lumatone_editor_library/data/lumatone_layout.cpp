@@ -817,6 +817,7 @@ juce::Array<int> LumatoneLayout::getLayoutKeyNotes() const
                 keyNotes.add(note);
     }
 
+    keyNotes.sort();
     return keyNotes;
 }
 
@@ -832,6 +833,7 @@ juce::Array<int> LumatoneLayout::getLayoutKeyChannels() const
                 keyChannels.add(ch);
     }
 
+    keyChannels.sort();
     return keyChannels;
 }
 
@@ -842,7 +844,8 @@ juce::Array<LumatoneKeyCoord> LumatoneLayout::getKeysWithProperties(LumatoneKeyP
     for (int i = 0; i < numBoards; i++)
         keyCoords.addArray(boards[i].getKeysWithProperties(properties));
 
-    return keyCoords;}
+    return keyCoords;
+}
 
 juce::Array<LumatoneKeyCoord> LumatoneLayout::getKeysWithColour(const juce::Colour &c) const
 {
