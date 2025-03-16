@@ -1,4 +1,5 @@
 #include "LumatoneEditorControl.h"
+#include "ColourDropdownSelector.h"
 
 #include "../style/LumatoneEditorStyleCommon.h"
 #include "../lumatone_editor_library/common/math.h"
@@ -24,6 +25,7 @@ LumatoneEditorControl::~LumatoneEditorControl()
     component = nullptr;
     box = nullptr;
     slider = nullptr;
+    colourDropdownInput = nullptr;
 }
 
 void LumatoneEditorControl::resized()
@@ -67,6 +69,16 @@ void LumatoneEditorControl::setStyle(Style newStyle)
     case Style::DropdownBox:
         box = std::make_unique<juce::ComboBox>(getName());
         component = box.get();
+        break;
+
+    case Style::ColourDropdownInput:
+        colourDropdownInput = std::make_unique<ColourDropdownSelector>(getName());
+
+        colourDropdownInput->setColourOptions(colourHistory);
+        colourDropdownInput->setShowPicker(false);
+        colourDropdownInput->setEditText(true);
+
+        component = colourDropdownInput.get();
         break;
 
     case Style::IncDecButtons:
@@ -130,6 +142,18 @@ void LumatoneEditorControl::addOption(const juce::String &name, int id)
     }
 }
 
+void LumatoneEditorControl::clearOptions()
+{
+    jassert(style == LumatoneEditorControl::Style::DropdownBox);
+    jassert(box.get() != nullptr);
+
+    if (box)
+    {
+        box->clear();
+        range = juce::Range<int>(0, 0);
+    }
+}
+
 void LumatoneEditorControl::allowTextInput(bool allowInput)
 {
     if (slider)
@@ -172,6 +196,10 @@ void LumatoneEditorControl::setValue(int newValue, juce::NotificationType notify
             box->setSelectedId(id, notify);
         }
     }
+    else if (colourDropdownInput)
+    {
+        colourDropdownInput->clearColour(true);
+    }
 }
 
 void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callback)
@@ -196,6 +224,14 @@ void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callba
             updateNull(slider->getValue());
         };
     }
+    else if (colourDropdownInput)
+    {
+        colourDropdownInput->setOnValueChangeCallback([&]() {
+            valueChangedCallback();
+            isNull = colourDropdownInput->getSelectedColour().isTransparent();
+        });
+    }
+
 }
 
 void LumatoneEditorControl::setTooltip(juce::String text)
@@ -224,6 +260,11 @@ void LumatoneEditorControl::setShowClearButton(bool hasClearButton)
         clearButton->setVisible(showClearButton);
 }
 
+void LumatoneEditorControl::setLastColour(const juce::Colour &lastColour)
+{
+    updateColourHistory(lastColour);
+}
+
 int LumatoneEditorControl::getValue() const
 {
     if (slider)
@@ -233,6 +274,40 @@ int LumatoneEditorControl::getValue() const
     else if (box)
     {
         return range.getStart() + box->getSelectedId() - 1;
+    }
+}
+
+juce::String LumatoneEditorControl::getValueText() const
+{
+    if (isNull)
+        return juce::String();
+
+    if (slider)
+    {
+        return slider->getTextFromValue(slider->getValue());
+    }
+    else if (box || colourDropdownInput)
+    {
+        return static_cast<juce::ComboBox*>(component)->getText();
+    }
+}
+
+juce::String LumatoneEditorControl::getOptionText(int index) const
+{
+    if (!range.contains(index))
+        return juce::String();
+
+    if (slider)
+    {
+        return juce::String(range.getStart() + index);
+    }
+    else if (box)
+    {
+        return box->getItemText(index + 1);
+    }
+    else if (colourDropdownInput)
+    {
+        return colourDropdownInput->getColourOptions()[index].toDisplayString(false);
     }
 }
 
@@ -262,4 +337,15 @@ void LumatoneEditorControl::createClearButton()
     {
         setValue(range.getStart() - 1);
     };
+}
+
+void LumatoneEditorControl::updateColourHistory(const juce::Colour &newColour)
+{
+    int indexOfColour = colourHistory.indexOf(newColour);
+    if (indexOfColour >= 0)
+        colourHistory.move(indexOfColour, 0);
+    else
+        colourHistory.insert(0, newColour);
+
+    colourDropdownInput->setColourOptions(colourHistory);
 }
