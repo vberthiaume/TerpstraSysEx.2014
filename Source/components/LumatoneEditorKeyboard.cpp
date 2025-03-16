@@ -59,7 +59,7 @@ void LumatoneEditorKeyboardComponent::mouseDown(const juce::MouseEvent &e)
         else
         {
             juce::Array<MappedLumatoneKey> keySelection;
-            if (!keyIsSelected)
+            if (LumatoneEditorState::getSelectedKeys()->size() > 1 || !keyIsSelected)
             {
                 keySelection.add(MappedLumatoneKey(LumatoneEditorState::getKey(keyCoord), keyCoord));
             }
@@ -104,7 +104,11 @@ void LumatoneEditorKeyboardComponent::mouseDragInternalOnNewKey(const juce::Mous
         {
             keySelection.add(MappedLumatoneKey(LumatoneEditorState::getKey(keyCoord), keyCoord));
         }
-        performAction(new SetKeySelectionAction(*this, keySelection), undoable, newTransaction);
+        if (performAction(new SetKeySelectionAction(*this, keySelection), undoable, newTransaction))
+        {
+            selectedColour = getEditSelectionData().colour;
+            selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, selectedColour);
+        }
     }
 }
 
