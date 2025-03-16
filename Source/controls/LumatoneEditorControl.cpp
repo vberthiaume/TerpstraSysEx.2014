@@ -1,31 +1,49 @@
-#include "RangedControl.h"
+#include "LumatoneEditorControl.h"
 
 #include "../style/LumatoneEditorStyleCommon.h"
 #include "../lumatone_editor_library/common/math.h"
 
-RangedControl::RangedControl(juce::String name, int minValueIn, int maxValueIn, Style style)
+LumatoneEditorControl::LumatoneEditorControl(juce::String name, int minValueIn, int maxValueIn, LumatoneEditorControl::Style style, bool hasClearButton)
     : juce::Component(name)
+    , range(juce::Range<int>(minValueIn, maxValueIn))
+    , valueChangedCallback([]() {}) // no operation
 {
-    range = juce::Range<int>(minValueIn, maxValueIn);
-    valueChangedCallback = [](){}; // no operation
+    setShowClearButton(hasClearButton);
     setStyle(style);
-    setValue(minValueIn - 1);
+    setValue(range.getStart() - 1);
 }
 
-RangedControl::~RangedControl()
+LumatoneEditorControl::LumatoneEditorControl(juce::String name, LumatoneEditorControl::Style style, bool hasClearButton)
+    : LumatoneEditorControl(name, 0, 0, style, hasClearButton)
 {
+}
+
+LumatoneEditorControl::~LumatoneEditorControl()
+{
+    clearButton = nullptr;
     component = nullptr;
     box = nullptr;
     slider = nullptr;
 }
 
-void RangedControl::resized()
+void LumatoneEditorControl::resized()
 {
     component->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, CONTROLBOXFONTHEIGHTSCALAR);
-    component->setBounds(getLocalBounds());
+
+    juce::Rectangle<int> controlBounds = getLocalBounds();
+    if (showClearButton)
+    {
+        int margin = juce::roundToInt(getHeight() * 0.2f);
+        controlBounds = controlBounds.withTrimmedRight(controlBounds.getHeight() + margin);
+
+        int buttonX = controlBounds.getRight() + margin;
+        clearButton->setBounds(buttonX, 0,  getWidth() - buttonX, getHeight());
+    }
+
+    component->setBounds(controlBounds);
 }
 
-void RangedControl::setTextBoxStyle(juce::Slider::TextEntryBoxPosition position, bool readOnly, int boxWidth, int boxHeight)
+void LumatoneEditorControl::setTextBoxStyle(juce::Slider::TextEntryBoxPosition position, bool readOnly, int boxWidth, int boxHeight)
 {
     if (slider)
     {
@@ -33,7 +51,7 @@ void RangedControl::setTextBoxStyle(juce::Slider::TextEntryBoxPosition position,
     }
 }
 
-void RangedControl::setStyle(Style newStyle)
+void LumatoneEditorControl::setStyle(Style newStyle)
 {
     if (component)
     {
@@ -67,18 +85,21 @@ void RangedControl::setStyle(Style newStyle)
     resized();
 }
 
-void RangedControl::setRange(juce::Range<int> newRange)
+void LumatoneEditorControl::setRange(juce::Range<int> newRange)
 {
     setRange(newRange.getStart(), newRange.getEnd());
 }
 
-void RangedControl::setRange(int min, int max)
+void LumatoneEditorControl::setRange(int min, int max)
 {
     range = juce::Range<int>(min, max);
 
     if (box)
     {
         box->clear();
+
+        if (min == max && max == 0) // Define this as empty
+            return;
 
         int id = 1;
         for (int i = range.getStart(); i <= range.getEnd(); i++)
@@ -96,7 +117,32 @@ void RangedControl::setRange(int min, int max)
     }
 }
 
-void RangedControl::setValue(int newValue, juce::NotificationType notify)
+void LumatoneEditorControl::addOption(const juce::String &name, int id)
+{
+    jassert(style == LumatoneEditorControl::Style::DropdownBox);
+    jassert(box.get() != nullptr);
+
+    if (box)
+    {
+        box->addItem(name, id);
+        // setRange(1, box->getNumItems());
+        range = juce::Range<int>(0, box->getNumItems());
+    }
+}
+
+void LumatoneEditorControl::allowTextInput(bool allowInput)
+{
+    if (slider)
+    {
+        slider->setTextBoxIsEditable(allowInput);
+    }
+    else if (box)
+    {
+        box->setEditableText(allowInput);
+    }
+}
+
+void LumatoneEditorControl::setValue(int newValue, juce::NotificationType notify)
 {
     // Shouldn't be possible to get null from UI
     updateNull(newValue);
@@ -128,7 +174,7 @@ void RangedControl::setValue(int newValue, juce::NotificationType notify)
     }
 }
 
-void RangedControl::setValueChangedCallback(std::function<void()> callback)
+void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callback)
 {
     valueChangedCallback = callback;
 
@@ -152,7 +198,7 @@ void RangedControl::setValueChangedCallback(std::function<void()> callback)
     }
 }
 
-void RangedControl::setTooltip(juce::String text)
+void LumatoneEditorControl::setTooltip(juce::String text)
 {
     tooltip = text;
     if (box)
@@ -165,7 +211,20 @@ void RangedControl::setTooltip(juce::String text)
     }
 }
 
-int RangedControl::getValue() const
+void LumatoneEditorControl::setShowClearButton(bool hasClearButton)
+{
+    showClearButton = hasClearButton;
+
+    if (showClearButton && clearButton.get() == nullptr)
+    {
+        createClearButton();
+    }
+
+    if (clearButton)
+        clearButton->setVisible(showClearButton);
+}
+
+int LumatoneEditorControl::getValue() const
 {
     if (slider)
     {
@@ -177,18 +236,30 @@ int RangedControl::getValue() const
     }
 }
 
-bool RangedControl::isValueNull() const
+bool LumatoneEditorControl::isValueNull() const
 {
     return isNull;
 }
 
-bool RangedControl::valueIsNull(int checkValue) const
+bool LumatoneEditorControl::valueIsNull(int checkValue) const
 {
     return checkValue < range.getStart() || checkValue > range.getEnd();
 }
 
-bool RangedControl::updateNull(int newValue)
+bool LumatoneEditorControl::updateNull(int newValue)
 {
     isNull = valueIsNull(newValue);
     return isNull;
+}
+
+void LumatoneEditorControl::createClearButton()
+{
+    clearButton = std::make_unique<juce::TextButton>(getName() + "_clear", "Clear " + getName());
+    clearButton->setButtonText("x");
+    addChildComponent(*clearButton);
+
+    clearButton->onClick = [&]()
+    {
+        setValue(range.getStart() - 1);
+    };
 }
