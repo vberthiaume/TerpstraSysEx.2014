@@ -302,12 +302,19 @@ public:
 
     void drawLabel(juce::Graphics& g, juce::Label& l) override
     {
+        juce::Colour bkgdColour, textColour, outlineColour;
+
         auto labelBounds = l.getBounds().toFloat();
         juce::Path roundedBounds = getConnectedRoundedRectPath(labelBounds, l.getHeight() * comboBoxRoundedCornerScalar, 0);
-        g.setColour(l.findColour(juce::Label::ColourIds::backgroundColourId));
+        bkgdColour = l.findColour(juce::Label::ColourIds::backgroundColourId);
+        g.setColour(bkgdColour);
         g.fillPath(roundedBounds);
 
-        g.setColour(l.findColour(juce::Label::ColourIds::textColourId));
+        textColour = l.findColour(juce::Label::ColourIds::textColourId);
+        if (!l.isEnabled())
+            textColour.darker(0.4f);
+
+        g.setColour(textColour);
 
         juce::Font font = getLabelFont(l);
         float fontScalar = 1.0f;
@@ -324,8 +331,13 @@ public:
         g.setFont(font);
 
         g.drawFittedText(l.getText(), l.getLocalBounds(), l.getJustificationType(), maxLines, 0.0f);
-        g.setColour(l.findColour(juce::Label::ColourIds::outlineColourId));
-        g.drawRect(l.getLocalBounds());
+
+        outlineColour = l.findColour(juce::Label::ColourIds::outlineColourId);
+        if (outlineColour.getAlpha() > (juce::uint8)0)
+        {
+            g.setColour(outlineColour);
+            g.drawRect(l.getLocalBounds());
+        }
     }
 
     //==================================================================
@@ -748,26 +760,26 @@ public:
             label->setColour(juce::Label::ColourIds::backgroundColourId, backgroundColour);
             label->setColour(juce::Label::ColourIds::backgroundWhenEditingColourId, backgroundColour);
             label->setColour(juce::Label::ColourIds::textColourId, textColour);
+            // auto sliderRange = sld.getRange();
+            // juce::String minValue = juce::String(juce::roundToInt(sliderRange.getStart()));
+            // juce::String maxValue = juce::String(juce::roundToInt(sliderRange.getEnd()));
+            // juce::String longestValue = (minValue.length() > maxValue.length()) ? minValue : maxValue;
 
-            auto sliderRange = sld.getRange();
-            juce::String minValue = juce::String(juce::roundToInt(sliderRange.getEnd()));
-            juce::String maxValue = juce::String(juce::roundToInt(sliderRange.getStart()));
-            juce::String longestValue = (minValue.length() > maxValue.length()) ? minValue : maxValue;
+            // // +1 for extra margin
+            // int numPlaces = longestValue.length() + sld.getNumDecimalPlacesToDisplay() + 1;
+            // for (int n = 0; n < numPlaces; n++)
+            // {
+            //     longestValue += "_";
+            // }
 
-            // +1 for extra margin
-            int numPlaces = longestValue.length() + sld.getNumDecimalPlacesToDisplay() + 1;
-            for (int n = 0; n < numPlaces; n++)
-            {
-                longestValue += "_";
-            }
+            // float fontHeight = sld.getHeight() * fontHeightScalar * 0.8f;
 
-            float fontHeight = sld.getHeight() * fontHeightScalar * 0.8f;
+            // juce::Font textBoxFont = getSliderTextBoxFont(fontHeight);
 
-            juce::Font textBoxFont = getSliderTextBoxFont(fontHeight);
+            // int labelMaxWidth = textBoxFont.getStringWidth(longestValue);
 
-            int labelMaxWidth = textBoxFont.getStringWidth(longestValue);
-
-            sld.setTextBoxStyle(sld.getTextBoxPosition(), false, labelMaxWidth, sld.getHeight());
+            // sld.setTextBoxStyle(sld.getTextBoxPosition(), false, labelMaxWidth, sld.getHeight());
+            sld.setTextBoxStyle(sld.getTextBoxPosition(), false, sld.getTextBoxWidth(), sld.getHeight());
 
             return label;
         }

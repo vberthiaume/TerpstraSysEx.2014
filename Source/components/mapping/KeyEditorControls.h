@@ -16,16 +16,10 @@
 #include "../../lumatone_editor_library/palettes/colour_selection_broadcaster.h"
 
 class ColourSelectionGroup;
-class ColourTextEditor;
 class ColourViewComponent;
-class RangedControl;
+class LumatoneEditorControl;
 class ColourSelectorPanel;
 class ColourDropdownSelector;
-// class SelectionTabBar;
-// class SingleSelectControls;
-// class MultiSelectControls;
-
-// enum class SelectionTabs;
 
 class KeyEditorControls : public juce::Component
                         , public LumatoneEditorState
@@ -49,7 +43,7 @@ public:
 
 private:
 
-  void updateColourHistory(const juce::Colour& newColour);
+    void autoIncrementToggleCallback(bool isToggled);
 
 private:
 
@@ -68,19 +62,19 @@ private:
 private:
     std::unique_ptr<juce::Label>            lblKeySettings;
 
-    std::unique_ptr<ColourTextEditor>       colourTextEditor;
-    // std::unique_ptr<ColourViewComponent>    colourSubwindow;
-    std::unique_ptr<ColourDropdownSelector> colourDropdown;
-    juce::Array<Colour>                     colourHistory;
+    std::unique_ptr<LumatoneEditorControl>  colourInputBox;
+    ColourDropdownSelector*                 colourDropdown;
     juce::Colour                            lastSelectedColour;
 
-    std::unique_ptr<juce::ComboBox>          keyTypeCombo;
-    std::unique_ptr<RangedControl>           noteInput;
-    std::unique_ptr<RangedControl>           channelInput;
+    std::unique_ptr<LumatoneEditorControl>  keyTypeCombo;
+    std::unique_ptr<LumatoneEditorControl>  noteInput;
+    std::unique_ptr<LumatoneEditorControl>  channelInput;
 
-    std::unique_ptr<juce::TextButton>       noteAutoIncButton;
+    std::unique_ptr<juce::ToggleButton>     autoIncrementToggleButton;
     std::unique_ptr<juce::Slider>           noteAutoIncrInput;
     std::unique_ptr<juce::Slider>           channelAutoIncrNoteInput;
+    juce::Rectangle<int>                    autoIncrementBounds;
+    juce::Path                              autoIncrBorder;
 
     std::unique_ptr<juce::Label>            lblColour;
     std::unique_ptr<juce::Label>            lblKeyType;
@@ -91,12 +85,7 @@ private:
     std::unique_ptr<juce::Label>            lblChannelAutoIncr;
 
     std::unique_ptr<ColourSelectorPanel>    colourPalettePanel;
-    // std::unique_ptr<ColourSelectionGroup>   colourSelectionGroup;
-    // ColourSelectionGroup*                   colourSelectionGroup;
 
-    // std::unique_ptr<SelectionTabBar>        selectionTabBar;
-    // std::unique_ptr<SingleSelectControls>   singleSelectControls;
-    // std::unique_ptr<MultiSelectControls>    multiSelectControls;
     juce::Component* selectionControls = nullptr;
 
     const juce::StringRef noteInputWidthRef = "_1.6.0._+.+_";

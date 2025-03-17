@@ -173,7 +173,7 @@ void ColourSelectorPanel::resized()
     if (paletteEditPanel.get())
         paletteEditPanel->setBounds(paletteSelectorArea);
 
-    customPickerPanel->setBounds(controlArea);
+    customPickerPanel->setBounds(controlArea.reduced(indent));
 }
 
 void ColourSelectorPanel::startEditingPalette(int paletteIndexIn, int selectedSwatchIndex)

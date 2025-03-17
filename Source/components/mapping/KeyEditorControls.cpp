@@ -11,22 +11,14 @@
 #include "KeyEditorControls.h"
 #include "../../style/LumatoneEditorLookAndFeel.h"
 
-// #include "./SelectionTabBar.h"
-// #include "./SingleSelectControls.h"
 #include "./MultiSelectControls.h"
-
-// #include "../../controls/colour_view_component.h"
-#include "../../controls/ColourDropdownSelector.h"
-#include "../../lumatone_editor_library/palettes/colour_edit_textbox.h"
-
 #include "../palettes/ColourSelectorPanel.h"
-// #include "../lumatone_editor_library/palettes/palette_selection_panel.h"
+
+#include "../../controls/ColourDropdownSelector.h"
+#include "../../controls/LumatoneEditorControl.h"
+
 #include "../../lumatone_editor_library/palettes/colour_picker_panel.h"
 #include "../../lumatone_editor_library/palettes/colour_selection_group.h"
-
-#include "../../actions/EditorControlActions.h"
-
-#include "../../controls/RangedControl.h"
 
 #include "../../actions/EditorControlActions.h"
 
@@ -41,74 +33,52 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     lblKeySettings->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     addAndMakeVisible(lblKeySettings.get());
 
-    // colourTextEditor = std::make_unique<ColourTextEditor>("colourTextEditor", "");
-    // addAndMakeVisible(colourTextEditor.get());
+    colourInputBox = std::make_unique<LumatoneEditorControl>("colourInputBox", LumatoneEditorControl::Style::ColourDropdownInput, true);
+    addAndMakeVisible(*colourInputBox);
+    colourDropdown = colourInputBox->getColourSelector();
 
-    // colourSubwindow = std::make_unique<ColourViewComponent>(juce::Colour(0xff5398b7));
-    // colourSubwindow->setColourButtonMode(ColourViewComponent::ColourButtonMode::Dropper);
-    // addAndMakeVisible(colourSubwindow.get());
-
-    colourDropdown = std::make_unique<ColourDropdownSelector>("AssignColourDropdown");
-    // colourDropdown->setOnValueChangeCallback([&]()
-    // {
-    //     performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, colourDropdown->getSelectedColour()));
-    //     if (colourDropdown->getSelectedColour() != juce::Colours::transparentBlack)
-    //         performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
-    // });
-
-    // addColourSelectionListener(colourDropdown.get());
-    // colourDropdown->setColourPickerChangedCallback([&]()
-    // {
-    //     addColourSelectionListener(colourDropdown.get());
-    // });
-
-    addAndMakeVisible(colourDropdown.get());
-    colourDropdown->setColourOptions(colourHistory);
-    colourDropdown->setShowPicker(false);
-    colourDropdown->setEditText(true);
-
-    keyTypeCombo = std::make_unique<juce::ComboBox>("keyTypeCombo");
-    keyTypeCombo->setEditableText (false);
-    keyTypeCombo->setJustificationType (juce::Justification::centredLeft);
-    keyTypeCombo->setTextWhenNothingSelected (juce::String());
-    keyTypeCombo->setTextWhenNoChoicesAvailable (juce::translate("(none)"));
-    keyTypeCombo->addItem (juce::translate("Note on/Note off"), (int)LumatoneKeyType::noteOnNoteOff);
-    keyTypeCombo->addItem (juce::translate("Continuous Controller"), (int)LumatoneKeyType::continuousController);
-    keyTypeCombo->addItem (juce::translate("Lumatouch"), (int)LumatoneKeyType::lumaTouch);
-    keyTypeCombo->addItem (juce::translate("Disabled"), (int)LumatoneKeyType::disabled);
-    keyTypeCombo->onChange = [&]()
+    keyTypeCombo = std::make_unique<LumatoneEditorControl>("keyTypeCombo", LumatoneEditorControl::Style::DropdownBox, true);
+    keyTypeCombo->addOption(juce::translate("Note on/Note off"), (int)LumatoneKeyType::noteOnNoteOff);
+    keyTypeCombo->addOption(juce::translate("Continuous Controller"), (int)LumatoneKeyType::continuousController);
+    keyTypeCombo->addOption(juce::translate("Lumatouch"), (int)LumatoneKeyType::lumaTouch);
+    keyTypeCombo->addOption(juce::translate("Disabled"), (int)LumatoneKeyType::disabled);
+    keyTypeCombo->setValueChangedCallback([&]()
     {
-        performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId())));
-        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
-    };
+        // performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId())));
+        performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getValue())));
+
+        if (inAssignMode() && keyTypeCombo->getValue() > 0)
+            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
+    });
     addAndMakeVisible(keyTypeCombo.get());
 
-    noteInput = std::make_unique<RangedControl>("noteInput", 0, 127, RangedControl::Style::IncDecButtons);
+    noteInput = std::make_unique<LumatoneEditorControl>("noteInput", 0, 127, LumatoneEditorControl::Style::IncDecButtons, true);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
     noteInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
-        if (!noteInput->isValueNull())
+        if (inAssignMode() && !noteInput->isValueNull())
             performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     });
     addAndMakeVisible(noteInput.get());
 
-    channelInput = std::make_unique<RangedControl>("channelInput", 1, 16, RangedControl::Style::IncDecButtons);
+    channelInput = std::make_unique<LumatoneEditorControl>("channelInput", 1, 16, LumatoneEditorControl::Style::IncDecButtons, true);
     channelInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
-        if (!channelInput->isValueNull())
+        if (inAssignMode() && !channelInput->isValueNull())
             performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
     });
     addAndMakeVisible(channelInput.get());
 
-    noteAutoIncButton.reset (new juce::TextButton ("noteAutoIncrButton", juce::translate("Assign notes per-click and step up value")));
-    noteAutoIncButton->setButtonText (juce::translate("Auto"));
-    noteAutoIncButton->setToggleable(true);
-    addAndMakeVisible(noteAutoIncButton.get());
+    autoIncrementToggleButton.reset (new juce::ToggleButton ("autoIncrementToggleButton"));
+    addAndMakeVisible (autoIncrementToggleButton.get());
+    autoIncrementToggleButton->setButtonText (juce::translate("Auto-Increment"));
+    autoIncrementToggleButton->onClick = [&] { autoIncrementToggleCallback(autoIncrementToggleButton->getToggleState()); };
+    autoIncrementToggleButton->setAlwaysOnTop(true);
 
     noteAutoIncrInput.reset (new juce::Slider ("noteAutoIncrInput"));
-    noteAutoIncrInput->setTooltip (juce::translate(" - step notes by: "));
+    noteAutoIncrInput->setTooltip (juce::translate("Increment notes per-click by: "));
     noteAutoIncrInput->setRange (0, 127, 1);
     noteAutoIncrInput->setSliderStyle (juce::Slider::IncDecButtons);
     noteAutoIncrInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
@@ -116,7 +86,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
 
     channelAutoIncrNoteInput.reset (new juce::Slider ("channelAutoIncrNoteInput"));
     channelAutoIncrNoteInput->setTooltip (juce::translate("After reaching this note, the channel is incremented and the note is reset to 0."));
-    channelAutoIncrNoteInput->setRange (0, 127, 1);
+    channelAutoIncrNoteInput->setRange (1, 16, 1);
     channelAutoIncrNoteInput->setSliderStyle (juce::Slider::IncDecButtons);
     channelAutoIncrNoteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     addAndMakeVisible(channelAutoIncrNoteInput.get());
@@ -145,7 +115,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     lblChannel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
     addAndMakeVisible(lblChannel.get());
 
-    lblAutoIncNotes = std::make_unique<juce::Label>("lblAutoIncNotes", "-step");
+    lblAutoIncNotes = std::make_unique<juce::Label>("lblAutoIncNotes", "Notes, per-click:");
     lblAutoIncNotes->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
     // lblAutoIncNotes->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, controlBoxFontHeightScalar);
     lblAutoIncNotes->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
@@ -153,7 +123,7 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     lblAutoIncNotes->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
     addAndMakeVisible(lblAutoIncNotes.get());
 
-    lblAutoIncChannels = std::make_unique<juce::Label>("lblAutoIncChannels", juce::translate("ChannelsAfterNote"));
+    lblAutoIncChannels = std::make_unique<juce::Label>("lblAutoIncChannels", juce::translate("ChannelsAfterNote") + ":");
     lblAutoIncChannels->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
     lblAutoIncChannels->setJustificationType(juce::Justification::centredLeft);
     lblAutoIncChannels->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
@@ -161,37 +131,15 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
 
     colourPalettePanel = std::make_unique<ColourSelectorPanel>(stateIn);
     colourPalettePanel->setBackgroundColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ColourPaletteBackground));
-    // colourPalettePanel->setColourSelectionGroup(group);
     addAndMakeVisible(colourPalettePanel.get());
-    // colourPalettePanel->addColourSelectorToGroup(colourSelectionGroup.get());
 
-    // addColourSelectionBroadcaster(colourPalettePanel.get());
-    LumatoneEditorState::addColourSelectionBroadcaster(colourDropdown.get());
-    LumatoneEditorState::addColourSelectionListener(colourDropdown.get());
+    LumatoneEditorState::addColourSelectionBroadcaster(colourDropdown);
+    LumatoneEditorState::addColourSelectionListener(colourDropdown);
     LumatoneEditorState::addColourSelectionListener(this);
     LumatoneEditorState::addColourSelectionBroadcaster(this);
-    // ColourSelectionGroup* group = new ColourSelectionGroup("KeyEditorControlColour");
-    // colourSelectionGroup = colourPalettePanel->getColourSelectionGroup();
-    // colourSelectionGroup->addSelector(colourDropdown.get());
-    // colourSelectionGroup->addColourSelectionListener(colourDropdown.get());
-    // colourSelectionGroup->addColourSelectionListener(this);
 
-    // colourSelectionGroup->addSelector(colourTextEditor.get())
-    // colourSelectionGroup->addColourSelectionListener(colourTextEditor.get());
-    // group->addSelector(colourTextEditor.get());
-    // group->addColourSelectionListener(colourSubwindow.get());
-    // group->addColourSelectionListener(colourTextEditor.get());
-
-    // singleSelectControls = std::make_unique<SingleSelectControls>(stateIn);
-    // addChildComponent(*singleSelectControls);
-
-    // multiSelectControls = std::make_unique<MultiSelectControls>(stateIn);
-    // addChildComponent(*multiSelectControls);
-
-    // selectionTabBar = std::make_unique<SelectionTabBar>();
-    // addAndMakeVisible(*selectionTabBar);
-    // selectionTabBar->addChangeListener(this);
-    // setSelectionTab(SelectionTabs::Single);
+    // Todo - callback for changing select/assign mode
+    autoIncrementToggleCallback(autoIncrementToggleButton->getToggleState());
 
     addEditorListener(this);
 }
@@ -200,24 +148,29 @@ KeyEditorControls::~KeyEditorControls()
 {
     LumatoneEditorState::removeColourSelectionBroadcaster(this);
     LumatoneEditorState::removeColourSelectionBroadcaster(this);
-    LumatoneEditorState::removeColourSelectionListener(colourDropdown.get());
-    LumatoneEditorState::removeColourSelectionBroadcaster(colourDropdown.get());
+    LumatoneEditorState::removeColourSelectionListener(colourDropdown);
+    LumatoneEditorState::removeColourSelectionBroadcaster(colourDropdown);
 
-    // colourSelectionGroup = nullptr;
     colourPalettePanel = nullptr;
+
+    lblChannelAutoIncr = nullptr;
+    lblAutoIncChannels = nullptr;
+    lblAutoIncNotes = nullptr;
 
     lblChannel = nullptr;
     lblNote = nullptr;
     lblKeyType = nullptr;
     lblColour = nullptr;
 
+    channelAutoIncrNoteInput = nullptr;
+    noteAutoIncrInput = nullptr;
+    autoIncrementToggleButton = nullptr;
+
     channelInput = nullptr;
     noteInput = nullptr;
     keyTypeCombo = nullptr;
 
-    // colourSubwindow = nullptr;
-    colourDropdown = nullptr;
-    // colourTextEditor = nullptr;
+    colourInputBox = nullptr;
 
     lblKeySettings = nullptr;
 }
@@ -229,6 +182,13 @@ void KeyEditorControls::paint(juce::Graphics& g)
 
     g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlAreaHeader));
     g.fillPath(headerPath);
+
+    // Draw border around auto-increment area, block-out space for toggle button
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlBoxBackground));
+    g.strokePath(autoIncrBorder, juce::PathStrokeType(2));
+
+    g.setColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ControlAreaBackground));
+    g.fillRect(autoIncrementToggleButton->getBounds().withX(autoIncrementToggleButton->getX() - autoIncrementToggleButton->getHeight() * 2 / 5));
 }
 
 void KeyEditorControls::resized()
@@ -258,7 +218,6 @@ void KeyEditorControls::resized()
     contentMarginWidth = roundToInt(windowH * contentMarginWidthWindowH);
     contentMarginHeight = roundToInt(h * controlMarginH);
 
-
     // first control column
 
     labelHeight = roundToInt(headerHeight * contentLabelFontScalar);
@@ -282,9 +241,7 @@ void KeyEditorControls::resized()
     colourButtonMargin = lblColour->getFont().getStringWidth(" ");
     colourButtonWidth = roundToInt(getParentWidth() * colourButtonParentW) - colourButtonMargin;
 
-    // colourTextEditor->setBounds(lblColour->getRight(), lblColour->getY(), keyControlColumnRight - lblColour->getRight() - colourButtonWidth, keyControlHeight);
-    // colourSubwindow->setBounds(colourTextEditor->getRight() + colourButtonMargin, colourTextEditor->getY(), colourButtonWidth, keyControlHeight);
-    colourDropdown->setBounds(lblColour->getRight(), lblColour->getY(), keyControlColumnRight - lblColour->getRight(), keyControlHeight);
+    colourInputBox->setBounds(lblColour->getRight(), lblColour->getY(), keyControlColumnRight - lblColour->getRight(), keyControlHeight);
 
     lblKeyType->setTopLeftPosition(contentMarginWidth, lblColour->getBottom() + keyControlMarginHeight);
     resizeLabelWithHeight(lblKeyType.get(), keyControlHeight, controlLabelFontScalar, "_");
@@ -312,21 +269,40 @@ void KeyEditorControls::resized()
     resizeLabelWithHeight(lblChannel.get(), keyControlHeight, controlLabelFontScalar, "_");
     channelInput->setBounds(lblChannel->getRight(), lblChannel->getY(), keyControlColumnRight - lblChannel->getRight(), keyControlHeight);
 
+
+    autoIncrementBounds = juce::Rectangle<int>(colourColumnX, colourPalettePanel->getBottom() + controlMarginH, getWidth() - colourColumnX - contentMarginWidth, getHeight() - colourPalettePanel->getBottom() - contentMarginHeight);
+    autoIncrBorder = juce::Path();
+    autoIncrBorder.addRoundedRectangle(autoIncrementBounds, roundedCornerSize);
+
+    juce::String autoIncToggleWidthRef = autoIncrementToggleButton->getButtonText() + juce::String::repeatedString("__", 2);
+    int autoIncToggleHeight = juce::roundToInt(keyControlHeight * 0.4f);
+    int autoIncToggleWidth = getEditorLookAndFeel().getToggleButtonFont(*autoIncrementToggleButton, autoIncToggleHeight).getStringWidth(autoIncToggleWidthRef);
+    // autoIncrementToggleButton->setBounds(autoIncrementBounds.withSize(autoIncToggleWidth, autoIncToggleHeight).translated(autoIncToggleHeight*2, - autoIncToggleHeight / 2));
+    autoIncrementToggleButton->setBounds(autoIncrementBounds.getX() + autoIncToggleHeight*2, autoIncrementBounds.getY() - autoIncToggleHeight / 2, autoIncToggleWidth, autoIncToggleHeight);
+
     // second column
-    juce::Font buttonFont = getEditorLookAndFeel().getTextButtonFont(*noteAutoIncButton, keyControlHeight);
-    int noteInputWidth = buttonFont.getStringWidth(noteInputWidthRef);
-    int autoNoteButtonWidth = buttonFont.getStringWidth(juce::translate("Auto"));
-    noteAutoIncButton->setBounds(noteInput->getRight() + contentMarginHeight, noteInput->getY(), autoNoteButtonWidth, keyControlHeight);
-    resizeLabelWithHeight(lblAutoIncNotes.get(), keyControlHeight, controlLabelFontScalar, "_" /*, getWidth() - keyControlColumnRight*/);
-    lblAutoIncNotes->setTopLeftPosition(noteAutoIncButton->getRight(), noteAutoIncButton->getY());
-    noteAutoIncrInput->setBounds(lblAutoIncNotes->getRight(), lblAutoIncNotes->getY(), noteInputWidth, keyControlHeight);
+    int autoControlBoundsMargin = keyControlMarginHeight / 2;
+    juce::Rectangle<int> autoControlBounds = autoIncrementBounds.reduced(autoControlBoundsMargin * 2, autoControlBoundsMargin);
+    int autoControlMarginHeight = autoControlBounds.getHeight() * 0.25f;
+    int autoControlHeight = (autoControlBounds.getHeight() - autoControlMarginHeight) / 2;
+
+    // juce::Font buttonFont = getEditorLookAndFeel().getTextButtonFont(*noteAutoIncButton, keyControlHeight);
+    juce::Font buttonFont = getEditorLookAndFeel().getSliderTextBoxFont(autoControlHeight);
+    int noteInputWidth = buttonFont.getStringWidth("999");
+    // int autoNoteButtonWidth = buttonFont.getStringWidth(juce::translate("Auto"));
+    // noteAutoIncButton->setBounds(autoControlBounds.getX(), autoControlBounds.getY(), autoNoteButtonWidth, autoControlHeight);
+    resizeLabelWithHeight(lblAutoIncNotes.get(), autoControlHeight, controlLabelFontScalar, "_" /*, getWidth() - keyControlColumnRight*/);
+    lblAutoIncNotes->setTopLeftPosition(autoControlBounds.getX(), autoControlBounds.getY() + (autoControlBoundsMargin / 2));
+    noteAutoIncrInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, noteInputWidth, autoControlHeight);
+    noteAutoIncrInput->setBounds(lblAutoIncNotes->getRight(), lblAutoIncNotes->getY(), noteInputWidth + autoControlHeight*2, autoControlHeight);
 
     int autoChnlLabelWidth = getEditorLookAndFeel().getLabelFont(*lblAutoIncChannels).getStringWidth(lblAutoIncChannels->getText());
-    resizeLabelWithHeight(lblAutoIncChannels.get(), keyControlHeight, controlLabelFontScalar, "_");
-    lblAutoIncChannels->setTopLeftPosition(keyControlColumnRight + contentMarginWidth, channelInput->getY());
-    channelAutoIncrNoteInput->setTopLeftPosition(channelInput->getRight() + contentMarginHeight, channelInput->getY());
+    resizeLabelWithHeight(lblAutoIncChannels.get(), autoControlHeight, controlLabelFontScalar, "_");
+    lblAutoIncChannels->setTopLeftPosition(autoControlBounds.getX(), lblAutoIncNotes->getBottom() + autoControlMarginHeight/2);
+    // channelAutoIncrNoteInput->setTopLeftPosition(autoControlBounds.getX(), autoControlBounds.getY() + autoControlHeight);
+    channelAutoIncrNoteInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, noteInputWidth, autoControlHeight);
+    channelAutoIncrNoteInput->setBounds(lblAutoIncChannels->getRight(), lblAutoIncChannels->getY(), noteInputWidth + autoControlHeight*2, autoControlHeight);
 
-    channelAutoIncrNoteInput->setBounds(lblAutoIncChannels->getRight(), lblAutoIncChannels->getY(), noteInputWidth, keyControlHeight);
 
     // int selectionTabBarWidth = juce::roundToInt(w * 0.4f);
     // selectionTabBar->setBounds(w - selectionTabBarWidth, 0, selectionTabBarWidth, headerHeight);
@@ -341,7 +317,7 @@ void KeyEditorControls::selectionChanged()
 
     if (newData.useColour)
     {
-        lastSelectedColour =  newData.colour;
+        lastSelectedColour = newData.colour;
         // setAssignKeyColour(true, lastSelectedColour);
         // colourSelectionGroup->setSelectedColour(newData.colour, nullptr);
         // colourSubwindow->setColour(newData.colour.toString(), false);
@@ -370,9 +346,13 @@ void KeyEditorControls::selectionChanged()
     }
 
     if (newData.useType)
-        keyTypeCombo->setSelectedId((int)newData.type, juce::NotificationType::dontSendNotification);
+        keyTypeCombo->setValue((int)newData.type, juce::NotificationType::dontSendNotification);
     else
-        keyTypeCombo->setSelectedId(0, juce::NotificationType::dontSendNotification);
+        keyTypeCombo->setValue(0, juce::NotificationType::dontSendNotification);
+    // if (newData.useType)
+    //     keyTypeCombo->setSelectedId((int)newData.type, juce::NotificationType::dontSendNotification);
+    // else
+    //     keyTypeCombo->setSelectedId(0, juce::NotificationType::dontSendNotification);
 
     if (newData.useNote)
         noteInput->setValue(newData.note, juce::NotificationType::dontSendNotification);
@@ -404,15 +384,22 @@ void KeyEditorControls::selectionChanged()
 //     selectionControls->setVisible(true);
 // }
 
-void KeyEditorControls::updateColourHistory(const juce::Colour &newColour)
+void KeyEditorControls::autoIncrementToggleCallback(bool isToggled)
 {
-    int indexOfColour = colourHistory.indexOf(newColour);
-    if (indexOfColour >= 0)
-        colourHistory.move(indexOfColour, 0);
+    if (isToggled)
+    {
+        noteAutoIncrInput->setEnabled(true);
+        channelAutoIncrNoteInput->setEnabled(true);
+        lblAutoIncNotes->setEnabled(true);
+        lblAutoIncChannels->setEnabled(true);
+    }
     else
-        colourHistory.insert(0, newColour);
-
-    colourDropdown->setColourOptions(colourHistory);
+    {
+        noteAutoIncrInput->setEnabled(false);
+        channelAutoIncrNoteInput->setEnabled(false);
+        lblAutoIncNotes->setEnabled(false);
+        lblAutoIncChannels->setEnabled(false);
+    }
 }
 
 void KeyEditorControls::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)
@@ -457,8 +444,9 @@ void KeyEditorControls::colourChangedCallback(ColourSelectionBroadcaster *source
     juce::Component* src = dynamic_cast<juce::Component*>(source);
     if (src != nullptr && isParentOf(src))
     {
-        updateColourHistory(newColour);
-        performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()), true, false);
+        colourInputBox->setLastColour(newColour);
+        if (inAssignMode())
+            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()), true, false);
     }
 }
 

@@ -31,7 +31,7 @@ countries: ca gb au
 "Channel" = "Channel"
 "AutoIncrement" = "Auto-Increment"
 "NotesPerClick" = "Notes-Per-Click"
-"ChannelsAfterNote" = "Channels, After Note #"
+"ChannelsAfterNote" = "Channels, after Note #"
 "AutoIncrTooltip" = "After reaching this note, the channel is incremented and the note is reset to 0."
 "StartingValue" = "Starting value"
 "StartingPointTooltip" = "Value that will be assigned to the key at mouse position when clicking"

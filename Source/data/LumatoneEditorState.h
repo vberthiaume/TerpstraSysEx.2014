@@ -79,6 +79,15 @@ enum class EditorMode
     ONLINE
 };
 
+namespace LumatoneEditor // TODO also use for EditorMode
+{
+    enum class MouseMode
+    {
+        SELECT,
+        ASSIGN
+    };
+}
+
 static juce::Array<juce::Identifier> GetLumatoneEditorProperties();
 
 class LumatoneEditorState : public LumatoneApplicationState
@@ -104,6 +113,12 @@ public:
     bool getInDeveloperMode() const { return inDeveloperMode; }
 
     EditorMode getEditorMode() const { return editorMode; }
+    bool inOfflineMode() const { return editorMode == EditorMode::OFFLINE; }
+    bool inOnlineMode() const { return editorMode == EditorMode::ONLINE; }
+
+    LumatoneEditor::MouseMode getMouseMode() const { return mouseMode; }
+    bool inSelectMode() const { return mouseMode == LumatoneEditor::MouseMode::SELECT; }
+    bool inAssignMode() const { return mouseMode == LumatoneEditor::MouseMode::ASSIGN; }
 
     // juce::Array<LumatoneKey> getSelectedKeys() const;
 
@@ -156,6 +171,7 @@ protected:
 	bool firmwareUpdateWasPerformed = false;
 
     EditorMode editorMode = EditorMode::OFFLINE;
+    LumatoneEditor::MouseMode mouseMode = LumatoneEditor::MouseMode::SELECT;
 
     LumatoneEditSelectionState editSelectionState;
     LumatoneEditorBatchColourState batchColourState;
