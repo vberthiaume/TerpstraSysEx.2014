@@ -34,7 +34,7 @@ public:
 
         colourPicker->setName("ColourPicker");
         addAndMakeVisible(*colourPicker);
-        colourPicker->addChangeListener(this);
+        // colourPicker->addChangeListener(this);
     }
 
     ~CustomPickerPanel()
@@ -54,16 +54,20 @@ public:
         colourPicker->setCurrentColour(colourIn, juce::NotificationType::dontSendNotification);
     }
 
-    void changeListenerCallback(juce::ChangeBroadcaster* source) override
-    {
-        selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, colourPicker->getCurrentColour());
-    }
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
     void colourChangedCallback(ColourSelectionBroadcaster* source, juce::Colour newColour) override
     {
         if (this != source)
             colourPicker->setCurrentColour(newColour, juce::NotificationType::dontSendNotification);
     }
+
+    //==============================================================================
+
+    void mouseDown(const juce::MouseEvent& e) override;
+    void mouseUp(const juce::MouseEvent& e) override;
+    void mouseDrag(const juce::MouseEvent& e) override;
+    void mouseExit(const juce::MouseEvent& e) override;
 
     //==============================================================================
 
@@ -77,6 +81,9 @@ public:
 private:
 
     std::unique_ptr<juce::ColourSelector> colourPicker;
+
+    bool mouseIsDown = false;
+    bool mouseIsDragging = false;
 };
 
 #endif // LUMATONE_COLOUR_PICKER_PANEL_H
