@@ -86,8 +86,9 @@ void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool send
         }
         else
         {
-            colourEditorBox->setColour(juce::ComboBox::ColourIds::backgroundColourId, newColour);
-            colourEditorBox->setColour(juce::ComboBox::ColourIds::textColourId, newColour.contrasting());
+            // colourEditorBox->setColour(juce::ComboBox::ColourIds::backgroundColourId, newColour);
+            // colourEditorBox->setColour(juce::ComboBox::ColourIds::textColourId, newColour.contrasting());
+            colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxRenderColourPreview, newColour.toString());
         }
         if (sendNotification)
             selectorListeners.call(&ColourSelectionListener::colourChangedCallback, this, lastSetColour);
@@ -105,6 +106,7 @@ void ColourDropdownSelector::setSelectedColour(juce::Colour newColour, bool send
 void ColourDropdownSelector::clearColour(bool sendNotification)
 {
     colourEditorBox->setSelectedId(0, sendNotification ? juce::NotificationType::sendNotification : juce::NotificationType::dontSendNotification);
+    colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxRenderColourPreview, juce::Colour().toString());
 }
 
 void ColourDropdownSelector::setOnValueChangeCallback(std::function<void()> callbackIn)

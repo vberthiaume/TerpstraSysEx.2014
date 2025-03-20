@@ -875,7 +875,8 @@ public:
         // }
         // g.fillPath(boxShape);
 
-        g.fillRoundedRectangle(juce::Rectangle<float>(0, 0, width, height), height * comboBoxRoundedCornerScalar);
+        int roundedRectSize = height * comboBoxRoundedCornerScalar;
+        g.fillRoundedRectangle(juce::Rectangle<float>(0, 0, width, height), roundedRectSize);
 
         int realButtonX = juce::jmax(margin, box.getWidth() - box.getHeight());
 
@@ -884,6 +885,22 @@ public:
             g.setColour(textColour);
             g.setFont(getAppFont(LumatoneEditorFont::GothamNarrowLight, buttonH * 0.5f).withHorizontalScale(1.5f));
             g.drawFittedText("v", realButtonX, 0, box.getHeight(), box.getHeight(), juce::Justification::centred, 1);
+        }
+
+        if (box.getProperties().contains(LumatoneEditorStyleIDs::comboBoxRenderColourPreview))
+        {
+            juce::Colour previewColour = juce::Colour::fromString(box.getProperties()[LumatoneEditorStyleIDs::comboBoxRenderColourPreview].toString());
+            if (previewColour.isOpaque())
+            {
+                float previewSize = height - roundedRectSize * 2;
+                float previewX = realButtonX - roundedRectSize;
+                float previewY = (height - previewSize) * 0.5f;
+                juce::Rectangle<float> previewBounds = juce::Rectangle<float>(previewX, previewY, previewSize, previewSize);
+                g.setColour(previewColour);
+                g.fillRect(previewBounds);
+                g.setColour(previewColour.contrasting(backgroundColour, previewColour));
+                g.drawRect(previewBounds, 1.0f);
+            }
         }
     }
 

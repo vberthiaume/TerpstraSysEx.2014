@@ -723,6 +723,9 @@ namespace LumatoneEditorStyleIDs
     // Check juce::ComboBox items for colour hex strings, render if they pass
     static juce::Identifier comboBoxRenderColourItems = juce::Identifier("ComboBoxRenderColourItems");
 
+    // Draw a square filled with selected colour after ComboBox value
+    static juce::Identifier comboBoxRenderColourPreview = juce::Identifier("ComboBoxRenderColourPreview");
+
     // Override the width of the pop up items, to account for varied string lengths
     static juce::Identifier comboBoxPopupItemWidthOverride = juce::Identifier("ComboBoxPopupItemWidthOverride");
 
