@@ -1,31 +1,50 @@
 #include "LumatoneEditorControl.h"
 #include "ColourDropdownSelector.h"
 
-#include "../style/LumatoneEditorStyleCommon.h"
+#include "../style/LumatoneEditorLookAndFeel.h"
 #include "../lumatone_editor_library/common/math.h"
 
-LumatoneEditorControl::LumatoneEditorControl(juce::String name, int minValueIn, int maxValueIn, LumatoneEditorControl::Style style, bool hasClearButton)
-    : juce::Component(name)
+
+LumatoneEditorControl::LumatoneEditorControl(const LumatoneEditorState& stateIn, juce::String name, int minValueIn, int maxValueIn, LumatoneEditorControl::Style style, bool hasClearButton)
+    : LumatoneEditorState(name, stateIn)
+    , juce::Component(name)
     , range(juce::Range<int>(minValueIn, maxValueIn))
     , valueChangedCallback([]() {}) // no operation
 {
     setShowClearButton(hasClearButton);
     setStyle(style);
     setValue(range.getStart() - 1);
+
+    setColour(ColourIds::outline, juce::Colour());
 }
 
-LumatoneEditorControl::LumatoneEditorControl(juce::String name, LumatoneEditorControl::Style style, bool hasClearButton)
-    : LumatoneEditorControl(name, 0, 0, style, hasClearButton)
+LumatoneEditorControl::LumatoneEditorControl(const LumatoneEditorState& stateIn, juce::String name, LumatoneEditorControl::Style style, bool hasClearButton)
+    : LumatoneEditorControl(stateIn, name, 0, 0, style, hasClearButton)
 {
 }
 
 LumatoneEditorControl::~LumatoneEditorControl()
 {
     clearButton = nullptr;
+    label = nullptr;
     component = nullptr;
     box = nullptr;
     slider = nullptr;
     colourDropdownInput = nullptr;
+}
+
+void LumatoneEditorControl::paint(juce::Graphics &g)
+{
+    juce::Colour outline = findColour(ColourIds::outline);
+    if (outline.isTransparent() == false)
+    {
+        g.setColour(outline);
+        g.drawRect(getLocalBounds(), 1);
+
+        if (label)
+            g.drawRect(label->getBounds(), 1);
+        g.drawRect(component->getBounds(), 1);
+    }
 }
 
 void LumatoneEditorControl::resized()
@@ -33,16 +52,86 @@ void LumatoneEditorControl::resized()
     component->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, CONTROLBOXFONTHEIGHTSCALAR);
 
     juce::Rectangle<int> controlBounds = getLocalBounds();
-    if (showClearButton)
-    {
-        int margin = juce::roundToInt(getHeight() * 0.2f);
-        controlBounds = controlBounds.withTrimmedRight(controlBounds.getHeight() + margin);
+    if (controlBounds.isEmpty())
+        return;
 
-        int buttonX = controlBounds.getRight() + margin;
-        clearButton->setBounds(buttonX, 0,  getWidth() - buttonX, getHeight());
+    flexLayout = juce::FlexBox();
+
+    juce::FlexBox controlLayout;
+    controlLayout.flexDirection = juce::FlexBox::Direction::row;
+
+    juce::FlexItem controlItem = juce::FlexItem(*component);
+    controlItem.flexGrow = 1.0f;
+    controlLayout.items.add(controlItem);
+
+    juce::FlexItem controlLayoutItem = juce::FlexItem(controlLayout);
+    controlLayoutItem.width = controlBounds.getWidth();
+    controlLayoutItem.maxWidth = controlBounds.getWidth();
+    controlLayoutItem.height = controlBounds.getHeight();
+    controlLayoutItem.maxHeight = controlBounds.getHeight();
+    controlLayoutItem.flexGrow = 1.0f;
+
+    int margin = juce::roundToInt(getHeight() * clearButtonMarginScalar);
+    int rowHeight = controlBounds.getHeight();
+
+    if (label != nullptr)
+    {
+        juce::FlexItem labelItem = juce::FlexItem(*label);
+        labelItem.margin = juce::FlexItem::Margin(0, margin, 0, 0);
+
+        // int labelHeight = rowHeight * controlLabelFontScalar;
+        int labelHeight = rowHeight;
+
+        if (labelLocation == LabelLocation::Left)
+        {
+            flexLayout.flexDirection = juce::FlexBox::Direction::row;
+            flexLayout.alignItems = juce::FlexBox::AlignItems::center;
+        }
+        else if (labelLocation == LabelLocation::Top)
+        {
+            flexLayout.flexDirection = juce::FlexBox::Direction::column;
+
+            rowHeight = juce::roundToInt(rowHeight * 0.5f);
+            labelHeight = rowHeight * controlLabelFontScalar;
+
+            labelItem.margin.bottom = rowHeight * 0.2f;
+            controlLayoutItem.height = rowHeight;
+            controlLayoutItem.maxHeight = rowHeight;
+        }
+
+        labelItem.height = labelHeight;
+        labelItem.maxHeight = labelHeight;
+        juce::Font labelFont = label->getFont().withHeight(labelItem.height);
+        label->setFont(labelFont);
+
+        int labelWidth = labelWidthInput;
+        if (labelWidthInput <= 0)
+        {
+            labelWidth = juce::roundToInt(labelFont.getStringWidth(label->getText()));
+        }
+
+        labelItem.width = labelWidth;
+        labelItem.maxWidth = labelWidth;
+        labelItem.flexGrow = 1.0f;
+
+        flexLayout.items.add(labelItem);
     }
 
-    component->setBounds(controlBounds);
+    if (showClearButton)
+    {
+        int clearButtonMaxSize = rowHeight * 0.6f;
+        int buttonMargin = (rowHeight - clearButtonMaxSize) * 0.5;
+
+        juce::FlexItem clearButtonItem = juce::FlexItem(*clearButton);
+        clearButtonItem.margin = juce::FlexItem::Margin(buttonMargin);
+        clearButtonItem.width = clearButtonMaxSize;
+        clearButtonItem.height = clearButtonMaxSize;
+
+        controlLayout.items.add(clearButtonItem);
+    }
+
+    flexLayout.items.add(controlLayoutItem);
+    flexLayout.performLayout(controlBounds);
 }
 
 void LumatoneEditorControl::setTextBoxStyle(juce::Slider::TextEntryBoxPosition position, bool readOnly, int boxWidth, int boxHeight)
@@ -51,6 +140,27 @@ void LumatoneEditorControl::setTextBoxStyle(juce::Slider::TextEntryBoxPosition p
     {
         slider->setTextBoxStyle(position, readOnly, boxWidth, boxHeight);
     }
+}
+
+void LumatoneEditorControl::setLabelOptions(juce::String labelText, LabelLocation location, int labelWidth, int labelHeight)
+{
+    labelLocation = location;
+    labelWidthInput = labelWidth;
+    labelHeightInput = labelHeight;
+
+    if (label == nullptr)
+    {
+        label = std::make_unique<juce::Label>(getName() + "_label", labelText);
+        addAndMakeVisible(*label);
+        // label->setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white);
+    }
+
+    label->setVisible(location != LabelLocation::None);
+    label->setText(labelText, juce::NotificationType::dontSendNotification);
+    label->setJustificationType(juce::Justification::centredLeft);
+
+    label->setFont(getEditorLookAndFeel().getAppFont(LumatoneEditorFont::FranklinGothic));
+    label->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
 }
 
 void LumatoneEditorControl::setStyle(Style newStyle)
@@ -129,7 +239,7 @@ void LumatoneEditorControl::setRange(int min, int max)
     }
 }
 
-void LumatoneEditorControl::addOption(const juce::String &name, int id)
+void LumatoneEditorControl::addOption(const juce::String &name, int id,  bool reshapeMenu)
 {
     jassert(style == LumatoneEditorControl::Style::DropdownBox);
     jassert(box.get() != nullptr);
@@ -139,6 +249,9 @@ void LumatoneEditorControl::addOption(const juce::String &name, int id)
         box->addItem(name, id);
         // setRange(1, box->getNumItems());
         range = juce::Range<int>(0, box->getNumItems());
+
+        if (reshapeMenu)
+            findIdealComboBoxNumColumns(box.get(), box->getNumItems());
     }
 }
 
@@ -309,6 +422,16 @@ juce::String LumatoneEditorControl::getOptionText(int index) const
     {
         return colourDropdownInput->getColourOptions()[index].toDisplayString(false);
     }
+}
+
+juce::String LumatoneEditorControl::getLabelText() const
+{
+    if (label)
+    {
+        return label->getText();
+    }
+
+    return juce::String();
 }
 
 bool LumatoneEditorControl::isValueNull() const

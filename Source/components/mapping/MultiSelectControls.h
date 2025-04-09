@@ -54,18 +54,19 @@ private:
     std::unique_ptr<juce::Label>    lblMultiSelect;
 
     std::unique_ptr<LumatoneEditorControl>  colourInput;
-    ColourDropdownSelector*                 colourDropdown;
     std::unique_ptr<LumatoneEditorControl>  keyTypeCombo;
     std::unique_ptr<LumatoneEditorControl>  noteInput;
     std::unique_ptr<LumatoneEditorControl>  channelInput;
 
+    ColourDropdownSelector*                 colourDropdown;
+
     // std::unique_ptr<juce::ComboBox>   notesDropDown;
     // std::unique_ptr<juce::ComboBox>   channelsDropDown;
 
-    std::unique_ptr<juce::Label>    lblColour;
-    std::unique_ptr<juce::Label>    lblKeyType;
-    std::unique_ptr<juce::Label>    lblNote;
-    std::unique_ptr<juce::Label>    lblChannel;
+    // std::unique_ptr<juce::Label>    lblColour;
+    // std::unique_ptr<juce::Label>    lblKeyType;
+    // std::unique_ptr<juce::Label>    lblNote;
+    // std::unique_ptr<juce::Label>    lblChannel;
 
 
     const float headerH         = 0.19f;

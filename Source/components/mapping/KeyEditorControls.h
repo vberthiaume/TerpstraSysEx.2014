@@ -27,7 +27,7 @@ class KeyEditorControls : public juce::Component
                         , public LumatoneEditor::EditorListener
                         , public ColourSelectionListener
                         , public ColourSelectionBroadcaster
-                        , public juce::ChangeListener
+                        // , public juce::ChangeListener
 {
 public:
     KeyEditorControls(const LumatoneEditorState& stateIn);
@@ -57,7 +57,7 @@ private:
     virtual void deselectColour() override;
 
     // Implementation of ChangeListener
-    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
+    // void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
 private:
     std::unique_ptr<juce::Label>            lblKeySettings;
@@ -71,18 +71,10 @@ private:
     std::unique_ptr<LumatoneEditorControl>  channelInput;
 
     std::unique_ptr<juce::ToggleButton>     autoIncrementToggleButton;
-    std::unique_ptr<juce::Slider>           noteAutoIncrInput;
-    std::unique_ptr<juce::Slider>           channelAutoIncrNoteInput;
+    std::unique_ptr<LumatoneEditorControl>  noteAutoIncrInput;
+    std::unique_ptr<LumatoneEditorControl>  channelAutoIncrNoteInput;
     juce::Rectangle<int>                    autoIncrementBounds;
     juce::Path                              autoIncrBorder;
-
-    std::unique_ptr<juce::Label>            lblColour;
-    std::unique_ptr<juce::Label>            lblKeyType;
-    std::unique_ptr<juce::Label>            lblNote;
-    std::unique_ptr<juce::Label>            lblChannel;
-    std::unique_ptr<juce::Label>            lblAutoIncNotes;
-    std::unique_ptr<juce::Label>            lblAutoIncChannels;
-    std::unique_ptr<juce::Label>            lblChannelAutoIncr;
 
     std::unique_ptr<ColourSelectorPanel>    colourPalettePanel;
 
@@ -94,8 +86,6 @@ private:
     juce::Path controlPath;
 
     int contentMarginWidth;
-
-    // int contentMarginWidth;
     // const float contentMarginParentW  = 0.02f;
 
     int contentMarginHeight;

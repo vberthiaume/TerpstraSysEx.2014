@@ -44,6 +44,11 @@ public:
 public:
     // Helpers for static style definition that don't need component references
 
+    juce::Font getLabelFont(float height=12.0f) const
+    {
+        return getAppFont(LumatoneEditorFont::FranklinGothic, height);
+    }
+
     juce::Font getTabBarFont(float height=12.0f) const
     {
         return getAppFont(LumatoneEditorFont::GothamNarrowMedium, height);

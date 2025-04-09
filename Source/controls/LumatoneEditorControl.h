@@ -15,8 +15,12 @@
 
 #include <JuceHeader.h>
 
+#include "../data/LumatoneEditorState.h"
+
 class ColourDropdownSelector;
-class LumatoneEditorControl : public juce::Component
+class LumatoneEditorLookAndFeel;
+class LumatoneEditorControl : public LumatoneEditorState, // only read - parent class writes to state
+                              public juce::Component
 {
 public:
 
@@ -28,23 +32,37 @@ public:
         // Rotary
     };
 
+    enum class LabelLocation
+    {
+        None = 0,
+        Left,
+        Top
+    };
+
+    enum ColourIds
+    {
+        outline = 0x501000,
+    };
+
 public:
 
-    LumatoneEditorControl(juce::String name, int minValue, int maxValue, LumatoneEditorControl::Style style = LumatoneEditorControl::Style::IncDecButtons, bool hasClearButton = false);
-    LumatoneEditorControl(juce::String name, LumatoneEditorControl::Style style = LumatoneEditorControl::Style::IncDecButtons, bool hasClearButton = false);
+    LumatoneEditorControl(const LumatoneEditorState& stateIn, juce::String name, int minValue, int maxValue, LumatoneEditorControl::Style style = LumatoneEditorControl::Style::IncDecButtons, bool hasClearButton = false);
+    LumatoneEditorControl(const LumatoneEditorState& stateIn, juce::String name, LumatoneEditorControl::Style style = LumatoneEditorControl::Style::IncDecButtons, bool hasClearButton = false);
 
     ~LumatoneEditorControl() override;
 
-    // void paint(juce::Graphics& g) override;
+    void paint(juce::Graphics& g) override;
     void resized() override;
 
     void setTextBoxStyle(juce::Slider::TextEntryBoxPosition position, bool readOnly, int boxWidth, int boxHeight);
+
+    void setLabelOptions(juce::String labelText, LabelLocation location, int labelWidth=0, int labelHeight=0);
 
     void setStyle(Style newStyle);
 
     void setRange(juce::Range<int> newRange);
     void setRange(int min, int max);
-    void addOption(const juce::String& name, int id);
+    void addOption(const juce::String& name, int id, bool reshapeMenu=true);
     void clearOptions();
 
     void allowTextInput(bool allowInput);
@@ -67,6 +85,7 @@ public:
     int getValue() const;
     juce::String getValueText() const;
     juce::String getOptionText(int index) const;
+    juce::String getLabelText() const;
 
     bool isValueNull() const;
 
@@ -81,6 +100,7 @@ public:
 private:
     bool updateNull(int newValue);
 
+private:
     void createClearButton();
 
     void updateColourHistory(const juce::Colour& newColour);
@@ -93,7 +113,8 @@ private:
     std::unique_ptr<ColourDropdownSelector> colourDropdownInput;
     juce::Array<Colour>                     colourHistory;
 
-    std::unique_ptr<juce::TextButton>   clearButton;
+    std::unique_ptr<juce::Label>            label;
+    std::unique_ptr<juce::TextButton>       clearButton;
 
     juce::Component* component = nullptr;
 
@@ -103,9 +124,17 @@ private:
     LumatoneEditorControl::Style style;
     juce::Range<int> range;
 
+    LabelLocation labelLocation = LabelLocation::None;
+    int labelWidthInput = 0;
+    int labelHeightInput = 0;
+
+    juce::FlexBox flexLayout;
+
     std::function<void()> valueChangedCallback;
 
     juce::String tooltip;
+
+    const float clearButtonMarginScalar = 0.2f;
 };
 
 #endif // LUMATONE_RANGED_CONTROL_H

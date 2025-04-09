@@ -33,11 +33,13 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     lblKeySettings->setFont(getAppFonts().getFont(LumatoneEditorFont::UniviaProBold));
     addAndMakeVisible(lblKeySettings.get());
 
-    colourInputBox = std::make_unique<LumatoneEditorControl>("colourInputBox", LumatoneEditorControl::Style::ColourDropdownInput, true);
+    colourInputBox = std::make_unique<LumatoneEditorControl>(*this, "colourInputBox", LumatoneEditorControl::Style::ColourDropdownInput, true);
+    colourInputBox->setLabelOptions(juce::translate("Colour") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     addAndMakeVisible(*colourInputBox);
     colourDropdown = colourInputBox->getColourSelector();
 
-    keyTypeCombo = std::make_unique<LumatoneEditorControl>("keyTypeCombo", LumatoneEditorControl::Style::DropdownBox, true);
+    keyTypeCombo = std::make_unique<LumatoneEditorControl>(*this, "keyTypeCombo", LumatoneEditorControl::Style::DropdownBox, true);
+    keyTypeCombo->setLabelOptions(juce::translate("Type"), LumatoneEditorControl::LabelLocation::Left);
     keyTypeCombo->addOption(juce::translate("Note on/Note off"), (int)LumatoneKeyType::noteOnNoteOff);
     keyTypeCombo->addOption(juce::translate("Continuous Controller"), (int)LumatoneKeyType::continuousController);
     keyTypeCombo->addOption(juce::translate("Lumatouch"), (int)LumatoneKeyType::lumaTouch);
@@ -52,7 +54,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     });
     addAndMakeVisible(keyTypeCombo.get());
 
-    noteInput = std::make_unique<LumatoneEditorControl>("noteInput", 0, 127, LumatoneEditorControl::Style::IncDecButtons, true);
+    noteInput = std::make_unique<LumatoneEditorControl>(*this, "noteInput", 0, 127, LumatoneEditorControl::Style::IncDecButtons, true);
+    noteInput->setLabelOptions(juce::translate("Note #") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
     noteInput->setValueChangedCallback([&]()
     {
@@ -62,7 +65,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     });
     addAndMakeVisible(noteInput.get());
 
-    channelInput = std::make_unique<LumatoneEditorControl>("channelInput", 1, 16, LumatoneEditorControl::Style::IncDecButtons, true);
+    channelInput = std::make_unique<LumatoneEditorControl>(*this, "channelInput", 1, 16, LumatoneEditorControl::Style::IncDecButtons, true);
+    channelInput->setLabelOptions(juce::translate("Channel #") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     channelInput->setValueChangedCallback([&]()
     {
         performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
@@ -77,57 +81,15 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     autoIncrementToggleButton->onClick = [&] { autoIncrementToggleCallback(autoIncrementToggleButton->getToggleState()); };
     autoIncrementToggleButton->setAlwaysOnTop(true);
 
-    noteAutoIncrInput.reset (new juce::Slider ("noteAutoIncrInput"));
+    noteAutoIncrInput = std::make_unique<LumatoneEditorControl>(*this, "noteAutoIncrInput", 0, 127, LumatoneEditorControl::Style::IncDecButtons, true);
+    noteAutoIncrInput->setLabelOptions(juce::translate("Notes, per-click") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     noteAutoIncrInput->setTooltip (juce::translate("Increment notes per-click by: "));
-    noteAutoIncrInput->setRange (0, 127, 1);
-    noteAutoIncrInput->setSliderStyle (juce::Slider::IncDecButtons);
-    noteAutoIncrInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     addAndMakeVisible(noteAutoIncrInput.get());
 
-    channelAutoIncrNoteInput.reset (new juce::Slider ("channelAutoIncrNoteInput"));
+    channelAutoIncrNoteInput = std::make_unique<LumatoneEditorControl>(*this, "channelAutoIncrNoteInput", 1, 16, LumatoneEditorControl::Style::IncDecButtons, true);
+    channelAutoIncrNoteInput->setLabelOptions(juce::translate("ChannelsAfterNote") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     channelAutoIncrNoteInput->setTooltip (juce::translate("After reaching this note, the channel is incremented and the note is reset to 0."));
-    channelAutoIncrNoteInput->setRange (1, 16, 1);
-    channelAutoIncrNoteInput->setSliderStyle (juce::Slider::IncDecButtons);
-    channelAutoIncrNoteInput->setTextBoxStyle (juce::Slider::TextBoxLeft, false, 56, 20);
     addAndMakeVisible(channelAutoIncrNoteInput.get());
-
-    lblColour = std::make_unique<juce::Label>("lblColour", juce::translate("Colour") + juce::String(":"));
-    lblColour->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
-    lblColour->setJustificationType(juce::Justification::centredLeft);
-    lblColour->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    addAndMakeVisible(lblColour.get());
-
-    lblKeyType = std::make_unique<juce::Label>("lblKeyType", "Type:");
-    lblKeyType->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
-    lblKeyType->setJustificationType(juce::Justification::centredLeft);
-    lblKeyType->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    addAndMakeVisible(lblKeyType.get());
-
-    lblNote = std::make_unique<juce::Label>("lblNote", "Note #:");
-    lblNote->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
-    lblNote->setJustificationType(juce::Justification::centredLeft);
-    lblNote->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    addAndMakeVisible(lblNote.get());
-
-    lblChannel = std::make_unique<juce::Label>("lblChannel", "Channel #:");
-    lblChannel->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
-    lblChannel->setJustificationType(juce::Justification::centredLeft);
-    lblChannel->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    addAndMakeVisible(lblChannel.get());
-
-    lblAutoIncNotes = std::make_unique<juce::Label>("lblAutoIncNotes", "Notes, per-click:");
-    lblAutoIncNotes->setFont(getAppFonts().getFont(LumatoneEditorFont::GothamNarrowMedium));
-    // lblAutoIncNotes->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, controlBoxFontHeightScalar);
-    lblAutoIncNotes->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
-    lblAutoIncNotes->setJustificationType(juce::Justification::centredLeft);
-    lblAutoIncNotes->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    addAndMakeVisible(lblAutoIncNotes.get());
-
-    lblAutoIncChannels = std::make_unique<juce::Label>("lblAutoIncChannels", juce::translate("ChannelsAfterNote") + ":");
-    lblAutoIncChannels->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
-    lblAutoIncChannels->setJustificationType(juce::Justification::centredLeft);
-    lblAutoIncChannels->setColour(juce::Label::ColourIds::textColourId, getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::DescriptionText));
-    addAndMakeVisible(lblAutoIncChannels.get());
 
     colourPalettePanel = std::make_unique<ColourSelectorPanel>(stateIn);
     colourPalettePanel->setBackgroundColour(getEditorLookAndFeel().findColour(LumatoneEditorColourIDs::ColourPaletteBackground));
@@ -153,15 +115,6 @@ KeyEditorControls::~KeyEditorControls()
 
     colourPalettePanel = nullptr;
 
-    lblChannelAutoIncr = nullptr;
-    lblAutoIncChannels = nullptr;
-    lblAutoIncNotes = nullptr;
-
-    lblChannel = nullptr;
-    lblNote = nullptr;
-    lblKeyType = nullptr;
-    lblColour = nullptr;
-
     channelAutoIncrNoteInput = nullptr;
     noteAutoIncrInput = nullptr;
     autoIncrementToggleButton = nullptr;
@@ -169,7 +122,6 @@ KeyEditorControls::~KeyEditorControls()
     channelInput = nullptr;
     noteInput = nullptr;
     keyTypeCombo = nullptr;
-
     colourInputBox = nullptr;
 
     lblKeySettings = nullptr;
@@ -235,24 +187,13 @@ void KeyEditorControls::resized()
     int controlMarginHeight = juce::roundToInt(controlRowHeight * keyControlH);
     keyControlHeight = controlRowHeight - controlMarginHeight;
 
-    lblColour->setTopLeftPosition(contentMarginWidth, headerHeight + contentMarginHeight + controlMarginHeight);
-    resizeLabelWithHeight(lblColour.get(), keyControlHeight, contentLabelFontScalar, "_");
-
-    colourButtonMargin = lblColour->getFont().getStringWidth(" ");
-    colourButtonWidth = roundToInt(getParentWidth() * colourButtonParentW) - colourButtonMargin;
-
-    colourInputBox->setBounds(lblColour->getRight(), lblColour->getY(), keyControlColumnRight - lblColour->getRight(), keyControlHeight);
-
-    lblKeyType->setTopLeftPosition(contentMarginWidth, lblColour->getBottom() + keyControlMarginHeight);
-    resizeLabelWithHeight(lblKeyType.get(), keyControlHeight, controlLabelFontScalar, "_");
-    keyTypeCombo->setBounds(lblKeyType->getRight(), lblKeyType->getY(), keyControlColumnRight - lblKeyType->getRight(), keyControlHeight);
+    colourInputBox->setBounds(contentMarginWidth,  headerHeight + contentMarginHeight + controlMarginHeight, keyControlColumnWidth, keyControlHeight);
+    keyTypeCombo->setBounds(contentMarginWidth, colourInputBox->getBottom() + keyControlMarginHeight, keyControlColumnWidth, keyControlHeight);
 
 
     // second column, colour area
 
     colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, keyTypeCombo->getBottom() + contentMarginHeight);
-    // colourPalettePanel->setBounds(colourColumnX, 0, colourColumnWidth, keyTypeCombo->getBottom());
-    // colourPalettePanel->setIndentSize(contentMarginHeight, false);
     colourPalettePanel->setTabBarDepth(headerHeight, true);
 
     colourColumnX = contentMarginWidth + keyControlColumnWidth + roundToInt(w * columnMarginW);
@@ -261,13 +202,8 @@ void KeyEditorControls::resized()
 
     // bottom two rows
 
-    lblNote->setTopLeftPosition(contentMarginWidth, keyTypeCombo->getBottom() + keyControlMarginHeight);
-    resizeLabelWithHeight(lblNote.get(), keyControlHeight, controlLabelFontScalar, "_");
-    noteInput->setBounds(lblNote->getRight(), lblNote->getY(), keyControlColumnRight - lblNote->getRight(), keyControlHeight);
-
-    lblChannel->setTopLeftPosition(contentMarginWidth, noteInput->getBottom() + keyControlMarginHeight);
-    resizeLabelWithHeight(lblChannel.get(), keyControlHeight, controlLabelFontScalar, "_");
-    channelInput->setBounds(lblChannel->getRight(), lblChannel->getY(), keyControlColumnRight - lblChannel->getRight(), keyControlHeight);
+    noteInput->setBounds(contentMarginWidth, keyTypeCombo->getBottom() + keyControlMarginHeight, keyControlColumnWidth, keyControlHeight);
+    channelInput->setBounds(contentMarginWidth, noteInput->getBottom() + keyControlMarginHeight, keyControlColumnWidth, keyControlHeight);
 
 
     autoIncrementBounds = juce::Rectangle<int>(colourColumnX, colourPalettePanel->getBottom() + controlMarginH, getWidth() - colourColumnX - contentMarginWidth, getHeight() - colourPalettePanel->getBottom() - contentMarginHeight);
@@ -277,7 +213,6 @@ void KeyEditorControls::resized()
     juce::String autoIncToggleWidthRef = autoIncrementToggleButton->getButtonText() + juce::String::repeatedString("__", 2);
     int autoIncToggleHeight = juce::roundToInt(keyControlHeight * 0.4f);
     int autoIncToggleWidth = getEditorLookAndFeel().getToggleButtonFont(*autoIncrementToggleButton, autoIncToggleHeight).getStringWidth(autoIncToggleWidthRef);
-    // autoIncrementToggleButton->setBounds(autoIncrementBounds.withSize(autoIncToggleWidth, autoIncToggleHeight).translated(autoIncToggleHeight*2, - autoIncToggleHeight / 2));
     autoIncrementToggleButton->setBounds(autoIncrementBounds.getX() + autoIncToggleHeight*2, autoIncrementBounds.getY() - autoIncToggleHeight / 2, autoIncToggleWidth, autoIncToggleHeight);
 
     // second column
@@ -286,22 +221,15 @@ void KeyEditorControls::resized()
     int autoControlMarginHeight = autoControlBounds.getHeight() * 0.25f;
     int autoControlHeight = (autoControlBounds.getHeight() - autoControlMarginHeight) / 2;
 
-    // juce::Font buttonFont = getEditorLookAndFeel().getTextButtonFont(*noteAutoIncButton, keyControlHeight);
-    juce::Font buttonFont = getEditorLookAndFeel().getSliderTextBoxFont(autoControlHeight);
-    int noteInputWidth = buttonFont.getStringWidth("999");
-    // int autoNoteButtonWidth = buttonFont.getStringWidth(juce::translate("Auto"));
-    // noteAutoIncButton->setBounds(autoControlBounds.getX(), autoControlBounds.getY(), autoNoteButtonWidth, autoControlHeight);
-    resizeLabelWithHeight(lblAutoIncNotes.get(), autoControlHeight, controlLabelFontScalar, "_" /*, getWidth() - keyControlColumnRight*/);
-    lblAutoIncNotes->setTopLeftPosition(autoControlBounds.getX(), autoControlBounds.getY() + (autoControlBoundsMargin / 2));
+    juce::Font labelFont = getEditorLookAndFeel().getLabelFont(autoControlHeight);
+    int noteInputWidth = labelFont.getStringWidth("999");
+    int autoNoteLabelWidth = labelFont.getStringWidth(noteAutoIncrInput->getLabelText());
     noteAutoIncrInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, noteInputWidth, autoControlHeight);
-    noteAutoIncrInput->setBounds(lblAutoIncNotes->getRight(), lblAutoIncNotes->getY(), noteInputWidth + autoControlHeight*2, autoControlHeight);
+    noteAutoIncrInput->setBounds(autoControlBounds.getX(), autoControlBounds.getY() + (autoControlBoundsMargin / 2), autoNoteLabelWidth +  autoControlHeight*2, autoControlHeight);
 
-    int autoChnlLabelWidth = getEditorLookAndFeel().getLabelFont(*lblAutoIncChannels).getStringWidth(lblAutoIncChannels->getText());
-    resizeLabelWithHeight(lblAutoIncChannels.get(), autoControlHeight, controlLabelFontScalar, "_");
-    lblAutoIncChannels->setTopLeftPosition(autoControlBounds.getX(), lblAutoIncNotes->getBottom() + autoControlMarginHeight/2);
-    // channelAutoIncrNoteInput->setTopLeftPosition(autoControlBounds.getX(), autoControlBounds.getY() + autoControlHeight);
+    int autoChnlLabelWidth = labelFont.getStringWidth(channelAutoIncrNoteInput->getLabelText());
     channelAutoIncrNoteInput->setTextBoxStyle(juce::Slider::TextBoxLeft, false, noteInputWidth, autoControlHeight);
-    channelAutoIncrNoteInput->setBounds(lblAutoIncChannels->getRight(), lblAutoIncChannels->getY(), noteInputWidth + autoControlHeight*2, autoControlHeight);
+    channelAutoIncrNoteInput->setBounds(autoControlBounds.getX(), noteAutoIncrInput->getBottom() + autoControlMarginHeight/2, autoChnlLabelWidth +  autoControlHeight*2, autoControlHeight);
 
 
     // int selectionTabBarWidth = juce::roundToInt(w * 0.4f);
@@ -390,15 +318,11 @@ void KeyEditorControls::autoIncrementToggleCallback(bool isToggled)
     {
         noteAutoIncrInput->setEnabled(true);
         channelAutoIncrNoteInput->setEnabled(true);
-        lblAutoIncNotes->setEnabled(true);
-        lblAutoIncChannels->setEnabled(true);
     }
     else
     {
         noteAutoIncrInput->setEnabled(false);
         channelAutoIncrNoteInput->setEnabled(false);
-        lblAutoIncNotes->setEnabled(false);
-        lblAutoIncChannels->setEnabled(false);
     }
 }
 
@@ -460,11 +384,11 @@ void KeyEditorControls::deselectColour()
     return;
 }
 
-void KeyEditorControls::changeListenerCallback(juce::ChangeBroadcaster *source)
-{
-    // if (source == selectionTabBar.get())
-    // {
-    //     // resizeEditSectionTabs();
-    //     setSelectionTab(SelectionTabs(selectionTabBar->getCurrentTabIndex()));
-    // }
-}
+// void KeyEditorControls::changeListenerCallback(juce::ChangeBroadcaster *source)
+// {
+//     // if (source == selectionTabBar.get())
+//     // {
+//     //     // resizeEditSectionTabs();
+//     //     setSelectionTab(SelectionTabs(selectionTabBar->getCurrentTabIndex()));
+//     // }
+// }
