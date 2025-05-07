@@ -18,7 +18,7 @@ class FirmwareDlg : public Component,
     protected Button::Listener, 
     protected PathBrowserComponent::Listener,
     protected FirmwareTransfer::ProcessListener,
-    protected LumatoneController::FirmwareListener,
+    protected LumatoneEditor::FirmwareListener,
     private Timer
 {
 public:
@@ -30,11 +30,11 @@ public:
 
     void resized() override;
 
-    void lookAndFeelChanged() override;
-
     void buttonClicked(Button* btn) override;
 
     void updateFirmwareVersionLabel();
+
+    void postMessage(String msgForLog);
     
     //=========================================================================
     // PathBrowserComponent::Listener Implementation
@@ -45,17 +45,13 @@ public:
     void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, String msg) override;
 
     //=========================================================================
-    // LumatoneController::FirmwareListener implementation
+    // LumatoneEditor::FirmwareListener implementation
 
-    void firmwareRevisionReceived(int major, int minor, int revision) override;
+    void firmwareRevisionReceived(FirmwareVersion version) override;
     
     //=========================================================================
     // juce::Timer Implementation
     void timerCallback() override;
-
-private:
-
-    double numIncrementsToProgress(int numberOfIncrements);
 
 private:
 
@@ -74,4 +70,10 @@ private:
     String msgLog;
     bool infoNeedsUpdate = false;
     const int infoUpdateTimeoutMs = 100;
+
+    // Style helpers
+    int margin = 12;
+    int doubleMargin = margin * 2;
+    float buttonWidthScalar = 0.3f;
+    int buttonHeight = 30;
 };

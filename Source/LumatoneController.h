@@ -10,30 +10,24 @@
 
 #pragma once
 
-#include "KeyboardDataStructure.h"
+#include "ApplicationListeners.h"
+#include "./data/lumatone_layout.h"
 #include "TerpstraMidiDriver.h"
 #include "DeviceActivityMonitor.h"
 #include "FirmwareTransfer.h"
+#include "key_update_buffer.h"
 
 //==============================================================================
 // Helper class for parsing and comparing (todo) firmware versions
 
 
 
-class LumatoneController :  protected TerpstraMidiDriver::Listener, 
-                            protected FirmwareTransfer::ProcessListener,
-                            private juce::Thread::Listener,
-                            private juce::Timer, 
+class LumatoneController :  private TerpstraMidiDriver::Collector,
+                            protected FirmwareTransfer::ProcessListener, // Firmware transfer updates
+                            private juce::Thread::Listener,              // Firmware thread exited
+                            private juce::Timer,
                             private juce::ChangeListener
 {
-public:
-
-    enum sysExSendingMode
-    {
-        liveEditor = 0,
-        offlineEditor = 1,
-        firmwareUpdate = 2
-    };
 
 public:
 
@@ -46,20 +40,14 @@ public:
     //============================================================================
     // Methods to configure firmware communication parameters
 
-    sysExSendingMode getSysExSendingMode() const { return editingMode; }
+    sysExSendingMode getEditorMode() const { return editingMode; }
     void setSysExSendingMode(sysExSendingMode newMode);
 
     FirmwareVersion getFirmwareVersion() const { return firmwareVersion; }
 
-    LumatoneFirmwareVersion getConfirmedVersion() const { return determinedVersion; }
-    
-    // Takes a generic firmware version and parses it into a recognized firmware version
-    void setFirmwareVersion(FirmwareVersion firmwareVersionIn);
+    LumatoneFirmwareVersion getLumatoneVersion() const { return determinedVersion; }
 
-    // Takes a recognized firmware version
-    void setFirmwareVersion(LumatoneFirmwareVersion lumatoneVersion, bool parseVersion = true);
-
-    int getOctaveSize() const { return octaveSize; }
+    const FirmwareSupport& getFirmwareSupport() const { return firmwareSupport; }
 
     void refreshAvailableMidiDevices();
 
@@ -76,25 +64,42 @@ public:
 
     bool requestFirmwareUpdate(File firmwareFile, FirmwareTransfer::ProcessListener* listenerIn = nullptr);
 
-    // Auto-connection and monitoring 
+    // Auto-connection and monitoring
 
     void detectAndConnectToLumatone();
     void stopAutoConnection();
 
-    bool isDetectingLumatone() const { return deviceMonitor.willDetectDeviceIfDisconnected() && !deviceMonitor.isConnectionEstablished(); }
-    void setDeviceDetectionTimeout(int responseTimeoutMs) { deviceMonitor.setResponseTimeoutMs(responseTimeoutMs); }
+    bool isDetectingLumatone() const { return deviceMonitor->willDetectDeviceIfDisconnected() && !deviceMonitor->isConnectionEstablished(); }
+    void setDeviceDetectionTimeout(int responseTimeoutMs) { deviceMonitor->setResponseTimeoutMs(responseTimeoutMs); }
 
-    bool willCheckConnectionWhenInactvie() const { return deviceMonitor.willCheckForInactivity(); }
-    void checkConnectionWhenInactive(bool checkWhenInactive) { deviceMonitor.setCheckForInactivity(checkWhenInactive); }
+    bool willCheckConnectionWhenInactvie() const { return deviceMonitor->willCheckForInactivity(); }
+    void checkConnectionWhenInactive(bool checkWhenInactive) { deviceMonitor->setCheckForInactivity(checkWhenInactive); }
+
+public:
+    // LumatoneLayout intermediaries
+
+    LumatoneKey* getKey(int boardIndex, int keyIndex);
+    LumatoneBoard* getBoard(int boardIndex);
+
+    int getNumBoards() const;
+    int getOctaveBoardSize() const;
+    bool isKeyCoordValid(LumatoneKeyCoord coord) const;
+
+    bool getInvertExpression() const;
+    bool getInvertSustain() const;
+    juce::uint8 getExpressionSensitivity() const;
+
+
+public:
 
     //============================================================================
     // Combined (hi-level) commands
 
     // Send all parametrizations of one sub board
-    void sendAllParamsOfBoard(int boardIndex, TerpstraKeys boardData);
+    void sendAllParamsOfBoard(int boardIndex, LumatoneBoard boardData, bool bufferMessages=false);
 
     // Send and save a complete key mapping
-    void sendCompleteMapping(TerpstraKeyMapping mappingData);
+    void sendCompleteMapping(LumatoneLayout mappingData, bool bufferMessages=false);
 
     // Send request to receive the current mapping of one sub board on the controller
     void sendGetMappingOfBoardRequest(int boardIndex);
@@ -103,13 +108,13 @@ public:
     void sendGetCompleteMappingRequest();
 
     // Send parametrization of one key to the device
-    void sendKeyParam(int boardIndex, int keyIndex, TerpstraKey keyData);
+    void sendKeyParam(int boardIndex, int keyIndex, LumatoneKey keyData, bool bufferMessages = false);
 
     // Send configuration of a certain look up table
-    void sendTableConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType, const uint8* table);
+    void sendTableConfig(LumatoneConfigTable::TableType velocityCurveType, const uint8* table);
 
     // Reset configuration of a certain look up table to factory settings
-    void resetVelocityConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType);
+    void resetVelocityConfig(LumatoneConfigTable::TableType velocityCurveType);
 
     // Ping a device cached in the device list, will primarily use GetSerialIdentity, or Ping if determined version happens to be >= 1.0.9
     unsigned int sendTestMessageToDevice(int deviceIndex, unsigned int pingId);
@@ -121,9 +126,9 @@ public:
     // Single (mid-level) commands
 
     // Send note, channel, cc, and fader polarity data
-    void sendKeyConfig(int boardIndex, int keyIndex, int noteOrCCNum, int channel, LumatoneKeyType keyType, bool faderUpIsNull = true);
+    void sendKeyConfig(int boardIndex, int keyIndex, int noteOrCCNum, int channel, int keyType, bool faderUpIsNull = true, bool bufferMessages = false);
 
-    void sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour);
+    void sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour, bool bufferMessages = false);
 
     // Send expression pedal sensivity
     void sendExpressionPedalSensivity(unsigned char value);
@@ -186,6 +191,9 @@ public:
 
     void sendVelocityIntervalConfigRequest();
 
+    // CMD 22h: Read back the fader type of all keys on the targeted board.
+	void getFaderTypeConfig(int boardIndex);
+
     // This command is used to read back the serial identification number of the keyboard.
     void sendGetSerialIdentityRequest();
 
@@ -205,140 +213,109 @@ public:
     // Send a value from 0-127 for the Lumatone to echo back, returns actual value sent (in case of 7-bit masking); used for auto device connection and monitoring
     int pingLumatone(uint8 pingId);
 
+    // Set MIDI Channels of peripheral controllers, pitch & mod wheels, expression & sustain pedals
+    void setPeripheralChannels(int pitchWheelChannel, int modWheelChannel, int expressionChannel, int sustainChannel);
+    void setPeripheralChannels(PeripheralChannelSettings channelSettings);
+
+    // Get MIDI Channels of peripheral controllers, pitch & mod wheels, expression & sustain pedals
+    void getPeripheralChannels();
+
+    // Invert the polarity of the sustain pedal
+    void invertSustainPedal(bool setInverted);
+
+    // Reset preset mappings to factory mappings
+    void resetPresetsToFactoryDefault();
+    void resetPresetToFactoryDefault(int presetIndex);
+
+    // Get interaction flags of current preset
+    void getPresetFlags();
+
+    // Get sensitivity setting of expression pedal
+    void getExpressionPedalSensitivity();
+
     //============================================================================
     // FirmwareTransfer::Listener
 
     void firmwareTransferUpdate(FirmwareTransfer::StatusCode statusCode, String msg) override;
 
     void exitSignalSent() override;
-    
+
     //============================================================================
     // juce::Timer implementation
 
     void timerCallback() override;
-    
+
+    // Buffer read helpers
+    FirmwareSupport::Error getBufferErrorCode(const uint8* sysExData);
+    FirmwareSupport::Error handleBufferCommand(const MidiMessage& midiMessage);
+
     //============================================================================
     // juce::ChangeListener implementation
 
     void changeListenerCallback(ChangeBroadcaster* source) override;
+
+
+    //============================================================================
+    // Test functions
+
+    void loadRandomMapping(int testTimeoutMs, int maxIterations, int i = 0);
+
+private:
+
+    // Takes a generic firmware version and parses it into a recognized firmware version
+    void setFirmwareVersion(FirmwareVersion firmwareVersionIn);
+
+    // Takes a recognized firmware version
+    void setFirmwareVersion(LumatoneFirmwareVersion lumatoneVersion, bool parseVersion = true);
 
 protected:
     //============================================================================
     // Implementation of TerpstraMidiDriver::Listener
 
     virtual void midiMessageReceived(MidiInput* source, const MidiMessage& midiMessage) override;
-
-    virtual void midiMessageSent(const MidiMessage& midiMessage) override;
-
+    virtual void midiMessageSent(MidiOutput* target, const MidiMessage& midiMessage) override;
     virtual void midiSendQueueSize(int queueSize) override;
-
     virtual void generalLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel) override;
-
-    virtual void noAnswerToMessage(const MidiMessage& midiMessage) override;
-
-public:
-    //============================================================================
-    // Public interface for Lumatone connection status
-
-    class StatusListener
-    {
-    public:
-
-        virtual void connectionEstablished(int inputMidiDevice, int outputMidiDevice) {};
-        virtual void connectionLost() {};
-    };
-
-    ListenerList<StatusListener> statusListeners;
-    void    addStatusListener(StatusListener* listenerIn) { statusListeners.add(listenerIn); }
-    void removeStatusListener(StatusListener* listenerIn) { statusListeners.remove(listenerIn); }
+    virtual void noAnswerToMessage(MidiInput* expectedDevice, const MidiMessage& midiMessage) override;
 
 private:
-    
-    void testResponseReceived();
 
-    void onConnectionConfirmed(bool sendChangeSignal);
+    void confirmAutoConnection();
+    void onConnectionConfirm(bool sendChangeSignal);
     void onDisconnection();
     void onFirmwareUpdateReceived();
 
+
+private:
+    ListenerList<LumatoneEditor::StatusListener> statusListeners;
 public:
-    //============================================================================
-    // Public interface for Lumatone firmware communication
-    class FirmwareListener
-    {
-    public:
+    void    addStatusListener(LumatoneEditor::StatusListener* listenerIn) { statusListeners.add(listenerIn); }
+    void removeStatusListener(LumatoneEditor::StatusListener* listenerIn) { statusListeners.remove(listenerIn); }
 
-        // rgbFlag uses 0 for red, 1 for green, 2 for blue
-        virtual void octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData) {};
+private:
+    ListenerList<LumatoneEditor::FirmwareListener> firmwareListeners;
+public:
+    void    addFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn) { firmwareListeners.add(listenerIn); }
+    void removeFirmwareListener(LumatoneEditor::FirmwareListener* listenerIn) { firmwareListeners.remove(listenerIn); }
 
-        virtual void octaveChannelConfigReceived(int octaveIndex, const int* channelData) {};
+private:
+     ListenerList<LumatoneEditor::EditorListener> editorListeners;
+public:
+     void    addEditorListener(LumatoneEditor::EditorListener* listenerIn) { editorListeners.add(listenerIn); }
+     void removeEditorListener(LumatoneEditor::EditorListener* listenerIn) { editorListeners.remove(listenerIn); }
 
-        virtual void octaveNoteConfigReceived(int octaveIndex, const int* noteData) {};
-
-        virtual void keyTypeConfigReceived(int octaveIndex, const int* keyTypeData) {};
-
-        virtual void velocityConfigReceived(const int* velocityData) {};
-
-        virtual void aftertouchConfigReceived(const int* aftertouch) {};
-
-        virtual void velocityIntervalConfigReceived(const int* velocityData) {};
-
-        virtual void faderConfigReceived(const int* faderData) {};
-
-        virtual void serialIdentityReceived(int inputDeviceIndex, const int* serialBytes) {};
-
-        virtual void lumatouchConfigReceived(const int* lumatouchData) {};
-
-        virtual void firmwareRevisionReceived(int majorVersion, int minorVersion, int revision) {};
-
-        virtual void pingResponseReceived(int inputDeviceIndex, unsigned int pingValue) {};
-
-        virtual void peripheralMidiChannelsReceived(int pitchWheelChannel, int modWheelChannel, int expressionChannel, int sustainPedalChannel) {};
-
-        virtual void pedalCalibrationDataReceived(int minBound, int maxBound, bool pedalIsActive) {};
-
-        virtual void wheelsCalibrationDataReceived(int minPitch, int maxPitch, int minMod, int maxMod) {};
-
-        virtual void noAnswerToCommand(int cmd) {};
-    };
-
-    ListenerList<FirmwareListener> firmwareListeners;
-
-    void    addFirmwareListener(FirmwareListener* listenerIn) { firmwareListeners.add(listenerIn); }
-    void removeFirmwareListener(FirmwareListener* listenerIn) { firmwareListeners.remove(listenerIn); }
-
-
-    class EditorListener
-    {
-    public:
-
-        virtual void keyFunctionConfigurationChanged(int octaveNumber, int keyNumber, int noteOrCC, int midiChannel, LumatoneKeyType keyType, bool faderUpIsNull) {};
-
-        virtual void keyColourConfigurationChanged(int octaveNumber, int keyNumber, Colour keyColour) {};
-    };
-
-    ListenerList<EditorListener> editorListeners;
-
-    void    addEditorListener(EditorListener* listenerIn) { editorListeners.add(listenerIn); }
-    void removeEditorListener(EditorListener* listenerIn) { editorListeners.remove(listenerIn); }
-
-    class MidiListener
-    {
-    public:
-
-        virtual void handleMidiMessage(const MidiMessage& msg) = 0;
-    };
-
-    ListenerList<MidiListener> midiListeners;
-
-    void    addMidiListener(MidiListener* listenerIn) { midiListeners.add(listenerIn); }
-    void removeMidiListener(MidiListener* listenerIn) { midiListeners.remove(listenerIn); }
+//private:
+//    ListenerList<MidiListener> midiListeners;
+//public:
+//    void    addMidiListener(MidiListener* listenerIn) { midiListeners.add(listenerIn); }
+//    void removeMidiListener(MidiListener* listenerIn) { midiListeners.remove(listenerIn); }
 
 private:
     //============================================================================
     // Lower-level message unpacking and handling
 
     FirmwareSupport::Error handleOctaveConfigResponse(
-        const MidiMessage& midiMessage, 
+        const MidiMessage& midiMessage,
         std::function <FirmwareSupport::Error(const MidiMessage&, int&, uint8, int*)> unpackFunction,
         std::function <void(int,void*)> callbackFunctionIfNoError = {}
     );
@@ -364,7 +341,9 @@ private:
     FirmwareSupport::Error handleVelocityIntervalConfigResponse(const MidiMessage& midiMessage);
 
     FirmwareSupport::Error handleFaderConfigResponse(const MidiMessage& midiMessage);
-    
+
+    FirmwareSupport::Error handleFaderTypeConfigResponse(const MidiMessage& midiMessage);
+
     FirmwareSupport::Error handleSerialIdentityResponse(const MidiMessage& midiMessage);
 
     FirmwareSupport::Error handleFirmwareRevisionResponse(const MidiMessage& midiMessage);
@@ -372,6 +351,16 @@ private:
     FirmwareSupport::Error handleLumatouchConfigResponse(const MidiMessage& midiMessage);
 
     FirmwareSupport::Error handlePingResponse(const MidiMessage& midiMessage);
+
+    FirmwareSupport::Error handlePeripheralCalibrationData(const MidiMessage& midiMessage);
+    FirmwareSupport::Error handleExpressionPedalCalibrationData(const MidiMessage& midiMessage);
+    FirmwareSupport::Error handleWheelsCalibrationData(const MidiMessage& midiMessage);
+
+    FirmwareSupport::Error handleGetPeripheralChannelResponse(const MidiMessage& midiMessage);
+
+    FirmwareSupport::Error handleGetPresetFlagsResponse(const MidiMessage& midiMessage);
+
+    FirmwareSupport::Error handleGetExpressionPedalSensitivityResponse(const MidiMessage& midiMessage);
 
     void handleMidiDriverError(FirmwareSupport::Error errorToHandle, int commandReceived = -1);
 
@@ -389,21 +378,27 @@ private:
 
     HajuErrorVisualizer         errorVisualizer;
     TerpstraMidiDriver          midiDriver;
-    DeviceActivityMonitor       deviceMonitor;
 
-    std::unique_ptr<FirmwareTransfer> firmwareTransfer;
+    LumatoneKeyUpdateBuffer     keyUpdater;
 
-    MidiBuffer                  responseQueue;
-    int                         readSample = 0;
-    int                         sampleNum = 0;
-    const int                   bufferReadTimeoutMs = 50;
+    std::unique_ptr<DeviceActivityMonitor>  deviceMonitor;
+
+    std::unique_ptr<FirmwareTransfer>       firmwareTransfer;
+
+//    MidiBuffer                  responseQueue;
+//    int                         readSample = 0;
+//    int                         sampleNum = 0;
+    const int                   bufferReadTimeoutMs = 30;
     const int                   bufferReadSize = 16;
     bool                        bufferReadRequested = false;
+
+    std::atomic<int>            readQueueSize;
+    int                         sendQueueSize = 0;
 
     int                         lastTestDeviceSent = -1;
     int                         lastTestDeviceResponded = -1;
     bool                        waitingForTestResponse = false;
     bool                        currentDevicePairConfirmed = false;
-    
-    LumatoneController::sysExSendingMode editingMode = sysExSendingMode::offlineEditor;
+
+    sysExSendingMode editingMode = sysExSendingMode::offlineEditor;
 };

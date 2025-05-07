@@ -22,19 +22,27 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "LumatoneController.h"
-#include "HexagonTilingGeometry.h"
-
-#include "ImageResampling/ImageResampler.h"
-#include "BoardGeometry.h"
+#include "lumatone_render.h"
 #include "LumatoneController.h"
 
+enum class LumatoneComponentRenderMode
+{
+	NoDisplay = -1,
+
+	Shape = 0x000010,
+	ShapeInteractive = 0x000011,
+
+	Graphic = 0x000020,
+	GraphicInteractive = 0x000021,
+
+	MaxRes = 0x000030,
+};
 
 // Representation of a key inside the overview
-class KeyMiniDisplayInsideAllKeysOverview : public Component, public LumatoneController::MidiListener
+class KeyMiniDisplayInsideAllKeysOverview : public MappedLumatoneKey, public Component, public LumatoneEditor::MidiListener
 {
 public:
-	KeyMiniDisplayInsideAllKeysOverview(int newBoardIndex, int newKeyIndex);
+	KeyMiniDisplayInsideAllKeysOverview(int newBoardIndex, int newKeyIndex, const LumatoneKey& keyDataIn);
 	~KeyMiniDisplayInsideAllKeysOverview();
 
 	void paint(Graphics&) override;
@@ -42,8 +50,11 @@ public:
 	void mouseDown(const MouseEvent& e) override;
 	void mouseUp(const juce::MouseEvent& e) override;
 
+	LumatoneComponentRenderMode getRenderMode() const { return renderMode; }
+	void setRenderMode(LumatoneComponentRenderMode uiModeIn);
 
-	void setKeyGraphics(Image& colourGraphicIn, Image& shadowGraphicIn);
+	juce::Colour getKeyColour() const;
+	void setKeyGraphics(Image colourGraphicIn, Image shadowGraphicIn);
 
 	// Implementation of TerpstraNidiDriver::Listener
 	//void midiMessageReceived(const MidiMessage& midiMessage) override;
@@ -55,18 +66,12 @@ public:
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KeyMiniDisplayInsideAllKeysOverview)
 
-	const TerpstraKey* getKeyData() const;
-	Colour getKeyColour() const;
+	LumatoneComponentRenderMode renderMode;
 
-	int boardIndex = -1;
-	int keyIndex = -1;
 	bool isHighlighted = false;
 
-	Image* colourGraphic = nullptr;
-	Image* shadowGraphic = nullptr;
-
-	//DEBUG
-	Colour keyColour;
+	juce::Image colourGraphic;
+	juce::Image shadowGraphic;
 };
 
 //[/Headers]
@@ -82,7 +87,8 @@ private:
                                                                     //[/Comments]
 */
 class AllKeysOverview  : public juce::Component,
-                         public LumatoneController::FirmwareListener,
+                         public LumatoneEditor::StatusListener,
+                         public LumatoneEditor::FirmwareListener,
                          public juce::Button::Listener
 {
 public:
@@ -100,10 +106,24 @@ public:
 
     void setFirmwareVersion(FirmwareVersion versionIn);
 
-	void lookAndFeelChanged() override;
-
 	void resetOctaveSize();
-	void firmwareRevisionReceived(int major, int minor, int revision) override;
+
+	void refreshMappingData(int boardIndex, int keyIndex, bool repaint=true);
+	void refreshMappingData(int boardIndex, bool repaint = true);
+	void refreshMappingData();
+
+	LumatoneComponentRenderMode getRenderMode() const { return renderMode; }
+	void setRenderMode(LumatoneComponentRenderMode modeIn);
+
+	void rerender();
+
+	// LumatoneEditor::StatusListener
+	void connectionEstablished(int, int) override;
+	void connectionLost() override;
+
+	// LumatoneEditor::FirmwareListener implementation
+	void firmwareRevisionReceived(FirmwareVersion version) override;
+
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -114,9 +134,6 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-
-
-private:
 
 	struct OctaveBoard
 	{
@@ -130,24 +147,30 @@ private:
 	int			currentOctaveSize = 0;
 	int			currentSetSelection;
 
-	HexagonTilingGeometry tilingGeometry;
-
-	Image keyColourLayer;
-	Image keyShadowLayer;
+	LumatoneComponentRenderMode renderMode;
+	LumatoneRender lumatoneRender;
 
     std::unique_ptr<Label> lblFirmwareVersion;
 
 	//==============================================================================
 	// Style helpers
 
-	std::unique_ptr<ImageProcessor> imageProcessor;
+    int currentWidth = 0;
+    int currentHeight = 0;
 
 	Rectangle<int> lumatoneBounds;
 	int octaveLineY = 0;
 
-	Image lumatoneGraphic;
-	Image keyShapeGraphic;
-	Image keyShadowGraphic;
+ 	int keyWidth = 0;
+    int keyHeight = 0;
+
+    juce::Array<juce::Point<float>> keyCentres;
+
+	juce::Image lumatoneGraphic;
+	juce::Image keyShapeGraphic;
+	juce::Image keyShadowGraphic;
+	
+	juce::Image currentRender;
 
 	//==============================================================================
 	// Position and sizing constants in reference to parent bounds
@@ -175,23 +198,8 @@ private:
 	const float keyW = 0.027352f;
 	const float keyH = 0.07307f;
 
-	const float oct1Key1X = 0.0839425f;
-	const float oct1Key1Y = 0.335887f;
-
-	const float oct1Key56X = 0.27304881f;
-	const float oct1Key56Y = 0.8314673f;
-
-	const float oct5Key7X = 0.878802f;
-	const float oct5Key7Y = 0.356511491f;
 
 	//===============================================================================
-
-	Point<float>  oct1Key1;
-	Point<float> oct1Key56;
-	Point<float>  oct5Key7;
-
-	// Geometry settings
-	TerpstraBoardGeometry	boardGeometry;
 
     //[/UserVariables]
 
@@ -207,4 +215,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

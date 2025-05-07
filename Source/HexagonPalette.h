@@ -11,7 +11,8 @@
 #pragma once
 
 #include "Palette.h"
-#include "HexagonTilingGeometry.h"
+#include "lumatone_geometry.h"
+#include "lumatone_tiling.h"
 
 
 //==============================================================================
@@ -51,10 +52,10 @@ public:
             g.setColour(getSwatchColour(i));
             g.fillPath(swatch);
 
-#if JUCE_DEBUG
-            g.setColour(getSwatchColour(i).contrasting());
-            g.drawFittedText(String(i), swatch.getBounds().toNearestInt(), Justification::centred, 1);
-#endif
+//#if JUCE_DEBUG
+//            g.setColour(getSwatchColour(i).contrasting());
+//            g.drawFittedText(String(i), swatch.getBounds().toNearestInt(), Justification::centred, 1);
+//#endif
         }
 
         if (selectedSwatch >= 0)
@@ -69,6 +70,8 @@ public:
         float scalar = (width > height)
             ? getWidth() / width
             : getHeight() / height;
+
+        scalar *= (1 - 0.05f); // kludge margin to fix it getting cutoff sometimes
 
         float newWidth = width * scalar;
         float newHeight = height * scalar;
@@ -93,7 +96,7 @@ private:
 
     void createSwatches()
     {
-        HexagonTilingGeometry tiling;
+        LumatoneTiling tiling;
         tiling.fitTilingTo(Rectangle<float>(0.0, 0.0, width, height),
             numColumns, numRows, margin, 0, true
         );
@@ -133,7 +136,7 @@ private:
 
     const float margin = 0.024f;
     float width = 1, height = 1;
-    
+
     int numColumns = 0;
     int numRows = 0;
 
@@ -144,16 +147,16 @@ class TenHexagonPalette : public HexagonPalette
 {
     Array<Point<int>> createCoordinates()
     {
-        Array<Point<int>> coords = { 
-			Point<int>(1, 0), 
-			Point<int>(2, 0), 
+        Array<Point<int>> coords = {
+			Point<int>(1, 0),
+			Point<int>(2, 0),
 			Point<int>(3, 0),
-			Point<int>(0, 1), 
-			Point<int>(1, 1), 
-			Point<int>(2, 1), 
+			Point<int>(0, 1),
+			Point<int>(1, 1),
+			Point<int>(2, 1),
 			Point<int>(3, 1),
-			Point<int>(0, 2), 
-			Point<int>(1, 2), 
+			Point<int>(0, 2),
+			Point<int>(1, 2),
 			Point<int>(2, 2)
         };
 

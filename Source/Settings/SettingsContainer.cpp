@@ -38,7 +38,9 @@ void SettingsCategoryModel::refreshCategories()
 
     categories = {
         "Calibrate",
-        "Firmware"
+        "Firmware",
+        "MIDI",
+        "Presets"
     };
 
     if (showDeveloperPanel)
@@ -46,10 +48,9 @@ void SettingsCategoryModel::refreshCategories()
 }
 
 void SettingsCategoryModel::setDeveloperMode(bool enableDeveloperMode)
-{ 
+{
     showDeveloperPanel = enableDeveloperMode;
     refreshCategories();
-}
 
 //=========================================================================
 
@@ -71,7 +72,9 @@ SettingsContainer::SettingsContainer()
 
 SettingsContainer::~SettingsContainer()
 {
+    settingsPanel = nullptr;
     categoryList = nullptr;
+
 }
 
 void SettingsContainer::paint(Graphics& g)
@@ -82,7 +85,7 @@ void SettingsContainer::paint(Graphics& g)
 void SettingsContainer::resized()
 {
     categoryList->setBounds(getLocalBounds().withRight(proportionOfWidth(0.2)));
-    
+
     if (settingsPanel.get())
     {
         settingsPanel->setBounds(getLocalBounds().withLeft(categoryList->getRight()).reduced(0.033333f));
@@ -91,14 +94,9 @@ void SettingsContainer::resized()
 
 void SettingsContainer::lookAndFeelChanged()
 {
-    auto* lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-    if (lookAndFeel)
-    {
-        setColour(ResizableWindow::ColourIds::backgroundColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::LightBackground));
-        categoryList->setColour(ListBox::ColourIds::backgroundColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::MediumBackground));
-    }
+    setColour(ResizableWindow::ColourIds::backgroundColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::LightBackground));
+    categoryList->setColour(ListBox::ColourIds::backgroundColourId, getLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground));
 }
-
 void SettingsContainer::changeListenerCallback(ChangeBroadcaster* source)
 {
     auto panelIndex = categoryList->getSelectedRow();
@@ -113,13 +111,17 @@ void SettingsContainer::showPanel(int editorSettingCategory)
     case LumatoneEditorSettingCategories::Calibration:
         newPanel = new CalibrationDlg();
         break;
-
     case LumatoneEditorSettingCategories::Firmware:
         newPanel = new FirmwareDlg();
         break;
-
     case LumatoneEditorSettingCategories::Developer:
         newPanel = new DeveloperDlg();
+        break;
+    case LumatoneEditorSettingCategories::Midi:
+        newPanel = new MidiSettingsDlg();
+        break;
+    case LumatoneEditorSettingCategories::Presets:
+        newPanel = new PresetSettingsDlg();
         break;
     }
 

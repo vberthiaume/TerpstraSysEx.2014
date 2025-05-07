@@ -10,11 +10,9 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-
 #include "AllKeysOverview.h"
 #include "ViewComponents.h"
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 #include "LumatoneController.h"
 #include "MidiEditArea.h"
 #include "NoteEditArea.h"
@@ -32,33 +30,35 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainContentComponent : public Component, 
-							 public LumatoneController::FirmwareListener,
+class MainContentComponent : public Component,
+							 public LumatoneEditor::FirmwareListener,
 							 public ChangeListener,
 							 public Button::Listener
 {
 public:
 	//==============================================================================
-	MainContentComponent();
+	MainContentComponent(LumatoneLayout& mappingDataIn);
 	~MainContentComponent();
 
 	void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile);
 	void saveStateToPropertiesFile(PropertiesFile* propertiesFile);
 
 	// Transfer of data
-	void setData(TerpstraKeyMapping& newData, bool withRefresh = true);
+	void setData(LumatoneLayout& newData, bool withRefresh = true);
 	void deleteAll(bool withRefresh = true);
 
-	void getData(TerpstraKeyMapping& newData);
-	TerpstraKeyMapping&	getMappingInEdit() { return this->mappingData; }
+	void getData(LumatoneLayout& newData);
+	LumatoneLayout&	getMappingInEdit() { return this->mappingData; }
 
 	TabbedButtonBar* getOctaveBoardSelectorTab() { return  noteEditArea->getOctaveBoardSelectorTab(); }
 	CurvesArea* getCurvesArea() { return curvesArea.get(); }
 
 	// Board edit operations
-	bool deleteCurrentSubBoardData();
+	UndoableAction* createDeleteCurrentSectionAction();
 	bool copyCurrentSubBoardData();
-	bool pasteCurrentSubBoardData();
+	UndoableAction* createPasteCurrentSectionAction();
+    UndoableAction* createModifiedPasteCurrentSectionAction(CommandID commandID);
+    bool canPasteCopiedSubBoard() const;
 
 	bool setDeveloperMode(bool developerModeOn);
 
@@ -69,12 +69,13 @@ public:
 	void buttonClicked(Button* btn) override;
 
 	// GUI implementation
-    void paint (Graphics&);
-    void resized();
+    void paint (Graphics&) override;
+    void resized() override;
 
 	void refreshKeyDataFields();
+	void refreshAllFields();
 
-	// Implementation of LumatoneController::FirmwareListener
+	// Implementation of LumatoneEditor::FirmwareListener
 
 	void octaveColourConfigReceived(int octaveIndex, uint8 rgbFlag, const int* colourData) override;
 
@@ -92,9 +93,11 @@ public:
 
 	void faderConfigReceived(const int* faderData) override;
 
+	void faderTypeConfigReceived(int octaveIndex, const int* faderTypeData) override;
+
 	void lumatouchConfigReceived(const int* lumatouchData) override;
 
-	void firmwareRevisionReceived(int major, int minor, int revision) override;
+	void firmwareRevisionReceived(FirmwareVersion version) override;
 
 private:
     //==============================================================================
@@ -113,7 +116,7 @@ private:
 	std::unique_ptr<NoteEditArea>	noteEditArea;
 
 	std::unique_ptr<GeneralOptionsDlg>	generalOptionsArea;
-	
+
 	std::unique_ptr<CurvesArea> curvesArea;
 
 	std::unique_ptr<GlobalSettingsArea> globalSettingsArea;
@@ -127,10 +130,10 @@ private:
 
 	//==============================================================================
 	// Data
-	TerpstraKeyMapping	mappingData;
+	LumatoneLayout&		mappingData;
 
 	// Buffer for copy/paste of sub board data
-	TerpstraKeys		copiedSubBoardData;
+	LumatoneBoard		copiedSubBoardData;
 
 	//==============================================================================
 	// Position and Size helpers
@@ -148,8 +151,8 @@ private:
 
     const float footerAreaY                 = 0.96f;
 
-    const float popupWidth                  = 0.2879f;
-    const float popupHeight                 = 0.2615f;
+    const float popupWidth                  = 0.4f;
+    const float popupHeight                 = 0.333f;
 
     const float lumatoneVersionMarginX      = 0.02f;
 	const float lumatoneVersionWidth        = 0.2f;

@@ -59,8 +59,9 @@ juce::Colour MappingLogicBase::indexToColour(int inx) const
     return colourTable.getReference(colourGroupIndex);
 }
 
-void MappingLogicBase::indexToTerpstraKey(int inx, TerpstraKey& keyData) const
+void MappingLogicBase::indexToTerpstraKey(int inx, LumatoneKey& keyData) const
 {
+    keyData.keyType = LumatoneKeyType::noteOnNoteOff;
 	keyData.channelNumber = indexToMIDIChannel(inx);
 	keyData.noteNumber = indexToMIDINote(inx);
 
@@ -68,9 +69,9 @@ void MappingLogicBase::indexToTerpstraKey(int inx, TerpstraKey& keyData) const
         keyData.colour = indexToColour(inx);
 }
 
-TerpstraKey MappingLogicBase::indexToTerpstraKey(int inx) const
+LumatoneKey MappingLogicBase::indexToTerpstraKey(int inx) const
 {
-	TerpstraKey keyData;
+	LumatoneKey keyData;
 	indexToTerpstraKey(inx, keyData);
 	return keyData;
 }
@@ -126,7 +127,7 @@ void IncrMidiNotesMappingLogic::setValues(int newPeriodSize, int newChannelInCas
 int IncrMidiNotesMappingLogic::globalMappingSize() const
 {
 	if (isSingleChannel())
-		return this->periodSize;	// notes start at 0 and go until periodSize-1
+		return 128;	// notes start at 0 and go until periodSize-1
 	else
 		return this->periodSize * 16;
 }
@@ -154,7 +155,7 @@ int IncrMidiNotesMappingLogic::indexToMIDINote(int inx) const
 
 }
 
-int IncrMidiNotesMappingLogic::terpstraKeyToIndex(TerpstraKey keyData) const
+int IncrMidiNotesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
 {
 	if (keyData.isEmpty() || this->globalMappingSize() == 0)
 		return -1;
@@ -245,7 +246,7 @@ int KBMFilesMappingLogic::getStartOfMap() const
         return 0;
     }
 
-    TerpstraKey keyData;
+    LumatoneKey keyData;
     keyData.channelNumber = channelMappingData[subTableIndex].channelNumber;
     keyData.noteNumber = channelMappingData[subTableIndex].mapping.noteNrWhereMappingStarts;
 
@@ -298,7 +299,7 @@ int KBMFilesMappingLogic::indexToMIDINote(int inx) const
         return mappingTable[inx].noteNumber;
 }
 
-int KBMFilesMappingLogic::terpstraKeyToIndex(TerpstraKey keyData) const
+int KBMFilesMappingLogic::terpstraKeyToIndex(LumatoneKey keyData) const
 {
 	if (keyData.isEmpty() || globalMappingSize() == 0)
 		return -1;

@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 6.0.5
+  Created with Projucer version: 6.0.8
 
   ------------------------------------------------------------------------------
 
@@ -20,16 +20,19 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "ViewComponents.h"
-#include "KeyboardDataStructure.h"
+#include "./data/lumatone_layout.h"
 #include "ColourEditComponent.h"
 
-#include "HexagonTilingGeometry.h"
+#include "lumatone_geometry.h"
+#include "lumatone_tiling.h"
+
 #include "LumatoneEditorStyleCommon.h"
 
-#include "BoardGeometry.h"
+#include "SingleNoteAssign.h"
+#include "IsomorphicMassAssign.h"
 
 //[/Headers]
 
@@ -44,7 +47,8 @@
                                                                     //[/Comments]
 */
 class NoteEditArea  : public Component,
-                      public ChangeListener
+                      public ChangeListener,
+                      public ColourSelectionBroadcaster
 {
 public:
     //==============================================================================
@@ -60,16 +64,18 @@ public:
 	void changeListenerCallback(ChangeBroadcaster *source) override;
 
 	// Things to be done when a new mapping is loaded. E. g. fill the colour combo box with the colours appearing in the mapping.
-	void onSetData(TerpstraKeyMapping& newData);
+	void onSetData(LumatoneLayout& newData);
 
 	// Fill key fields with values from a certain octaveboard subset
-	void setKeyFieldValues(const TerpstraKeys& keySet);
+	void setKeyFieldValues(const LumatoneBoard& keySet);
 
 	TabbedButtonBar* getOctaveBoardSelectorTab() { return octaveBoardSelectorTab.get(); }
 
     ColourEditComponent* getColourEditComponent();
 
     ColourTextEditor* getSingleNoteColourTextEditor();
+
+    IsomorphicMassAssign* getIsomorphicMassAssignPanel() { return dynamic_cast<IsomorphicMassAssign*>(editFunctionsTab->getTabContentComponent(1)); }
 
 	void changeSingleKeySelection(int newSelection);
 
@@ -82,11 +88,16 @@ public:
 
     void resetOctaveSize(bool refreshAndResize=true);
 
+    // ColourSelectionBroadcaster Implementation
+    Colour getSelectedColour() override;
+    void deselectColour() override {};
+
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
     void resized() override;
     void mouseDown (const juce::MouseEvent& e) override;
+
 
 
 private:
@@ -109,7 +120,7 @@ private:
     int					currentSingleKeySelection;
 
     // Key edit positioning
-    HexagonTilingGeometry tilingGeometry;
+    LumatoneTiling lumatoneGeometry;
 
     //===========================================================================
     // Style Helpers
@@ -153,7 +164,7 @@ private:
     const float singleKeyMarginFromWidth = 0.0164f;
 
 	// Geometry settings
-	TerpstraBoardGeometry	boardGeometry;
+	LumatoneGeometry	boardGeometry;
 
     //[/UserVariables]
 
@@ -168,4 +179,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

@@ -1,30 +1,30 @@
 /*
   ==============================================================================
 
-    HexagonTilingGeometry.cpp
+    LumatoneTiling.cpp
     Created: 6 Jan 2021 11:42:30pm
     Author:  Vincenzo
 
   ==============================================================================
 */
 
-#include "HexagonTilingGeometry.h"
+#include "lumatone_tiling.h"
 
-void HexagonTilingGeometry::setColumnAngle(double angleIn)
+void LumatoneTiling::setColumnAngle(double angleIn)
 { 
 	columnBasisAngle = angleIn; 
 	columnAngleCos = cos(columnBasisAngle);
 	columnAngleSin = sin(columnBasisAngle);
 }
 
-void HexagonTilingGeometry::setRowAngle(double angleIn)
+void LumatoneTiling::setRowAngle(double angleIn)
 { 
 	rowBasisAngle = angleIn;
 	rowAngleCos = cos(rowBasisAngle);
 	rowAngleSin = sin(rowBasisAngle);
 }
 
-void HexagonTilingGeometry::fitTilingTo(Rectangle<float> boundsIn, 
+void LumatoneTiling::fitTilingTo(juce::Rectangle<float> boundsIn, 
 	int widestRow, int longestColumn, float marginSize, float rotateAngle, 
 	bool scaleToFitRotation, float radiusScalarIn, float lateralScalarIn)
 {
@@ -42,21 +42,21 @@ void HexagonTilingGeometry::fitTilingTo(Rectangle<float> boundsIn,
 
 	double rad = radius * verticalScalar;
 	double lat = radius * LATERALRADIUSRATIO * horizontalScalar;
-	startingCentre = Point<double>(bounds.getX() + lat, bounds.getY() + rad);
+	startingCentre = juce::Point<double>(bounds.getX() + lat, bounds.getY() + rad);
 
 	recalculateTransform(tileBounds.getCentre(), true);
 }
 
-void HexagonTilingGeometry::fitSkewedTiling(Point<float> firstKeyCentre,
-	Point<float> secondKeyCentre, int rowStepsFirstToSecond,
-	Point<float> thirdKeyCentre,  int colStepsSecondToThird,
+void LumatoneTiling::fitSkewedTiling(juce::Point<float> firstKeyCentre,
+	juce::Point<float> secondKeyCentre, int rowStepsFirstToSecond,
+	juce::Point<float> thirdKeyCentre,  int colStepsSecondToThird,
 	bool calculateAngles)
 {
 	useSkewedBasis = true;
 	
 	startingCentre = firstKeyCentre.toDouble();
-	Point<double> secondKeyNormFirst = secondKeyCentre.toDouble() - startingCentre;
-	Point<double> thirdKeyNormSecond = (thirdKeyCentre - secondKeyCentre).toDouble();
+	juce::Point<double> secondKeyNormFirst = secondKeyCentre.toDouble() - startingCentre;
+	juce::Point<double> thirdKeyNormSecond = (thirdKeyCentre - secondKeyCentre).toDouble();
 
 	if (calculateAngles)
 	{
@@ -73,23 +73,23 @@ void HexagonTilingGeometry::fitSkewedTiling(Point<float> firstKeyCentre,
 	rowYComponent    = rowUnit * rowAngleSin;
 }
 
-Array<Point<float>> HexagonTilingGeometry::getHexagonCentres(const TerpstraBoardGeometry& boardGeometry, int startingOctave, int numOctavesIn) const
+juce::Array<juce::Point<float>> LumatoneTiling::getHexagonCentres(const LumatoneGeometry& boardGeometry, int startingOctave, int numOctavesIn) const
 {
 	return calculateCentres(boardGeometry, startingOctave, numOctavesIn);
 }
 
-Array<Point<float>> HexagonTilingGeometry::getHexagonCentresSkewed(const TerpstraBoardGeometry& boardGeometry, int startingOctave, int numOctavesIn) const
+juce::Array<juce::Point<float>> LumatoneTiling::getHexagonCentresSkewed(const LumatoneGeometry& boardGeometry, int startingOctave, int numOctavesIn) const
 {
 	return calculateCentresSkewed(boardGeometry, startingOctave, numOctavesIn);
 }
 
-float HexagonTilingGeometry::getKeySize(bool scaled) const
+float LumatoneTiling::getKeySize(bool scaled) const
 {
 	float keySize = (scaled) ? radius * rotationScalar * verticalScalar : (float)radius;
 	return keySize * 2.0f;
 }
 
-Rectangle<float> HexagonTilingGeometry::getRecentTileBounds(bool withTransformation)
+juce::Rectangle<float> LumatoneTiling::getRecentTileBounds(bool withTransformation)
 {
 	if (withTransformation)
 		return transformedBounds;
@@ -97,27 +97,27 @@ Rectangle<float> HexagonTilingGeometry::getRecentTileBounds(bool withTransformat
 	return tileBounds;
 }
 
-double HexagonTilingGeometry::calculateTileWidth(int widestRow, double radiusInside, double margin)
+double LumatoneTiling::calculateTileWidth(int widestRow, double radiusInside, double margin)
 {
 	return widestRow * (margin + 2 * radiusInside) - margin + radiusInside;
 }
 
-double HexagonTilingGeometry::calculateTileHeight(int longestColumn, double radiusBounding, double margin)
+double LumatoneTiling::calculateTileHeight(int longestColumn, double radiusBounding, double margin)
 {
 	return (longestColumn - 1.0) * (1.5 * radiusBounding + margin * LATERALRADIUSRATIO) + 2 * radiusBounding;
 }
 
-double HexagonTilingGeometry::distanceStepsAwayX(double lateral, double margin, int stepsX, int stepsY)
+double LumatoneTiling::distanceStepsAwayX(double lateral, double margin, int stepsX, int stepsY)
 {
 	return stepsX * (2 * lateral + margin) + ((stepsY + 1) / 2) * (lateral + margin / 2.0);
 }
 
-double HexagonTilingGeometry::distanceStepsAwayY(double radius, double margin, int stepsY)
+double LumatoneTiling::distanceStepsAwayY(double radius, double margin, int stepsY)
 {
 	return stepsY * (radius * 1.5 + margin * LATERALRADIUSRATIO);
 }
 
-Point<double> HexagonTilingGeometry::getSkewedPoint(
+juce::Point<double> LumatoneTiling::getSkewedPoint(
 	double columnAngleX, double columnAngleY, double rowAngleX, double rowAngleY, 
 	double columnUnit, double rowUnit, int columnOffset, int rowOffset) 
 {
@@ -130,7 +130,7 @@ Point<double> HexagonTilingGeometry::getSkewedPoint(
 	return { colX, colY };
 }
 
-double HexagonTilingGeometry::findBestRadius(int widestRow, int longestColumn)
+double LumatoneTiling::findBestRadius(int widestRow, int longestColumn)
 {
 	double widthBased = (bounds.getWidth() - margin * (widestRow - 1)) / (2 * widestRow + 1) / LATERALRADIUSRATIO;
 	double heightBased = (2 * bounds.getHeight() - margin * 2 * LATERALRADIUSRATIO * (longestColumn + 1)) / (3 * longestColumn + 1);
@@ -138,14 +138,14 @@ double HexagonTilingGeometry::findBestRadius(int widestRow, int longestColumn)
 	return juce::jmin(widthBased, heightBased);
 }
 
-void HexagonTilingGeometry::recalculateTransform(Point<float> rotateOrigin, bool centreAndScale)
+void LumatoneTiling::recalculateTransform(juce::Point<float> rotateOrigin, bool centreAndScale)
 {
-	transform = AffineTransform::rotation(angle, rotateOrigin.x, rotateOrigin.y);
-	Rectangle<float> rotatedBounds = tileBounds.transformedBy(transform);
+	transform = juce::AffineTransform::rotation(angle, rotateOrigin.x, rotateOrigin.y);
+	juce::Rectangle<float> rotatedBounds = tileBounds.transformedBy(transform);
 	
 	if (centreAndScale)
 	{
-		transform = transform.followedBy(AffineTransform::translation(
+		transform = transform.followedBy(juce::AffineTransform::translation(
 			bounds.getCentreX() - rotatedBounds.getCentreX(),
 			bounds.getCentreY() - rotatedBounds.getCentreY()
 		));
@@ -161,16 +161,16 @@ void HexagonTilingGeometry::recalculateTransform(Point<float> rotateOrigin, bool
 		if (scaleToFit)
 		{
 			transform = transform.followedBy(
-				AffineTransform::scale(rotationScalar, rotationScalar, transformedBounds.getCentreX(), transformedBounds.getCentreY())
+				juce::AffineTransform::scale(rotationScalar, rotationScalar, transformedBounds.getCentreX(), transformedBounds.getCentreY())
 			);
 		}
 	}
 }
 
-Array<Point<float>> HexagonTilingGeometry::transformPointsFromOrigin(Array<Point<int>> hexagonalCoordinatesIn)
+juce::Array<juce::Point<float>> LumatoneTiling::transformPointsFromOrigin(juce::Array<juce::Point<int>> hexagonalCoordinatesIn)
 {
-	Array<Point<float>> hexagonCentres;
-	AffineTransform transform = AffineTransform::translation(startingCentre).followedBy(AffineTransform::rotation(angle, startingCentre.x, startingCentre.y));
+	juce::Array<juce::Point<float>> hexagonCentres;
+	juce::AffineTransform transform = juce::AffineTransform::translation(startingCentre).followedBy(juce::AffineTransform::rotation(angle, startingCentre.x, startingCentre.y));
 
 	const double rad = radius * verticalScalar;
 	const double lat = radius * LATERALRADIUSRATIO * horizontalScalar;
@@ -179,11 +179,11 @@ Array<Point<float>> HexagonTilingGeometry::transformPointsFromOrigin(Array<Point
 	const double yUnitX = distanceStepsAwayX(lat, margin, 1, 1) - distanceStepsAwayX(lat, margin, 1, 0);
 	const double yUnitY = distanceStepsAwayY(rad, margin, 1);
 
-	Array<Point<float>> pointsOut;
+	juce::Array<juce::Point<float>> pointsOut;
 
 	for (auto point : hexagonalCoordinatesIn)
 	{
-		Point<float> pointTrans = Point<float>(
+		juce::Point<float> pointTrans = juce::Point<float>(
 			point.x * xUnit + point.y * yUnitX,
 			point.y * yUnitY
 			);
@@ -194,9 +194,9 @@ Array<Point<float>> HexagonTilingGeometry::transformPointsFromOrigin(Array<Point
 	return pointsOut;
 }
 
-Array<Point<float>> HexagonTilingGeometry::calculateCentres(const TerpstraBoardGeometry& boardGeometry, int startingOctave, int numOctaves) const
+juce::Array<juce::Point<float>> LumatoneTiling::calculateCentres(const LumatoneGeometry& boardGeometry, int startingOctave, int numOctaves) const
 {
-	Array<Point<float>> hexagonCentres;
+	juce::Array<juce::Point<float>> hexagonCentres;
 
 	const int numColumnsInOctave = boardGeometry.getMaxHorizontalLineSize();
 	const int numRowsInOctave	 = boardGeometry.horizontalLineCount();
@@ -226,7 +226,7 @@ Array<Point<float>> HexagonTilingGeometry::calculateCentres(const TerpstraBoardG
 
 			for (int col = 0; col < rowCount; col++)
 			{
-				Point<float> centre = Point<float>(
+				juce::Point<float> centre = juce::Point<float>(
 					// TODO: review implementation. this curently treats rows as zigzag 
 					startingCentre.x + distanceStepsAwayX(lat, margin, firstColumn + col, (octaveRow % 2)),
 					yCoordinate
@@ -246,14 +246,14 @@ Array<Point<float>> HexagonTilingGeometry::calculateCentres(const TerpstraBoardG
 	return hexagonCentres;
 }
 
-int HexagonTilingGeometry::verticalToSlantOffset(int rowNum, int offsetIn)
+int LumatoneTiling::verticalToSlantOffset(int rowNum, int offsetIn)
 {
 	return offsetIn - (rowNum / 2);
 }
 
-Array<Point<float>> HexagonTilingGeometry::calculateCentresSkewed(const TerpstraBoardGeometry& boardGeometry, int startingOctave, int numOctaves) const
+juce::Array<juce::Point<float>> LumatoneTiling::calculateCentresSkewed(const LumatoneGeometry& boardGeometry, int startingOctave, int numOctaves) const
 {
-	Array<Point<float>> hexagonCentres;
+	juce::Array<juce::Point<float>> hexagonCentres;
 
 	const int numColumnsInOctave = boardGeometry.getMaxHorizontalLineSize() ;
 	const int numRowsInOctave = boardGeometry.horizontalLineCount();
@@ -281,7 +281,7 @@ Array<Point<float>> HexagonTilingGeometry::calculateCentresSkewed(const Terpstra
 
 			for (int col = colStart; col < colEnd; col++)
 			{
-				Point<float> centre = startingCentre.toFloat() + Point<float>(
+				juce::Point<float> centre = startingCentre.toFloat() + juce::Point<float>(
 					col * colX + octaveRow * rowX,
 					col * colY + octaveRow * rowY
 				);
@@ -299,12 +299,12 @@ Array<Point<float>> HexagonTilingGeometry::calculateCentresSkewed(const Terpstra
 }
 
 
-Rectangle<float> HexagonTilingGeometry::calculateSmallestBounds(int widestRowSize, int longestColumnSize) const
+juce::Rectangle<float> LumatoneTiling::calculateSmallestBounds(int widestRowSize, int longestColumnSize) const
 {
 	float rad = radius * verticalScalar;
 	float lat = radius * LATERALRADIUSRATIO * horizontalScalar;
 
-	return Rectangle<float>(
+	return juce::Rectangle<float>(
 		bounds.getX(), bounds.getY(),
 		calculateTileWidth(widestRowSize, lat, margin), calculateTileHeight(longestColumnSize, rad, margin)
 	);

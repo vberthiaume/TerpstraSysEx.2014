@@ -15,32 +15,26 @@
 // Note on/on velocity curve dialog. Horizontal axis stands for ticks
 class NoteOnOffVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    //==============================================================================
     NoteOnOffVelocityCurveDialog();
-    //~NoteOnOffVelocityCurveDialog() override;
-
-    //protected:
-    //	virtual float beamWidth(int xPos) override;
-
 };
 
 class FaderVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    FaderVelocityCurveDialog() : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::fader)
+    FaderVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::fader)
     {
     }
 };
 
 class AftertouchVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    AftertouchVelocityCurveDialog() : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::afterTouch)
+    AftertouchVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::afterTouch)
     {
     }
 };
 
 class LumatouchVelocityCurveDialog : public VelocityCurveDlgBase {
 public:
-    LumatouchVelocityCurveDialog() : VelocityCurveDlgBase(TerpstraVelocityCurveConfig::VelocityCurveType::lumaTouch)
+    LumatouchVelocityCurveDialog() : VelocityCurveDlgBase(LumatoneConfigTable::TableType::lumaTouch)
     {
     }
 };

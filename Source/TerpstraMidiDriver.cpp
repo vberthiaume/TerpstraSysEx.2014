@@ -11,23 +11,74 @@
 #include "TerpstraMidiDriver.h"
 #include "Main.h"
 
-TerpstraMidiDriver::TerpstraMidiDriver() : HajuMidiDriver()
-{
+// There are different race-condition issues between macOS and Windows.
+// This Driver may need to be redesigned, but for now this define is
+// used for including a MessageManagerLock on Windows & Linux, but not on macOS.
 
+#define MIDI_DRIVER_USE_LOCK JUCE_WINDOWS //|| JUCE_LINUX
+
+TerpstraMidiDriver::TerpstraMidiDriver(int numBoardsIn)
+    : HajuMidiDriver()
+    , numBoards(numBoardsIn)
+{
 }
 
 TerpstraMidiDriver::~TerpstraMidiDriver()
 {
+    collectors.clear();
 }
 
-void TerpstraMidiDriver::addListener(TerpstraMidiDriver::Listener* listener)
+//============================================================================
+// TerpstaMidiDriver::Collector helpers
+
+void TerpstraMidiDriver::addMessageCollector(Collector* collectorToAdd)
 {
-	listeners.add(listener);
+    collectors.addIfNotAlreadyThere(collectorToAdd);
 }
 
-void TerpstraMidiDriver::removeListener(TerpstraMidiDriver::Listener* listener)
+void TerpstraMidiDriver::removeMessageCollector(Collector* collectorToRemove)
 {
-	listeners.remove(listener);
+    collectors.removeFirstMatchingValue(collectorToRemove);
+}
+
+void TerpstraMidiDriver::notifyMessageReceived(MidiInput* source, const MidiMessage& midiMessage)
+{
+#if MIDI_DRIVER_USE_LOCK
+    const MessageManagerLock lock;
+#endif
+    MessageManager::callAsync([this, source, midiMessage]{
+        for (auto collector : collectors) collector->midiMessageReceived(source, midiMessage);
+    });
+}
+
+void TerpstraMidiDriver::notifyMessageSent(MidiOutput* target, const MidiMessage& midiMessage)
+{
+    // Currently unused
+// #if MIDI_DRIVER_USE_LOCK
+//     const MessageManagerLock lock;
+// #endif
+
+//     MessageManager::callAsync([this, target, midiMessage]{
+//         for (auto collector : collectors) collector->midiMessageSent(target, midiMessage);
+//     });
+}
+
+void TerpstraMidiDriver::notifySendQueueSize()
+{
+    auto size = messageBuffer.size();
+    for (auto collector : collectors) collector->midiSendQueueSize(size);
+}
+
+void TerpstraMidiDriver::notifyLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel)
+{
+    for (auto collector : collectors) collector->generalLogMessage(textMessage, errorLevel);
+}
+
+void TerpstraMidiDriver::notifyNoAnswerToMessage(MidiInput* expectedDevice, const MidiMessage& midiMessage)
+{
+    MessageManager::callAsync([this, expectedDevice, midiMessage]{
+        for (auto collector : collectors) collector->noAnswerToMessage(expectedDevice, midiMessage);
+    });
 }
 
 /*
@@ -39,9 +90,9 @@ Single (mid-level) commands, firmware specific
 void TerpstraMidiDriver::sendKeyFunctionParameters(uint8 boardIndex, uint8 keyIndex, uint8 noteOrCCNum, uint8 midiChannel, uint8 keyType, bool faderUpIsNull)
 {
     // boardIndex is expected 1-based
-    jassert(boardIndex > 0 && boardIndex <= NUMBEROFBOARDS);
-    //jassert(midiChannel >= 0 && midiChannel < 16);
-    midiChannel &= 0x1000;
+    jassert(boardIndex > 0 && boardIndex <= numBoards);
+    //jassert(midiChannel > 0 && midiChannel <= 16);
+    midiChannel = (midiChannel - 1) & 0xF;
     uint8 typeByte = (faderUpIsNull << 4) | keyType;
     sendSysEx(boardIndex, CHANGE_KEY_NOTE, keyIndex, noteOrCCNum, midiChannel, typeByte);
 }
@@ -58,7 +109,7 @@ void TerpstraMidiDriver::sendKeyLightParameters(uint8 boardIndex, uint8 keyIndex
 void TerpstraMidiDriver::sendKeyLightParameters(uint8 boardIndex, uint8 keyIndex, uint8 redUpper, uint8 redLower, uint8 greenUpper, uint8 greenLower, uint8 blueUpper, uint8 blueLower)
 {
     // boardIndex is expected 1-based
-    jassert(boardIndex > 0 && boardIndex <= NUMBEROFBOARDS);
+    jassert(boardIndex > 0 && boardIndex <= numBoards);
 
     if (redUpper   > 0xf) redUpper   &= 0xf;
     if (redLower   > 0xf) redLower   &= 0xf;
@@ -66,7 +117,7 @@ void TerpstraMidiDriver::sendKeyLightParameters(uint8 boardIndex, uint8 keyIndex
     if (greenLower > 0xf) greenLower &= 0xf;
     if (blueUpper  > 0xf) blueUpper  &= 0xf;
     if (blueLower  > 0xf) blueLower  &= 0xf;
- 
+
     MidiMessage msg = createExtendedKeyColourSysEx(boardIndex, SET_KEY_COLOUR, keyIndex, redUpper, redLower, greenUpper, greenLower, blueUpper, blueLower);
 }
 
@@ -74,7 +125,7 @@ void TerpstraMidiDriver::sendKeyLightParameters(uint8 boardIndex, uint8 keyIndex
 void TerpstraMidiDriver::sendKeyLightParameters_Version_1_0_0(uint8 boardIndex, uint8 keyIndex, uint8 red, uint8 green, uint8 blue)
 {
     // boardIndex is expected 1-based
-    jassert(boardIndex > 0 && boardIndex <= NUMBEROFBOARDS);
+    jassert(boardIndex > 0 && boardIndex <= numBoards);
 
     // clip if exceed 0x7f
     if (red > 0x7f) red &= 0x7f;
@@ -169,14 +220,13 @@ void TerpstraMidiDriver::sendVelocityConfig(const uint8 velocityTable[])
         reversedTable[x] = velocityTable[127 - x] & 0x7f;
     }
 
-    MidiMessage msg = sendTableSysEx(0, SET_VELOCITY_CONFIG, 128, reversedTable);
-		
-	sendMessageWithAcknowledge(msg);
+    auto msg = createTableSysEx(0, SET_VELOCITY_CONFIG, 128, reversedTable);
+    sendMessageWithAcknowledge(msg);
 }
 
 // CMD 09h: Save velocity config to EEPROM
 void TerpstraMidiDriver::saveVelocityConfig()
-{            
+{
     sendSysExRequest(0, SAVE_VELOCITY_CONFIG);
 }
 
@@ -189,7 +239,7 @@ void TerpstraMidiDriver::resetVelocityConfig()
 // CMD 0Bh: Adjust the internal fader look-up table (128 7-bit values)
 void TerpstraMidiDriver::sendFaderConfig(const uint8 faderTable[])
 {
-    MidiMessage msg = sendTableSysEx(0, SET_FADER_CONFIG, 128, faderTable);
+    MidiMessage msg = createTableSysEx(0, SET_FADER_CONFIG, 128, faderTable);
     sendMessageWithAcknowledge(msg);
 }
 
@@ -220,7 +270,7 @@ void TerpstraMidiDriver::sendCalibrateAfterTouch()
 // CMD 10h: Adjust the internal aftertouch look-up table (size of 128)
 void TerpstraMidiDriver::sendAftertouchConfig(const uint8 aftertouchTable[])
 {
-    MidiMessage msg = sendTableSysEx(0, SET_AFTERTOUCH_CONFIG, 128, aftertouchTable);
+    MidiMessage msg = createTableSysEx(0, SET_AFTERTOUCH_CONFIG, 128, aftertouchTable);
     sendMessageWithAcknowledge(msg);
 }
 
@@ -327,7 +377,7 @@ void TerpstraMidiDriver::sendVelocityIntervalConfig(const int velocityIntervalTa
         formattedTable[1 + 2*i] = velocityIntervalTable[i] & 0x3f;
     }
 
-	MidiMessage msg = sendTableSysEx(0, SET_VELOCITY_INTERVALS, payloadSize, formattedTable);
+	MidiMessage msg = createTableSysEx(0, SET_VELOCITY_INTERVALS, payloadSize, formattedTable);
 	sendMessageWithAcknowledge(msg);
 }
 
@@ -352,7 +402,7 @@ void TerpstraMidiDriver::sendGetSerialIdentityRequest(int sendToTestDevice)
         sendTestMessageNow(sendToTestDevice, createTerpstraSysEx(0, GET_SERIAL_IDENTITY, TEST_ECHO, '\0', '\0', '\0'));
 }
 
-// CMD 24h: Initiate the key calibration routine; each pair of macro buttons  
+// CMD 24h: Initiate the key calibration routine; each pair of macro buttons
 // on each octave must be pressed to return to normal state
 void TerpstraMidiDriver::sendCalibrateKeys()
 {
@@ -366,9 +416,12 @@ void TerpstraMidiDriver::startDemoMode(bool turnOn)
 }
 
 // CMD 26h: Initiate the pitch and mod wheel calibration routine, pass in false to stop
-void TerpstraMidiDriver::sendCalibratePitchModWheel(bool startCalibration)
+void TerpstraMidiDriver::sendCalibratePitchModWheel(bool startCalibration, int testOutputIndex)
 {
-    sendSysExToggle(0, CALIBRATE_PITCH_MOD_WHEEL, startCalibration);
+    if (testOutputIndex < 0)
+        sendSysExToggle(0, CALIBRATE_PITCH_MOD_WHEEL, startCalibration);
+    else
+        sendTestMessageNow(testOutputIndex, createTerpstraSysEx(0, CALIBRATE_PITCH_MOD_WHEEL, startCalibration, TEST_ECHO, '\0', '\0'));
 }
 
 // CMD 27h: Set the sensitivity value of the mod wheel, 0x01 to 0x07f
@@ -422,7 +475,7 @@ void TerpstraMidiDriver::setAftertouchKeySensitivity(uint8 boardIndex, uint8 sen
 // CMD 2Dh: Adjust the Lumatouch table, a 128 byte array with value of 127 being a key fully pressed
 void TerpstraMidiDriver::setLumatouchConfig(const uint8 lumatouchTable[])
 {
-    MidiMessage msg = sendTableSysEx(0, SET_LUMATOUCH_CONFIG, 128, lumatouchTable);
+    MidiMessage msg = createTableSysEx(0, SET_LUMATOUCH_CONFIG, 128, lumatouchTable);
     sendMessageWithAcknowledge(msg);
 }
 
@@ -453,7 +506,7 @@ void TerpstraMidiDriver::sendGetFirmwareRevisionRequest(int sendToTestDevice)
         sendTestMessageNow(sendToTestDevice, createTerpstraSysEx(0, GET_FIRMWARE_REVISION, TEST_ECHO, '\0', '\0', '\0'));
 }
 
-// CMD 32h: Set the thresold from key’s min value to trigger CA - 004 submodule CC events, ranging from 0x00 to 0xFE
+// CMD 32h: Set the thresold from key's min value to trigger CA - 004 submodule CC events, ranging from 0x00 to 0xFE
 void TerpstraMidiDriver::setCCActiveThreshold(uint8 boardIndex, uint8 sensitivity)
 {
     if (sensitivity > 0xfe) sensitivity &= 0xfe;
@@ -471,7 +524,9 @@ void TerpstraMidiDriver::ping(uint8 value1, uint8 value2, uint8 value3, int send
     if (sendToTestDevice < 0)
         sendSysEx(0, LUMA_PING, TEST_ECHO, value1, value2, value3);
     else if (sendToTestDevice < midiOutputs.size())
+    {
         sendTestMessageNow(sendToTestDevice, createTerpstraSysEx(0, LUMA_PING, TEST_ECHO, value1, value2, value3));
+    }
 }
 
 // CMD 33h: Echo the payload, 0x00-0x7f, for use in connection monitoring
@@ -534,6 +589,11 @@ void TerpstraMidiDriver::getBoardSensitivityValues(uint8 boardIndex)
 // CMD 3Ch: Set the MIDI channels for peripheral controllers
 void TerpstraMidiDriver::setPeripheralChannels(uint8 pitchWheelChannel, uint8 modWheelChannel, uint8 expressionChannel, uint8 sustainChannel)
 {
+    pitchWheelChannel -= 1;
+    modWheelChannel -= 1;
+    expressionChannel -= 1;
+    sustainChannel -= 1;
+
     // For now set default channel to 1
     if (pitchWheelChannel > 0xf) pitchWheelChannel &= 0x00;
     if (modWheelChannel   > 0xf) modWheelChannel   &= 0x00;
@@ -568,7 +628,7 @@ void TerpstraMidiDriver::sendGetAftertouchTriggerDelayRequest(uint8 boardIndex)
 }
 
 // CMD 41h: Set the Lumatouch note-off delay value, an 11-bit integer representing the amount of 1.1ms ticks before
-// sending a note-off event after a Lumatone-configured key is released. 
+// sending a note-off event after a Lumatone-configured key is released.
 void TerpstraMidiDriver::setLumatouchNoteOffDelay(uint8 boardIndex, int delayValue)
 {
     setLumatouchNoteOffDelay(boardIndex,
@@ -609,6 +669,32 @@ void TerpstraMidiDriver::setExpressionPedalADCThreshold(uint8 valueBits8_12, uin
 void TerpstraMidiDriver::sendGetExpressionPedalADCThresholdRequest()
 {
     sendSysExRequest(0, GET_EXPRESSION_PEDAL_THRESHOLD);
+}
+
+// CMD 45h: Configure the on/off settings of the sustain pedal
+void TerpstraMidiDriver::sendInvertSustainPedal(bool setInverted)
+{
+    sendSysExToggle(0, INVERT_SUSTAIN_PEDAL, setInverted);
+}
+
+// CMD 46h: Replace current presets with factory presets
+void TerpstraMidiDriver::sendResetDefaultPresetsRequest(int presetIndex)
+{
+    presetIndex %= 10;
+    sendSysEx(0, RESET_DEFAULT_PRESETS, presetIndex, '\0', '\0', '\0');
+}
+
+// CMD 47h: Read back the currently configured preset flags of expression & sustain inversion,
+// plus light-on-keystroke and polyphonic aftertouch
+void TerpstraMidiDriver::sendGetPresetFlagsReset()
+{
+    sendSysExRequest(0, GET_PRESET_FLAGS);
+}
+
+// For CMD 48h response: get expression pedal sensitivity
+void TerpstraMidiDriver::sendGetExpressionPedalSensitivity()
+{
+    sendSysExRequest(0, GET_EXPRESSION_PEDAL_SENSITIVIY);
 }
 
 /*
@@ -658,7 +744,7 @@ MidiMessage TerpstraMidiDriver::createExtendedKeyColourSysEx(uint8 boardIndex, u
 }
 MidiMessage TerpstraMidiDriver::createExtendedKeyColourSysEx(uint8 boardIndex, uint8 cmd, uint8 keyIndex, int red, int green, int blue) const
 {
-    return createExtendedKeyColourSysEx(boardIndex, cmd, keyIndex, red >> 8, red & 0xf, green >> 8, green & 0xf, blue >> 8, blue & 0xf);
+    return createExtendedKeyColourSysEx(boardIndex, cmd, keyIndex, red >> 4, red & 0xf, green >> 4, green & 0xf, blue >> 4, blue & 0xf);
 }
 
 MidiMessage TerpstraMidiDriver::createExtendedMacroColourSysEx(uint8 cmd, uint8 redUpper, uint8 redLower, uint8 greenUpper, uint8 greenLower, uint8 blueUpper, uint8 blueLower) const
@@ -680,10 +766,10 @@ MidiMessage TerpstraMidiDriver::createExtendedMacroColourSysEx(uint8 cmd, uint8 
 
 MidiMessage TerpstraMidiDriver::createExtendedMacroColourSysEx(uint8 cmd, int red, int green, int blue) const
 {
-    return createExtendedMacroColourSysEx(cmd, red >> 8, red & 0xf, green >> 8, green & 0xf, blue >> 8, blue & 0xf);
+    return createExtendedMacroColourSysEx(cmd, red >> 4, red & 0xf, green >> 4, green & 0xf, blue >> 4, blue & 0xf);
 }
 
-MidiMessage TerpstraMidiDriver::sendTableSysEx(uint8 boardIndex, uint8 cmd, uint8 tableSize, const uint8 table[])
+MidiMessage TerpstraMidiDriver::createTableSysEx(uint8 boardIndex, uint8 cmd, uint8 tableSize, const uint8 table[])
 {
     size_t msgSize = tableSize + 5;
     Array<unsigned char> dataArray;
@@ -697,13 +783,12 @@ MidiMessage TerpstraMidiDriver::sendTableSysEx(uint8 boardIndex, uint8 cmd, uint
 
     memmove(&sysExData[5], table, sizeof(uint8) * tableSize);
 
-    //DEBUG
+#if JUCE_DEBUG
     for (int i = 0; i < tableSize; i++)
         jassert(table[i] <= 0x7f);
+#endif
 
     auto msg = MidiMessage::createSysExMessage(sysExData, msgSize);
-    sendMessageWithAcknowledge(msg);
-
     return msg;
 }
 
@@ -711,7 +796,7 @@ void TerpstraMidiDriver::sendSysEx(uint8 boardIndex, uint8 cmd, uint8 data1, uin
 {
     if (midiInput != nullptr)
     {
-        jassert(boardIndex < 0x6 && cmd <= 0x44 && data1 <= 0x7f && data2 <= 0x7f && data3 <= 0x7f && data4 <= 0x7f);
+        jassert(boardIndex < 0x6 && data1 <= 0x7f && data2 <= 0x7f && data3 <= 0x7f && data4 <= 0x7f);
         MidiMessage msg = createTerpstraSysEx(boardIndex, cmd, data1, data2, data3, data4);
         sendMessageWithAcknowledge(msg);
     }
@@ -746,7 +831,7 @@ void TerpstraMidiDriver::sendSysExToggle(uint8 boardIndex, uint8 cmd, bool turnS
     sendMessageWithAcknowledge(msg);
 }
 
-// Checks if message is a valid Lumatone firmware response and is expected length, then runs supplied unpacking function or returns an error code 
+// Checks if message is a valid Lumatone firmware response and is expected length, then runs supplied unpacking function or returns an error code
 FirmwareSupport::Error TerpstraMidiDriver::unpackIfValid(const MidiMessage& response, size_t numBytes, std::function<FirmwareSupport::Error(const uint8*)> unpackFunction)
 {
     auto status = messageIsValidLumatoneResponse(response);
@@ -797,7 +882,7 @@ FirmwareSupport::Error TerpstraMidiDriver::unpack8BitData(const MidiMessage& msg
     auto unpack = [&](const uint8* payload) {
         auto numValues = numBytes / 2;
         for (int i = 0; i < numValues; i++)
-            unpackedData[i] = (payload[(i * 2) + 1] << 4) | (payload[(i * 2)]);
+            unpackedData[i] = (payload[(i * 2)] << 4) | (payload[(i * 2) + 1]);
         return FirmwareSupport::Error::noError;
     };
 
@@ -1020,7 +1105,7 @@ FirmwareSupport::Error TerpstraMidiDriver::unpackGetSerialIdentityResponse(const
     auto sysExData = response.getSysExData();
     if (sysExData[MSG_STATUS] == TEST_ECHO)
         return FirmwareSupport::Error::messageIsAnEcho;
-    
+
     auto errorCode = FirmwareSupport::Error::noError;
 
     if (response.getSysExDataSize() == 18)
@@ -1093,7 +1178,7 @@ FirmwareSupport::Error TerpstraMidiDriver::unpackPingResponse(const MidiMessage&
     auto sysExData = response.getSysExData();
     if (sysExData[MSG_STATUS] == TEST_ECHO)
         return FirmwareSupport::Error::messageIsAnEcho;
-    
+
     auto status = messageIsValidLumatoneResponse(response);
     if (status != FirmwareSupport::Error::noError)
         return status;
@@ -1150,18 +1235,37 @@ FirmwareSupport::Error TerpstraMidiDriver::unpackGetPeripheralChannelsResponse(c
     if (status != FirmwareSupport::Error::noError)
         return status;
 
-    pitchWheelChannel   = unpackedData[0];
-    modWheelChannel     = unpackedData[1];
-    expressionChannel   = unpackedData[2];
-    sustainPedalChannel = unpackedData[3];
+    pitchWheelChannel   = unpackedData[0] + 1;
+    modWheelChannel     = unpackedData[1] + 1;
+    expressionChannel   = unpackedData[2] + 1;
+    sustainPedalChannel = unpackedData[3] + 1;
 
     return status;
+}
+
+// For CMD 3Eh response: read back the calibration mode of the message
+FirmwareSupport::Error TerpstraMidiDriver::unpackPeripheralCalibrationMode(const MidiMessage& response, int& calibrationMode)
+{
+    // Other errors will be caught in corresponding mode unpacking
+    int msgSize = response.getSysExDataSize();
+    int expectedSize = PAYLOAD_INIT + 15;
+
+    if (msgSize < expectedSize)
+        return FirmwareSupport::Error::messageTooShort;
+
+    else if (msgSize > expectedSize)
+        return FirmwareSupport::Error::messageTooLong;
+
+    auto sysExData = response.getSysExData();
+    calibrationMode = sysExData[CALIB_MODE];
+
+    return FirmwareSupport::Error::noError;
 }
 
 // For CMD 3Eh response: retrieve 12-bit expression pedal calibration status values in respective mode, automatically sent every 100ms
 FirmwareSupport::Error TerpstraMidiDriver::unpackExpressionPedalCalibrationPayload(const MidiMessage& response, int& minBound, int& maxBound, bool& valid)
 {
-    const short NUM_UNPACKED = 5; // Actually two + boolean, but this message always returns 15-byte payload
+    const short NUM_UNPACKED = 15; // Actually two + boolean, but this message always returns 15-byte payload
     int unpackedData[NUM_UNPACKED];
     auto status = unpack12BitDataFrom4Bit(response, 15, unpackedData);
     if (status != FirmwareSupport::Error::noError)
@@ -1170,14 +1274,14 @@ FirmwareSupport::Error TerpstraMidiDriver::unpackExpressionPedalCalibrationPaylo
     minBound = unpackedData[0];
     maxBound = unpackedData[1];
     valid = response.getSysExData()[PAYLOAD_INIT + 3];
-    
+
     return status;
 }
 
 // For CMD 3Eh response: retrieve 12-bit pitch & mod wheel calibration status values in respective mode, automatically sent every 100ms
 FirmwareSupport::Error TerpstraMidiDriver::unpackWheelsCalibrationPayload(const MidiMessage& response, int& centerPitch, int& minPitch, int& maxPitch, int& minMod, int& maxMod)
 {
-    const short NUM_UNPACKED = 5;
+    const short NUM_UNPACKED = 15;
     int unpackedData[NUM_UNPACKED];
     auto status = unpack12BitDataFrom4Bit(response, NUM_UNPACKED, unpackedData);
     if (status != FirmwareSupport::Error::noError)
@@ -1241,36 +1345,76 @@ FirmwareSupport::Error TerpstraMidiDriver::unpackGetExpressionPedalThresholdResp
     return status;
 }
 
+// For CMD 47h response: retrieve preset flags
+FirmwareSupport::Error TerpstraMidiDriver::unpackGetPresetFlagsResponse(const MidiMessage& response, bool& expressionInverted, bool& lightsOnKeystroke, bool& aftertouchOn, bool& sustainInverted)
+{
+    const short NUM_UNPACKED = 4;
+    int unpackedData[NUM_UNPACKED];
+    auto status = unpack7BitData(response, NUM_UNPACKED, unpackedData);
+    if (status != FirmwareSupport::Error::noError)
+        return status;
+
+    expressionInverted  = unpackedData[0];
+    lightsOnKeystroke   = unpackedData[1];
+    aftertouchOn        = unpackedData[2];
+    sustainInverted     = unpackedData[3];
+
+    return status;
+}
+
+// For CMD 48h response: get expression pedal sensitivity
+FirmwareSupport::Error TerpstraMidiDriver::unpackGetExpressionPedalSensitivityResponse(const MidiMessage& response, int& sensitivity)
+{
+    const short NUM_UNPACKED = 1;
+    int unpackedData[NUM_UNPACKED];
+    auto status = unpack7BitData(response, NUM_UNPACKED, unpackedData);
+    if (status != FirmwareSupport::Error::noError)
+        return status;
+
+    sensitivity = unpackedData[0];
+
+    return status;
+}
+
+
+
 void TerpstraMidiDriver::sendMessageWithAcknowledge(const MidiMessage& message)
 {
-    if (sendTestMessagesOnly && message.isSysEx())
+    // Prevent certain messages from being sent
+    if (onlySendRequestMessages && message.isSysEx())
     {
         auto sysExData = message.getSysExData();
-        if (   sysExData[CMD_ID] != GET_SERIAL_IDENTITY
-            && sysExData[CMD_ID] != GET_FIRMWARE_REVISION
-            && sysExData[CMD_ID] != LUMA_PING)
+        if (   sysExData[CMD_ID] == CHANGE_KEY_NOTE
+            || sysExData[CMD_ID] == SET_KEY_COLOUR
+            || sysExData[CMD_ID] == SET_VELOCITY_CONFIG
+            || sysExData[CMD_ID] == SET_FADER_CONFIG
+            || sysExData[CMD_ID] == SET_AFTERTOUCH_CONFIG
+            || sysExData[CMD_ID] == SET_VELOCITY_INTERVALS
+            || sysExData[CMD_ID] == SET_LUMATOUCH_CONFIG)
         {
             return;
         }
     }
 
-    // If there is no MIDI input port active: just send, without expecting acknowledge
-	// ToDo Or do nothing?
+//    jassert(midiInput != nullptr);
     if (midiInput == nullptr)
     {
-        sendMessageNow(message);
+        DBG("No MidiInput open to send message to.");
+//        sendMessageNow(message);
 
 	    // Notify listeners
-		const MessageManagerLock mmLock;
-		this->listeners.call(&Listener::midiMessageSent, message);
+		// const MessageManagerLock mmLock;
+		// this->listeners.call(&Listener::midiMessageSent, message);
+//        notifyMessageSent(midiOutput, message);
     }
     else
     {
         // Add message to queue first. The oldest message in queue will be sent.
 		{
 			messageBuffer.add(message);
-			const MessageManagerLock mmLock;
-			this->listeners.call(&Listener::midiSendQueueSize, messageBuffer.size());
+			// const MessageManagerLock mmLock;
+			// this->listeners.call(&Listener::midiSendQueueSize, messageBuffer.size());
+            notifySendQueueSize();
 		}
 
         // If there is no message waiting for acknowledge: send oldest message of queue
@@ -1291,10 +1435,10 @@ void TerpstraMidiDriver::sendOldestMessageInQueue()
         currentMsgWaitingForAck = messageBuffer[0];     // oldest element in buffer
         hasMsgWaitingForAck = true;
 		messageBuffer.remove(0);                        // remove from buffer
-		{
-			const MessageManagerLock mmLock;
-			this->listeners.call(&Listener::midiSendQueueSize, messageBuffer.size());
-		}
+
+        // const MessageManagerLock mmLock;
+        // this->listeners.call(&Listener::midiSendQueueSize, messageBuffer.size());
+        notifySendQueueSize();
 
         sendCurrentMessage();
     }
@@ -1317,11 +1461,10 @@ void TerpstraMidiDriver::sendCurrentMessage()
     sendMessageNow(currentMsgWaitingForAck);        // send it
 
     // Notify listeners
-	{
-        DBG("SENT    : " + currentMsgWaitingForAck.getDescription());
-		const MessageManagerLock mmLock;
-		this->listeners.call(&Listener::midiMessageSent, currentMsgWaitingForAck);
-	}
+    DBG("SENT: " + currentMsgWaitingForAck.getDescription());
+    // const MessageManagerLock mmLock;
+    // this->listeners.call(&Listener::midiMessageSent, currentMsgWaitingForAck);
+    notifyMessageSent(midiOutput, currentMsgWaitingForAck);
 
     timerType = waitForAnswer;
     startTimer(receiveTimeoutInMilliseconds);       // Start waiting for answer
@@ -1329,16 +1472,14 @@ void TerpstraMidiDriver::sendCurrentMessage()
 
 void TerpstraMidiDriver::handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message)
 {
-    // Notify listeners
-	{
-		const MessageManagerLock mmLock;
-        
-        // DEBUG
-        if (message.isSysEx())
-            DBG("RECEIVED: " + message.getDescription());
-        
-		this->listeners.call(&Listener::midiMessageReceived, source, message);
-	}
+#if JUCE_DEBUG
+    if (message.isSysEx())
+        DBG("RCVD: " + message.getDescription());
+#endif
+
+    //const MessageManagerLock mmLock;
+    //this->listeners.call(&Listener::midiMessageReceived, source, message);
+    notifyMessageReceived(source, message);
 
     // Check whether received message is an answer to the previously sent one
     if (hasMsgWaitingForAck && messageIsResponseToMessage(message, currentMsgWaitingForAck))
@@ -1350,14 +1491,16 @@ void TerpstraMidiDriver::handleIncomingMidiMessage(MidiInput* source, const Midi
 
         // Check answer state (error yes/no)
         auto answerState = message.getSysExData()[5];
-        // if answer state is "busy": resend message after a little delay
-        if (answerState == TerpstraMIDIAnswerReturnCode::STATE)
-        {
-            // turn demo mode off
-            startDemoMode(false);
-        }
 
-        if ( answerState == TerpstraMIDIAnswerReturnCode::BUSY)
+        // This would be nice but we can't be sure the state is demo mode
+//        if (answerState == TerpstraMIDIAnswerReturnCode::STATE)
+//        {
+//            // turn demo mode off
+//            startDemoMode(false);
+//        }
+
+        // if answer state is "busy": resend message after a little delay
+        if (answerState == TerpstraMIDIAnswerReturnCode::BUSY)
         {
             // Start delay timer, after which message will be sent again
             timerType = delayWhileDeviceBusy;
@@ -1387,12 +1530,14 @@ void TerpstraMidiDriver::timerCallback()
         hasMsgWaitingForAck = false;
 
         // No answer came from MIDI input
-		{
-            DBG("DRIVER: NO ANSWER");
-			const MessageManagerLock mmLock;
-			listeners.call(&Listener::generalLogMessage, "No answer from device", HajuErrorVisualizer::ErrorLevel::error);
-            listeners.call(&Listener::noAnswerToMessage, currentMsgWaitingForAck);
-		}
+
+        DBG("DRIVER: NO ANSWER");
+        //const MessageManagerLock mmLock;
+        // listeners.call(&Listener::generalLogMessage, "No answer from device", HajuErrorVisualizer::ErrorLevel::error);
+        // listeners.call(&Listener::noAnswerToMessage, currentMsgWaitingForAck);
+        notifyLogMessage("No answer from device", HajuErrorVisualizer::ErrorLevel::error);
+        notifyNoAnswerToMessage(midiInput, currentMsgWaitingForAck);
+
 
         sendOldestMessageInQueue();
     }
@@ -1406,8 +1551,10 @@ void TerpstraMidiDriver::timerCallback()
 }
 
 void TerpstraMidiDriver::clearMIDIMessageBuffer()
-{ 
+{
     messageBuffer.clear();
     hasMsgWaitingForAck = false;
-    this->listeners.call(&Listener::midiSendQueueSize, 0); 
+    stopTimer();
+    // this->listeners.call(&Listener::midiSendQueueSize, 0);
+    notifySendQueueSize();
 }

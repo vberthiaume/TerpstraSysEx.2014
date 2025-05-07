@@ -97,7 +97,7 @@ bool FirmwareTransfer::requestFirmwareUpdate(String firmwareFilePath)
 	selectedFileToTransfer = firmwareFilePath;
 	transferRequested = true;
 
-	runThread();
+	launchThread();
 
 	return true;
 }
@@ -142,7 +142,7 @@ void FirmwareTransfer::run()
 
 	else if (transferRequested)
 	{
-		prepareForUpdate();
+		prepareAndRunUpdate();
 		transferRequested = false;
 	}
 }
@@ -193,12 +193,15 @@ static FirmwareTransfer::StatusCode shutdownSSHSession(LIBSSH2_SESSION* session,
 		fclose(localFile);
 	DBG("All done.");
 
-	libssh2_exit();
-
 	return returnCode;
 }
 
-bool FirmwareTransfer::prepareForUpdate()
+void FirmwareTransfer::exitLibSsh2()
+{
+	libssh2_exit();
+}
+
+bool FirmwareTransfer::prepareAndRunUpdate()
 {
 	StatusCode returnStatus = StatusCode::Initialize;
 	listeners.call(&FirmwareTransfer::ProcessListener::firmwareTransferUpdate, returnStatus, statusCodeToMessage(returnStatus));
@@ -314,9 +317,43 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
         return StatusCode::StartupErr;
     }
 
+	// Make sure we release libssh2 before app is shutdown
+	TerpstraSysExApplication::getApp().setFirmwareUpdatePerformed(true);
 
+#if JUCE_WINDOWS
 
-#ifdef HAS_POLL_H
+	// Create socket and connect to port 22
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0)
+	{
+		DBG("failed to create socket!");
+		return StatusCode::StartupErr;
+	}
+
+	STOPBEFOREINIT
+
+	String deviceHostName = SERVERHOST;
+	unsigned int hostaddr = inet_addr(deviceHostName.getCharPointer());
+	struct sockaddr_in sin;
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(22);
+	sin.sin_addr.s_addr = hostaddr;
+	
+	if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0)
+	{
+		DBG("failed to connect!");
+
+	#if WIN32
+		closesocket(sock);
+	#else
+		close(sock);
+	#endif
+
+		return StatusCode::HostConnectErr;
+	}
+    
+    
+#else
     
     int sockFlagsBefore = 0;
 
@@ -466,38 +503,6 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
         return StatusCode::StartupErr;
     }
 
-
-#else
-
-	// Create socket and connect to port 22
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock < 0)
-	{
-		DBG("failed to create socket!");
-		return StatusCode::StartupErr;
-	}
-
-	STOPBEFOREINIT
-
-	String deviceHostName = SERVERHOST;
-	unsigned int hostaddr = inet_addr(deviceHostName.getCharPointer());
-	struct sockaddr_in sin;
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(22);
-	sin.sin_addr.s_addr = hostaddr;
-	
-	if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0)
-	{
-		DBG("failed to connect!");
-
-#if WIN32
-		closesocket(sock);
-#else
-		close(sock);
-#endif
-
-		return StatusCode::HostConnectErr;
-	}
 
 #endif
 

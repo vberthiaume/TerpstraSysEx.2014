@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 6.0.4
+  Created with Projucer version: 6.1.3
 
   ------------------------------------------------------------------------------
 
@@ -20,11 +20,11 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "MappingLogic.h"
 #include "IncrMidiNotesMapping.h"
 #include "KBMMappingDlg.h"
-#include "BoardGeometry.h"
+#include "lumatone_geometry.h"
 #include "ScaleStructureController/ScaleStructureComponent.h"
 #include "ScaleStructureController/ScaleDesignWindow.h"
 #include "LumatoneEditorStyleCommon.h"
@@ -43,6 +43,7 @@
 class IsomorphicMassAssign  : public Component,
                               public MappingLogicBase::Listener,
                               public ScaleStructureComponent::Listener,
+                              public ColourSelectionListener,
                               public juce::ComboBox::Listener,
                               public juce::Button::Listener
 {
@@ -61,20 +62,20 @@ public:
 	void setSaveSend(int setSelection, int keySelection, int noteIndex);
 
 	// Fill a line, Starting point is assumed to have been set
-	void fillLine(int setSelection, TerpstraBoardGeometry::StraightLine& line, int startPos, int startNoteIndex, int stepSize);
+	void fillLine(int setSelection, LumatoneGeometry::StraightLine& line, int startPos, int startNoteIndex, int stepSize);
 
 	// Fill a line over all octave boards. Starting point is assumed to have been set.
-	void fillGlobalLine(int setSelection, TerpstraBoardGeometry::StraightLineSet& globalLine, int startPos, int startNoteIndex, int stepSize);
+	void fillGlobalLine(int setSelection, LumatoneGeometry::StraightLineSet& globalLine, int startPos, int startNoteIndex, int stepSize);
 
 	// Fill a horizontal line and its cutting upwards lines, recursively
-	void fill2DHorizLineRecursive(int setSelection, TerpstraBoardGeometry::StraightLine& horizLine, int startPos, int startNoteIndex,
+	void fill2DHorizLineRecursive(int setSelection, LumatoneGeometry::StraightLine& horizLine, int startPos, int startNoteIndex,
 		int horizStepSize, int rUpwStepSize,
-		TerpstraBoardGeometry::StraightLineSet& finishedLines);
+		LumatoneGeometry::StraightLineSet& finishedLines);
 
 	// Fill a right upward line and its cutting horizontal lines, recursively
-	void fill2DRUpwLineRecursive(int setSelection, TerpstraBoardGeometry::StraightLine& rUpwLine, int startPos, int startNoteIndex,
+	void fill2DRUpwLineRecursive(int setSelection, LumatoneGeometry::StraightLine& rUpwLine, int startPos, int startNoteIndex,
 		int horizStepSize, int rUpwStepSize,
-		TerpstraBoardGeometry::StraightLineSet& finishedLines);
+		LumatoneGeometry::StraightLineSet& finishedLines);
 
 	// Implementation of MappingLogicListener
 	void mappingLogicChanged(MappingLogicBase* mappingLogicThatChanged) override;
@@ -83,9 +84,11 @@ public:
 	void scaleStructurePeriodChanged(int newPeriod) override;
 	void scaleStructureStepSizesChanged(int rightUpwardSize, int horizontalSize) override;
 
+	// Implementation of ColourSelectionListener
+	void colourChangedCallback(ColourSelectionBroadcaster* source, Colour newColour) override;
+
 	bool performMouseDown(int setSelection, int keySelection);
 
-	void lookAndFeelChanged() override;
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -103,7 +106,7 @@ private:
 
 	MappingLogicBase*			mappingLogic;
 	int							periodSize;
-	TerpstraBoardGeometry		boardGeometry;
+	LumatoneGeometry		boardGeometry;
 	ScaleStructure				scaleStructure;
 
 	// Style helpers
@@ -149,6 +152,7 @@ private:
     std::unique_ptr<juce::ComboBox> periodSizeBox;
     std::unique_ptr<juce::Label> labelPeriodSize;
     std::unique_ptr<juce::ToggleButton> setColourToggleButton;
+    std::unique_ptr<juce::ToggleButton> setStepsToggleButton;
 
 
     //==============================================================================
@@ -157,4 +161,3 @@ private:
 
 //[EndFile] You can add extra defines here...
 //[/EndFile]
-

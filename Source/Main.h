@@ -10,9 +10,9 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "LumatoneMenu.h"
-#include "MainComponent.h"
+#include "MainWindow.h"
 #include "LumatoneController.h"
 
 #include "ViewConstants.h"
@@ -21,6 +21,10 @@
 #include "LocalisationMap.h"
 #include "FirmwareTransfer.h"
 
+#include "./color/colour_model.h"
+
+#define CHOOSE_FILE_NOOP [](bool) -> void {}
+
 //==============================================================================
 class TerpstraSysExApplication : public JUCEApplication
 {
@@ -28,14 +32,14 @@ public:
 	//==============================================================================
 	TerpstraSysExApplication();
 
-	const String getApplicationName()       { return ProjectInfo::projectName; }
-	const String getApplicationVersion()    { return ProjectInfo::versionString; }
-	bool moreThanOneInstanceAllowed()       { return true; }
+	const String getApplicationName() override		{ return ProjectInfo::projectName; }
+	const String getApplicationVersion() override   { return ProjectInfo::versionString; }
+	bool moreThanOneInstanceAllowed() override      { return true; }
 
-	void initialise(const String& commandLine);
-	void shutdown();
-	void systemRequestedQuit();
-	void anotherInstanceStarted(const String& commandLine);
+	void initialise(const String& commandLine) override;
+	void shutdown() override;
+	void systemRequestedQuit() override;
+	void anotherInstanceStarted(const String& commandLine) override;
 
 	static TerpstraSysExApplication& getApp()
 	{
@@ -48,17 +52,21 @@ public:
 	LumatoneEditorLookAndFeel& getLookAndFeel() { return lookAndFeel; }
 	ComponentBoundsConstrainer* getBoundsConstrainer() { return boundsConstrainer.get(); };
 	RecentlyOpenedFilesList& getRecentFileList() { return recentFiles; }
-	LumatoneController& getLumatoneController() { return lumatoneController; }
+	LumatoneController* getLumatoneController() { return lumatoneController.get(); }
 	Array<LumatoneEditorColourPalette>& getColourPalettes() { return colourPalettes; }
 	Font getAppFont(LumatoneEditorFont fontIdIn, float height = 12.0f) { return appFonts.getFont(fontIdIn, height); }
-	int getOctaveBoardSize() const { return lumatoneController.getOctaveSize(); }
 	bool isDeveloperModeActive() const { return propertiesFile->getBoolValue("DeveloperMode", false); }
+	int getOctaveBoardSize() const { return lumatoneController->getOctaveBoardSize(); }
+    int getNumBoards() const { return lumatoneController->getNumBoards(); }
 
-	FirmwareVersion getFirmwareVersion() const { return lumatoneController.getFirmwareVersion(); }
-	String getFirmwareVersionStr() const { return lumatoneController.getFirmwareVersion().toString(); }
+	LumatoneFirmwareVersion getLumatoneVersion() const { return lumatoneController->getLumatoneVersion(); }
+	FirmwareVersion getFirmwareVersion() const { return lumatoneController->getFirmwareVersion(); }
+	String getFirmwareVersionStr() const { return lumatoneController->getFirmwareVersion().toDisplayString(); }
+
+	void setFirmwareUpdatePerformed(bool updateWasRun) { firmwareUpdateWasPerformed = true; }
 
 	void reloadColourPalettes();
-	bool saveColourPalette(LumatoneEditorColourPalette& palette, File pathToPalette);
+	bool saveColourPalette(LumatoneEditorColourPalette& palette, File pathToPalette=File());
 	bool deletePaletteFile(File pathToPalette);
 
 	// Menu functionality
@@ -67,18 +75,29 @@ public:
 	void getCommandInfo(CommandID commandID, ApplicationCommandInfo& result) override;
 	bool perform(const InvocationInfo& info) override;
 
+
 	bool openSysExMapping();
-	bool saveSysExMapping();
-	bool saveSysExMappingAs();
+	bool saveSysExMapping(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
+	bool saveSysExMappingAs(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 	bool resetSysExMapping();
 
 	bool deleteSubBoardData();
 	bool copySubBoardData();
 	bool pasteSubBoardData();
+    bool pasteModifiedSubBoardData(CommandID commandID);
+    bool canPasteSubBoardData() const;
 
-	bool performUndoableAction(UndoableAction* editAction);
+    void setEditMode(sysExSendingMode editMode);
+
+	void setCalibrationMode(bool calibrationStarted) { inCalibrationMode = calibrationStarted; }
+	bool getInCalibrationMode() const { return inCalibrationMode; }
+
+	bool performUndoableAction(UndoableAction* editAction, bool newTransaction=true);
 	bool undo();
 	bool redo();
+
+	LumatoneLayout* getMappingData() { return &mappingData; }
+	LumatoneColourModel* getColourModel();
 
 	bool toggleDeveloperMode();
 
@@ -90,86 +109,23 @@ public:
 
 	bool openRecentFile(int recentFileIndex);
 	bool openFromCurrentFile();
-	bool saveCurrentFile();
+    bool setCurrentFile(File fileToOpen);
+	bool saveCurrentFile(std::function<void(bool success)> saveFileCallback = CHOOSE_FILE_NOOP);
 
 	void sendCurrentConfigurationToDevice();
 	void requestConfigurationFromDevice();
 
-	
 	void updateMainTitle();
 
 	bool getHasChangesToSave() const { return hasChangesToSave; }
 	void setHasChangesToSave(bool value);
 
+	void setOpenDialogWindow(DialogWindow* dialogWindowIn);
+
 	bool aboutTerpstraSysEx();
 
-	//==============================================================================
-	/*
-	This class implements the desktop window that contains an instance of
-	our MainContentComponent class.
-	*/
-	class MainWindow : public DocumentWindow
-	{
-	public:
-		MainWindow() : DocumentWindow("Lumatone Editor", 
-			TerpstraSysExApplication::getApp().getLookAndFeel().findColour(LumatoneEditorColourIDs::MediumBackground),
-			DocumentWindow::minimiseButton + DocumentWindow::closeButton)
-		{
-			setContentOwned(new MainContentComponent(), true);
 
-			setResizable(true, true);
-			setConstrainer(TerpstraSysExApplication::getApp().getBoundsConstrainer());
-			centreWithSize(getWidth(), getHeight());
-#if JUCE_ANDROID
-			setFullScreen(true);
-#endif
-			setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel());
-			setVisible(true);
-		}
-
-		void closeButtonPressed() override
-		{
-			// This is called when the user tries to close this window. Here, we'll just
-			// ask the app to quit when this happens, but you can change this to do
-			// whatever you need.
-			JUCEApplication::getInstance()->systemRequestedQuit();
-		}
-
-		BorderSize<int> getBorderThickness() override
-		{
-			return BorderSize <int>(1);
-		}
-
-		/* Note: Be careful if you override any DocumentWindow methods - the base
-		class uses a lot of them, so by overriding you might break its functionality.
-		It's best to do all your work in your content component instead, but if
-		you really have to override any DocumentWindow methods, make sure your
-		subclass also calls the superclass's method.
-		*/
-
-		void saveStateToPropertiesFile(PropertiesFile* propertiesFile)
-		{
-			// Save state of main window
-			propertiesFile->setValue("MainWindowState", getWindowStateAsString());
-			((MainContentComponent*)(getContentComponent()))->saveStateToPropertiesFile(propertiesFile);
-		}
-
-		void restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
-		{
-			if (!restoreWindowStateFromString(propertiesFile->getValue("MainWindowState")))
-			{
-				// Default window state
-				setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
-			}
-
-			((MainContentComponent*)(getContentComponent()))->restoreStateFromPropertiesFile(propertiesFile);
-		}
-
-	private:
-		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
-	};
-
-	MainContentComponent* getMainContentComponent();
+	MainContentComponent* getMainContentComponent() const;
 
 private:
 	std::unique_ptr<MainWindow> mainWindow;
@@ -181,10 +137,14 @@ private:
 	TooltipWindow				tooltipWindow;
 	bool						hasChangesToSave;
 
+	bool						inCalibrationMode = false;
+
 	juce::UndoManager undoManager;
-	
+
 	LumatoneEditorFonts			appFonts;
 	LumatoneEditorLookAndFeel	lookAndFeel;
+
+	LumatoneColourModel			colourModel;
 
 	PropertiesFile*				propertiesFile;
 	File						currentFile;
@@ -199,6 +159,15 @@ private:
 
 	Array<LumatoneEditorColourPalette> colourPalettes;
 
-	LumatoneController			lumatoneController;
-};
+	LumatoneLayout mappingData;
 
+	// Make sure an open dialog window is deleted on shutdown
+	std::unique_ptr<DialogWindow> dialogWindow;
+
+	// Communication with Lumatone
+	std::unique_ptr<LumatoneController> lumatoneController;
+
+	std::unique_ptr<juce::FileChooser> fileChooser;
+
+	bool firmwareUpdateWasPerformed = false; // Allows us to deinitialize libssh2 a single time
+};

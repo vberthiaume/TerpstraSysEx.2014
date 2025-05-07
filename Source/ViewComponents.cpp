@@ -17,14 +17,15 @@ TerpstraKeyEdit class
 ==============================================================================
 */
 
-TerpstraKeyEdit::TerpstraKeyEdit()
-	: isSelected(false), keyColour(juce::Colour()), keyType(LumatoneKeyType::noteOnNoteOff)
+TerpstraKeyEdit::TerpstraKeyEdit(int boardIndex, int keyIndex, LumatoneKey keyData)
+	: MappedLumatoneKey(keyData, boardIndex, keyIndex)
+	, isSelected(false)
 {
 	midiNoteLabel = new Label("midiNoteLabel", "0");
 	addAndMakeVisible(midiNoteLabel);
 	midiNoteLabel->setJustificationType(Justification::centredRight);
 	midiNoteLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowBold));
-	
+
 	midiChannelLabel = new Label("midiChannelLabel", "0");
 	addAndMakeVisible(midiChannelLabel);
 	midiChannelLabel->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::GothamNarrowMedium));
@@ -36,23 +37,23 @@ TerpstraKeyEdit::~TerpstraKeyEdit()
 	deleteAllChildren();
 }
 
-TerpstraKey TerpstraKeyEdit::getValue() const
+void TerpstraKeyEdit::setValue(const LumatoneKey& newValue)
 {
-	TerpstraKey newValue;
-	newValue.noteNumber = midiNoteLabel->getText().getIntValue();
-	newValue.channelNumber = midiChannelLabel->getText().getIntValue();
-	newValue.colour = keyColour;
-	newValue.keyType = keyType;
-
-	return newValue;
-}
-
-void TerpstraKeyEdit::setValue(TerpstraKey newValue)
-{
-	midiNoteLabel->setText(String(newValue.noteNumber), juce::NotificationType::sendNotification);
-	midiChannelLabel->setText(String(newValue.channelNumber), juce::NotificationType::sendNotification);
-	keyColour = newValue.colour;
 	keyType = newValue.keyType;
+
+    if (newValue.keyType == LumatoneKeyType::disabled || newValue.keyType == LumatoneKeyType::disabledDefault)
+    {
+        keyType = LumatoneKeyType::disabled;
+        midiNoteLabel->setText("x", juce::NotificationType::sendNotification);
+        midiChannelLabel->setText("x", juce::NotificationType::sendNotification);
+    }
+    else
+    {
+        midiNoteLabel->setText(String(newValue.noteNumber), juce::NotificationType::sendNotification);
+        midiChannelLabel->setText(String(newValue.channelNumber), juce::NotificationType::sendNotification);
+    }
+	colour = newValue.colour;
+    ccFaderDefault = newValue.ccFaderDefault;
 
 	String newTooltip = translate("KeyType") + " ";
 	switch (keyType)
@@ -62,6 +63,11 @@ void TerpstraKeyEdit::setValue(TerpstraKey newValue)
 		break;
 	case LumatoneKeyType::continuousController:
 		newTooltip += translate("ContinuousController");
+        newTooltip += newLine;
+        if (ccFaderDefault)
+            newTooltip += "CC Default (0->127)";
+        else
+            newTooltip += "CC Inverted (127->0)";
 		break;
 	case LumatoneKeyType::lumaTouch:
 		newTooltip += translate("Lumatouch");
@@ -76,8 +82,8 @@ void TerpstraKeyEdit::setValue(TerpstraKey newValue)
 	}
 
 	newTooltip += newLine;
-	newTooltip += translate("KeyColour") + " " + keyColour.toDisplayString(false);
-	
+	newTooltip += translate("KeyColour") + " " + colour.toDisplayString(false);
+
 	setTooltip(newTooltip);
 	midiNoteLabel->setTooltip(newTooltip);
 	midiChannelLabel->setTooltip(newTooltip);
@@ -96,41 +102,41 @@ void TerpstraKeyEdit::setIsSelected(bool newValue)
 
 void TerpstraKeyEdit::paint(Graphics& g)
 {
-	TerpstraKey currentValue = getValue();
-
 	// Selected or not: color and thickness of the line
 	float lineWidth = TERPSTRASINGLEKEYFLDLINEWIDTH;
 	Colour lineColor = findColour(selectedKeyOutlineId);
 
 	// Color: empty or the parametrized color
-	Colour bgColour = findColour(backgroundColourId).overlaidWith(currentValue.colour.withAlpha(TERPSTRASINGLEKEYCOLOURALPHA));
+	Colour bgColour = findColour(backgroundColourId).overlaidWith(colour.withAlpha(TERPSTRASINGLEKEYCOLOURALPHA));
     Colour textColour = bgColour.contrasting(0.7f);
 
 	if (bgColour.getPerceivedBrightness() < 0.5)
 	{
 		textColour = textColour.brighter();
 	}
-	
-	if (currentValue.keyType == LumatoneKeyType::disabled)
-	{
-		midiChannelLabel->setVisible(false);
-		midiNoteLabel->setVisible(false);
-	}
-	else
-	{
-		midiChannelLabel->setVisible(true);
-		midiChannelLabel->setColour(juce::Label::textColourId, textColour);
-		midiNoteLabel->setVisible(true);
-		midiNoteLabel->setColour(juce::Label::textColourId, textColour);
-	}
-	// Look depending on Key type
-	if (currentValue.keyType == LumatoneKeyType::continuousController)
+
+    midiChannelLabel->setColour(juce::Label::textColourId, textColour);
+    midiNoteLabel->setColour(juce::Label::textColourId, textColour);
+
+    // Look depending on Key type
+    if (keyType == LumatoneKeyType::continuousController)
 	{
 		// Key type is continuous controller. Set colour gradient.
         float w = this->getWidth();
         float h = this->getHeight();
+        Colour inside, outside;
+        if (ccFaderDefault)
+        {
+            outside = bgColour.darker();
+            inside = bgColour.brighter();
+        }
+        else
+        {
+            outside = bgColour.brighter();
+            inside = bgColour.darker();
+        }
 		g.setGradientFill(
-			ColourGradient(bgColour.darker(), w * 0.5f, h * 0.5f, bgColour.brighter(), w * 0.5f, 0.0f, true));
+			ColourGradient(inside, w * 0.5f, h * 0.5f, outside, w * 0.5f, 0.0f, true));
 	}
 	else
 	{
@@ -152,19 +158,28 @@ void TerpstraKeyEdit::paint(Graphics& g)
 		g.strokePath(hexOutline, PathStrokeType(lineWidth));
 	}
 
-	if (currentValue.keyType == LumatoneKeyType::disabled)
-	{
-		float w = this->getWidth();
-		float h = this->getHeight();
-		float xProportion = 0.25f;
-		// Draw X on key
-		g.setColour(bgColour.contrasting(0.5f));
-		g.drawLine(w * xProportion, h * xProportion, w * (1-xProportion), h * (1-xProportion), 2);
-		g.drawLine(w * (1 - xProportion), h * xProportion, w * xProportion, h * (1 - xProportion), 2);
-	}
+//	if (currentValue.keyType == LumatoneKeyType::disabled)
+//	{
+//		float w = this->getWidth();
+//		float h = this->getHeight();
+//		float xProportion = 0.25f;
+//		// Draw X on key
+//		g.setColour(bgColour.contrasting(0.5f));
+//		g.drawLine(w * xProportion, h * xProportion, w * (1-xProportion), h * (1-xProportion), 2);
+//		g.drawLine(w * (1 - xProportion), h * xProportion, w * xProportion, h * (1 - xProportion), 2);
+//	}
+
+//    if (currentValue.keyType == LumatoneKeyType::disabled)
+//    {
+//        TerpstraSysExApplication::getApp().getLookAndFeel().getLabelFont(*midiNoteLabel);
+//        g.setColour(textColour);
+//        g.setFont(midiChannelLabel->getFont());
+//        g.drawText("x", midiChannelLabel->getBounds(), midiChannelLabel->getJustificationType());
+//        g.drawText("x", midiNoteLabel->getBounds(), midiChannelLabel->getJustificationType());
+//    }
 
 	// Something parametrized or not?
-	if (currentValue.isEmpty())
+	if (isEmpty())
 	{
 		midiChannelLabel->setAlpha(0.3f);
 		midiNoteLabel->setAlpha(0.3f);
@@ -184,7 +199,7 @@ void TerpstraKeyEdit::resized()
 	// Draw hexagon
 	hexPath.clear();
 	hexPath.addPolygon(centre.toFloat(), 6, radius, TERPSTRASINGLEKEYROTATIONANGLE);
-	Rectangle<float> hexBounds = hexPath.getBounds().reduced(1, 1);
+	//Rectangle<float> hexBounds = hexPath.getBounds().reduced(1, 1);
 
 	float lblSize = radius * TERPSTRASINGLEKEYLABELSIZE;
 	float lblOffset = radius * 0.375f;
@@ -201,4 +216,3 @@ void TerpstraKeyEdit::setKeySize(float keySizeIn)
 	keySize = keySizeIn;
 	setSize(keySize, keySize);
 }
-

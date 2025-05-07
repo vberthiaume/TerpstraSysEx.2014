@@ -7,7 +7,7 @@
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Created with Projucer version: 6.0.5
+  Created with Projucer version: 6.0.8
 
   ------------------------------------------------------------------------------
 
@@ -36,6 +36,7 @@
                                                                     //[/Comments]
 */
 class PedalSensitivityDlg  : public juce::Component,
+                             public LumatoneEditor::FirmwareListener,
                              public juce::Button::Listener,
                              public juce::Slider::Listener
 {
@@ -50,6 +51,12 @@ public:
 	void loadFromMapping();
 
 	void lookAndFeelChanged() override;
+
+    // LumatoneEditor::FirmwareListener implementation
+    void firmwareRevisionReceived(FirmwareVersion version) override;
+    void presetFlagsReceived(PresetFlags presetFlags) override;
+    void expressionPedalSensitivityReceived(int sensitivity) override;
+
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -61,19 +68,20 @@ public:
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
-	int roundedCornerSize;
-    Rectangle<float> controlBounds;
-
-    // Style Constants
-    const Rectangle<float> sliderBoundsProps = { 0.54f, 0.38f, 0.4f, 0.52f };
+    int roundedCornerSize = 0;
+    Rectangle<float> expressionBounds;
+    Rectangle<float> sustainBounds;
+    const float sectionMarginWidth = 0.05f;
 
     //[/UserVariables]
 
     //==============================================================================
-    std::unique_ptr<juce::Label> labelExprContrSensivity;
-    std::unique_ptr<juce::ToggleButton> btnInvertFootCtrl;
-    std::unique_ptr<juce::Label> labelEXpressionPedalTitle;
-    std::unique_ptr<juce::Slider> sldExprCtrlSensivity;
+    std::unique_ptr<juce::Label> labelExprContrSensitivity;
+    std::unique_ptr<juce::ToggleButton> btnInvertExpression;
+    std::unique_ptr<juce::Label> lblExpression;
+    std::unique_ptr<juce::Slider> sldExprCtrlSensitivity;
+    std::unique_ptr<juce::ToggleButton> btnInvertSustain;
+    std::unique_ptr<juce::Label> lblSustain;
 
 
     //==============================================================================

@@ -13,11 +13,15 @@
 #include "CalibrationDlg.h"
 #include "FirmwareDlg.h"
 #include "DeveloperDlg.h"
+#include "PresetSettingsDlg.h"
+#include "MidiSettingsDlg.h"
 
 typedef enum {
     Calibration = 0,
     Firmware = 1,
-    Developer
+    Developer = 2,
+    Midi        = 3,
+    Presets     = 4
 } LumatoneEditorSettingCategories;
 
 class SettingsCategoryModel : public ListBoxModel, public ChangeBroadcaster
@@ -27,7 +31,7 @@ public:
     SettingsCategoryModel();
 
     void refreshCategories();
-    
+
     void setDeveloperMode(bool enableDeveloperMode);
 
     //=========================================================================
@@ -38,12 +42,12 @@ public:
     void paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override;
 
     void selectedRowsChanged(int lastRowSelected) override { sendChangeMessage(); }
-    
+
 
     //=========================================================================
 private:
     Array<String> categories;
-    
+
     bool showDeveloperPanel = false;
 };
 
@@ -52,6 +56,8 @@ class SettingsContainer : public Component, protected ChangeListener
 public:
 
     SettingsContainer();
+
+    // Send change signal when destructed
     ~SettingsContainer();
 
     void paint(Graphics& g) override;
@@ -63,7 +69,7 @@ public:
     void changeListenerCallback(ChangeBroadcaster* source) override;
 
     //=========================================================================
-    
+
     void showPanel(int editorSettingCategory);
 
     void setDeveloperMode(bool enableDeveloperMode);

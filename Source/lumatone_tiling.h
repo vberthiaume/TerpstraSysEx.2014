@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    HexagonTilingGeometry.h
+    LumatoneTiling.h
     Created: 6 Jan 2021 11:42:30pm
     Author:  Vincenzo
 
@@ -9,8 +9,7 @@
 */
 
 #pragma once
-#include "BoardGeometry.h"
-#include "KeyboardDataStructure.h"
+#include "lumatone_geometry.h"
 
 //==============================================================================
 // Used to calculate the center point coordinates for a hexagon tiling.
@@ -19,14 +18,14 @@
 
 #define LATERALRADIUSRATIO   0.8660254037844 // sqrt(3) / 2, proportional to radius, the length between the center and a vertex)
 
-class HexagonTilingGeometry
+class LumatoneTiling
 {
 public:
 
 	/// <summary>
 	/// Creates a basic hexagon tiling with a 1x1 bounding box set at (0, 0)
 	/// </summary>
-	HexagonTilingGeometry() {};
+	LumatoneTiling() {};
 
 	void setRadius(double radiusIn) { radius = radiusIn; }
 
@@ -34,11 +33,11 @@ public:
 
 	void setRotationAngle(double angleIn) { angle = angleIn; recalculateTransform(startingCentre.toFloat(), scaleToFit); }
 
-	void setBounds(Rectangle<float> boundsIn) { bounds = boundsIn; }
+	void setBounds(juce::Rectangle<float> boundsIn) { bounds = boundsIn; }
 
 	void scaleToFitBounds(bool doScaling) { scaleToFit = doScaling; }
 
-	void setOriginPoint(Point<float> originPoint) { startingCentre = originPoint.toDouble(); }
+	void setOriginPoint(juce::Point<float> originPoint) { startingCentre = originPoint.toDouble(); }
 
 	void setSkewed(bool tilingIsSkewed) { useSkewedBasis = tilingIsSkewed; }
 
@@ -74,11 +73,11 @@ public:
 	/// <param name="radiusScalarIn"></param>
 	/// <param name="lateralScalarIn"></param>
 	void fitTilingTo(
-		Rectangle<float>	boundsIn, 
+		juce::Rectangle<float>	boundsIn,
 		int					widestRow,
 		int					longestColumn,
-		float				marginSize, 
-		float				rotateAngle, 
+		float				marginSize,
+		float				rotateAngle,
 		bool				scaleToFitRotation = true,
 		float				radiusScalarIn = 1.0f,
 		float				lateralScalarIn = 1.0f
@@ -94,25 +93,25 @@ public:
 	/// <param name="colStepsSecondToThird"></param>
 	/// <param name="correctionAngle"></param>
 	void fitSkewedTiling(
-		Point<float>		firstKeyCentre,
-		Point<float>		secondKeyCentre,
+		juce::Point<float>		firstKeyCentre,
+		juce::Point<float>		secondKeyCentre,
 		int					rowStepsFirstToSecond,
-		Point<float>		thirdKeyCentre,
+		juce::Point<float>		thirdKeyCentre,
 		int					colStepsSecondToThird,
 		bool				calculateAngles = true
 	);
 
 	// TODO: Generalized hex plane for any shapes
-	//Array<Point<float>> getHexagonCentres(const Point<float> originCentre, const Array<Array<int>> stepsFromCentre) const;
+	//juce::Array<juce::Point<float>> getHexagonCentres(const juce::Point<float> originCentre, const juce::Array<juce::Array<int>> stepsFromCentre) const;
 
-	Array<Point<float>> getHexagonCentres(const TerpstraBoardGeometry& boardGeometry, int startingOctave = 0, int numOctavesIn = 1) const;
+	juce::Array<juce::Point<float>> getHexagonCentres(const LumatoneGeometry& boardGeometry, int startingOctave = 0, int numOctavesIn = 1) const;
 
-	Array<Point<float>> getHexagonCentresSkewed(const TerpstraBoardGeometry& boardGeometry, int startingOctave, int numOctavesIn) const;
+	juce::Array<juce::Point<float>> getHexagonCentresSkewed(const LumatoneGeometry& boardGeometry, int startingOctave, int numOctavesIn) const;
 
-	// I have a new model of this class in the TilingGeometry branch that is based on this function, but it happened to perform worse 
+	// I have a new model of this class in the TilingGeometry branch that is based on this function, but it happened to perform worse
 	// in terms of rounding errors, so this is a quick-fix for implementing HexPalettes before I can officially clean this class up
-	Array<Point<float>> transformPointsFromOrigin(Array<Point<int>> hexagonalCoordinatesIn);
-	
+	juce::Array<juce::Point<float>> transformPointsFromOrigin(juce::Array<juce::Point<int>> hexagonalCoordinatesIn);
+
 	//==============================================================================
 	// Property getters
 
@@ -127,7 +126,7 @@ public:
 	/// </summary>
 	/// <param name="withTransformation">If true, the bounds will be after the transformation</param>
 	/// <returns></returns>
-	Rectangle<float> getRecentTileBounds(bool withTransformation = true);
+	juce::Rectangle<float> getRecentTileBounds(bool withTransformation = true);
 
 	double getRadius() const { return radius; }
 
@@ -139,9 +138,9 @@ public:
 
 	double getMargin() const { return margin; }
 
-	Point<float> getCurrentOriginPoint() const { return startingCentre.toFloat(); }
+	juce::Point<float> getCurrentOriginPoint() const { return startingCentre.toFloat(); }
 
-	AffineTransform getCurrentTransformation() const { return transform; }
+	juce::AffineTransform getCurrentTransformation() const { return transform; }
 
 	float getCurrentAngle() const { return angle; }
 
@@ -154,22 +153,22 @@ public:
 	double getRowAngleBasis() const { return rowBasisAngle; }
 
 	//==============================================================================
-	
+
 	double findBestRadius(int widestRow, int longestColumn);
 
 private:
 
-	void recalculateTransform(Point<float> rotateOrigin, bool centreAndScale);
+	void recalculateTransform(juce::Point<float> rotateOrigin, bool centreAndScale);
 
 	// Finds the smallest rectangle based on tiling with board geometry since it may be smaller than bounds passed in
-	Rectangle<float> calculateSmallestBounds(int widestRowSize, int longestColumnSize) const;
+	juce::Rectangle<float> calculateSmallestBounds(int widestRowSize, int longestColumnSize) const;
 
 	// Generalized ones
-	//Array<Point<float>> calculateCentres(const TerpstraBoardGeometry& boardGeometry, Point<float> firstKeyCentre);
+	//juce::Array<juce::Point<float>> calculateCentres(const LumatoneGeometry& lumatoneGeometry, juce::Point<float> firstKeyCentre);
 
-	Array<Point<float>> calculateCentres(const TerpstraBoardGeometry& boardGeometry, int startingOctave = 0, int numOctaves = 1) const;
+	juce::Array<juce::Point<float>> calculateCentres(const LumatoneGeometry& boardGeometry, int startingOctave = 0, int numOctaves = 1) const;
 
-	Array<Point<float>> calculateCentresSkewed(const TerpstraBoardGeometry& boardGeometry, int startingOctave = 0, int numOctaves = 1) const;
+	juce::Array<juce::Point<float>> calculateCentresSkewed(const LumatoneGeometry& boardGeometry, int startingOctave = 0, int numOctaves = 1) const;
 
 	static int verticalToSlantOffset(int rowNum, int offsetIn);
 
@@ -183,9 +182,9 @@ public:
 
 	static double distanceStepsAwayY(double radiusBounding, double margin, int stepsY);
 
-	static Point<double> getSkewedPoint(
-		double columnAngleX, double columnAngleY, 
-		double rowAngleX, double rowAngleY, 
+	static juce::Point<double> getSkewedPoint(
+		double columnAngleX, double columnAngleY,
+		double rowAngleX, double rowAngleY,
 		double colUnit, double rowUnit, int columnOffset, int rowOffset
 	);
 
@@ -193,8 +192,8 @@ private:
 
 	//=======================================================================
 	// Parameters
-	
-	Rectangle<float> bounds = Rectangle<float>(0, 0, 1, 1);
+
+	juce::Rectangle<float> bounds = juce::Rectangle<float>(0, 0, 1, 1);
 	double radius = 0.5;
 
 	double margin = 0.0;
@@ -207,15 +206,15 @@ private:
 	float verticalScalar = 1.0f;
 
 	double columnBasisAngle = 0.0;
-	double rowBasisAngle = -double_Pi / 3.0;
+	double rowBasisAngle = -(juce::MathConstants<double>::pi) / 3.0;
 
-	Point<double> startingCentre = Point<double>(0.4330127, 0.5);
+	juce::Point<double> startingCentre = juce::Point<double>(0.4330127, 0.5);
 
 	//=======================================================================
 	// Properties based on parameters
 
 	float rotationScalar = 1.0f;
-	AffineTransform transform = AffineTransform();
+	juce::AffineTransform transform = juce::AffineTransform();
 
 	double columnAngleCos = 0;
 	double columnAngleSin = 0;
@@ -227,6 +226,6 @@ private:
 	double    rowXComponent = 0;
 	double    rowYComponent = 0;
 
-	Rectangle<float> tileBounds;        // Smallest rectangle containing tiles pre-transformation
-	Rectangle<float> transformedBounds; // Smallest rectangle containing tiles post-transformation
+	juce::Rectangle<float> tileBounds;        // Smallest rectangle containing tiles pre-transformation
+	juce::Rectangle<float> transformedBounds; // Smallest rectangle containing tiles post-transformation
 };

@@ -11,7 +11,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "JuceHeader.h"
+#include <JuceHeader.h>
 #include "HajuLib/HajuMidiDriver.h"
 #include "HajuLib/HajuErrorVisualizer.h"
 #include "LumatoneFirmwareDefinitions.h"
@@ -22,23 +22,36 @@
 Connection to midi, sending SysEx parameters to keyboard
 ==============================================================================
 */
-class TerpstraMidiDriver : public HajuMidiDriver, public MidiInputCallback, public Timer
+class TerpstraMidiDriver : public HajuMidiDriver, public Timer
 {
     // Types
 public:
-	// Listener class, to notify changes
-	class Listener
+	// MidiMessageCollector version of previous TerpstraMidiDriver::Listener, as to keep the Midi thread lightweight
+	class Collector : protected MidiMessageCollector
 	{
-	public:
-		// Destructor
-		virtual ~Listener() {}
+		MidiBuffer messagesSentQueue;
 
-		virtual void midiMessageReceived(MidiInput* source, const MidiMessage& midiMessage) = 0;
-		virtual void midiMessageSent(const MidiMessage& midiMessage) = 0;
-		virtual void midiSendQueueSize(int queueSize) = 0;
-        virtual void generalLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel) = 0;
-		virtual void noAnswerToMessage(const MidiMessage& midiMessage) = 0;
-	};
+	public:
+        virtual ~Collector() {}
+
+		virtual void midiMessageReceived(MidiInput* source, const MidiMessage& message) = 0;
+		virtual void midiMessageSent(MidiOutput* target, const MidiMessage& message) = 0;
+		virtual void midiSendQueueSize(int size) = 0;
+		virtual void generalLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel) {}
+
+		// Realtime messages before a device is connected - not for heavy processing!
+		virtual void noAnswerToMessage(MidiInput* expectedDevice, const MidiMessage& message) = 0;
+//		virtual void testMessageReceived(int testInputIndex, const MidiMessage& midiMessage) {};
+    };
+
+private:
+	// Helper callbacks for notifying Collectors
+	void notifyMessageReceived(MidiInput* source, const MidiMessage& midiMessage);
+	void notifyMessageSent(MidiOutput* target, const MidiMessage& midiMessage);
+	void notifySendQueueSize();
+	void notifyLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel);
+    void notifyNoAnswerToMessage(MidiInput* expectedDevice, const MidiMessage& midiMessage);
+//	void notifyTestMessageReceived(int testInputIndex, const MidiMessage& midiMessage);
 
 private:
     typedef enum
@@ -48,13 +61,15 @@ private:
     } TimerType;
 
 public:
-	TerpstraMidiDriver();
+	TerpstraMidiDriver(int numBoardsIn);
 	~TerpstraMidiDriver();
 
-	void addListener(Listener* listenerToAdd);
-	void removeListener(Listener* listenerToRemove);
+//	void addListener(Listener* listenerToAdd);
+//	void removeListener(Listener* listenerToRemove);
+    void addMessageCollector(Collector* collectorToAdd);
+    void removeMessageCollector(Collector* collectorToRemove);
 
-	void restrictToTestMessages(bool testMessagesOnly) { sendTestMessagesOnly = testMessagesOnly; }
+	void restrictToRequestMessages(bool testMessagesOnly) { onlySendRequestMessages = testMessagesOnly; }
 
 	//============================================================================
 	// Single (mid-level) commands, firmware specific
@@ -157,7 +172,7 @@ public:
 
 	// CMD 1Ch: Get back flag whether or not each key of target board meets minimum threshold
 	void sendKeyValidityParametersRequest(uint8 boardIndex);
-	
+
 	// CMD 1Dh: Read back the current velocity look up table of the keyboard.
 	void sendVelocityConfigRequest();
 
@@ -179,7 +194,7 @@ public:
 	// CMD 23h: This command is used to read back the serial identification number of the keyboard.
 	void sendGetSerialIdentityRequest(int sendToTestDevice = -1);
 
-	// CMD 24h: Initiate the key calibration routine; each pair of macro buttons  
+	// CMD 24h: Initiate the key calibration routine; each pair of macro buttons
 	// on each octave must be pressed to return to normal state
 	void sendCalibrateKeys();
 
@@ -187,7 +202,7 @@ public:
 	void startDemoMode(bool turnOn);
 
 	// CMD 26h: Initiate the pitch and mod wheel calibration routine, pass in false to stop
-	void sendCalibratePitchModWheel(bool startCalibration);
+	void sendCalibratePitchModWheel(bool startCalibration, int testOutputIndex = -1);
 
 	// CMD 27h: Set the sensitivity value of the mod wheel, 0x01 to 0x07f
 	void setModWheelSensitivity(uint8 sensitivity);
@@ -224,7 +239,7 @@ public:
 	// If the board has not been initialized, the Beaglebone will contain a firmware revision of 0.0.0 for the board
 	void sendGetFirmwareRevisionRequest(int sendToTestDevice = -1);
 
-	// CMD 32h: Set the thresold from key’s min value to trigger CA - 004 submodule CC events, ranging from 0x00 to 0xFE
+	// CMD 32h: Set the thresold from keyï¿½s min value to trigger CA - 004 submodule CC events, ranging from 0x00 to 0xFE
 	void setCCActiveThreshold(uint8 boardIndex, uint8 sensitivity);
 
 	// CMD 33h: Echo the payload, 3 7-bit values, for use in connection monitoring
@@ -273,7 +288,7 @@ public:
 	void sendGetAftertouchTriggerDelayRequest(uint8 boardIndex);
 
 	// CMD 41h: Set the Lumatouch note-off delay value, an 11-bit integer representing the amount of 1.1ms ticks before
-	// sending a note-off event after a Lumatone-configured key is released. 
+	// sending a note-off event after a Lumatone-configured key is released.
 	void setLumatouchNoteOffDelay(uint8 boardIndex, int delayValue);
 	void setLumatouchNoteOffDelay(uint8 boardIndex, uint8 valueBits8_11, uint8 valueBits4_7, uint8 valueBits0_3);
 
@@ -287,6 +302,21 @@ public:
 
 	// CMD 44h: Get the current expression pedal ADC threshold value
 	void sendGetExpressionPedalADCThresholdRequest();
+
+	// CMD 45h: Configure the on/off settings of the sustain pedal
+	void sendInvertSustainPedal(bool setInverted);
+
+	// CMD 46h: Replace a certain preset with the factory preset
+	void sendResetDefaultPresetsRequest(int presetIndex);
+
+	// CMD 47h: Read back the currently configured preset flags of expression & sustain inversion,
+	// plus light-on-keystroke and polyphonic aftertouch
+	void sendGetPresetFlagsReset();
+
+	// For CMD 48h response: get expression pedal sensitivity
+	void sendGetExpressionPedalSensitivity();
+
+	// TODO CMD 49h-4Eh
 
 	//============================================================================
 	// Implementation of bidirectional communication with acknowledge messages
@@ -314,7 +344,7 @@ public:
 
 	// For CMD 13h response: unpacks 8-bit key data for red LED intensity. 112 bytes, lower and upper nibbles for 56 values
 	FirmwareSupport::Error unpackGetLEDConfigResponse(const MidiMessage& response, int& boardId, int* keyData);
-	
+
 	// For CMD 13h response: unpacks 7-bit key data for red LED intensity. 56 bytes, each value must be multiplied by 5
 	FirmwareSupport::Error unpackGetLEDConfigResponse_Version_1_0_0(const MidiMessage& response, int& boardId, uint8 numKeys, int* keyData);
 
@@ -376,6 +406,9 @@ public:
 	// For CMD 3Dh response: retrieve MIDI channels of which peripherals are configured
 	FirmwareSupport::Error unpackGetPeripheralChannelsResponse(const MidiMessage& response, int& pitchWheelChannel, int& modWheelChannel, int& expressionChannel, int& sustainPedalChannel);
 
+	// For CMD 3Eh response: read back the calibration mode of the message
+	FirmwareSupport::Error unpackPeripheralCalibrationMode(const MidiMessage& response, int& calibrationMode);
+
 	// For CMD 3Eh response: retrieve 12-bit expression pedal calibration status values in respective mode, automatically sent every 100ms
 	FirmwareSupport::Error unpackExpressionPedalCalibrationPayload(const MidiMessage& response, int& minBound, int& maxBound, bool& valid);
 
@@ -391,6 +424,13 @@ public:
 	// For CMD 44h response: retrieve 12-bit expression pedal adc threshold
 	FirmwareSupport::Error unpackGetExpressionPedalThresholdResponse(const MidiMessage& response, int& thresholdValue);
 
+	// For CMD 47h response: retrieve preset flags
+	FirmwareSupport::Error unpackGetPresetFlagsResponse(const MidiMessage& response, bool& expressionInverted, bool& lightsOnKeystroke, bool& aftertouchOn, bool& sustainInverted);
+
+	// For CMD 48h response: get expression pedal sensitivity
+	FirmwareSupport::Error unpackGetExpressionPedalSensitivityResponse(const MidiMessage& response, int& sensitivity);
+
+private:
 	// Low-level SysEx message sending
 	void sendMessageWithAcknowledge(const MidiMessage& message);
 
@@ -417,7 +457,7 @@ private:
 	MidiMessage createExtendedMacroColourSysEx(uint8 cmd, int red, int green, int blue) const;
 
 	// Create a SysEx message encoding a table with a defined size
-	MidiMessage sendTableSysEx(uint8 boardIndex, uint8 cmd, uint8 tableSize, const uint8 table[]);
+	MidiMessage createTableSysEx(uint8 boardIndex, uint8 cmd, uint8 tableSize, const uint8 table[]);
 
     // Send a SysEx message with standardized length
 	void sendSysEx(uint8 boardIndex, uint8 cmd, uint8 data1, uint8 data2, uint8 data3, uint8 data4, bool overrideEditMode = false);
@@ -428,7 +468,7 @@ private:
 	// Send a SysEx message to toggle a state
 	void sendSysExToggle(uint8 boardIndex, uint8 cmd, bool turnStateOn);
 
-	// Checks if message is a valid Lumatone firmware response and is expected length, then runs supplied unpacking function or returns an error code 
+	// Checks if message is a valid Lumatone firmware response and is expected length, then runs supplied unpacking function or returns an error code
 	FirmwareSupport::Error unpackIfValid(const MidiMessage& response, size_t numBytes, std::function<FirmwareSupport::Error(const uint8*)> unpackFunction);
 
 	// Generic unpacking of octave data from a SysEx message
@@ -454,16 +494,20 @@ private:
 
 	// Attributes
 protected:
-    ListenerList<Listener> listeners;
+    // ListenerList<Listener> listeners;
+	Array<Collector*> collectors;
 
 private:
+
+	int numBoards = 0;
 
     MidiMessage currentMsgWaitingForAck;    // std::optional would be the object of choice,once that is available...
 	bool hasMsgWaitingForAck = false;       // will be obsolete when std::optional is available
 
-	Array<MidiMessage> messageBuffer;
+	Array<MidiMessage, CriticalSection> messageBuffer;
 
-	bool      sendTestMessagesOnly = false; // Only send GetSerialIdentity, GetFirmwareRevision, and Ping commands
+	// Used for device detection and "Offline" mode (no messages that mutate board data)
+	bool      onlySendRequestMessages = false;
 
 	const int receiveTimeoutInMilliseconds = 2000;
 	const int busyTimeDelayInMilliseconds = 500;
