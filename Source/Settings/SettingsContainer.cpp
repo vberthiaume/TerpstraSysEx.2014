@@ -51,7 +51,7 @@ void SettingsCategoryModel::setDeveloperMode(bool enableDeveloperMode)
 {
     showDeveloperPanel = enableDeveloperMode;
     refreshCategories();
-
+}
 //=========================================================================
 
 SettingsContainer::SettingsContainer()

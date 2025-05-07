@@ -430,7 +430,7 @@ public:
 	// For CMD 48h response: get expression pedal sensitivity
 	FirmwareSupport::Error unpackGetExpressionPedalSensitivityResponse(const MidiMessage& response, int& sensitivity);
 
-private:
+// private:
 	// Low-level SysEx message sending
 	void sendMessageWithAcknowledge(const MidiMessage& message);
 

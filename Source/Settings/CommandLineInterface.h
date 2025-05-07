@@ -11,8 +11,9 @@
 #pragma once
 #include <JuceHeader.h>
 #include "../LumatoneController.h"
+#include "../ApplicationListeners.h"
 
-class CommandParser : private TerpstraMidiDriver::Listener, private LumatoneController::FirmwareListener
+class CommandParser : private TerpstraMidiDriver::Collector
 {
 
 public:
@@ -45,7 +46,7 @@ public:
     ~CommandParser();
 
     FirmwareSupport::Error parseAndSendCommand(String command);
-    
+
     StringArray getResponseQueue(bool clearQueue = true);
 
 private:
@@ -54,16 +55,16 @@ private:
 
     //============================================================================
     // Implementation of TerpstraMidiDriver::Listener
-    
+
     virtual void midiMessageReceived(MidiInput* source, const MidiMessage& midiMessage) override;
 
-    virtual void midiMessageSent(const MidiMessage& midiMessage) override {};
+    virtual void midiMessageSent(MidiOutput* target, const MidiMessage& midiMessage) override {};
 
     virtual void midiSendQueueSize(int queueSize) override {};
 
     virtual void generalLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel) override {};
 
-    virtual void noAnswerToMessage(const MidiMessage& midiMessage) override {};
+    virtual void noAnswerToMessage(MidiInput* expectedDevice, const MidiMessage& midiMessage) override {};
 
 private:
 
@@ -102,7 +103,7 @@ public:
 
 
 private:
-    
+
     CommandParser parser;
 
     std::unique_ptr<TextEditor> commandLog;

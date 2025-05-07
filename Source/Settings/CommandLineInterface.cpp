@@ -12,16 +12,16 @@
 #include "../Main.h"
 
 CommandParser::CommandParser()
-    : midiDriver(TerpstraSysExApplication::getApp().getLumatoneController().getMidiDriver())
+    : midiDriver(TerpstraSysExApplication::getApp().getLumatoneController()->getMidiDriver())
 {
-    midiDriver.addListener(this);
+    midiDriver.addMessageCollector(this);
     addSupportedCommands();
 
 }
 
 CommandParser::~CommandParser()
 {
-    midiDriver.removeListener(this);
+    midiDriver.removeMessageCollector(this);
 }
 
 FirmwareSupport::Error CommandParser::parseAndSendCommand(String command)
@@ -255,7 +255,7 @@ void CommandParser::addSupportedCommands()
         "<Board ID: 1-5> <Key#: 0-55> <Note/CC#: 0-127> <Channel#: 1-16> <KeyType: 0-3> <Fader Polarity: 0-1>",
         "Configure a specific key's note, channel, type, and polarity parameters",
         "Configure a specific key's note, channel, type, and polarity parameters",
-        [&](const ArgumentList& args) { TerpstraSysExApplication::getApp().getLumatoneController().sendKeyConfig(
+        [&](const ArgumentList& args) { TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyConfig(
             args[0].text.getIntValue(),
             args[1].text.getIntValue(),
             args[2].text.getIntValue(),
@@ -269,10 +269,9 @@ void CommandParser::addSupportedCommands()
         "<Board ID: 1-5> <Key#: 0-55> <Red Channel: 0-255> <Green Channel: 0-255> <Blue Channel: 0-255>",
         "Configure a specific key's LED colour",
         "Specify the LED channel intensities of a given key number and board index",
-        [&](const ArgumentList& args) { TerpstraSysExApplication::getApp().getLumatoneController().sendKeyColourConfig(
+        [&](const ArgumentList& args) { TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyColourConfig(
             args[0].text.getIntValue(),
             args[1].text.getIntValue(),
             Colour((uint8)args[2].text.getIntValue(),(uint8)args[3].text.getIntValue(),(uint8)args[4].text.getIntValue()));
         }});
 }
-

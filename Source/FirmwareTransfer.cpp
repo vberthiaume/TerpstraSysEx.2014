@@ -60,7 +60,7 @@
 FirmwareTransfer::FirmwareTransfer(TerpstraMidiDriver& driverIn)
 	: juce::ThreadWithProgressWindow("Lumatone Firmware Update", true, false), midiDriver(driverIn)
 {
-	
+
 }
 
 FirmwareTransfer::~FirmwareTransfer()
@@ -83,7 +83,7 @@ bool FirmwareTransfer::checkFirmwareFileIntegrity(String filePathIn)
 			isValid = true;
 		}
 	}
-	return isValid; 
+	return isValid;
 }
 
 bool FirmwareTransfer::requestFirmwareUpdate(String firmwareFilePath)
@@ -309,7 +309,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 
     // Occasionally check if for thread exit request before session is initiated
     STOPBEFOREINIT
-    
+
     int returnCode = libssh2_init(0);
     if (returnCode != 0)
     {
@@ -338,7 +338,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(22);
 	sin.sin_addr.s_addr = hostaddr;
-	
+
 	if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) != 0)
 	{
 		DBG("failed to connect!");
@@ -351,10 +351,10 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 
 		return StatusCode::HostConnectErr;
 	}
-    
-    
+
+
 #else
-    
+
     int sockFlagsBefore = 0;
 
     // Find correct hostname for OS
@@ -363,7 +363,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
     {
         STOPBEFOREINIT
         returnCode = 0;
-        
+
         // Create socket and connect to port 22
         sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock < 0)
@@ -371,7 +371,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
             DBG("failed to create socket!");
             return StatusCode::StartupErr;
         }
-        
+
         if ((sockFlagsBefore = fcntl(sock, F_GETFL, 0) < 0))
         {
             DBG("bad socket flags received");
@@ -387,10 +387,10 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
             sin.sin_addr.s_addr = hostaddr;
 
             DBG("attempting to connect to host " + deviceHostName);
-            
+
             do {
                 STOPDURINGSETUP
-                
+
                 if (connect(sock, (struct sockaddr*)(&sin), sizeof(struct sockaddr_in)) < 0)
                 {
                     returnCode = errno;
@@ -401,7 +401,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
                         DBG("connection failed with error code: " + String(errno));
                         failedTries++;
                     }
-                
+
                     // Wait with specified timeout
                     else
                     {
@@ -419,7 +419,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
                                 .tv_sec = now.tv_sec,
                                 .tv_nsec = now.tv_nsec + SOCKTIMEOUTMS * 1000000l
                             };
-                            
+
                             do {
                                 // Keep checking how much time left
                                 if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
@@ -438,11 +438,11 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
                                 }
 
                                 STOPDURINGSETUP
-                                
+
                                 // Check connection status
                                 struct pollfd pfds[] = { { .fd = sock, .events = POLLOUT } };
                                 returnCode = poll(pfds, 1, msUntilDeadline);
-                                
+
                                 // Double-check there aren't other errors
                                 if (returnCode > 0)
                                 {
@@ -450,23 +450,23 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
                                     socklen_t len = sizeof(err);
                                     if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &err, &len) == 0)
                                         errno = err;
-                                    
+
                                     if (err != 0)
                                     {
                                         returnCode = -1;
                                         DBG("connection failed with errno " + String(err));
                                     }
                                 }
-                                
+
                             } while (returnCode == -1 && errno == EINTR); // If poll was interrupted, try again
-                                
+
                             if (returnCode == 0)
                             {
                                 // Fail if timed out
                                 errno = ETIMEDOUT;
                                 returnCode = -1;
                             }
-                            
+
                             // Success
                             else if (returnCode > 0)
                                 returnCode = 0;
@@ -474,7 +474,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
                     }
                 }
             } while(0);
-            
+
             if (returnCode == 0)
             {
                 DBG("connected to " + deviceHostName);
@@ -485,18 +485,18 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
         {
             DBG("could not set to non-blocking for host connection");
         }
-        
+
         DBG("connection attempt failed");
 
         close(sock);
         failedTries++;
     }
-    
+
     if (failedTries == 2)
     {
         return StatusCode::HostConnectErr;
     }
-    
+
     if (fcntl(sock, F_SETFL, sockFlagsBefore) < 0)
     {
         DBG("could not reset sock flags");
@@ -513,9 +513,9 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
         DBG("failed to open file!");
         return StatusCode::StartupErr;
     }
-    
+
     stat(filePath, &fileinfo);
-    
+
     STOPDURINGSETUP
 
 	/* Create a session instance */
@@ -620,7 +620,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 	DBG("Waiting for channel to close");
     while ((returnCode = libssh2_channel_wait_closed(channel)) == LIBSSH2_ERROR_EAGAIN && !threadShouldExit()) {};
     STOPDURINGEXEC
-    
+
     while ((returnCode = libssh2_channel_free(channel)) == LIBSSH2_ERROR_EAGAIN && !threadShouldExit()) {};
     STOPDURINGEXEC
 
@@ -643,7 +643,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 		return shutdownSSHSession(session, sock, nullptr, StatusCode::ChannelErr);
 	}
 
-    
+
     DBG("Sending reboot command to Lumatone");
 	while ((returnCode = libssh2_channel_exec(channel, rebootCmd.getCharPointer())) == LIBSSH2_ERROR_EAGAIN
            && !threadShouldExit())
@@ -706,7 +706,7 @@ FirmwareTransfer::StatusCode FirmwareTransfer::performFirmwareUpdate()
 		DBG("Exit: " + String(exitcode) + "bytecount: " + String(bytecount));
 
     // Ignore kill-request for regular shutdown
-    
+
 	libssh2_channel_free(channel);
 
 	channel = NULL;

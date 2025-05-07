@@ -59,12 +59,12 @@ DeveloperDlg::~DeveloperDlg()
 
 }
 
-void DeveloperDlg::paint(Graphics& g) 
+void DeveloperDlg::paint(Graphics& g)
 {
 
 }
 
-void DeveloperDlg::resized() 
+void DeveloperDlg::resized()
 {
     int w = getWidth();
     int h = getHeight();
@@ -113,27 +113,27 @@ void DeveloperDlg::buttonClicked(Button* btn)
     }
     else if (btn == toggleDemoMode.get())
     {
-        TerpstraSysExApplication::getApp().getLumatoneController().setDemoModeState(toggleDemoMode->getToggleState());
+        TerpstraSysExApplication::getApp().getLumatoneController()->setDemoModeState(toggleDemoMode->getToggleState());
     }
 }
 
 void DeveloperDlg::lookAndFeelChanged()
 {
-    auto lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
-    if (lookAndFeel)
-    {
-        lookAndFeel->setupTextButton(*btnMidiLog);
-        lookAndFeel->setupTextButton(*btnPropertyViewer);
-        lookAndFeel->setupTextButton(*btnShowCommandLine);
-        lookAndFeel->setupToggleButton(*toggleDemoMode);
-        lookAndFeel->setupComboBox(*cbTableSelector);
-        lookAndFeel->setupTextButton(*btnTableReset);
-    }
+    // auto lookAndFeel = dynamic_cast<LumatoneEditorLookAndFeel*>(&getLookAndFeel());
+    // if (lookAndFeel)
+    // {
+    //     lookAndFeel->setupTextButton(*btnMidiLog);
+    //     lookAndFeel->setupTextButton(*btnPropertyViewer);
+    //     lookAndFeel->setupTextButton(*btnShowCommandLine);
+    //     lookAndFeel->setupToggleButton(*toggleDemoMode);
+    //     lookAndFeel->setupComboBox(*cbTableSelector);
+    //     lookAndFeel->setupTextButton(*btnTableReset);
+    // }
 }
 
 void DeveloperDlg::sendResetRequest(ResetMenuId resetPropertyId)
 {
-    auto lumatoneController = &TerpstraSysExApplication::getApp().getLumatoneController();
+    auto lumatoneController = TerpstraSysExApplication::getApp().getLumatoneController();
 
     switch (resetPropertyId)
     {
@@ -185,4 +185,3 @@ void DeveloperDlg::launchCommandLineDialog()
     dw->centreWithSize(548, 240);
     dw->setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel().compactWindowStyle);
 }
-
