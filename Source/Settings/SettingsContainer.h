@@ -20,8 +20,8 @@ typedef enum {
     Calibration = 0,
     Firmware = 1,
     Midi        = 2,
-    Presets     = 3
-    Developer = 4,
+    Presets     = 3,
+    Developer = 4
 } LumatoneEditorSettingCategories;
 
 class SettingsCategoryModel : public ListBoxModel, public ChangeBroadcaster
