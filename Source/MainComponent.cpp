@@ -22,6 +22,11 @@ MainContentComponent::MainContentComponent(LumatoneLayout& mappingDataIn)
 {
 	setName("MainContentComponent");
 
+	debugWindow = std::make_unique<LumatoneSandboxDebugWindow>(TerpstraSysExApplication::getApp().getLogger());
+    debugWindow->setSize(800, 500);
+    debugWindow->addToDesktop();
+    debugWindow->setVisible(true);
+
 	// Midi input + output
 	midiEditArea.reset(new MidiEditArea(TerpstraSysExApplication::getApp().getLookAndFeel()));
 	addAndMakeVisible(midiEditArea.get());
@@ -90,6 +95,8 @@ MainContentComponent::~MainContentComponent()
 
 	lblAppName = nullptr;
 	lblAppVersion = nullptr;
+
+    debugWindow = nullptr;
 }
 
 void MainContentComponent::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)

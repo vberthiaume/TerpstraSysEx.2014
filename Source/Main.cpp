@@ -26,6 +26,9 @@ MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
 TerpstraSysExApplication::TerpstraSysExApplication()
 	: lookAndFeel(appFonts.fonts, true), tooltipWindow(), hasChangesToSave(false)
 {
+	logger = std::make_unique<LumatoneSandboxLogTableModel>();
+    juce::Logger::setCurrentLogger(logger.get());
+
 	PropertiesFile::Options options;
 	options.applicationName = "LumatoneSetup";
 	options.filenameSuffix = "settings";
@@ -184,6 +187,9 @@ void TerpstraSysExApplication::shutdown()
 	propertiesFile = nullptr;
 
 	LocalisedStrings::setCurrentMappings(nullptr);
+
+	juce::Logger::setCurrentLogger(nullptr);
+	logger = nullptr;
 
 #if JUCE_MAC
     MenuBarModel::setMacMainMenu(nullptr);

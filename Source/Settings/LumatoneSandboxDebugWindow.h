@@ -19,7 +19,11 @@ private:
 private:
 
     LumatoneSandboxLogTableModel* logModel;
+    juce::TableListBox* logTable;
     // std::unique_ptr<juce::TableListBox> logTable;
+
+
+    bool scrollToNewLogs = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LumatoneSandboxDebugWindow)
 };

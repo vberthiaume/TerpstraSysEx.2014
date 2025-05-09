@@ -2,6 +2,8 @@
 #include "./LumatoneSandboxLogTableModel.h"
 #include "LumatoneSandboxLogTableModel.h"
 
+using namespace LumatoneEditorLogger;
+
 LumatoneSandboxLogTableModel::~LumatoneSandboxLogTableModel()
 {
 
@@ -13,7 +15,7 @@ void LumatoneSandboxLogTableModel::logMessage(const juce::String& message)
         logs.remove(0);
     else
         numLogs++;
-    
+
     LumatoneSandboxLog logInfo = LumatoneSandboxLog::FromString(message);
     if (logInfo.time == errorTime)
     {
@@ -23,7 +25,7 @@ void LumatoneSandboxLogTableModel::logMessage(const juce::String& message)
     }
 
     logs.add(logInfo);
-    
+
     juce::MessageManager::callAsync([=]() { sendChangeMessage(); });
 }
 
@@ -31,23 +33,23 @@ const LumatoneSandboxLog& LumatoneSandboxLogTableModel::getLog(int logNum) const
 {
     if (logNum < logs.size())
         return logs.getReference(logNum);
-    
+
     return defaultLog;
 }
 
-juce::Colour LumatoneSandboxLogTableModel::getRowColour(int rowNumber, LumatoneSandboxLogStatus status)
+juce::Colour LumatoneSandboxLogTableModel::getRowColour(int rowNumber, LogStatus status)
 {
     juce::Colour c = rowNumber % 2 == 0 ? juce::Colours::lightslategrey : juce::Colours::lightgrey;
 
-    if (status == LumatoneSandboxLogStatus::WARNING)
+    if (status == LogStatus::WARNING)
         c.overlaidWith(juce::Colours::yellow);
-    else if (status == LumatoneSandboxLogStatus::ERROR)
+    else if (status == LogStatus::ERROR)
         c.overlaidWith(juce::Colours::red);
 
     return c;
 }
 void LumatoneSandboxLogTableModel::paintRowBackground(juce::Graphics &g, int rowNumber, int width, int height, bool rowIsSelected)
-{   
+{
     auto log = getLog(rowNumber);
     auto c = getRowColour(rowNumber, log.status);
     g.fillAll(c);
@@ -57,20 +59,24 @@ void LumatoneSandboxLogTableModel::paintCell(juce::Graphics& g, int rowNumber, i
 {
     if (rowNumber < 0)
         return;
-    
+
     const LumatoneSandboxLog& log = getLog(rowNumber);
     juce::String value;
 
     switch (columnId)
     {
     case LumatoneSandboxLogTableColumn::Date:
-        value = log.time.toString(true, true, true, true);
+        // value = log.time.toString(false, true, true, true);
+        value = log.time.formatted("%H:%m:%S");
         break;
     case LumatoneSandboxLogTableColumn::Class:
         value = log.className;
         break;
     case LumatoneSandboxLogTableColumn::Status:
         value = log.getStatusString();
+        break;
+    case LumatoneSandboxLogTableColumn::Type:
+        value = log.getTypeString();
         break;
     case LumatoneSandboxLogTableColumn::Method:
         value = log.method;
@@ -86,4 +92,3 @@ void LumatoneSandboxLogTableModel::paintCell(juce::Graphics& g, int rowNumber, i
     g.setColour(textColour);
     g.drawText(value, 0, 0, width, height, juce::Justification::centredLeft);
 }
-

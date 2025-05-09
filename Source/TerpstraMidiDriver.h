@@ -15,6 +15,7 @@
 #include "HajuLib/HajuMidiDriver.h"
 #include "HajuLib/HajuErrorVisualizer.h"
 #include "LumatoneFirmwareDefinitions.h"
+#include "Settings/LumatoneSandboxLogger.h"
 //[/Headers]
 
 /*
@@ -22,7 +23,7 @@
 Connection to midi, sending SysEx parameters to keyboard
 ==============================================================================
 */
-class TerpstraMidiDriver : public HajuMidiDriver, public Timer
+class TerpstraMidiDriver : public HajuMidiDriver, public Timer, public LumatoneSandboxLogger
 {
     // Types
 public:

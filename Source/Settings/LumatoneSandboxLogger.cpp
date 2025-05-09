@@ -1,6 +1,8 @@
 
 #include "LumatoneSandboxLogger.h"
 
+using namespace LumatoneEditorLogger;
+
 LumatoneSandboxLogger::LumatoneSandboxLogger(juce::String classNameIn)
     : className(classNameIn)
 {
@@ -21,7 +23,7 @@ void LumatoneSandboxLogger::logMessage(const juce::String &message)
     juce::Logger::writeToLog(message);
 }
 
-void LumatoneSandboxLogger::log(LumatoneSandboxLogStatus status, juce::String method, juce::String message) const
+void LumatoneSandboxLogger::log(LogStatus status, LogType type, juce::String method, juce::String message) const
 {
     if (logLevel == LogLevel::NONE)
         return;
@@ -30,34 +32,35 @@ void LumatoneSandboxLogger::log(LumatoneSandboxLogStatus status, juce::String me
     if (level > logLevel)
         return;
 
-    LumatoneSandboxLog info = getLog(status, method, message);
+    LumatoneSandboxLog info = createLog(status, type, method, message);
     LumatoneSandboxLogger::Log(info);
 }
 
-void LumatoneSandboxLogger::logInfo(juce::String method, juce::String message) const
+void LumatoneSandboxLogger::logInfo(LogType type, juce::String method, juce::String message) const
 {
-    log(LumatoneSandboxLogStatus::INFO, method, message);
+    log(LogStatus::INFO, type, method, message);
 }
 
-void LumatoneSandboxLogger::logWarning(juce::String method, juce::String message) const
+void LumatoneSandboxLogger::logWarning(LogType type, juce::String method, juce::String message) const
 {
-    log(LumatoneSandboxLogStatus::WARNING, method, message);
+    log(LogStatus::WARNING, type, method, message);
 }
 
-void LumatoneSandboxLogger::logError(juce::String method, juce::String message) const
+void LumatoneSandboxLogger::logError(LogType type, juce::String method, juce::String message) const
 {
-    log(LumatoneSandboxLogStatus::ERROR, method, message);
+    log(LogStatus::ERROR, type, method, message);
 }
 
-LumatoneSandboxLog LumatoneSandboxLogger::getLog(LumatoneSandboxLogStatus status, juce::String method, juce::String message) const
+LumatoneSandboxLog LumatoneSandboxLogger::createLog(LogStatus status, LogType type, juce::String method, juce::String message) const
 {
     juce::Time now = juce::Time::getCurrentTime();
 
-    LumatoneSandboxLog info = 
+    LumatoneSandboxLog info =
     {
         now,
         className,
         status,
+        type,
         method,
         message
     };
@@ -76,13 +79,13 @@ juce::String LumatoneSandboxLog::toFullString() const
 
     switch (status)
     {
-    case LumatoneSandboxLogStatus::ERROR:
+    case LogStatus::ERROR:
         tokens.add("Error");
         break;
-    case LumatoneSandboxLogStatus::INFO:
+    case LogStatus::INFO:
         tokens.add("Info");
         break;
-    case LumatoneSandboxLogStatus::WARNING:
+    case LogStatus::WARNING:
         tokens.add("Warning");
         break;
     default:
@@ -91,7 +94,7 @@ juce::String LumatoneSandboxLog::toFullString() const
 
     tokens.add(method + "()");
     tokens.add(message);
-    
+
     if (info.size() > 0)
     {
         auto infoKeys = info.getAllKeys();
@@ -126,15 +129,34 @@ juce::String LumatoneSandboxLog::getStatusString() const
     {
     default:
         jassertfalse;
-    case LumatoneSandboxLogStatus::ERROR:
+        break;
+    case LogStatus::ERROR:
         return "Error";
-
-    case LumatoneSandboxLogStatus::INFO:
+    case LogStatus::INFO:
         return "Info";
-    case LumatoneSandboxLogStatus::WARNING:
+    case LogStatus::WARNING:
         return "Warning";
     }
 
+    return juce::String();
+}
+
+juce::String LumatoneSandboxLog::getTypeString() const
+{
+    switch (type)
+    {
+        default:
+            jassertfalse;
+            break;
+        case LogType::APP:
+            return "App";
+        case LogType::MIDI:
+            return "MIDI";
+        case LogType::SYSEX:
+            return "Sysex";
+        case LogType::DEVICE:
+            return "Device";
+    }
     return juce::String();
 }
 
@@ -187,40 +209,40 @@ LumatoneSandboxLog LumatoneSandboxLog::FromString(juce::String logString)
         wordNum++;
         }
     }
-    
+
     if (properties.length() > 0)
     {
         // auto propStrings = juce::StringArray::fromTokens(properties, "|");
         // auto keys = juce::StringArray::fromTokens(propStrings[0], ",");
         // auto values = juce::StringArray::fromTokens(propStrings[1], ",");
-        
+
         // juce::StringPairArray props;
         // for (int i = 0; i < keys.size(); i++)
         // {
         //     props.set(keys[i], values[i]);
         // }
-        
+
         // logInfo.info = props;
     }
-    
+
     return logInfo;
 }
 
-LumatoneSandboxLogStatus LumatoneSandboxLog::CodeToStatus(int statusCode)
+LogStatus LumatoneSandboxLog::CodeToStatus(int statusCode)
 {
     if (statusCode == 0)
-        return LumatoneSandboxLogStatus::INFO;
+        return LogStatus::INFO;
     if (statusCode > 0)
-        return LumatoneSandboxLogStatus::WARNING;
-    return LumatoneSandboxLogStatus::ERROR;
+        return LogStatus::WARNING;
+    return LogStatus::ERROR;
 }
 
-LumatoneSandboxLogStatus LumatoneSandboxLog::LogStringToStatus(juce::StringRef statusString)
+LogStatus LumatoneSandboxLog::LogStringToStatus(juce::StringRef statusString)
 {
     if (juce::String(statusString).startsWith("Info"))
-        return LumatoneSandboxLogStatus::INFO;
+        return LogStatus::INFO;
     if (juce::String(statusString).startsWith("Warning"))
-        return LumatoneSandboxLogStatus::WARNING;
-    
-    return LumatoneSandboxLogStatus::ERROR;
+        return LogStatus::WARNING;
+
+    return LogStatus::ERROR;
 }

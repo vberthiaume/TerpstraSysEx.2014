@@ -8,6 +8,7 @@ typedef enum
     Date = 1,
     Class,
     Status,
+    Type,
     Method,
     Message,
     Info
@@ -26,23 +27,23 @@ public:
 
 
     int getNumRows() override { return numLogs; }
-    
+
     void paintRowBackground(juce::Graphics&, int rowNumber, int width, int height, bool rowIsSelected) override;
-    
+
     void paintCell(juce::Graphics&, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
 
     const LumatoneSandboxLog& getLog(int logNum) const;
 
 private:
 
-    static juce::Colour getRowColour(int rowNumber, LumatoneSandboxLogStatus status);
+    static juce::Colour getRowColour(int rowNumber, LumatoneEditorLogger::LogStatus status);
 
 private:
-    
+
     int maxLogs = 1000;
-    
+
     int numLogs = 0;
-    
+
     juce::Array<LumatoneSandboxLog> logs;
 
     juce::Time errorTime;
@@ -51,7 +52,8 @@ private:
     {
         juce::Time(),
         "LumatoneSandboxLogTableModel",
-        LumatoneSandboxLogStatus::INFO,
+        LumatoneEditorLogger::LogStatus::INFO,
+        LumatoneEditorLogger::LogType::APP,
         "initialized",
         "No logs yet."
     };

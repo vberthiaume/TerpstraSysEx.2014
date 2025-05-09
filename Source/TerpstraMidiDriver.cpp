@@ -20,6 +20,7 @@
 TerpstraMidiDriver::TerpstraMidiDriver(int numBoardsIn)
     : HajuMidiDriver()
     , numBoards(numBoardsIn)
+    , LumatoneSandboxLogger("MidiDriver")
 {
 }
 
@@ -1400,6 +1401,7 @@ void TerpstraMidiDriver::sendMessageWithAcknowledge(const MidiMessage& message)
     if (midiInput == nullptr)
     {
         DBG("No MidiInput open to send message to.");
+        logWarning(LumatoneEditorLogger::LogType::APP, "sendMessageWithAcknowledge", "No MidiInput open to send message to.");
 //        sendMessageNow(message);
 
 	    // Notify listeners
@@ -1461,7 +1463,10 @@ void TerpstraMidiDriver::sendCurrentMessage()
     sendMessageNow(currentMsgWaitingForAck);        // send it
 
     // Notify listeners
-    DBG("SENT: " + currentMsgWaitingForAck.getDescription());
+    juce::String description = currentMsgWaitingForAck.getDescription();
+    DBG("SENT: " + description);
+    logInfo(LumatoneEditorLogger::LogType::SYSEX, "sendCurrentMessage", description);
+
     // const MessageManagerLock mmLock;
     // this->listeners.call(&Listener::midiMessageSent, currentMsgWaitingForAck);
     notifyMessageSent(midiOutput, currentMsgWaitingForAck);
@@ -1472,10 +1477,14 @@ void TerpstraMidiDriver::sendCurrentMessage()
 
 void TerpstraMidiDriver::handleIncomingMidiMessage(MidiInput* source, const MidiMessage& message)
 {
-#if JUCE_DEBUG
     if (message.isSysEx())
+    {
         DBG("RCVD: " + message.getDescription());
-#endif
+    }
+    else
+    {
+        logInfo(LumatoneEditorLogger::LogType::MIDI, "handleIncomingMidiMessage", message.getDescription());
+    }
 
     //const MessageManagerLock mmLock;
     //this->listeners.call(&Listener::midiMessageReceived, source, message);
@@ -1492,6 +1501,15 @@ void TerpstraMidiDriver::handleIncomingMidiMessage(MidiInput* source, const Midi
         // Check answer state (error yes/no)
         auto answerState = message.getSysExData()[5];
 
+        if (answerState == TerpstraMIDIAnswerReturnCode::ACK)
+        {
+            logInfo(LumatoneEditorLogger::LogType::SYSEX, "handleIncomingMidiMessage", message.getDescription());
+        }
+        else
+        {
+            logError(LumatoneEditorLogger::LogType::SYSEX, "handleIncomingMidiMessage", message.getDescription());
+        }
+
         // This would be nice but we can't be sure the state is demo mode
 //        if (answerState == TerpstraMIDIAnswerReturnCode::STATE)
 //        {
@@ -1503,6 +1521,7 @@ void TerpstraMidiDriver::handleIncomingMidiMessage(MidiInput* source, const Midi
         if (answerState == TerpstraMIDIAnswerReturnCode::BUSY)
         {
             // Start delay timer, after which message will be sent again
+            logWarning(LumatoneEditorLogger::LogType::APP, "handleIncomingMidiMessage", "Pausing before retrying.");
             timerType = delayWhileDeviceBusy;
             startTimer(busyTimeDelayInMilliseconds);
         }
@@ -1532,6 +1551,7 @@ void TerpstraMidiDriver::timerCallback()
         // No answer came from MIDI input
 
         DBG("DRIVER: NO ANSWER");
+        logError(LumatoneEditorLogger::LogType::DEVICE, "timerCallback", "No answer from device");
         //const MessageManagerLock mmLock;
         // listeners.call(&Listener::generalLogMessage, "No answer from device", HajuErrorVisualizer::ErrorLevel::error);
         // listeners.call(&Listener::noAnswerToMessage, currentMsgWaitingForAck);

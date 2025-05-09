@@ -3,18 +3,31 @@
 
 #include <JuceHeader.h>
 
-enum class LumatoneSandboxLogStatus
+namespace LumatoneEditorLogger
 {
-    ERROR   = -1,
-    INFO    = 0,
-    WARNING = 1
-};
+    enum class LogStatus
+    {
+        ERROR   = -1,
+        INFO    = 0,
+        WARNING = 1
+    };
 
+    typedef enum
+    {
+        APP,
+        MIDI,
+        SYSEX,
+        DEVICE
+    } LogType;
+}
 struct LumatoneSandboxLog
 {
     juce::Time time;
     juce::String className;
-    LumatoneSandboxLogStatus status = LumatoneSandboxLogStatus::ERROR;
+
+    LumatoneEditorLogger::LogStatus status = LumatoneEditorLogger::LogStatus::ERROR;
+    LumatoneEditorLogger::LogType type = LumatoneEditorLogger::LogType::APP;
+
     juce::String method = "undefined";
     juce::String message = "";
     juce::StringPairArray info = juce::StringPairArray();
@@ -23,11 +36,12 @@ struct LumatoneSandboxLog
     juce::String toShortString() const;
 
     juce::String getStatusString() const;
+    juce::String getTypeString() const;
 
     static LumatoneSandboxLog FromString(juce::String logString);
 
-    static LumatoneSandboxLogStatus CodeToStatus(int statusCode);
-    static LumatoneSandboxLogStatus LogStringToStatus(juce::StringRef statusString);
+    static LumatoneEditorLogger::LogStatus CodeToStatus(int statusCode);
+    static LumatoneEditorLogger::LogStatus LogStringToStatus(juce::StringRef statusString);
 };
 
 class LumatoneSandboxLogger : public juce::Logger
@@ -42,7 +56,7 @@ public:
         VERBOSE
     } LogLevel;
 
-    static LogLevel StatusToLogLevel(LumatoneSandboxLogStatus status)
+    static LogLevel StatusToLogLevel(LumatoneEditorLogger::LogStatus status)
     {
         int code = static_cast<int>(status);
         if (code == 0)
@@ -58,21 +72,21 @@ public:
     virtual ~LumatoneSandboxLogger() override { }
 
     // Basic log message with status parameter
-    void log(LumatoneSandboxLogStatus status, juce::String method, juce::String message) const;
+    void log(LumatoneEditorLogger::LogStatus status, LumatoneEditorLogger::LogType type, juce::String method, juce::String message) const;
 
     // Status-based helper methods
-    void logInfo(juce::String method, juce::String message) const;
-    void logWarning(juce::String method, juce::String message) const;
-    void logError(juce::String method, juce::String message) const;
+    void logInfo(LumatoneEditorLogger::LogType type, juce::String method, juce::String message) const;
+    void logWarning(LumatoneEditorLogger::LogType type, juce::String method, juce::String message) const;
+    void logError(LumatoneEditorLogger::LogType type, juce::String method, juce::String message) const;
 
     // Helper to build struct, mainly to add more info
-    LumatoneSandboxLog getLog(LumatoneSandboxLogStatus status, juce::String method, juce::String message) const;
+    LumatoneSandboxLog createLog(LumatoneEditorLogger::LogStatus status, LumatoneEditorLogger::LogType type, juce::String method, juce::String message) const;
 
 public:
 
     // Send logs to juce::Logger registered with applicatoin
     static void Log(LumatoneSandboxLog logInfo);
-    
+
 private:
 
     virtual void logMessage(const juce::String& message) override;

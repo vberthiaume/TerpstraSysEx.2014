@@ -23,6 +23,8 @@
 #include "LumatoneEditorLookAndFeel.h"
 #include "ColourPaletteWindow.h"
 
+#include "Settings/LumatoneSandboxDebugWindow.h"
+
 
 
 //==============================================================================
@@ -127,6 +129,8 @@ private:
 	std::unique_ptr<Label> lblAppName;
 
 	std::unique_ptr<Label> lblAppVersion;
+
+    std::unique_ptr<LumatoneSandboxDebugWindow> debugWindow;
 
 	//==============================================================================
 	// Data
