@@ -22,7 +22,7 @@ MainContentComponent::MainContentComponent(LumatoneLayout& mappingDataIn)
 {
 	setName("MainContentComponent");
 
-	debugWindow = std::make_unique<LumatoneSandboxDebugWindow>(TerpstraSysExApplication::getApp().getLogger());
+	debugWindow = std::make_unique<DebugWindow>( TerpstraSysExApplication::getApp().getLogger());
     debugWindow->setSize(800, 500);
     debugWindow->addToDesktop();
     debugWindow->setVisible(true);

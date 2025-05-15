@@ -1,25 +1,29 @@
 
-#include "./LumatoneSandboxLogTableModel.h"
-#include "LumatoneSandboxLogTableModel.h"
+#include "DebugLogModel.h"
+#include "../LumatoneFirmwareDefinitions.h"
 
 using namespace LumatoneEditorLogger;
 
-LumatoneSandboxLogTableModel::~LumatoneSandboxLogTableModel()
+DebugLogModel::DebugLogModel()
+{
+}
+
+DebugLogModel::~DebugLogModel()
 {
 
 }
 
-void LumatoneSandboxLogTableModel::logMessage(const juce::String& message)
+void DebugLogModel::logMessage(const juce::String& message)
 {
     if (numLogs == maxLogs)
         logs.remove(0);
     else
         numLogs++;
 
-    LumatoneSandboxLog logInfo = LumatoneSandboxLog::FromString(message);
+    DebugLogEntry logInfo = DebugLogEntry::FromString(message);
     if (logInfo.time == errorTime)
     {
-        logInfo.className = "LumatoneSandboxLogTableModel";
+        logInfo.className = "DebugLogModel";
         logInfo.method = "logMessage";
         logInfo.message = "Unable to parse message: " + message;
     }
@@ -29,7 +33,7 @@ void LumatoneSandboxLogTableModel::logMessage(const juce::String& message)
     juce::MessageManager::callAsync([=]() { sendChangeMessage(); });
 }
 
-const LumatoneSandboxLog& LumatoneSandboxLogTableModel::getLog(int logNum) const
+const DebugLogEntry& DebugLogModel::getLog(int logNum) const
 {
     if (logNum < logs.size())
         return logs.getReference(logNum);
@@ -37,7 +41,7 @@ const LumatoneSandboxLog& LumatoneSandboxLogTableModel::getLog(int logNum) const
     return defaultLog;
 }
 
-juce::Colour LumatoneSandboxLogTableModel::getRowColour(int rowNumber, LogStatus status)
+juce::Colour DebugLogModel::getRowColour(int rowNumber, LogStatus status)
 {
     juce::Colour c = rowNumber % 2 == 0 ? juce::Colours::lightslategrey : juce::Colours::lightgrey;
 
@@ -48,41 +52,47 @@ juce::Colour LumatoneSandboxLogTableModel::getRowColour(int rowNumber, LogStatus
 
     return c;
 }
-void LumatoneSandboxLogTableModel::paintRowBackground(juce::Graphics &g, int rowNumber, int width, int height, bool rowIsSelected)
+void DebugLogModel::paintRowBackground(juce::Graphics &g, int rowNumber, int width, int height, bool rowIsSelected)
 {
     auto log = getLog(rowNumber);
     auto c = getRowColour(rowNumber, log.status);
     g.fillAll(c);
 }
 
-void LumatoneSandboxLogTableModel::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
+void DebugLogModel::paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
 {
     if (rowNumber < 0)
         return;
 
-    const LumatoneSandboxLog& log = getLog(rowNumber);
+    const DebugLogEntry& log = getLog(rowNumber);
     juce::String value;
 
     switch (columnId)
     {
-    case LumatoneSandboxLogTableColumn::Date:
+    case TableColumn::Date:
         // value = log.time.toString(false, true, true, true);
         value = log.time.formatted("%H:%m:%S");
         break;
-    case LumatoneSandboxLogTableColumn::Class:
+    case TableColumn::Class:
         value = log.className;
         break;
-    case LumatoneSandboxLogTableColumn::Status:
+    case TableColumn::Status:
         value = log.getStatusString();
         break;
-    case LumatoneSandboxLogTableColumn::Type:
+    case TableColumn::Type:
         value = log.getTypeString();
         break;
-    case LumatoneSandboxLogTableColumn::Method:
+    case TableColumn::Method:
         value = log.method;
         break;
-    case LumatoneSandboxLogTableColumn::Message:
+    case TableColumn::Message:
         value = log.message;
+        if (log.type == LogType::SYSEX)
+        {
+            FirmwareSupport support;
+            int commandId = support.getCommandNumber(log.message);
+            value = CommandCodeToName(commandId) + juce::String(": ") + value;
+        }
         break;
     default:
         break;

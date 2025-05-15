@@ -26,7 +26,7 @@ MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
 TerpstraSysExApplication::TerpstraSysExApplication()
 	: lookAndFeel(appFonts.fonts, true), tooltipWindow(), hasChangesToSave(false)
 {
-	logger = std::make_unique<LumatoneSandboxLogTableModel>();
+	logger = std::make_unique<DebugLogModel>();
     juce::Logger::setCurrentLogger(logger.get());
 
 	PropertiesFile::Options options;

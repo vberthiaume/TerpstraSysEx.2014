@@ -23,7 +23,7 @@
 
 #include "./color/colour_model.h"
 
-#include "Settings/LumatoneSandboxLogTableModel.h"
+#include "Settings/DebugLogModel.h"
 
 #define CHOOSE_FILE_NOOP [](bool) -> void {}
 
@@ -43,7 +43,7 @@ public:
 	void systemRequestedQuit() override;
 	void anotherInstanceStarted(const String& commandLine) override;
 
-	LumatoneSandboxLogTableModel* getLogger() { return logger.get(); }
+	DebugLogModel* getLogger() { return logger.get(); }
 
 	static TerpstraSysExApplication& getApp()
 	{
@@ -173,7 +173,7 @@ private:
 
 	std::unique_ptr<juce::FileChooser> fileChooser;
 
-	std::unique_ptr<LumatoneSandboxLogTableModel> logger;
+	std::unique_ptr<DebugLogModel> logger;
 
 	bool firmwareUpdateWasPerformed = false; // Allows us to deinitialize libssh2 a single time
 };
