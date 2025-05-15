@@ -176,6 +176,94 @@ System exclusive command bytes
 #define GET_PITCH_AND_MOD_BOUNDS 0x4E
 #define GET_EXPRESSION_PEDAL_BOUNDS 0x4F
 
+static juce::String CommandCodeToName(int code)
+{
+	switch (code)
+	{
+	case 0x00: return "CHANGE_KEY_NOTE";
+	case 0x01: return "SET_KEY_COLOUR";
+	case 0x02: return "SAVE_PROGRAM";
+	case 0x03: return "SET_FOOT_CONTROLLER_SENSITIVITY";
+	case 0x04: return "INVERT_FOOT_CONTROLLER";
+	case 0x05: return "MACROBUTTON_COLOUR_ON";
+	case 0x06: return "MACROBUTTON_COLOUR_OFF";
+	case 0x07: return "SET_LIGHT_ON_KEYSTROKES";
+	case 0x08: return "SET_VELOCITY_CONFIG";
+	case 0x09: return "SAVE_VELOCITY_CONFIG";
+	case 0x0A: return "RESET_VELOCITY_CONFIG";
+	case 0x0B: return "SET_FADER_CONFIG";
+	case 0x0C: return "SAVE_FADER_CONFIG";
+	case 0x0D: return "RESET_FADER_CONFIG";
+	case 0x0E: return "SET_AFTERTOUCH_FLAG";
+	case 0x0F: return "CALIBRATE_AFTERTOUCH";
+	case 0x10: return "SET_AFTERTOUCH_CONFIG";
+	case 0x11: return "SAVE_AFTERTOUCH_CONFIG";
+	case 0x12: return "RESET_AFTERTOUCH_CONFIG";
+	case 0x13: return "GET_RED_LED_CONFIG";
+	case 0x14: return "GET_GREEN_LED_CONFIG";
+	case 0x15: return "GET_BLUE_LED_CONFIG";
+	case 0x16: return "GET_CHANNEL_CONFIG";
+	case 0x17: return "GET_NOTE_CONFIG";
+	case 0x18: return "GET_KEYTYPE_CONFIG";
+	case 0x19: return "GET_MAX_THRESHOLD";
+	case 0x1A: return "GET_MIN_THRESHOLD";
+	case 0x1B: return "GET_AFTERTOUCH_MAX";
+	case 0x1C: return "GET_KEY_VALIDITY";
+	case 0x1D: return "GET_VELOCITY_CONFIG";
+	case 0x1E: return "GET_FADER_CONFIG";
+	case 0x1F: return "GET_AFTERTOUCH_CONFIG";
+	case 0x20: return "SET_VELOCITY_INTERVALS";
+	case 0x21: return "GET_VELOCITY_INTERVALS";
+	case 0x22: return "GET_FADER_TYPE_CONFIGURATION";
+	case 0x23: return "GET_SERIAL_IDENTITY";
+	case 0x24: return "CALIBRATE_KEYS";
+	case 0x25: return "DEMO_MODE";
+	case 0x26: return "CALIBRATE_PITCH_MOD_WHEEL";
+	case 0x27: return "SET_MOD_WHEEL_SENSITIVITY";
+	case 0x28: return "SET_PITCH_WHEEL_SENSITIVITY";
+	case 0x29: return "SET_KEY_MAX_THRESHOLD";
+	case 0x2A: return "SET_KEY_MIN_THRESHOLD";
+	case 0x2B: return "SET_KEY_FADER_SENSITIVITY";
+	case 0x2C: return "SET_KEY_AFTERTOUCH_SENSITIVITY";
+	case 0x2D: return "SET_LUMATOUCH_CONFIG";
+	case 0x2E: return "SAVE_LUMATOUCH_CONFIG";
+	case 0x2F: return "RESET_LUMATOUCH_CONFIG";
+	case 0x30: return "GET_LUMATOUCH_CONFIG";
+	case 0x31: return "GET_FIRMWARE_REVISION";
+	case 0x32: return "SET_CC_ACTIVE_THRESHOLD";
+	case 0x33: return "LUMA_PING";
+	case 0x34: return "RESET_BOARD_THRESHOLDS";
+	case 0x35: return "SET_KEY_SAMPLING";
+	case 0x36: return "RESET_WHEELS_THRESHOLD";
+	case 0x37: return "SET_PITCH_WHEEL_CENTER_THRESHOLD";
+	case 0x38: return "CALLIBRATE_EXPRESSION_PEDAL";
+	case 0x39: return "RESET_EXPRESSION_PEDAL_BOUNDS";
+	case 0x3A: return "GET_BOARD_THRESHOLD_VALUES";
+	case 0x3B: return "GET_BOARD_SENSITIVITY_VALUES";
+	case 0x3C: return "SET_PERIPHERAL_CHANNELS";
+	case 0x3D: return "GET_PERIPHERAL_CHANNELS";
+	case 0x3E: return "PERIPHERAL_CALBRATION_DATA";
+	case 0x3F: return "SET_AFTERTOUCH_TRIGGER_DELAY";
+	case 0x40: return "GET_AFTERTOUCH_TRIGGER_DELAY";
+	case 0x41: return "SET_LUMATOUCH_NOTE_OFF_DELAY";
+	case 0x42: return "GET_LUMATOUCH_NOTE_OFF_DELAY";
+	case 0x43: return "SET_EXPRESSION_PEDAL_THRESHOLD";
+	case 0x44: return "GET_EXPRESSION_PEDAL_THRESHOLD";
+	case 0x45: return "INVERT_SUSTAIN_PEDAL";
+	case 0x46: return "RESET_DEFAULT_PRESETS";
+	case 0x47: return "GET_PRESET_FLAGS";
+	case 0x48: return "GET_EXPRESSION_PEDAL_SENSITIVIY";
+	case 0x49: return "GET_MACRO_LIGHT_INTENSITY";
+	case 0x4A: return "RESET_MACRO_LIGHT_INTENSITY";
+	case 0x4B: return "RESET_BOARD_KEYS";
+	case 0x4C: return "RESET_AFTERTOUCH_TRIGGER_DELAY";
+	case 0x4D: return "RESET_LUMATOUCH_NOTE_OFF_DELAY";
+	case 0x4E: return "GET_PITCH_AND_MOD_BOUNDS";
+	case 0x4F: return "GET_EXPRESSION_PEDAL_BOUNDS";
+	default: return "UNKNOWN_COMMAND";
+	}
+}
+
 typedef enum
 {
 	NACK    = 0x00, // Not recognized
@@ -464,6 +552,13 @@ struct FirmwareSupport
 	int getCommandNumber(const MidiMessage& msg)
 	{
 		return msg.getSysExData()[CMD_ID];
+	}
+
+	int getCommandNumber(juce::StringRef msgString)
+	{
+		juce::String sysex(msgString);
+		juce::String code = sysex.substring(15, 17);
+		return code.getHexValue64();
 	}
 
     String serialIdentityToString(int* serialBytes)
