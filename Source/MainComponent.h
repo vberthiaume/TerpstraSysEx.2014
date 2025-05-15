@@ -123,6 +123,8 @@ private:
 
 	std::unique_ptr<GlobalSettingsArea> globalSettingsArea;
 
+	std::unique_ptr<juce::TextButton> debugWindowToggle;
+
 	std::unique_ptr<PedalSensitivityDlg> pedalSensitivityDlg;
 
 	// Version signature in bottom left of window

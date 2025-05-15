@@ -74,7 +74,7 @@ DebugComponent::DebugComponent( DebugLogModel* modelIn)
     logTable->getHeader().setColumnVisible(DebugLogModel::TableColumn::Method, false);
 
     bool monitorDevice = TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("CheckConnectionIfInactive");
-    monitorDeviceToggle->setToggleState(true, juce::NotificationType::dontSendNotification);
+    monitorDeviceToggle->setToggleState(monitorDevice, juce::NotificationType::dontSendNotification);
 }
 
 DebugComponent::~DebugComponent()

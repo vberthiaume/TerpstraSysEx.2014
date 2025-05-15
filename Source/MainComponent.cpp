@@ -67,6 +67,15 @@ MainContentComponent::MainContentComponent(LumatoneLayout& mappingDataIn)
 	lblAppVersion->setColour(Label::ColourIds::textColourId, Colour(0xff777777));
 	addAndMakeVisible(lblAppVersion.get());
 
+	debugWindowToggle.reset (new juce::TextButton ("debugWindowToggle"));
+    addAndMakeVisible (debugWindowToggle.get());
+    debugWindowToggle->setButtonText (TRANS("Debug"));
+    debugWindowToggle->addListener (this);
+	debugWindowToggle->onClick = [this]()
+	{
+		debugWindow->setVisible(!debugWindow->isVisible());
+	};
+
 	// Initial size
 	setSize(DEFAULTMAINWINDOWWIDTH, DEFAULTMAINWINDOWHEIGHT);
 
@@ -428,6 +437,9 @@ void MainContentComponent::resized()
 		.withTop(roundToInt(getHeight() * footerAreaY))
 		.withTrimmedRight(footerHeight)
 	);
+
+    debugWindowToggle->setSize(60, globalSettingsArea->getHeight() * 0.55);
+    debugWindowToggle->setTopRightPosition(getWidth() - 340, globalSettingsArea->getY() + (globalSettingsArea->getHeight() - debugWindowToggle->getHeight()) * 0.45);
 
 	resizeLabelWithHeight(lblAppName.get(), roundToInt(footerHeight * lumatoneVersionHeight), 1.0f, " ");
 	lblAppName->setTopLeftPosition(proportionOfWidth(lumatoneVersionMarginX), footerY + (footerHeight - lblAppName->getHeight()) * 0.5f);
