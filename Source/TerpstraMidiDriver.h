@@ -15,7 +15,7 @@
 #include "HajuLib/HajuMidiDriver.h"
 #include "HajuLib/HajuErrorVisualizer.h"
 #include "LumatoneFirmwareDefinitions.h"
-#include "Settings/LumatoneSandboxLogger.h"
+#include "Settings/DebugLogger.h"
 //[/Headers]
 
 /*

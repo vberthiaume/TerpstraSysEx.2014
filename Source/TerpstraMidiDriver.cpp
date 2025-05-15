@@ -1465,7 +1465,7 @@ void TerpstraMidiDriver::sendCurrentMessage()
     // Notify listeners
     juce::String description = currentMsgWaitingForAck.getDescription();
     DBG("SENT: " + description);
-    logInfo(LumatoneEditorLogger::LogType::SYSEX, "sendCurrentMessage", description);
+    // logInfo(LumatoneEditorLogger::LogType::SYSEX, "sendCurrentMessage", description);
 
     // const MessageManagerLock mmLock;
     // this->listeners.call(&Listener::midiMessageSent, currentMsgWaitingForAck);
