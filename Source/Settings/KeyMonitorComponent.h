@@ -24,6 +24,7 @@ public:
         addAndMakeVisible(velocityLabel.get());
 
         maxVelocityLabel = std::make_unique<juce::Label>("", "");
+        // maxVelocityLabel->setJustificationType(juce::Justification::topLeft);
         addAndMakeVisible(maxVelocityLabel.get());
 
         noteLabel = std::make_unique<juce::Label>("", "");
@@ -125,13 +126,17 @@ private:
 
     void updateVelocityMeter()
     {
-        currentVelocityY = juce::roundToInt(velocityMeter.getHeight() * (1.0f - levelToRatio(currentVelocity)));
-        highestVelocityY = juce::roundToInt(velocityMeter.getHeight() * (1.0f - levelToRatio(highestVelocity)));
+        currentVelocityY = velocityMeter.getBottom() - juce::roundToInt(velocityMeter.getHeight() * levelToRatio(currentVelocity));
+        highestVelocityY = velocityMeter.getBottom() - juce::roundToInt(velocityMeter.getHeight() * levelToRatio(highestVelocity));
 
         maxVelocityLine.setStart(velocityMeter.getX(), highestVelocityY);
         maxVelocityLine.setEnd(velocityMeter.getRight(), highestVelocityY);
 
-        maxVelocityLabel->setBounds(maxVelocityLine.getEndX() + 8, maxVelocityLine.getEndY(), 100, 48);
+        int labelHeight = 30;
+        int labelY = highestVelocityY - labelHeight / 2;
+        if (labelY < 0)
+            labelY = 0;
+        maxVelocityLabel->setBounds(maxVelocityLine.getEndX() + 5, labelY, 100, labelHeight);
 
         velocityLabel->setText(juce::String("Velocity: ") + juce::String(currentVelocity), juce::NotificationType::dontSendNotification);
         maxVelocityLabel->setText(juce::String("Max: ") + juce::String(highestVelocity), juce::NotificationType::dontSendNotification);

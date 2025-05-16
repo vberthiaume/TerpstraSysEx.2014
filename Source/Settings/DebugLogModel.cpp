@@ -71,7 +71,7 @@ void DebugLogModel::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
     {
     case TableColumn::Date:
         // value = log.time.toString(false, true, true, true);
-        value = log.time.formatted("%H:%m:%S");
+        value = log.time.formatted(" %H:%m:%S");
         break;
     case TableColumn::Class:
         value = log.className;
@@ -84,15 +84,21 @@ void DebugLogModel::paintCell(juce::Graphics& g, int rowNumber, int columnId, in
         break;
     case TableColumn::Method:
         value = log.method;
-        break;
-    case TableColumn::Message:
-        value = log.message;
-        if (log.type == LogType::SYSEX)
+        if (log.type == LogType::SYSEX) // quick hack
         {
             FirmwareSupport support;
             int commandId = support.getCommandNumber(log.message);
-            value = CommandCodeToName(commandId) + juce::String(": ") + value;
+            value = CommandCodeToName(commandId);
         }
+        break;
+    case TableColumn::Message:
+        value = log.message;
+        // if (log.type == LogType::SYSEX)
+        // {
+        //     FirmwareSupport support;
+        //     int commandId = support.getCommandNumber(log.message);
+        //     value = CommandCodeToName(commandId) + juce::String(": ") + value;
+        // }
         break;
     default:
         break;

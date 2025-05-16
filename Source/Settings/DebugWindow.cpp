@@ -36,12 +36,13 @@ DebugComponent::DebugComponent( DebugLogModel* modelIn)
 
     logTable = std::make_unique<juce::TableListBox>("LumatoneSandboxLogTable", static_cast<juce::TableListBoxModel*>(logModel));
     logTable->setHeader(std::make_unique<juce::TableHeaderComponent>());
-    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Date),     DebugLogModel::TableColumn::Date,    100);
+    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Date),     DebugLogModel::TableColumn::Date,    72);
     logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Class),    DebugLogModel::TableColumn::Class,   72);
-    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Status),   DebugLogModel::TableColumn::Status,  64);
+    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Status),   DebugLogModel::TableColumn::Status,  50);
     logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Type),     DebugLogModel::TableColumn::Type,    64);
-    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Method),   DebugLogModel::TableColumn::Method,  160);
-    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Message),  DebugLogModel::TableColumn::Message, 1024);
+    logTable->getHeader().addColumn("Command",   DebugLogModel::TableColumn::Method,  180);
+    // logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Method),   DebugLogModel::TableColumn::Method,  160);
+    logTable->getHeader().addColumn(DebugLogModel::TableColumnName(DebugLogModel::TableColumn::Message),  DebugLogModel::TableColumn::Message, 512);
     addAndMakeVisible(logTable.get());
 
     for (int i = 0; i < numColumns; i++)
@@ -71,7 +72,7 @@ DebugComponent::DebugComponent( DebugLogModel* modelIn)
     // Set default settings
     logTable->getHeader().setColumnVisible(DebugLogModel::TableColumn::Class, false);
     logTable->getHeader().setColumnVisible(DebugLogModel::TableColumn::Type, false);
-    logTable->getHeader().setColumnVisible(DebugLogModel::TableColumn::Method, false);
+    // logTable->getHeader().setColumnVisible(DebugLogModel::TableColumn::Method, false);
 
     bool monitorDevice = TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("CheckConnectionIfInactive");
     monitorDeviceToggle->setToggleState(monitorDevice, juce::NotificationType::dontSendNotification);

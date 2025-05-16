@@ -92,6 +92,7 @@ MainContentComponent::MainContentComponent(LumatoneLayout& mappingDataIn)
 MainContentComponent::~MainContentComponent()
 {
     //TerpstraSysExApplication::getApp().getMidiDriver().removeListener(this);
+    debugWindow = nullptr;
 
 	midiEditArea = nullptr;
 	allKeysOverview = nullptr;
@@ -105,7 +106,6 @@ MainContentComponent::~MainContentComponent()
 	lblAppName = nullptr;
 	lblAppVersion = nullptr;
 
-    debugWindow = nullptr;
 }
 
 void MainContentComponent::restoreStateFromPropertiesFile(PropertiesFile* propertiesFile)
