@@ -48,6 +48,8 @@ public:
 
     void setEditText(bool enableTextEdit);
 
+    void setEmptyText(juce::String emptyText);
+
 private:
     juce::Colour parseInput() const;
 

@@ -73,6 +73,7 @@ public:
     void setValueChangedCallback(std::function<void()> callback);
 
     void clearValue(juce::NotificationType notify = juce::NotificationType::sendNotification);
+    void setNullText(juce::String textToDisplay);
 
     void setTooltip(juce::String text);
 
@@ -102,12 +103,15 @@ public:
 public:
     bool valueIsNull(int checkValue) const;
 private:
-    bool updateNull(int newValue);
+    bool parseNull(int newValue);
 
 private:
     void createClearButton();
 
     void updateColourHistory(const juce::Colour& newColour);
+
+    // Updates control's null display
+    void updateNullText();
 
 private:
 
@@ -123,6 +127,7 @@ private:
     juce::Component* component = nullptr;
 
     bool isNull = true;
+    juce::String nullText;
 
     bool showClearButton = false;
     LumatoneEditorControl::Style style;

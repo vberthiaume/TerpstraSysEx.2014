@@ -170,6 +170,12 @@ void ColourDropdownSelector::setEditText(bool enableTextEdit)
     colourEditorBox->setEditableText(enableTextEdit);
 }
 
+void ColourDropdownSelector::setEmptyText(juce::String emptyText)
+{
+    colourEditorBox->setTextWhenNothingSelected(emptyText);
+    colourEditorBox->setTextWhenNoChoicesAvailable(emptyText);
+}
+
 juce::Colour ColourDropdownSelector::parseInput() const
 {
     juce::String text = colourEditorBox->getText();

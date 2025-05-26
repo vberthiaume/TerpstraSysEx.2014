@@ -281,20 +281,11 @@ void LumatoneEditorControl::allowTextInput(bool allowInput)
 
 void LumatoneEditorControl::setValue(int newValue, juce::NotificationType notify)
 {
-    updateNull(newValue);
+    parseNull(newValue);
 
     if (slider)
     {
-        slider->getProperties().set(LumatoneEditorStyleIDs::sliderValueNull, isNull);
         slider->setValue(newValue, notify);
-
-        // does not update if null is same value
-
-        // Kludge to hide label when null
-        if (isNull)
-        {
-            dynamic_cast<juce::Label*>(slider->getChildComponent(0))->setText("", juce::NotificationType::dontSendNotification);
-        }
     }
     else if (box)
     {
@@ -312,6 +303,9 @@ void LumatoneEditorControl::setValue(int newValue, juce::NotificationType notify
     {
         colourDropdownInput->clearColour(notify != juce::NotificationType::dontSendNotification);
     }
+
+    if (isNull)
+        updateNullText();
 }
 
 void LumatoneEditorControl::setColourValue(juce::Colour newColour, juce::NotificationType notify)
@@ -330,8 +324,8 @@ void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callba
     if (box)
     {
         box->onChange = [&]() {
+            parseNull(box->getText().getIntValue());
             valueChangedCallback();
-            updateNull(box->getText().getIntValue());
         };
     }
     else if (slider)
@@ -341,15 +335,15 @@ void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callba
             // if (isNull && slider->getValue() == (range.getStart() + 1))
             //     slider->setValue(range.getStart(), juce::NotificationType::dontSendNotification);
 
+            parseNull(slider->getValue());
             valueChangedCallback();
-            updateNull(slider->getValue());
         };
     }
     else if (colourDropdownInput)
     {
         colourDropdownInput->setOnValueChangeCallback([&]() {
-            valueChangedCallback();
             isNull = colourDropdownInput->getSelectedColour().isTransparent();
+            valueChangedCallback();
         });
     }
 
@@ -358,6 +352,26 @@ void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callba
 void LumatoneEditorControl::clearValue(juce::NotificationType notify)
 {
     setValue(range.getStart() - 1, notify);
+}
+
+void LumatoneEditorControl::setNullText(juce::String textToDisplay)
+{
+    nullText = textToDisplay;
+
+    if (box)
+    {
+        box->setTextWhenNothingSelected(nullText);
+    }
+    else if (colourDropdownInput)
+    {
+        colourDropdownInput->setEmptyText(nullText);
+    }
+    else if (slider)
+    {
+
+    }
+
+    updateNullText();
 }
 
 void LumatoneEditorControl::setTooltip(juce::String text)
@@ -465,7 +479,7 @@ bool LumatoneEditorControl::valueIsNull(int checkValue) const
     return checkValue < range.getStart() || checkValue > range.getEnd();
 }
 
-bool LumatoneEditorControl::updateNull(int newValue)
+bool LumatoneEditorControl::parseNull(int newValue)
 {
     isNull = valueIsNull(newValue);
     return isNull;
@@ -489,4 +503,12 @@ void LumatoneEditorControl::updateColourHistory(const juce::Colour &newColour)
         colourHistory.insert(0, newColour);
 
     colourDropdownInput->setColourOptions(colourHistory);
+}
+
+void LumatoneEditorControl::updateNullText()
+{
+    if (slider)
+        dynamic_cast<juce::Label*>(slider->getChildComponent(0))->setText(nullText, juce::NotificationType::dontSendNotification);
+
+    // boxes are automatic
 }
