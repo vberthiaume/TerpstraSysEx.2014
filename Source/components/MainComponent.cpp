@@ -46,18 +46,12 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
     allKeysOverview->setUiMode(LumatoneKeyboardComponent::UiMode::Controller);
     addAndMakeVisible(allKeysOverview.get());
 
-    // Listens to key selection and creates selection edit actions
-    // keyboardClickListener = std::make_unique<KeyboardClickListener>(*this, allKeysOverview.get());
-
     // Edit function area
     keyEditorPanel = std::make_unique<KeyEditorPanel>(stateIn);
     addChildComponent(*keyEditorPanel);
 
     mappingSettingsComponent = std::make_unique<MappingSettingsPanel>(stateIn);
     addChildComponent(*mappingSettingsComponent);
-
-    // curvesArea.reset(new CurvesArea(stateIn));
-    // addAndMakeVisible(curvesArea.get());
 
     globalSettingsArea.reset(new GlobalSettingsArea(stateIn));
     addAndMakeVisible(globalSettingsArea.get());
@@ -96,6 +90,11 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
     btnImportFile->setTooltip(juce::translate("ImportTooltip"));
     btnImportFile->setButtonText(juce::translate("Import"));
     btnImportFile->setCommandToTrigger(commandManager, Lumatone::Menu::importSysExMapping, true);
+
+    btnClearSelection.reset(new juce::TextButton("btnClearSelection"));
+    addAndMakeVisible(btnClearSelection.get());
+    btnClearSelection->setButtonText(juce::translate("x"));
+    btnClearSelection->setCommandToTrigger(commandManager, Lumatone::Menu::selectNone, true);
 
     lblAppName.reset(new Label("lblAppName", getApplicationName()));
     lblAppName->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
@@ -396,8 +395,13 @@ void MainContentComponent::resized()
     lblEditTitle->setTopLeftPosition(contentMargin, controlsLabelYPos);
     resizeLabelWithHeight(lblEditTitle.get(), controlHeaderHeight);
 
-    resizeLabelWithHeight(lblSelectedKeys.get(), lblEditTitle->getHeight(), 0.667f, "____");
-    lblSelectedKeys->setTopRightPosition(controlsArea.getRight(), lblEditTitle->getY());
+    int selectedKeyAreaHeight = lblEditTitle->getHeight();
+    int clearSize = (selectedKeyAreaHeight * 2) / 3;
+    btnClearSelection->setSize(clearSize, clearSize);
+    btnClearSelection->setTopRightPosition(controlsArea.getRight(), lblEditTitle->getY() + (selectedKeyAreaHeight - clearSize) / 2);
+
+    resizeLabelWithHeight(lblSelectedKeys.get(), selectedKeyAreaHeight, 0.667f, "____");
+    lblSelectedKeys->setTopRightPosition(btnClearSelection->getX() - (btnMargin * 2), lblEditTitle->getY());
 
     resizeEditSectionTabs();
 

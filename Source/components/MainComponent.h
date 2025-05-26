@@ -70,9 +70,6 @@ public:
     void resizeEditSectionTabs();
     void setMappingEditorTab(MappingEditorTabs tabIndex);
 
-    //void refreshKeyDataFields();
-    //void refreshAllFields();
-
     // Implementation of LumatoneEditor::StatusListener
     void connectionStateChanged(ConnectionState state) override;
 
@@ -117,6 +114,8 @@ private:
     std::unique_ptr<juce::TextButton>		btnSaveFile;
     std::unique_ptr<juce::TextButton>		btnImportFile;
 
+    std::unique_ptr<juce::TextButton>		btnClearSelection;
+
     // Version signature in bottom left of window
     std::unique_ptr<juce::Label> 			lblAppName;
     std::unique_ptr<juce::Label> 			lblAppVersion;
@@ -126,9 +125,6 @@ private:
     // Buffer for copy/paste of sub board data
     std::unique_ptr<LumatoneBoard>			copiedSubBoardData;
 
-    //==============================================================================
-
-    // std::unique_ptr<KeyboardClickListener>	keyboardClickListener;
 
     //==============================================================================
     // Position and Size helpers
