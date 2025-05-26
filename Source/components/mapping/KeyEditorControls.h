@@ -62,6 +62,9 @@ private:
 private:
 
     void colorInputCallback();
+    void typeInputCallback();
+    void noteInputCallback();
+    void channelInputCallback();
 
 private:
     std::unique_ptr<juce::Label>            lblKeySettings;

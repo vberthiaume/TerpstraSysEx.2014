@@ -11,10 +11,12 @@ SetKeySettingsAction::SetKeySettingsAction(const LumatoneEditorState & stateIn,
                                            LumatoneKeyType typeIn,
                                            int noteIn,
                                            int channelIn,
-                                           bool ccFaderDefaultIn)
+                                           bool ccFaderDefaultIn,
+                                            bool addToSettings)
 	: LumatoneEditorState("SetKeySettingsAction", stateIn)
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , LumatoneAction(this, "SetKeySettingsAction")
+    , add(addToSettings)
     // , newEditData("SetKeySettingsActionData")
 {
     previousData = stateIn.getEditSelectionData();
@@ -37,7 +39,10 @@ SetKeySettingsAction::SetKeySettingsAction(const LumatoneEditorState & stateIn,
 
 bool SetKeySettingsAction::perform()
 {
-    addToEditAassignment();
+    if (add)
+        addToEditAassignment();
+    else
+        setEditAssignment();
     return true;
 }
 
@@ -51,9 +56,6 @@ bool SetKeySettingsAction::undo()
     return true;
 }
 
-// void SetKeySettingsAction::assignToSelectedKeys()
-// {
-// }
 
 void SetKeySettingsAction::addToEditAassignment()
 {
@@ -69,33 +71,49 @@ void SetKeySettingsAction::addToEditAassignment()
         setAssignCCFader(newEditData.useCCFaderDefault, newEditData.ccFaderDefault);
 }
 
-SetKeySettingsAction *SetKeySettingsAction::NewSetAssignColourAction(LumatoneEditorState &stateIn, juce::Colour colourIn)
+void SetKeySettingsAction::setEditAssignment()
+{
+    editSelectionState.clear();
+    addToEditAassignment();
+}
+
+SetKeySettingsAction *SetKeySettingsAction::NewSetAssignColourAction(LumatoneEditorState &stateIn, juce::Colour colourIn, bool addToSettings)
 {
     bool valid = colourIn.isOpaque();
-    return new SetKeySettingsAction(stateIn, valid, false, false, false, false, colourIn);
+    SetKeySettingsAction* action = new SetKeySettingsAction(stateIn, valid, false, false, false, false, colourIn);
+    action->add = addToSettings;
+    return action;
 }
 
-SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyTypeAction(LumatoneEditorState &stateIn, LumatoneKeyType typeIn)
+SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyTypeAction(LumatoneEditorState &stateIn, LumatoneKeyType typeIn, bool addToSettings)
 {
     bool valid = typeIn > LumatoneKeyType::disabledDefault && typeIn <= LumatoneKeyType::disabled;
-    return new SetKeySettingsAction(stateIn, false, valid, false, false, false, juce::Colour(), typeIn);
+    SetKeySettingsAction* action = new SetKeySettingsAction(stateIn, false, valid, false, false, false, juce::Colour(), typeIn);
+    action->add = addToSettings;
+    return action;
 }
 
-SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyNoteAction(LumatoneEditorState &stateIn, int noteIn)
+SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyNoteAction(LumatoneEditorState &stateIn, int noteIn, bool addToSettings)
 {
     bool valid = noteIn >= 0 && noteIn < 128;
-    return new SetKeySettingsAction(stateIn, false, false, valid, false, false, juce::Colour(), LumatoneKeyType(), noteIn);
+    SetKeySettingsAction* action = new SetKeySettingsAction(stateIn, false, false, valid, false, false, juce::Colour(), LumatoneKeyType(), noteIn);
+    action->add = addToSettings;
+    return action;
 }
 
-SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyChannelAction(LumatoneEditorState &stateIn, int channelIn)
+SetKeySettingsAction *SetKeySettingsAction::NewSetAssignKeyChannelAction(LumatoneEditorState &stateIn, int channelIn, bool addToSettings)
 {
     bool valid = channelIn > 0 && channelIn <= 16;
-    return new SetKeySettingsAction(stateIn, false, false, false, valid, false, juce::Colour(), LumatoneKeyType(), 0, channelIn);
+    SetKeySettingsAction* action = new SetKeySettingsAction(stateIn, false, false, false, valid, false, juce::Colour(), LumatoneKeyType(), 0, channelIn);
+    action->add = addToSettings;
+    return action;
 }
 
-SetKeySettingsAction *SetKeySettingsAction::NewSetAssignCCFaderAction(LumatoneEditorState &stateIn, bool faderDefaultIn)
+SetKeySettingsAction *SetKeySettingsAction::NewSetAssignCCFaderAction(LumatoneEditorState &stateIn, bool faderDefaultIn, bool addToSettings)
 {
-    return new SetKeySettingsAction(stateIn, false, false, false, false, true, juce::Colour(), LumatoneKeyType(), 0, 0, faderDefaultIn);
+    SetKeySettingsAction* action = new SetKeySettingsAction(stateIn, false, false, false, false, true, juce::Colour(), LumatoneKeyType(), 0, 0, faderDefaultIn);
+    action->add = addToSettings;
+    return action;
 }
 
 ApplyAssignmentsToSelectionAction::ApplyAssignmentsToSelectionAction(const LumatoneEditorState& stateIn
@@ -108,52 +126,11 @@ ApplyAssignmentsToSelectionAction::ApplyAssignmentsToSelectionAction(const Lumat
 
     newData = assignData;
 
-
-    // should probably be added as an option
-    // clean, only assign different values
-    bool assignColour = false;
-    bool assignType = false;
-    bool assignNote = false;
-    bool assignChannel = false;
-
-    LumatoneKey sampleKey;
-    if (keySelectionIn.size() > 0)
-    {
-        sampleKey = keySelectionIn[0];
-    }
-    if (newData.useColour)
-        sampleKey.setColour(newData.colour);
-    if (newData.useType)
-        sampleKey.setKeyType(newData.type);
-    if (newData.useNote)
-        sampleKey.setNoteOrCC(newData.note);
-    if (newData.useChannel)
-        sampleKey.setChannelNumber(newData.channel);
-
     for (const MappedLumatoneKey& key : keySelectionIn)
     {
         keySelection.add(key);
         previousData.add(key);
-
-        //
-        if (newData.useColour && !assignColour && !key.colourIsEqual(sampleKey))
-            assignColour = true;
-        if (newData.useType && !assignType && key.getType() != sampleKey.getType())
-            assignType = true;
-        if (newData.useNote && !assignNote && key.getMidiNumber() != sampleKey.getMidiNumber())
-            assignNote = true;
-        if (newData.useChannel && !assignChannel && key.getMidiChannel() != sampleKey.getMidiChannel())
-            assignChannel = true;
     }
-
-    if (newData.useColour)
-        newData.useColour = assignColour;
-    if (newData.useType)
-        newData.useType = assignType;
-    if (newData.useNote)
-        newData.useNote = assignNote;
-    if (newData.useChannel)
-        newData.useChannel = assignChannel;
 }
 
 bool ApplyAssignmentsToSelectionAction::perform()

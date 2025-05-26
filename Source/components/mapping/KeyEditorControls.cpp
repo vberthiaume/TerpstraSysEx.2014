@@ -45,36 +45,18 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     keyTypeCombo->addOption(juce::translate("Continuous Controller"), (int)LumatoneKeyType::continuousController);
     keyTypeCombo->addOption(juce::translate("Lumatouch"), (int)LumatoneKeyType::lumaTouch);
     keyTypeCombo->addOption(juce::translate("Disabled"), (int)LumatoneKeyType::disabled);
-    keyTypeCombo->setValueChangedCallback([&]()
-    {
-        // performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, LumatoneKeyType(keyTypeCombo->getSelectedId())));
-        LumatoneKeyType newType = LumatoneKeyType(keyTypeCombo->getValue() + 1);
-        performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, newType));
-
-        if (keyTypeCombo->getValue() > 0)
-            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
-    });
+    keyTypeCombo->setValueChangedCallback([&]() { typeInputCallback(); });
     addAndMakeVisible(keyTypeCombo.get());
 
     noteInput = std::make_unique<LumatoneEditorControl>(*this, "noteInput", 0, 127, LumatoneEditorControl::Style::IncDecButtons, true);
     noteInput->setLabelOptions(juce::translate("Note #") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
-    noteInput->setValueChangedCallback([&]()
-    {
-        performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
-        if (!noteInput->isValueNull())
-            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
-    });
+    noteInput->setValueChangedCallback([&]() { noteInputCallback(); });
     addAndMakeVisible(noteInput.get());
 
     channelInput = std::make_unique<LumatoneEditorControl>(*this, "channelInput", 1, 16, LumatoneEditorControl::Style::IncDecButtons, true);
     channelInput->setLabelOptions(juce::translate("Channel #") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
-    channelInput->setValueChangedCallback([&]()
-    {
-        performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
-        if (!channelInput->isValueNull())
-            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()));
-    });
+    channelInput->setValueChangedCallback([&]() { channelInputCallback(); });
     addAndMakeVisible(channelInput.get());
 
     autoIncrementToggleButton.reset (new juce::ToggleButton ("autoIncrementToggleButton"));
@@ -243,7 +225,8 @@ void KeyEditorControls::resized()
 void KeyEditorControls::selectionChanged()
 {
     // Make more efficient? (each time goes through loop)
-    auto newData = LumatoneEditSelectionState::findSharedSelectionProperties(*getSelectedKeys());
+    auto selectionData = LumatoneEditSelectionState::findSelectionProperties(*getSelectedKeys());
+    auto newData = LumatoneEditSelectionState::findSharedSelectionProperties(selectionData);
 
     if (newData.useColour)
     {
@@ -264,30 +247,61 @@ void KeyEditorControls::selectionChanged()
     else
     {
         colourInputBox->clearValue(juce::NotificationType::dontSendNotification);
+        if (selectionData.hasMultipleColours())
+        {
+            colourInputBox->setNullText("*");
+        }
+        else
+        {
+            colourInputBox->setNullText("");
+        }
     }
 
 
     if (newData.useType)
         keyTypeCombo->setValue((int)newData.type - 1, juce::NotificationType::dontSendNotification);
     else
+    {
         keyTypeCombo->clearValue(juce::NotificationType::dontSendNotification);
-        // keyTypeCombo->setValue(0, juce::NotificationType::dontSendNotification);
-    // if (newData.useType)
-    //     keyTypeCombo->setSelectedId((int)newData.type, juce::NotificationType::dontSendNotification);
-    // else
-    //     keyTypeCombo->setSelectedId(0, juce::NotificationType::dontSendNotification);
+        if (selectionData.hasMultipleTypes())
+        {
+            keyTypeCombo->setNullText("*");
+        }
+        else
+        {
+            keyTypeCombo->setNullText("");
+        }
+    }
 
     if (newData.useNote)
         noteInput->setValue(newData.note, juce::NotificationType::dontSendNotification);
     else
+    {
         noteInput->clearValue(juce::NotificationType::dontSendNotification);
-        // noteInput->setValue(-1, juce::NotificationType::dontSendNotification);
+        if (selectionData.hasMultipleNotes())
+        {
+            noteInput->setNullText("*");
+        }
+        else
+        {
+            noteInput->setNullText("");
+        }
+    }
 
     if (newData.useChannel)
         channelInput->setValue(newData.channel, juce::NotificationType::dontSendNotification);
     else
+    {
         channelInput->clearValue(juce::NotificationType::dontSendNotification);
-        // channelInput->setValue(-1, juce::NotificationType::dontSendNotification);
+        if (selectionData.hasMultipleChannels())
+        {
+            channelInput->setNullText("*");
+        }
+        else
+        {
+            channelInput->setNullText("");
+        }
+    }
 }
 
 // void KeyEditorControls::setSelectionTab(SelectionTabs tabIndex)
@@ -366,8 +380,11 @@ void KeyEditorControls::colourChangedCallback(ColourSelectionBroadcaster *source
     if (src != nullptr && isParentOf(src))
     {
         colourInputBox->setLastColour(newColour);
-        // if (inAssignMode())
-            performAction(new ApplyAssignmentsToSelectionAction(*this, getEditSelectionData(), *getSelectedKeys()), true, false);
+
+        LumatoneKeyPropertyData assignData;
+        assignData.useColour = true;
+        assignData.colour = newColour;
+        performAction(new ApplyAssignmentsToSelectionAction(*this, assignData, *getSelectedKeys()), true, false);
     }
 }
 
@@ -384,6 +401,44 @@ void KeyEditorControls::deselectColour()
 void KeyEditorControls::colorInputCallback()
 {
     performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, colourInputBox->getColourValue()));
+}
+
+void KeyEditorControls::typeInputCallback()
+{
+    LumatoneKeyType newType = LumatoneKeyType(keyTypeCombo->getValue() + 1);
+    performAction(SetKeySettingsAction::NewSetAssignKeyTypeAction(*this, newType));
+
+    if (keyTypeCombo->getValue() == 0)
+        return;
+
+    LumatoneKeyPropertyData assignData;
+    assignData.useType = true;
+    assignData.type = newType;
+    performAction(new ApplyAssignmentsToSelectionAction(*this, assignData, *getSelectedKeys()), true, false);
+}
+
+void KeyEditorControls::noteInputCallback()
+{
+    performAction(SetKeySettingsAction::NewSetAssignKeyNoteAction(*this, (int)noteInput->getValue()));
+    if (noteInput->isValueNull())
+        return;
+
+    LumatoneKeyPropertyData assignData;
+    assignData.useNote = true;
+    assignData.note = (int)noteInput->getValue();
+    performAction(new ApplyAssignmentsToSelectionAction(*this, assignData, *getSelectedKeys()), true, false);
+}
+
+void KeyEditorControls::channelInputCallback()
+{
+    performAction(SetKeySettingsAction::NewSetAssignKeyChannelAction(*this, (int)channelInput->getValue()));
+    if (channelInput->isValueNull())
+        return;
+
+    LumatoneKeyPropertyData assignData;
+    assignData.useChannel = true;
+    assignData.channel = (int)channelInput->getValue();
+    performAction(new ApplyAssignmentsToSelectionAction(*this, assignData, *getSelectedKeys()), true, false);
 }
 
 // void KeyEditorControls::changeListenerCallback(juce::ChangeBroadcaster *source)

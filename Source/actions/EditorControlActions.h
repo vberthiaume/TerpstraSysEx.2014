@@ -32,28 +32,33 @@ public:
                        , LumatoneKeyType typeIn = LumatoneKeyType::noteOnNoteOff
                        , int noteIn = 0
                        , int channelIn = 0
-                       , bool ccFaderDefaultIn = false);
+                       , bool ccFaderDefaultIn = false,
+                        bool addToSettings = false);
 
     bool perform() override;
     bool undo() override;
 
     int getSizeInUnits() override { return sizeof(SetKeySettingsAction); }
 
-    // void assignToSelectedKeys();
     void addToEditAassignment();
+    void setEditAssignment();
 
 public:
 
-    static SetKeySettingsAction* NewSetAssignColourAction(LumatoneEditorState&  stateIn,    juce::Colour colourIn);
-    static SetKeySettingsAction* NewSetAssignKeyTypeAction(LumatoneEditorState& stateIn,    LumatoneKeyType typeIn);
-    static SetKeySettingsAction* NewSetAssignKeyNoteAction(LumatoneEditorState& stateIn,    int noteIn);
-    static SetKeySettingsAction* NewSetAssignKeyChannelAction(LumatoneEditorState& stateIn, int channelIn);
-    static SetKeySettingsAction* NewSetAssignCCFaderAction(LumatoneEditorState& stateIn,    bool faderDefaultIn);
+    static SetKeySettingsAction* NewSetAssignColourAction(LumatoneEditorState&  stateIn,    juce::Colour colourIn, bool addToSettings = true);
+    static SetKeySettingsAction* NewSetAssignKeyTypeAction(LumatoneEditorState& stateIn,    LumatoneKeyType typeIn, bool addToSettings = true);
+    static SetKeySettingsAction* NewSetAssignKeyNoteAction(LumatoneEditorState& stateIn,    int noteIn, bool addToSettings = true);
+    static SetKeySettingsAction* NewSetAssignKeyChannelAction(LumatoneEditorState& stateIn, int channelIn, bool addToSettings = true);
+    static SetKeySettingsAction* NewSetAssignCCFaderAction(LumatoneEditorState& stateIn,    bool faderDefaultIn, bool addToSettings = true);
 
 private:
 
     LumatoneKeyPropertyData previousData;
     LumatoneKeyPropertyData newEditData;
+
+public:
+
+    bool add = false;
 
 };
 
