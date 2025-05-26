@@ -30,64 +30,29 @@ MultiSelectControls::MultiSelectControls(const LumatoneEditorState& stateIn)
     colourInput = std::make_unique<LumatoneEditorControl>(*this, "MultiSelectColourEdit", LumatoneEditorControl::Style::ColourDropdownInput, true);
     colourInput->setLabelOptions(juce::translate("Colour") + juce::String(":"), LumatoneEditorControl::LabelLocation::Top);
     addAndMakeVisible(*colourInput);
-    colourInput->setValueChangedCallback([&]()
-    {
-        LumatoneKeyPropertyData properties;
-        properties.useColour = true;
-        properties.colour = colourDropdown->getSelectedColour();
-
-        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
-        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
-    });
+    colourInput->setValueChangedCallback([&](){ colourInputCallback(colourInput->getColourValue(), UpdateType::REPLACE); });
     // colourInput->setColour(LumatoneEditorControl::ColourIds::outline, juce::Colours::white);
 
     colourDropdown = colourInput->getColourSelector();
     // addColourSelectionListener(colourDropdown.get());
-    colourDropdown->setColourPickerChangedCallback([&]()
-    {
-        addColourSelectionListener(colourDropdown);
-    });
+    colourDropdown->setColourPickerChangedCallback([&]() { addColourSelectionListener(colourDropdown); });
     colourDropdown->setShowPicker(false);
 
     keyTypeCombo = std::make_unique<LumatoneEditorControl>(*this, "keyTypeComboSelect", LumatoneEditorControl::Style::DropdownBox, true);
     keyTypeCombo->setLabelOptions(juce::translate("Type"), LumatoneEditorControl::LabelLocation::Top);
-    keyTypeCombo->setValueChangedCallback([&]()
-    {
-        LumatoneKeyPropertyData properties;
-        properties.useType = true;
-        properties.type = LumatoneKeyType(keyTypeCombo->getValue());
-
-        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
-        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
-    });
+    keyTypeCombo->setValueChangedCallback([&]() { typeInputCallback(keyTypeCombo->getValue(), UpdateType::REPLACE); });
     addAndMakeVisible(keyTypeCombo.get());
     // keyTypeCombo->setColour(LumatoneEditorControl::ColourIds::outline, juce::Colours::white);
 
     noteInput = std::make_unique<LumatoneEditorControl>(*this, "noteInputSelect", LumatoneEditorControl::Style::DropdownBox, true);
     noteInput->setLabelOptions(juce::translate("Note #") + juce::String(":"), LumatoneEditorControl::LabelLocation::Top);
     noteInput->setTooltip (juce::translate("MIDI note or MIDI controller no. (for key type \'continuous controller\')"));
-    noteInput->setValueChangedCallback([&]()
-    {
-        LumatoneKeyPropertyData properties;
-        properties.useNote = true;
-        properties.note = noteInput->getValue();
-
-        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
-        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
-    });
+    noteInput->setValueChangedCallback([&]() { noteInputCallback(noteInput->getValue(), UpdateType::REPLACE); });
     addAndMakeVisible(noteInput.get());
 
     channelInput = std::make_unique<LumatoneEditorControl>(*this, "channelInputSelect", LumatoneEditorControl::Style::DropdownBox, true);
     channelInput->setLabelOptions(juce::translate("Channel #") + juce::String(":"), LumatoneEditorControl::LabelLocation::Top);
-    channelInput->setValueChangedCallback([&]()
-    {
-        LumatoneKeyPropertyData properties;
-        properties.useChannel = true;
-        properties.channel = channelInput->getValue();
-
-        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
-        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
-    });
+    channelInput->setValueChangedCallback([&]() { channelInputCallback(channelInput->getValue(), UpdateType::REPLACE); });
     addAndMakeVisible(channelInput.get());
 
     addEditorListener(this);
@@ -143,7 +108,7 @@ void MultiSelectControls::resized()
 
     colourTypeColumnWidth = roundToInt(w * colourTypeColumnW);
 
-    noteChannelColumnX = (contentMarginWidth*2) + colourTypeColumnWidth;
+    noteChannelColumnX = juce::roundToInt(contentMarginWidth * 1.3f) + colourTypeColumnWidth;
     noteChannelColumnWidth = getWidth() - noteChannelColumnX - contentMarginWidth;
 
     // lblColour->setTopLeftPosition(contentMarginWidth + labelMarginWidth, headerHeight + contentMarginHeight);
@@ -186,19 +151,222 @@ void MultiSelectControls::resized()
     // channelsDropDown->setBounds(noteChannelColumnX, lblChannel->getBottom(), noteChannelColumnWidth, controlHeight);
 }
 
+void MultiSelectControls::setSelection(const MultiSelection &selectionIn, bool sendUpdate)
+{
+    coloursSelected.clear();
+    typesSelected.clear();
+    notesSelected.clear();
+    channelsSelected.clear();
+
+    coloursSelected.addArray(selectionIn.coloursSelected);
+    typesSelected.addArray(selectionIn.typesSelected);
+    notesSelected.addArray(selectionIn.notesSelected);
+    channelsSelected.addArray(selectionIn.channelsSelected);
+
+    if (coloursSelected.size() > 0)
+        colourInput->setColourValue(coloursSelected[0], juce::NotificationType::dontSendNotification);
+    else
+        colourInput->clearValue(juce::NotificationType::dontSendNotification);
+
+    if (typesSelected.size() > 0)
+    {
+        int id = (int)typesSelected[0] - 1;
+        keyTypeCombo->setValue(id, juce::NotificationType::dontSendNotification);
+    }
+    else
+        keyTypeCombo->clearValue(juce::NotificationType::dontSendNotification);
+
+    if (notesSelected.size() > 0)
+        noteInput->setValue(notesSelected[0], juce::NotificationType::dontSendNotification);
+    else
+        noteInput->clearValue(juce::NotificationType::dontSendNotification);
+
+    if (channelsSelected.size() > 0)
+    {
+        int id = channelsSelected[0] - 1;
+        channelInput->setValue(id, juce::NotificationType::dontSendNotification);
+    }
+    else
+        channelInput->clearValue(juce::NotificationType::dontSendNotification);
+}
+
+void MultiSelectControls::setSelection(juce::Colour colour, bool sendUpdate)
+{
+    MultiSelection selection;
+    selection.coloursSelected.add(colour);
+    setSelection(selection, sendUpdate);
+
+    if (sendUpdate)
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useColour = true;
+        properties.colour = colour;
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    }
+}
+
+void MultiSelectControls::setSelection(LumatoneKeyType type, bool sendUpdate)
+{
+    MultiSelection selection;
+
+    if (type > LumatoneKeyType::disabledDefault && type < LumatoneKeyType::disabled)
+        selection.typesSelected.add(type);
+
+    setSelection(selection, sendUpdate);
+
+    if (sendUpdate)
+    {
+        LumatoneKeyPropertyData properties;
+        properties.useType = true;
+        properties.type = type;
+        auto matchingKeyCoords = getMappingData()->getKeysWithProperties(properties);
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, matchingKeyCoords));
+    }
+}
+
+void MultiSelectControls::setSelection(int note, int channel, bool sendUpdate)
+{
+    MultiSelection selection;
+    bool skippedNote = false;
+    if (note >= 0 && note < 128)
+    {
+        selection.notesSelected.add(note);
+    }
+    else
+    {
+        skippedNote = true;
+    }
+
+    bool skippedChannel = false;
+    if (channel > 0 && channel <= 16)
+    {
+        selection.channelsSelected.add(channel);
+    }
+    else
+    {
+        skippedChannel = true;
+    }
+
+    setSelection(selection, sendUpdate);
+
+    if (sendUpdate)
+    {
+        juce::Array<LumatoneKeyCoord> newSelection;
+
+        if (!skippedNote || !skippedChannel)
+        {
+            LumatoneKeyPropertyData properties;
+            properties.useNote = !skippedNote;
+            properties.useChannel = !skippedChannel;
+            properties.note = note;
+            properties.channel = channel;
+
+            newSelection = getMappingData()->getKeysWithProperties(properties);
+        }
+
+        performAction(SetKeySelectionAction::NewSetKeySelectionActionByCoords(*this, newSelection));
+    }
+}
+
+void MultiSelectControls::addToSelection(juce::Colour colour, bool sendUpdate)
+{
+    coloursSelected.add(colour);
+
+    if (sendUpdate)
+    {
+
+    }
+}
+
+void MultiSelectControls::addToSelection(LumatoneKeyType colour, bool sendUpdate)
+{
+
+}
+
+void MultiSelectControls::addToSelection(int note, int channel, bool sendUpdate)
+{
+}
+
+void MultiSelectControls::removeFromSelection(juce::Colour colour, bool sendUpdate)
+{
+}
+
+void MultiSelectControls::removeFromSelection(LumatoneKeyType colour, bool sendUpdate)
+{
+}
+
+void MultiSelectControls::removeFromSelection(int note, int channel, bool sendUpdate)
+{
+}
+
+void MultiSelectControls::clearSelection(bool sendUpdate)
+{
+    MultiSelection empty;
+    setSelection(empty);
+
+    if (sendUpdate)
+    {
+        juce::Array<MappedLumatoneKey> noKeys;
+        performAction(new SetKeySelectionAction(*this, noKeys));
+    }
+}
+
+void MultiSelectControls::colourInputCallback(juce::Colour colour, UpdateType update)
+{
+    switch (update)
+    {
+    default:
+        setSelection(colour, true);
+        break;
+    }
+}
+
+void MultiSelectControls::typeInputCallback(int type, UpdateType update)
+{
+    switch (update)
+    {
+    default:
+        setSelection(LumatoneKeyType(type + 1), true);
+        break;
+    }
+}
+
+void MultiSelectControls::noteInputCallback(int note, UpdateType update)
+{
+    switch (update)
+    {
+    default:
+        setSelection(note, -1, true);
+        break;
+    }
+}
+
+void MultiSelectControls::channelInputCallback(int channel, UpdateType update)
+{
+    switch (update)
+    {
+    default:
+        setSelection(-1, channel, true);
+        break;
+    }
+}
+
 void MultiSelectControls::layoutChanged(const LumatoneLayout &mappingData)
 {
     auto layoutColours = mappingData.getLayoutColours();
-    updateColours(layoutColours, UpdateType::REPLACE);
+    updateColoursOptions(layoutColours);
 
     auto layoutTypes = mappingData.getLayoutKeyTypes();
-    updateKeyTypes(layoutTypes, UpdateType::REPLACE);
+    updateKeyTypesOptions(layoutTypes);
 
     auto layoutNotes = mappingData.getLayoutKeyNotes();
-    updateKeyNotes(layoutNotes, UpdateType::REPLACE);
+    updateKeyNotesOptions(layoutNotes);
 
     auto layoutChannels = mappingData.getLayoutKeyChannels();
-    updateKeyChannels(layoutChannels, UpdateType::REPLACE);
+    updateKeyChannelsOptions(layoutChannels);
+
+    clearSelection(false);
 }
 
 void MultiSelectControls::boardChanged(const LumatoneBoard &boardData)
@@ -236,24 +404,56 @@ void MultiSelectControls::keySetChanged(juce::Array<MappedLumatoneKey> selection
     layoutChanged(*getMappingData());
 }
 
-void MultiSelectControls::updateColours(const juce::Array<juce::Colour> &colours, UpdateType type)
+void MultiSelectControls::selectionChanged()
+{
+    // bool matchingColour     = true;
+    // bool matchingType       = true;
+    // bool matchingNote       = true;
+    // bool matchingChannel    = true;
+
+    // const juce::Array<MappedLumatoneKey>* selection = getSelectedKeys();
+    // for (const MappedLumatoneKey& key : *selection)
+    // {
+    //     if (matchingColour)
+    //     {
+    //         matchingColour = coloursSelected.contains(key.getColour());
+    //     }
+    //     if (matchingType)
+    //     {
+    //         matchingType = typesSelected.contains(key.getType());
+    //     }
+    //     if (matchingNote)
+    //     {
+    //         matchingNote = notesSelected.contains(key.getMidiNumber());
+    //     }
+    //     if (matchingChannel)
+    //     {
+    //         matchingChannel = channelsSelected.contains(key.getMidiChannel());
+    //     }
+    // }
+
+    // MultiSelection newSelection;
+    // if (matchingColour)
+    //     newSelection.coloursSelected.addArray(coloursSelected);
+    // if (matchingType)
+    //     newSelection.typesSelected.addArray(typesSelected);
+    // if (matchingNote)
+    //     newSelection.notesSelected.addArray(notesSelected);
+    // if (matchingChannel)
+    //     newSelection.channelsSelected.addArray(channelsSelected);
+
+    // setSelection(newSelection, false);
+}
+
+void MultiSelectControls::updateColoursOptions(const juce::Array<juce::Colour> &colours)
 {
     juce::Array<juce::Colour> newOptions = colours;
-    if (type == UpdateType::MERGE)
-    {
-
-    }
-
     colourDropdown->setColourOptions(newOptions);
 }
 
-void MultiSelectControls::updateKeyTypes(const juce::Array<LumatoneKeyType> &types, UpdateType type)
+void MultiSelectControls::updateKeyTypesOptions(const juce::Array<LumatoneKeyType> &types)
 {
     juce::Array<LumatoneKeyType> newOptions = types;
-    if (type == UpdateType::MERGE)
-    {
-
-    }
 
     keyTypeCombo->clearOptions();
     for (auto type : newOptions)
@@ -276,13 +476,9 @@ void MultiSelectControls::updateKeyTypes(const juce::Array<LumatoneKeyType> &typ
     }
 }
 
-void MultiSelectControls::updateKeyNotes(const juce::Array<int> &notes, UpdateType type)
+void MultiSelectControls::updateKeyNotesOptions(const juce::Array<int> &notes)
 {
     juce::Array<int> newOptions = notes;
-    if (type == UpdateType::MERGE)
-    {
-
-    }
 
     noteInput->clearOptions();
     for (int note : newOptions)
@@ -291,13 +487,9 @@ void MultiSelectControls::updateKeyNotes(const juce::Array<int> &notes, UpdateTy
     }
 }
 
-void MultiSelectControls::updateKeyChannels(const juce::Array<int> &channels, UpdateType type)
+void MultiSelectControls::updateKeyChannelsOptions(const juce::Array<int> &channels)
 {
     juce::Array<int> newOptions = channels;
-    if (type == UpdateType::MERGE)
-    {
-
-    }
 
     channelInput->clearOptions();
     for (int ch : newOptions)

@@ -30,6 +30,16 @@ class MultiSelectControls : public LumatoneEditorState
     } UpdateType;
 
 public:
+
+    struct MultiSelection
+    {
+        juce::Array<juce::Colour> coloursSelected;
+        juce::Array<LumatoneKeyType> typesSelected;
+        juce::Array<int> notesSelected;
+        juce::Array<int> channelsSelected;
+    };
+
+public:
     MultiSelectControls(const LumatoneEditorState& stateIn);
 
     virtual ~MultiSelectControls() override;
@@ -37,17 +47,42 @@ public:
     void paint(juce::Graphics&) override;
     void resized() override;
 
+    void setSelection(const MultiSelection& selectionIn, bool sendUpdate=true);
+    void setSelection(juce::Colour colour, bool sendUpdate=true);
+    void setSelection(LumatoneKeyType type, bool sendUpdate=true);
+    void setSelection(int note=-1, int channel=-1, bool sendUpdate=true);
+
+    void addToSelection(juce::Colour colour, bool sendUpdate=true);
+    void addToSelection(LumatoneKeyType colour, bool sendUpdate=true);
+    void addToSelection(int note=-1, int channel=-1, bool sendUpdate=true);
+
+    void removeFromSelection(juce::Colour colour, bool sendUpdate=true);
+    void removeFromSelection(LumatoneKeyType colour, bool sendUpdate=true);
+    void removeFromSelection(int note=-1, int channel=-1, bool sendUpdate=true);
+
+    void clearSelection(bool sendUpdate=true);
+
+private:
+
+    void colourInputCallback(juce::Colour colour, UpdateType update);
+    void typeInputCallback(int type, UpdateType update);
+    void noteInputCallback(int note, UpdateType update);
+    void channelInputCallback(int channel, UpdateType update);
+
+
 private:
     void layoutChanged(const LumatoneLayout& mappingData) override;
     void boardChanged(const LumatoneBoard& boardData) override;
     void keyChanged(int boardIndex, int keyIndex, const LumatoneKey& lumatoneKey) override;
     void keySetChanged(juce::Array<MappedLumatoneKey> selection) override;
 
+    void selectionChanged() override;
+
 private:
-    void updateColours(const juce::Array<juce::Colour>& colours, UpdateType type);
-    void updateKeyTypes(const juce::Array<LumatoneKeyType>& types, UpdateType type);
-    void updateKeyNotes(const juce::Array<int>& notes, UpdateType type);
-    void updateKeyChannels(const juce::Array<int>& channels, UpdateType type);
+    void updateColoursOptions(const juce::Array<juce::Colour>& colours);
+    void updateKeyTypesOptions(const juce::Array<LumatoneKeyType>& types);
+    void updateKeyNotesOptions(const juce::Array<int>& notes);
+    void updateKeyChannelsOptions(const juce::Array<int>& channels);
 
 private:
 
@@ -60,13 +95,10 @@ private:
 
     ColourDropdownSelector*                 colourDropdown;
 
-    // std::unique_ptr<juce::ComboBox>   notesDropDown;
-    // std::unique_ptr<juce::ComboBox>   channelsDropDown;
-
-    // std::unique_ptr<juce::Label>    lblColour;
-    // std::unique_ptr<juce::Label>    lblKeyType;
-    // std::unique_ptr<juce::Label>    lblNote;
-    // std::unique_ptr<juce::Label>    lblChannel;
+    juce::Array<juce::Colour> coloursSelected;
+    juce::Array<LumatoneKeyType> typesSelected;
+    juce::Array<int> notesSelected;
+    juce::Array<int> channelsSelected;
 
 
     const float headerH         = 0.19f;
@@ -99,7 +131,7 @@ private:
     // const float controlMarginH          = 0.08f;
 
     int colourTypeColumnWidth;
-    const float colourTypeColumnW       = 0.43f;
+    const float colourTypeColumnW       = 0.5f;
 
     int noteChannelColumnX;
     int noteChannelColumnWidth;
