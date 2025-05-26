@@ -60,6 +60,10 @@ private:
     // void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
 private:
+
+    void colorInputCallback();
+
+private:
     std::unique_ptr<juce::Label>            lblKeySettings;
 
     std::unique_ptr<LumatoneEditorControl>  colourInputBox;

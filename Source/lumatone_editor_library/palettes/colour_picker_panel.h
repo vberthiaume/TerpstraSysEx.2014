@@ -34,7 +34,7 @@ public:
 
         colourPicker->setName("ColourPicker");
         addAndMakeVisible(*colourPicker);
-        // colourPicker->addChangeListener(this);
+        colourPicker->addChangeListener(this);
     }
 
     ~CustomPickerPanel()

@@ -36,11 +36,8 @@ KeyEditorControls::KeyEditorControls(const LumatoneEditorState& stateIn)
     colourInputBox = std::make_unique<LumatoneEditorControl>(*this, "colourInputBox", LumatoneEditorControl::Style::ColourDropdownInput, true);
     colourInputBox->setLabelOptions(juce::translate("Colour") + juce::String(":"), LumatoneEditorControl::LabelLocation::Left);
     addAndMakeVisible(*colourInputBox);
+    colourInputBox->setValueChangedCallback([&](){ colorInputCallback(); });
     colourDropdown = colourInputBox->getColourSelector();
-    colourInputBox->setValueChangedCallback([&]()
-    {
-        performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, colourInputBox->getColourValue()));
-    });
 
     keyTypeCombo = std::make_unique<LumatoneEditorControl>(*this, "keyTypeCombo", LumatoneEditorControl::Style::DropdownBox, true);
     keyTypeCombo->setLabelOptions(juce::translate("Type"), LumatoneEditorControl::LabelLocation::Left);
@@ -382,6 +379,11 @@ juce::Colour KeyEditorControls::getSelectedColour()
 void KeyEditorControls::deselectColour()
 {
     return;
+}
+
+void KeyEditorControls::colorInputCallback()
+{
+    performAction(SetKeySettingsAction::NewSetAssignColourAction(*this, colourInputBox->getColourValue()));
 }
 
 // void KeyEditorControls::changeListenerCallback(juce::ChangeBroadcaster *source)
