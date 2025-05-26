@@ -107,6 +107,11 @@ void ColourDropdownSelector::clearColour(bool sendNotification)
 {
     colourEditorBox->setSelectedId(0, sendNotification ? juce::NotificationType::sendNotification : juce::NotificationType::dontSendNotification);
     colourEditorBox->getProperties().set(LumatoneEditorStyleIDs::comboBoxRenderColourPreview, juce::Colour().toString());
+
+    lastSetColour = juce::Colours::transparentBlack;
+
+    if (sendNotification)
+        callbackColourChanged();
 }
 
 void ColourDropdownSelector::setOnValueChangeCallback(std::function<void()> callbackIn)

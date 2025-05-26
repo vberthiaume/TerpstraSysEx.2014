@@ -69,8 +69,10 @@ public:
 
     // Sets control to explicit value, if in range
     void setValue(int newValue, juce::NotificationType notify=juce::NotificationType::sendNotification);
-
+    void setColourValue(juce::Colour newColour, juce::NotificationType notify=juce::NotificationType::sendNotification);
     void setValueChangedCallback(std::function<void()> callback);
+
+    void clearValue(juce::NotificationType notify = juce::NotificationType::sendNotification);
 
     void setTooltip(juce::String text);
 
@@ -86,6 +88,8 @@ public:
     juce::String getValueText() const;
     juce::String getOptionText(int index) const;
     juce::String getLabelText() const;
+
+    juce::Colour getColourValue() const;
 
     bool isValueNull() const;
 

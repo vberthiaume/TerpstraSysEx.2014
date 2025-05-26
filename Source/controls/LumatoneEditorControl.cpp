@@ -281,7 +281,6 @@ void LumatoneEditorControl::allowTextInput(bool allowInput)
 
 void LumatoneEditorControl::setValue(int newValue, juce::NotificationType notify)
 {
-    // Shouldn't be possible to get null from UI
     updateNull(newValue);
 
     if (slider)
@@ -311,7 +310,16 @@ void LumatoneEditorControl::setValue(int newValue, juce::NotificationType notify
     }
     else if (colourDropdownInput)
     {
-        colourDropdownInput->clearColour(true);
+        colourDropdownInput->clearColour(notify != juce::NotificationType::dontSendNotification);
+    }
+}
+
+void LumatoneEditorControl::setColourValue(juce::Colour newColour, juce::NotificationType notify)
+{
+    if (colourDropdownInput)
+    {
+        bool callbacks = notify != juce::NotificationType::dontSendNotification;
+        colourDropdownInput->setSelectedColour(newColour, callbacks, callbacks);
     }
 }
 
@@ -345,6 +353,11 @@ void LumatoneEditorControl::setValueChangedCallback(std::function<void()> callba
         });
     }
 
+}
+
+void LumatoneEditorControl::clearValue(juce::NotificationType notify)
+{
+    setValue(range.getStart() - 1, notify);
 }
 
 void LumatoneEditorControl::setTooltip(juce::String text)
@@ -434,6 +447,14 @@ juce::String LumatoneEditorControl::getLabelText() const
     return juce::String();
 }
 
+juce::Colour LumatoneEditorControl::getColourValue() const
+{
+    if (colourDropdownInput)
+    {
+        return colourDropdownInput->getSelectedColour();
+    }
+}
+
 bool LumatoneEditorControl::isValueNull() const
 {
     return isNull;
@@ -456,10 +477,7 @@ void LumatoneEditorControl::createClearButton()
     clearButton->setButtonText("x");
     addChildComponent(*clearButton);
 
-    clearButton->onClick = [&]()
-    {
-        setValue(range.getStart() - 1);
-    };
+    clearButton->onClick = [&]() { clearValue(); };
 }
 
 void LumatoneEditorControl::updateColourHistory(const juce::Colour &newColour)
