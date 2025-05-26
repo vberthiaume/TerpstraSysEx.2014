@@ -241,7 +241,7 @@ void AdjustLayoutColour::setGradient(SetGradientOptions options)
     juce::Array<Hex::Point> updateHexCoords;
     for (auto coord : options.selection)
     {
-        auto hex = hexMap.keyCoordsToHex(coord);
+        Hex::Point hex = hexMap.keyCoordsToHex(coord);
         updateHexCoords.add(hex);
 
         if (hex.q < originColumn)
@@ -254,8 +254,8 @@ void AdjustLayoutColour::setGradient(SetGradientOptions options)
         if (hex.r > furthestRow)
             furthestRow = hex.r;
 
-        presentColumns.addIfNotAlreadyThere(hex.q);
-        presentRows.addIfNotAlreadyThere(hex.r);
+        presentColumns.addIfNotAlreadyThere((int)hex.q);
+        presentRows.addIfNotAlreadyThere((int)hex.r);
     }
 
     presentColumns.sort();
@@ -274,13 +274,13 @@ void AdjustLayoutColour::setGradient(SetGradientOptions options)
     if (options.selectionOrigin)
     {
         if (options.fillRelative)
-            maxGradientDistance = presentColumns.size();
+            maxGradientDistance = (float)presentColumns.size();
         else
-            maxGradientDistance = selectionDistance;
+            maxGradientDistance = (float)selectionDistance;
     }
     else
     {
-        maxGradientDistance = maxBoardDistance;
+        maxGradientDistance = (float)maxBoardDistance;
     }
 
     float keyGradientDistance = 0.0f;
@@ -297,12 +297,12 @@ void AdjustLayoutColour::setGradient(SetGradientOptions options)
                 }
                 else
                 {
-                    keyGradientDistance = hex.distanceTo(selectionOrigin);
+                    keyGradientDistance = (float)hex.distanceTo(selectionOrigin);
                 }
             }
         else
         {
-            keyGradientDistance = hex.distanceTo(boardOrigin);
+            keyGradientDistance = (float)hex.distanceTo(boardOrigin);
         }
 
         float t = (maxGradientDistance == 0.0f) ? 0.0f : keyGradientDistance / maxGradientDistance;
@@ -397,14 +397,14 @@ void AdjustLayoutColour::resetChanges()
     whiteKelvinValue = 6500;
 }
 
-void AdjustLayoutColour::sendSelectionUpdate(const juce::Array<MappedLumatoneKey>& keyUpdates, bool bufferUpdates)
+void AdjustLayoutColour::sendSelectionUpdate(const juce::Array<MappedLumatoneKey>& keyUpdates, bool /*bufferUpdates*/)
 {
     //auto updateAction = new LumatoneEditAction::MultiKeyAssignAction(state, keyUpdates, false, true, bufferUpdates);
     //state->performAction(updateAction);
     state->sendSelectionParam(keyUpdates);
 }
 
-void AdjustLayoutColour::sendMappingUpdate(const LumatoneLayout& updatedLayout, bool bufferUpdates)
+void AdjustLayoutColour::sendMappingUpdate(const LumatoneLayout& updatedLayout, bool /*bufferUpdates*/)
 {
     //for (int i = 0; i < state->getNumBoards(); i++)
     //    state->performAction(new LumatoneEditAction::SectionEditAction(state, i, updatedLayout.getBoard(i), bufferUpdates), true, i == 0);
@@ -459,7 +459,7 @@ void AdjustLayoutColour::sendMappingUpdate(const LumatoneLayout& updatedLayout, 
 
 AdjustLayoutColour::LAB AdjustLayoutColour::rgbToLab(juce::Colour rgb)
 {
-    float lr, lg, lb;
+    float lr = 0.0f, lg = 0.0f, lb = 0.0f;
     for (int ch = 0; ch < 3; ch++)
     {
         float v = 0.0f;
@@ -513,11 +513,11 @@ AdjustLayoutColour::LAB AdjustLayoutColour::rgbToLab(juce::Colour rgb)
     const float epsilon = 0.008856f;
     const float kappa = 903.3f;
 
-    float fx, fy, fz;
+    float fx = 0.0f, fy = 0.0f, fz = 0.0f;
 
     for (int ch = 0; ch < 3; ch++)
     {
-        float v;
+        float v = 0.0f;
 
         switch (ch)
         {
@@ -642,7 +642,7 @@ juce::Colour AdjustLayoutColour::labToRgb(LAB lab)
 
     for (int ch = 0; ch < 3; ch++)
     {
-        float v;
+        float v = 0.0f;
         switch (ch)
         {
         case 0:

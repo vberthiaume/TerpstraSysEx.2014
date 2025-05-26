@@ -146,7 +146,7 @@ private:
     const float liveEditButtonWidth             = 0.0804f;
     const float offlineEditButtonWidth          = 0.0862f;
 
-    const float controlBoundsX                  = 0.56;
+    const float controlBoundsX                  = 0.56f;
     const float controlBoundsY                  = 0.2857f;
     const float controlBoundsWidth              = 0.3684f;
     const float controlBoundsHeight             = 0.4375f;

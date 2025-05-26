@@ -6,7 +6,7 @@
 
 class LumatoneState;
 
-class AdjustLayoutColour 
+class AdjustLayoutColour
 {
 public:
     enum class Type
@@ -67,7 +67,7 @@ private:
 
 public:
     void setGradient(SetGradientOptions options);
-    
+
     void commitChanges();
     void resetChanges();
 
@@ -79,7 +79,7 @@ private:
     juce::Array<MappedLumatoneKey> updateAdjustedColoursState(const juce::Array<LumatoneKeyCoord>& selection) const;
 
 public:
-    
+
     struct LAB
     {
         float L;
@@ -111,7 +111,7 @@ public:
         else if (temperature > 40000)
             temperature = 40000;
 
-        float tempFloat = temperature * 0.01;
+        float tempFloat = (float)temperature * 0.01f;
 
         // red
         juce::uint8 red = 0;
@@ -127,7 +127,7 @@ public:
             else if (tempRed > 255)
                 red = 255;
             else
-                red = tempRed;
+                red = (juce::uint8)(juce::roundToInt(tempRed));
         }
 
         //  green
@@ -136,23 +136,23 @@ public:
 
         if (tempFloat <= 66)
         {
-            tempGreen = 99.4708025861 * logf(tempFloat) - 161.1195681661f;
+            tempGreen = 99.4708025861f * logf(tempFloat) - 161.1195681661f;
             if (tempGreen < 0)
                 green = 0;
-            else if (tempGreen > 255)
+            else if (tempGreen > 255.0f)
                 green = 255;
             else
-                green = tempGreen;
+                green = (juce::uint8)juce::roundToInt(tempGreen);
         }
         else
         {
-            tempGreen = 288.1221695283 * powf(tempFloat - 60, -0.0755148492f);
-            if (tempGreen < 0)
+            tempGreen = 288.1221695283f * powf(tempFloat - 60.0f, -0.0755148492f);
+            if (tempGreen < 0.0f)
                 green = 0;
-            else if (tempGreen > 255)
+            else if (tempGreen > 255.0f)
                 green = 255;
             else
-                green = tempGreen;
+                green = (juce::uint8)juce::roundToInt(tempGreen);
         }
 
         //  blue
@@ -165,13 +165,13 @@ public:
             blue = 0;
         else
         {
-            tempBlue = 138.5177312231f * logf(tempFloat - 10) - 305.0447927307f;
+            tempBlue = 138.5177312231f * logf(tempFloat - 10.0f) - 305.0447927307f;
             if (tempBlue < 0)
                 blue = 0;
             else if (tempBlue > 255)
                 blue = 255;
             else
-                blue = tempBlue;
+                blue = (juce::uint8)juce::roundToInt(tempBlue);
         }
 
         return juce::Colour(red, green, blue);

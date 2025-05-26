@@ -54,7 +54,7 @@ public:
     LumatoneAction* createDeleteCurrentSectionAction(){return nullptr;};
     bool copyCurrentSubBoardData(){return false;};
     LumatoneAction* createPasteCurrentSectionAction(){return nullptr;};
-    LumatoneAction* createModifiedPasteCurrentSectionAction(CommandID commandID){return nullptr;};
+    LumatoneAction* createModifiedPasteCurrentSectionAction(CommandID){return nullptr;};
     bool canPasteCopiedSubBoard() const;
 
     // Implementation of ChangeListener

@@ -66,14 +66,29 @@ SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetBrightnessValu
     return new SetBatchColourSettingsAction(stateIn, true, false, false, value);
 }
 
+SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetBrightnessValue(const LumatoneEditorState &stateIn, double value)
+{
+    return new SetBatchColourSettingsAction(stateIn, true, false, false, (float)value);
+}
+
 SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetHueValue(const LumatoneEditorState &stateIn, float value)
 {
     return new SetBatchColourSettingsAction(stateIn, false, true, false, 0, value);
 }
 
+SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetHueValue(const LumatoneEditorState &stateIn, double value)
+{
+    return new SetBatchColourSettingsAction(stateIn, false, true, false, 0, (float)value);
+}
+
 SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetTemperatureValue(const LumatoneEditorState &stateIn, float value)
 {
     return new SetBatchColourSettingsAction(stateIn, false, false, true, 0, 0, value);
+}
+
+SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetTemperatureValue(const LumatoneEditorState &stateIn, double value)
+{
+    return new SetBatchColourSettingsAction(stateIn, false, false, true, 0, 0, (float)value);
 }
 
 ApplyBatchColourAdjustments::ApplyBatchColourAdjustments(const LumatoneEditorState &stateIn, std::shared_ptr<LumatoneLayout>& baseLayoutIn, LumatoneEditor::BatchColourEditData editData, const juce::Array<MappedLumatoneKey> &keySelectionIn)

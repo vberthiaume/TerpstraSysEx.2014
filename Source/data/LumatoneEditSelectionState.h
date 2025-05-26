@@ -43,7 +43,7 @@ protected:
     juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
     void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
-    void loadPropertiesFile(juce::PropertiesFile* properties) override { };
+    void loadPropertiesFile(juce::PropertiesFile*) override { };
 
 private:
 

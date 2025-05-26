@@ -166,7 +166,7 @@ void BatchToolsColourControls::resized()
 
     int sliderY = contentMarginH + controlHeight / 2;
     hue->setBounds(marginX, sliderY, sliderWidth, sliderHeight);
-    brightness->setBounds(marginX + sliderWidth + sliderMargin, sliderY + getHeight() * 0.25f, sliderWidth, sliderHeight);
+    brightness->setBounds(marginX + sliderWidth + sliderMargin, juce::roundToInt((float)sliderY + (float)getHeight() * 0.25f), sliderWidth, sliderHeight);
     temperature->setBounds(marginX + (sliderWidth + sliderMargin) * 2, sliderY, sliderWidth, sliderHeight);
 
     int buttonHeight = juce::roundToInt((float)controlHeight * 1.2f);

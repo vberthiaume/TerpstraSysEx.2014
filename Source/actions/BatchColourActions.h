@@ -38,8 +38,11 @@ public:
 public:
 
     static SetBatchColourSettingsAction* NewSetBrightnessValue(const LumatoneEditorState& stateIn, float value);
+    static SetBatchColourSettingsAction* NewSetBrightnessValue(const LumatoneEditorState& stateIn, double value);
     static SetBatchColourSettingsAction* NewSetHueValue(const LumatoneEditorState& stateIn, float value);
+    static SetBatchColourSettingsAction* NewSetHueValue(const LumatoneEditorState& stateIn, double value);
     static SetBatchColourSettingsAction* NewSetTemperatureValue(const LumatoneEditorState& stateIn, float value);
+    static SetBatchColourSettingsAction* NewSetTemperatureValue(const LumatoneEditorState& stateIn, double value);
 
 private:
 

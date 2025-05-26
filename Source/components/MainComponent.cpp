@@ -165,7 +165,7 @@ MainContentComponent::~MainContentComponent()
     midiEditArea = nullptr;
 }
 
-void MainContentComponent::saveStateToPropertiesFile(PropertiesFile* props)
+void MainContentComponent::saveStateToPropertiesFile(PropertiesFile*)
 {
     // noteEditArea->saveStateToPropertiesFile(propertiesFile);
     // globalSettingsArea->saveStateToPropertiesFile(propertiesFile);
@@ -278,7 +278,7 @@ void MainContentComponent::connectionStateChanged(ConnectionState stateIn)
     btnImportFile->setEnabled(stateIn == ConnectionState::ONLINE);
 }
 
-void MainContentComponent::layoutImported(const LumatoneLayout &data)
+void MainContentComponent::layoutImported(const LumatoneLayout &)
 {
     setCurrentFile(juce::File(), false);
     undoManager->clearUndoHistory();
@@ -415,7 +415,7 @@ void MainContentComponent::resized()
     lblAppVersion->setTopLeftPosition(lblAppName->getRight(), lblAppName->getBottom() - lblAppVersion->getHeight());
 
     juce::Rectangle<int> lumatoneBounds = allKeysOverview->getLocalGraphicBounds().translated(allKeysOverview->getX(), allKeysOverview->getY());
-    lblFirmwareVersion->setBounds(lumatoneBounds.getX(), lumatoneBounds.getBottom(), contentWidth, btnHeight * 0.7f);
+    lblFirmwareVersion->setBounds(lumatoneBounds.getX(), lumatoneBounds.getBottom(), contentWidth, juce::roundToInt((float)btnHeight * 0.7f));
 }
 
 void MainContentComponent::resizeEditSectionTabs()
