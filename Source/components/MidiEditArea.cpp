@@ -513,6 +513,15 @@ void MidiEditArea::onOpenConnectionToDevice(juce::String dialogTitle)
         return;
     }
 
+	// If nothing was loaded or edited, just import
+	if (getCurrentFile().getFileName().isEmpty() && !getHasChangesToSave())
+	{
+		setEditMode(EditorMode::ONLINE);
+		LumatoneEditorState::Controller::requestCompleteDeviceConfig();
+		editModeChangedCallback();
+		return;
+	}
+
     isWaitingForUserChoice = true;
 
 	auto alertOptions = juce::MessageBoxOptions().withTitle(dialogTitle)
@@ -529,7 +538,6 @@ void MidiEditArea::onOpenConnectionToDevice(juce::String dialogTitle)
 
 		if (retc == 0) // Import
 		{
-			// TODO non getLumatoneController call
 			setEditMode(EditorMode::ONLINE);
 			LumatoneEditorState::Controller::requestCompleteDeviceConfig();
 		}

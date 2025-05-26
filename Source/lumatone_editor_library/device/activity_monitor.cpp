@@ -535,6 +535,8 @@ void DeviceActivityMonitor::handleResponse(int inputDeviceIndex, const juce::Mid
             case GET_FIRMWARE_REVISION:
                 waitingForFirmwareVersion = false;
                 waitingForResponse = false;
+                if (getConnectionState() != ConnectionState::ONLINE)
+                    setConnectionState(ConnectionState::ONLINE);
                 break;
 
             case LUMA_PING:
@@ -705,9 +707,11 @@ void DeviceActivityMonitor::establishConnection(int inputIndex, int outputIndex)
     else
     {
         waitingForFirmwareVersion = false;
+        setConnectionState(ConnectionState::ONLINE);
     }
 
-    setConnectionState(ConnectionState::ONLINE);
+    // Don't send until we get the firmware version
+    // setConnectionState(ConnectionState::ONLINE);
 
     startTimer(threadDelayMs);
 }
