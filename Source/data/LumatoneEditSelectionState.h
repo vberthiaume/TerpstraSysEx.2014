@@ -17,6 +17,35 @@
 #include "../lumatone_editor_library/data/state_base.h"
 #include "../lumatone_editor_library/data/lumatone_key.h"
 
+struct LumatoneKeySelectionData
+{
+    juce::Array<juce::Colour> colours;
+    juce::Array<LumatoneKeyType> types;
+    juce::Array<int> notes;
+    juce::Array<int> channels;
+    juce::Array<bool> ccFlags;
+
+    bool hasColours() const { return colours.size() > 0; }
+    bool hasOneColour() const { return colours.size() == 1; }
+    bool hasMultipleColours() const { return colours.size()  > 1; }
+
+    bool hasTypes() const { return types.size() > 0; }
+    bool hasOneType() const { return types.size() == 1; }
+    bool hasMultipleTypes() const { return types.size()  > 1; }
+
+    bool hasNotes() const { return notes.size() > 0; }
+    bool hasOneNote() const { return notes.size() == 1; }
+    bool hasMultipleNotes() const { return notes.size()  > 1; }
+
+    bool hasChannels() const { return channels.size() > 0; }
+    bool hasOneChannel() const { return channels.size() == 1; }
+    bool hasMultipleChannels() const { return channels.size()  > 1; }
+
+    bool hasCcFlags() const { return ccFlags.size() > 0; }
+    bool hasOneCcFlag() const { return ccFlags.size() == 1; }
+    bool hasMultipleCcFlags() const { return ccFlags.size()  > 1; }
+};
+
 class LumatoneEditSelectionState : public LumatoneStateBase
 {
 public:
@@ -34,9 +63,16 @@ public:
     void setKeyChannel(bool set, int channelIn);
     void setCCFader(bool set, bool ccFaderDefaultIn);
 
+    void clear();
+
 public:
 
+    // Get lists of all selected properties
+    static LumatoneKeySelectionData findSelectionProperties(const juce::Array<MappedLumatoneKey>& selection);
+
+    // Get properties shared with all selected keys
     static LumatoneKeyPropertyData findSharedSelectionProperties(const juce::Array<MappedLumatoneKey>& selection);
+    static LumatoneKeyPropertyData findSharedSelectionProperties(const LumatoneKeySelectionData& properties);
 
 protected:
 

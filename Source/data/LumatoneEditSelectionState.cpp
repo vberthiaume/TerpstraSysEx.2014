@@ -56,7 +56,7 @@ void LumatoneEditSelectionState::handleStatePropertyChange(juce::ValueTree state
     // DBG(name + " edit selection state changed");
     // DBG(state.toXmlString());
 
-    if (stateIn != state)
+    if (state.isValid() && stateIn != state)
         return;
 
     bool setProperty = stateIn.hasProperty(property);
@@ -199,6 +199,33 @@ void LumatoneEditSelectionState::setCCFader(bool set, bool ccFaderDefaultIn)
     }
 }
 
+void LumatoneEditSelectionState::clear()
+{
+    data = LumatoneKeyPropertyData();
+
+    state.removeProperty(LumatoneEditSelectionProperty::AssignKeyColour, nullptr);
+    state.removeProperty(LumatoneEditSelectionProperty::AssignKeyType, nullptr);
+    state.removeProperty(LumatoneEditSelectionProperty::AssignKeyNote, nullptr);
+    state.removeProperty(LumatoneEditSelectionProperty::AssignKeyChannel, nullptr);
+    state.removeProperty(LumatoneEditSelectionProperty::AssignKeyCCFader, nullptr);
+}
+
+LumatoneKeySelectionData LumatoneEditSelectionState::findSelectionProperties(const juce::Array<MappedLumatoneKey> &selection)
+{
+    LumatoneKeySelectionData selectionProperties;
+
+    for (int i = 0; i < selection.size(); i++)
+    {
+        const MappedLumatoneKey& key = selection.getReference(i);
+        selectionProperties.colours.addIfNotAlreadyThere(key.getColour());
+        selectionProperties.types.addIfNotAlreadyThere(key.getType());
+        selectionProperties.notes.addIfNotAlreadyThere(key.getMidiNumber());
+        selectionProperties.channels.addIfNotAlreadyThere(key.getMidiChannel());
+    }
+
+    return selectionProperties;
+}
+
 LumatoneKeyPropertyData LumatoneEditSelectionState::findSharedSelectionProperties(const juce::Array<MappedLumatoneKey> &selection)
 {
     LumatoneKeyPropertyData data;
@@ -259,6 +286,34 @@ LumatoneKeyPropertyData LumatoneEditSelectionState::findSharedSelectionPropertie
             data.ccFaderDefault = false;
         }
 
+    }
+
+    return data;
+}
+
+LumatoneKeyPropertyData LumatoneEditSelectionState::findSharedSelectionProperties(const LumatoneKeySelectionData &properties)
+{
+    LumatoneKeyPropertyData data;
+
+    if (properties.colours.size() == 1)
+    {
+        data.useColour = true;
+        data.colour = properties.colours[0];
+    }
+    if (properties.types.size() == 1)
+    {
+        data.useType = true;
+        data.type = properties.types[0];
+    }
+    if (properties.notes.size() == 1)
+    {
+        data.useNote = true;
+        data.note = properties.notes[0];
+    }
+    if (properties.channels.size() == 1)
+    {
+        data.useChannel = true;
+        data.channel = properties.channels[0];
     }
 
     return data;
