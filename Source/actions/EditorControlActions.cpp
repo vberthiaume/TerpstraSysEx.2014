@@ -105,13 +105,55 @@ ApplyAssignmentsToSelectionAction::ApplyAssignmentsToSelectionAction(const Lumat
     , LumatoneEditorState::Controller(static_cast<LumatoneEditorState&>(*this))
     , LumatoneAction(this, "ApplyAssignmentsToSelectionAction")
 {
+
+    newData = assignData;
+
+
+    // should probably be added as an option
+    // clean, only assign different values
+    bool assignColour = false;
+    bool assignType = false;
+    bool assignNote = false;
+    bool assignChannel = false;
+
+    LumatoneKey sampleKey;
+    if (keySelectionIn.size() > 0)
+    {
+        sampleKey = keySelectionIn[0];
+    }
+    if (newData.useColour)
+        sampleKey.setColour(newData.colour);
+    if (newData.useType)
+        sampleKey.setKeyType(newData.type);
+    if (newData.useNote)
+        sampleKey.setNoteOrCC(newData.note);
+    if (newData.useChannel)
+        sampleKey.setChannelNumber(newData.channel);
+
     for (const MappedLumatoneKey& key : keySelectionIn)
     {
         keySelection.add(key);
         previousData.add(key);
+
+        //
+        if (newData.useColour && !assignColour && !key.colourIsEqual(sampleKey))
+            assignColour = true;
+        if (newData.useType && !assignType && key.getType() != sampleKey.getType())
+            assignType = true;
+        if (newData.useNote && !assignNote && key.getMidiNumber() != sampleKey.getMidiNumber())
+            assignNote = true;
+        if (newData.useChannel && !assignChannel && key.getMidiChannel() != sampleKey.getMidiChannel())
+            assignChannel = true;
     }
 
-    newData = assignData;
+    if (newData.useColour)
+        newData.useColour = assignColour;
+    if (newData.useType)
+        newData.useType = assignType;
+    if (newData.useNote)
+        newData.useNote = assignNote;
+    if (newData.useChannel)
+        newData.useChannel = assignChannel;
 }
 
 bool ApplyAssignmentsToSelectionAction::perform()
