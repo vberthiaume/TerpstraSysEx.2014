@@ -94,9 +94,8 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
     btnImportFile.reset(new juce::TextButton("buttonReceive"));
     addAndMakeVisible(btnImportFile.get());
     btnImportFile->setTooltip(juce::translate("ImportTooltip"));
-    btnImportFile->setButtonText(juce::translate("Import from Lumatone"));
+    btnImportFile->setButtonText(juce::translate("Import"));
     btnImportFile->setCommandToTrigger(commandManager, Lumatone::Menu::importSysExMapping, true);
-
 
     lblAppName.reset(new Label("lblAppName", getApplicationName()));
     lblAppName->setFont(getAppFonts().getFont(LumatoneEditorFont::FranklinGothic));
@@ -129,7 +128,7 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
     btnLoadFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::LoadIcon);
     btnSaveFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::SaveIcon);
     btnImportFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ArrowUp);
-    btnImportFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconPlacement, LumatoneEditorStyleIDs::TextButtonIconPlacement::RightOfText);
+    // btnImportFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconPlacement, LumatoneEditorStyleIDs::TextButtonIconPlacement::RightOfText);
 
     // Only enable when connected
     btnImportFile->setEnabled(false);
@@ -381,16 +380,17 @@ void MainContentComponent::resized()
     int btnHeight = juce::roundToInt(getHeight() * fileButtonH);
     int btnMargin = juce::roundToInt(contentWidth * saveLoadMarginW);
     int saveLoadWidth = juce::roundToInt(getWidth() * saveLoadW);
-    int btnY = juce::roundToInt(allKeysOverview->getY() - (allKeysOverview->getHeight() * btnYFromImageTop));
+    int btnY = juce::roundToInt(allKeysOverview->getY() + (allKeysOverview->getHeight() * btnYFromImageTop));
+
+    int importWidth = juce::roundToInt(getWidth() * importW);
+    int btnBarWidth = saveLoadWidth * 2 + importWidth + btnMargin * 2;
 
     int halfWidthX = roundToInt(getWidth() * 0.5f);
+    int btnBarX = juce::roundToInt(halfWidthX - btnBarWidth * 0.5);
 
-    btnLoadFile->setBounds(halfWidthX - btnMargin - saveLoadWidth, btnY, saveLoadWidth, btnHeight);
-    btnSaveFile->setBounds(halfWidthX + btnMargin, btnY, saveLoadWidth, btnHeight);
-
-    int importY = allKeysOverview->getY() - roundToInt(getHeight() * importYFromImageTop);
-    int importWidth = juce::roundToInt(getWidth() * importW);
-    btnImportFile->setBounds(allKeysOverview->getRight() - importWidth, importY, importWidth, btnHeight);
+    btnLoadFile->setBounds(btnBarX, btnY, saveLoadWidth, btnHeight);
+    btnSaveFile->setBounds(btnLoadFile->getRight() + btnMargin, btnY, saveLoadWidth, btnHeight);
+    btnImportFile->setBounds(btnSaveFile->getRight() + btnMargin, btnY, importWidth, btnHeight);;
 
     int controlHeaderHeight = juce::roundToInt((controlsArea.getY() - controlsLabelYPos) * 0.8f);
     lblEditTitle->setTopLeftPosition(contentMargin, controlsLabelYPos);

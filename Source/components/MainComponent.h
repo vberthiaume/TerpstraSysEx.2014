@@ -162,13 +162,11 @@ private:
     const float lumatoneGraphicH			= 0.8f;
 
     const float fileButtonH					= 0.025f;
-    const float importYFromImageTop			= 0.4f;
-    const float importW						= 0.1f;
+    const float importW						  = 0.06f;
 
-    const float btnYFromImageTop			= 0.02;
-    const float saveLoadW					= 0.08f;
+    const float btnYFromImageTop			= 0.055f;
+    const float saveLoadW					    = 0.055f;
     const float saveLoadMarginW				= 0.0034f;
-
 
     const float popupWidth                  = 0.4f;
     const float popupHeight                 = 0.333f;
