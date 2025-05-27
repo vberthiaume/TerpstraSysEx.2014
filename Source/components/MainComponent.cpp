@@ -281,6 +281,7 @@ void MainContentComponent::layoutImported(const LumatoneLayout &)
 {
     setCurrentFile(juce::File(), false);
     undoManager->clearUndoHistory();
+    clearSelectedKeys();
     setHasChangesToSave(false);
 }
 

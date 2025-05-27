@@ -66,8 +66,8 @@ LumatoneEditorState::LumatoneEditorState(juce::ValueTree stateIn, LumatoneFirmwa
 
 LumatoneEditorState::LumatoneEditorState(juce::String name, const LumatoneEditorState &stateIn)
     : LumatoneApplicationState(name, stateIn)
-    , editSelectionState(name, state, stateIn.editSelectionState)
-    , batchColourState(name, state, stateIn.batchColourState)
+    , editSelectionState(name, state)
+    , batchColourState(name, state)
     , appFonts(stateIn.appFonts)
     , lookAndFeel(stateIn.lookAndFeel)
     , recentFiles(stateIn.recentFiles)
