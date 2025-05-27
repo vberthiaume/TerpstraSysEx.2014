@@ -34,7 +34,7 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     };
     brightness->textFromValueFunction = [](double value)
     {
-        double percent = juce::roundToInt(value * 200 * 100) * 0.01;
+        double percent = juce::roundToInt(value * 200);
         return juce::String(percent) + "%";
     };
     brightness->setValue(0.5, juce::NotificationType::dontSendNotification);
@@ -47,7 +47,6 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     hue->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::HueSlider);
     hue->onValueChange = [&] ()
     {
-
         performAction(SetBatchColourSettingsAction::NewSetHueValue(*this, hue->getValue()));
         if (isSetToDefault())
             resetButtonCallback();
@@ -64,7 +63,7 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     };
     hue->textFromValueFunction = [](double value)
     {
-        double percent = juce::roundToInt(value * 200 * 100) * 0.01 - 100.0;
+        int percent = juce::roundToInt(value * 200) - 100;
         juce::String prefix = percent > 0 ? "+" : "";
         return prefix + juce::String(percent) + "%";
     };
@@ -94,7 +93,7 @@ BatchToolsColourControls::BatchToolsColourControls(const LumatoneEditorState & s
     };
     temperature->textFromValueFunction = [](double value)
     {
-        double display = (double)juce::roundToInt(value * 20.0 * 1000) * 0.001 - 10.0;
+        int display = juce::roundToInt(value * 20.0) - 10.0;
         juce::String prefix = display > 0 ? "+" : "";
         return juce::String(display);
     };
