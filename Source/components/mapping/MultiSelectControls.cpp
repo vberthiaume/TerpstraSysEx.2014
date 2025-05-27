@@ -453,7 +453,13 @@ void MultiSelectControls::updateColoursOptions(const juce::Array<juce::Colour> &
 
 void MultiSelectControls::updateKeyTypesOptions(const juce::Array<LumatoneKeyType> &types)
 {
-    juce::Array<LumatoneKeyType> newOptions = types;
+    juce::Array<LumatoneKeyType> newOptions;
+    for (LumatoneKeyType type : types)
+    {
+        if (type == LumatoneKeyType::disabledDefault)
+            type = LumatoneKeyType::disabled;
+        newOptions.addIfNotAlreadyThere(type);
+    }
 
     keyTypeCombo->clearOptions();
     for (auto type : newOptions)
