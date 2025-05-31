@@ -501,7 +501,7 @@ void MidiEditArea::editorModeChanged(EditorMode editModeIn)
 
 void MidiEditArea::onOpenConnectionToDevice(juce::String dialogTitle)
 {
-	jassert(cbMidiInput->getSelectedItemIndex() >= 0 && cbMidiOutput->getSelectedItemIndex() >= 0);
+	//jassert(cbMidiInput->getSelectedItemIndex() >= 0 && cbMidiOutput->getSelectedItemIndex() >= 0);
 
 	if (dialogTitle.length() == 0)
 		dialogTitle = translate("Connection Established!");
