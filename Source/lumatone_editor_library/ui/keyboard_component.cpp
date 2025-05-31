@@ -39,8 +39,6 @@ LumatoneKeyboardComponent::~LumatoneKeyboardComponent()
 
 void LumatoneKeyboardComponent::paint (juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::red);
-
     switch (renderMode)
     {
     case LumatoneComponentRenderMode::Graphic:

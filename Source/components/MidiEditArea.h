@@ -26,6 +26,7 @@
 
 #include "../lumatone_editor_library/listeners/status_listener.h"
 #include "../lumatone_editor_library/listeners/editor_listener.h"
+#include "../lumatone_editor_library/listeners/midi_listener.h"
 
 //[/Headers]
 
@@ -45,6 +46,7 @@ class MidiEditArea  : public juce::Component
                     , private LumatoneApplicationState::DeviceController
                     , public LumatoneEditor::StatusListener
                     , public LumatoneEditor::EditorListener
+                    , public LumatoneEditor::MidiListener
                     , public juce::Timer
 {
 public:
@@ -73,6 +75,8 @@ public:
     void editorModeChanged(EditorMode editModeIn);
 
     void timerCallback() override;
+
+    void handleNoteOn (int midiChannel, int midiNote, juce::uint8 velocity) override;
 
 private:
     void setConnectivity(bool isConnected, juce::String connectionStatus=String());

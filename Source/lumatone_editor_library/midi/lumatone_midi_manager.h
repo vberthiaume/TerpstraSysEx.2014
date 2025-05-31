@@ -56,7 +56,7 @@ private:
     juce::ListenerList<LumatoneEditor::MidiListener> listeners;
 
 public:
-    void addMidiListener(LumatoneEditor::MidiListener* listenerIn) { listeners.add(listenerIn); }
+    void addMidiListener(LumatoneEditor::MidiListener* listenerIn);
     void removeMidiListener(LumatoneEditor::MidiListener* listenerIn) { listeners.remove(listenerIn); }
 
 protected:

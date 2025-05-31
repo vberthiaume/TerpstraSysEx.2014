@@ -185,6 +185,8 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	bool enableAutoConnection = getBoolProperty(LumatoneEditorProperty::AutoConnectDevice, true);
     btnAutoConnect->setToggleState(enableAutoConnection, dontSendNotification);
 	onAutoConnectionChanged(false);
+
+    addMidiListener (this);
 }
 
 MidiEditArea::~MidiEditArea()
@@ -587,6 +589,10 @@ void MidiEditArea::timerCallback()
 			juce::NotificationType::dontSendNotification
 		);
 	}
+}
+void MidiEditArea::handleNoteOn (int midiChannel, int midiNote, juce::uint8 velocity)
+{
+    DBG ("Note On: Channel " << midiChannel << ", Note " << midiNote << ", Velocity " << (int) velocity);
 }
 //[/MiscUserCode]
 

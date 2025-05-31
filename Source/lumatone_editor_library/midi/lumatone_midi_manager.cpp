@@ -130,6 +130,11 @@ void LumatoneApplicationMidiController::allNotesOff()
         allNotesOff(ch);
 }
 
+void LumatoneApplicationMidiController::addMidiListener (LumatoneEditor::MidiListener* listenerIn)
+{
+    listeners.add (listenerIn);
+}
+
 void LumatoneApplicationMidiController::handleLumatoneMidi(LumatoneMidiState *midiState, const juce::MidiMessage &msg)
 {
     appMidiState.processNextMidiEvent(msg);

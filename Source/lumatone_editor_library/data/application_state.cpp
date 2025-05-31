@@ -624,6 +624,7 @@ void LumatoneApplicationState::removeFirmwareListener(LumatoneEditor::FirmwareLi
 void LumatoneApplicationState::addMidiListener(LumatoneEditor::MidiListener* listenerIn)
 {
     midiListeners->add(listenerIn);
+    controller->addMidiListener (listenerIn);
 }
 
 void LumatoneApplicationState::removeMidiListener(LumatoneEditor::MidiListener* listenerIn)
