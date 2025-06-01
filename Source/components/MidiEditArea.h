@@ -94,6 +94,7 @@ private:
 
     std::unique_ptr<juce::TextButton> liveEditorBtn;
     std::unique_ptr<juce::TextButton> offlineEditorBtn;
+    std::unique_ptr<juce::Label>      noteOnLabel;
 
     std::unique_ptr<juce::Label>      pleaseConnectLabel;
     std::unique_ptr<juce::Label>      offlineMsgLabel;

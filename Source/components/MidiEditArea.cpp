@@ -45,6 +45,12 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	lumatoneLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(lumatoneLabel.get());
 
+    noteOnLabel.reset (new juce::Label ("noteOnLabel", ""));
+    noteOnLabel->setFont (getAppFonts ().getFont (LumatoneEditorFont::UniviaProBold));
+    noteOnLabel->setColour (juce::Label::ColourIds::textColourId, getEditorLookAndFeel ().findColour (LumatoneEditorColourIDs::TitlePink));
+    noteOnLabel->setJustificationType (Justification::centred);
+    addAndMakeVisible (noteOnLabel.get ());
+
 	liveEditorBtn.reset(new juce::TextButton("LiveEditorButton"));
 	getEditorLookAndFeel().setupRadioTextButton(*liveEditorBtn, 10, false);
 	liveEditorBtn->setButtonText(translate("LiveEditor"));
@@ -269,6 +275,10 @@ void MidiEditArea::resized()
 		offlineEditorBtn->setBounds(
 			liveEditorBtn->getRight(), liveEditorBtn->getY(), roundToInt(w * offlineEditButtonWidth), liveEditorBtn->getHeight()
 		);
+
+        noteOnLabel->setBounds (
+            offlineEditorBtn->getRight () + 50, offlineEditorBtn->getY (), 200, liveEditorBtn->getHeight ()
+        );
 
 		connectivityArea = getBounds().toFloat().withLeft(roundToInt(w * connectedAreaX));
 
@@ -592,7 +602,8 @@ void MidiEditArea::timerCallback()
 }
 void MidiEditArea::handleNoteOn (int midiChannel, int midiNote, juce::uint8 velocity)
 {
-    DBG ("Note On: Channel " << midiChannel << ", Note " << midiNote << ", Velocity " << (int) velocity);
+    const auto text = juce::String("Note On: Channel " + juce::String(midiChannel) + ", Note " + juce::String (midiNote) << ", Velocity " << juce::String (velocity));
+    noteOnLabel->setText(text, juce::dontSendNotification);
 }
 //[/MiscUserCode]
 
