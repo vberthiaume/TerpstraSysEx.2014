@@ -176,6 +176,26 @@ private:
     std::unique_ptr<juce::Label> lblEditMode;
     std::unique_ptr<juce::TextButton> btnAutoConnect;
 
+    class OneShotTimer : public juce::Timer
+    {
+    public:
+        std::function<void ()> callback;
+
+        void start (int milliseconds)
+        {
+            stopTimer ();
+            startTimer (milliseconds);
+        }
+
+        void timerCallback () override
+        {
+            stopTimer ();
+            if (callback)
+                callback ();
+        }
+    };
+    std::unique_ptr<OneShotTimer> noteLabelClearTimer;
+
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEditArea)

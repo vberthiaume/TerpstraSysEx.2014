@@ -46,8 +46,9 @@ MidiEditArea::MidiEditArea (const LumatoneEditorState& stateIn)
 	addAndMakeVisible(lumatoneLabel.get());
 
     noteOnLabel.reset (new juce::Label ("noteOnLabel", ""));
-    noteOnLabel->setFont (getAppFonts ().getFont (LumatoneEditorFont::UniviaProBold));
-    noteOnLabel->setColour (juce::Label::ColourIds::textColourId, getEditorLookAndFeel ().findColour (LumatoneEditorColourIDs::TitlePink));
+    noteOnLabel->setFont (getAppFonts ().getFont (LumatoneEditorFont::CourierNew));
+    noteOnLabel->setColour (juce::Label::ColourIds::textColourId, getEditorLookAndFeel ().findColour (LumatoneEditorColourIDs::ActiveText));
+    noteOnLabel->setColour (juce::Label::ColourIds::backgroundColourId, getEditorLookAndFeel ().findColour (LumatoneEditorColourIDs::HeaderBackground));
     noteOnLabel->setJustificationType (Justification::centred);
     addAndMakeVisible (noteOnLabel.get ());
 
@@ -277,7 +278,7 @@ void MidiEditArea::resized()
 		);
 
         noteOnLabel->setBounds (
-            offlineEditorBtn->getRight () + 50, offlineEditorBtn->getY (), 200, liveEditorBtn->getHeight ()
+            offlineEditorBtn->getRight () + 50, offlineEditorBtn->getY (), 300, liveEditorBtn->getHeight ()
         );
 
 		connectivityArea = getBounds().toFloat().withLeft(roundToInt(w * connectedAreaX));
@@ -602,9 +603,22 @@ void MidiEditArea::timerCallback()
 }
 void MidiEditArea::handleNoteOn (int midiChannel, int midiNote, juce::uint8 velocity)
 {
-    const auto text = juce::String("Note On: Channel " + juce::String(midiChannel) + ", Note " + juce::String (midiNote) << ", Velocity " << juce::String (velocity));
-    noteOnLabel->setText(text, juce::dontSendNotification);
+    const auto text = juce::String ("NOTE ON: CHANNEL " + juce::String (midiChannel) + ", NOTE " + juce::String (midiNote) << ", VELOCITY " << juce::String (velocity));
+    noteOnLabel->setText (text, juce::dontSendNotification);
+
+    if (!noteLabelClearTimer)
+    {
+        noteLabelClearTimer = std::make_unique<OneShotTimer> ();
+        noteLabelClearTimer->callback = [label = juce::Component::SafePointer<juce::Label> (noteOnLabel.get())]()
+            {
+                if (label)
+                    label->setText ({}, juce::dontSendNotification);
+            };
+    }
+
+    noteLabelClearTimer->start (2000); // restart the 2-second countdown
 }
+
 //[/MiscUserCode]
 
 

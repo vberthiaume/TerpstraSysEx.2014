@@ -21,7 +21,8 @@ typedef enum
     GothamNarrowMedium,
     GothamNarrowBold,
     GothamNarrowItalic,
-    GothamNarrowLight
+    GothamNarrowLight,
+    CourierNew
 
 } LumatoneEditorFont;
 
@@ -53,6 +54,9 @@ struct LumatoneEditorFontLibrary
         // GothamNarrowMediumLight
         fonts.add(Font("Trebuchet MS", 12.0f, Font::plain));
 
+        // CourierNew
+        fonts.add (Font ("Courier New", 12.0f, Font::plain));
+
 #if USE_LICENSED_FONTS
 
         fonts.set(LumatoneEditorFont::UniviaPro,
@@ -83,6 +87,9 @@ struct LumatoneEditorFontLibrary
               Font(Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowLight_otf, BinaryData::GothamNarrowLight_otfSize))
         );
 
+        //TODO: this is untested
+        // CourierNew
+        fonts.add (Font ("Courier New", 12.0f, Font::plain));
 #endif
     }
 
