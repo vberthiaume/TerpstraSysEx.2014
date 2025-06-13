@@ -12,9 +12,12 @@
 
 #include "../data/LumatoneEditorState.h"
 
+#include "./VelocityMeter.h"
+
 #include "../lumatone_editor_library/data/lumatone_layout.h"
 #include "../lumatone_editor_library/listeners/status_listener.h"
 #include "../lumatone_editor_library/listeners/editor_listener.h"
+#include "../lumatone_editor_library/listeners/midi_listener.h"
 #include "../lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
 class LumatoneKeyboardComponent;
@@ -36,6 +39,7 @@ class MainContentComponent : public juce::Component
 						   , public LumatoneEditorState::Controller
 						   , public LumatoneEditor::StatusListener
 						   , public LumatoneEditor::EditorListener
+                           , public LumatoneEditor::MidiListener
 						   , public juce::ChangeListener
 						   , public juce::Button::Listener
 {
@@ -82,6 +86,8 @@ public:
 
 	void handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier& property) override;
 
+    void handleNoteOn (int midiChannel, int midiNote, juce::uint8 velocity) override;
+
 private:
 
 	void updateDeveloperMode();
@@ -95,6 +101,7 @@ private:
 
 	// Midi devices and connection state
 	std::unique_ptr<MidiEditArea>			midiEditArea;
+    std::unique_ptr<VelocityMeter>          velocityMeter;
 
 	// Sets of 55/56 keys
 	std::unique_ptr<LumatoneKeyboardComponent> 	allKeysOverview;

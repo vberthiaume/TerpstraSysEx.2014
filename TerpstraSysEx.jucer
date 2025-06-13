@@ -218,6 +218,7 @@
               file="Source/components/palette_edit_panel.h"/>
         <FILE id="vZJHy2" name="palette_selection_panel.h" compile="0" resource="0"
               file="Source/components/palette_selection_panel.h"/>
+        <FILE id="hwzfH0" name="VelocityMeter.h" compile="0" resource="0" file="Source/components/VelocityMeter.h"/>
       </GROUP>
       <GROUP id="{D62FB8DD-5A26-09B7-723B-0E8E52FF1875}" name="controls">
         <FILE id="A93q3J" name="colour_palette_component.cpp" compile="1" resource="0"

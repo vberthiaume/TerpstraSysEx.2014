@@ -40,6 +40,10 @@ MainContentComponent::MainContentComponent(const LumatoneEditorState& stateIn, j
 	midiEditArea.reset(new MidiEditArea(stateIn));
 	addAndMakeVisible(midiEditArea.get());
 
+    velocityMeter = std::make_unique<VelocityMeter> ();
+    addMidiListener (this);
+    addAndMakeVisible (velocityMeter.get ());
+
 	// All keys overview
 	allKeysOverview.reset(new LumatoneKeyboardComponent(*this));
 	allKeysOverview->setUiMode(LumatoneKeyboardComponent::UiMode::Controller);
@@ -385,6 +389,7 @@ void MainContentComponent::resized()
 
 	allKeysOverview->setBounds(contentMargin, midiAreaHeight, contentWidth, controlsLabelYPos - midiAreaHeight);
 
+
 	int btnHeight = roundToInt(getHeight() * fileButtonH);
 	int btnMargin = roundToInt(contentWidth * saveLoadMarginW);
 	int saveLoadWidth = roundToInt(getWidth() * saveLoadW);
@@ -420,6 +425,8 @@ void MainContentComponent::resized()
 
 	juce::Rectangle<int> lumatoneBounds = allKeysOverview->getLocalGraphicBounds().translated(allKeysOverview->getX(), allKeysOverview->getY());
     lblFirmwareVersion->setBounds(lumatoneBounds.getX(), lumatoneBounds.getBottom(), contentWidth, btnHeight * 0.7f);
+    const auto velocityMeterW = 25;
+    velocityMeter->setBounds ((contentMargin - velocityMeterW) / 2, lumatoneBounds.getY (), velocityMeterW, lumatoneBounds.getHeight ());
 }
 
 void MainContentComponent::resizeEditSectionTabs()
@@ -456,4 +463,10 @@ void MainContentComponent::handleStatePropertyChange(juce::ValueTree stateIn, co
 
 		requestDeviceGlobalSettings();
 	}
+}
+
+void MainContentComponent::handleNoteOn (int midiChannel, int midiNote, juce::uint8 velocity)
+{
+    velocityMeter->setVelocity (velocity);
+
 }
