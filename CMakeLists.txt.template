@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.27)
 project(LUMATONE_EDITOR VERSION 0.0.1)
 
 # find_package(juce)
+# set juce_DIR in your environment to a local JUCE directory
 add_subdirectory($ENV{juce_DIR} subprojects/juce)
 
 juce_add_gui_app(

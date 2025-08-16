@@ -3,7 +3,7 @@
 ## Getting started
 
 ### JUCE
-The Lumatone Editor primarily relies on the JUCE framework. Please visit the JUCE website if you need help setting that up. Version 1.0.X used JUCE 6, and 1.X in development is on JUCE 7, but we will need to move to 8 to get a license for the next release.
+The Lumatone Editor primarily relies on the JUCE framework. Please visit the JUCE website if you need help setting that up. Version 1.0.X used JUCE 6, and 1.X in development is on JUCE 8, but we will need to move to get a license for the next release.
 
 ### CMake
 This project initially used the Projucer for setup and some design. This was a bit limited to work with so JUCE's CMake integration was chosen as a replacement, which also has very nice support in some IDEs. Please visit the CMake website if you need help setting this up. For now, the .jucer project file is still updated if you prefer using that, however its build routines will not be updated as the CMake script is extended.
