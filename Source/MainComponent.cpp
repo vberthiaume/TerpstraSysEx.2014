@@ -51,6 +51,7 @@ MainContentComponent::MainContentComponent()
 	editAreaSizeButton->setClickingTogglesState(true);
 	addAndMakeVisible(editAreaSizeButton.get());
 	editAreaSizeButton->addListener(this);
+	editAreaSizeButton->setVisible(false); // TODO fix hexagon tile sizing
 
 	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
 
