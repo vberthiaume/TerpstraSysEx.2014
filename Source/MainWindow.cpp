@@ -47,11 +47,6 @@ void MainWindow::closeButtonPressed()
     JUCEApplication::getInstance()->systemRequestedQuit();
 }
 
-BorderSize<int> MainWindow::getBorderThickness()
-{
-    return BorderSize <int>(1);
-}
-
 bool MainWindow::isLargerThanCurrentScreen() const
 {
     if (maxWindowHeight > 0)
