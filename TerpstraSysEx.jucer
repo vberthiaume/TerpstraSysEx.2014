@@ -94,18 +94,6 @@
                 file="Source/assets/PNG/KeybedShadows.png"/>
           <FILE id="kyvd7P" name="KeybedShadows@2x.png" compile="0" resource="1"
                 file="Source/assets/PNG/KeybedShadows@2x.png"/>
-          <FILE id="xrZqd1" name="KeyboardBase.png" compile="0" resource="1"
-                file="Source/assets/PNG/KeyboardBase.png"/>
-          <FILE id="pXK8Wy" name="KeyboardBase@2x.png" compile="0" resource="1"
-                file="Source/assets/PNG/KeyboardBase@2x.png"/>
-          <FILE id="Z3ZWtz" name="KeyShadow.png" compile="0" resource="1" file="Source/assets/PNG/KeyShadow.png"/>
-          <FILE id="Zr26Id" name="KeyShadow@2x.png" compile="0" resource="1"
-                file="Source/assets/PNG/KeyShadow@2x.png"/>
-          <FILE id="qFnUJB" name="KeyShadow@4x.png" compile="0" resource="1"
-                file="Source/assets/PNG/KeyShadow@4x.png"/>
-          <FILE id="ukLFDT" name="KeyShape.png" compile="0" resource="1" file="Source/assets/PNG/KeyShape.png"/>
-          <FILE id="enXeez" name="KeyShape@2x.png" compile="0" resource="1" file="Source/assets/PNG/KeyShape@2x.png"/>
-          <FILE id="Bw2ZxH" name="KeyShape@4x.png" compile="0" resource="1" file="Source/assets/PNG/KeyShape@4x.png"/>
           <FILE id="vfi3bq" name="LoadIcon@4x.png" compile="0" resource="1" file="Source/assets/PNG/LoadIcon@4x.png"/>
           <FILE id="c02YFn" name="ltn.ico" compile="0" resource="1" file="Source/assets/PNG/ltn.ico"/>
           <FILE id="cf3FaF" name="LTN.png" compile="0" resource="1" file="Source/assets/PNG/LTN.png"/>
