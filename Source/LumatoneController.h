@@ -16,6 +16,8 @@
 #include "DeviceActivityMonitor.h"
 #include "FirmwareTransfer.h"
 
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_support.h"
+
 //==============================================================================
 // Helper class for parsing and comparing (todo) firmware versions
 
@@ -39,9 +41,9 @@ public:
     sysExSendingMode getEditorMode() const { return editingMode; }
     void setSysExSendingMode(sysExSendingMode newMode);
 
-    FirmwareVersion getFirmwareVersion() const { return firmwareVersion; }
+    LumatoneFirmware::Version getFirmwareVersion() const { return firmwareVersion; }
 
-    LumatoneFirmwareVersion getConfirmedVersion() const { return determinedVersion; }
+    LumatoneFirmware::ReleaseVersion  getConfirmedVersion() const { return determinedVersion; }
 
     const FirmwareSupport& getFirmwareSupport() const { return firmwareSupport; }
 
@@ -196,7 +198,7 @@ public:
 
     // Set MIDI Channels of peripheral controllers, pitch & mod wheels, expression & sustain pedals
     void setPeripheralChannels(int pitchWheelChannel, int modWheelChannel, int expressionChannel, int sustainChannel);
-    void setPeripheralChannels(PeripheralChannelSettings channelSettings);
+    void setPeripheralChannels(LumatoneFirmware::PeripheralChannelSettings channelSettings);
 
     // Get MIDI Channels of peripheral controllers, pitch & mod wheels, expression & sustain pedals
     void getPeripheralChannels();
@@ -244,10 +246,10 @@ public:
 private:
     
     // Takes a generic firmware version and parses it into a recognized firmware version
-    void setFirmwareVersion(FirmwareVersion firmwareVersionIn);
+    void setFirmwareVersion(LumatoneFirmware::Version firmwareVersionIn);
 
     // Takes a recognized firmware version
-    void setFirmwareVersion(LumatoneFirmwareVersion lumatoneVersion, bool parseVersion = true);
+    void setFirmwareVersion(LumatoneFirmware::ReleaseVersion  lumatoneVersion, bool parseVersion = true);
 
 protected:
     //============================================================================
@@ -352,12 +354,12 @@ private:
     FirmwareSupport             firmwareSupport;
 
     String                      connectedSerialNumber;
-    LumatoneFirmwareVersion     determinedVersion = LumatoneFirmwareVersion::NO_VERSION;
-    FirmwareVersion             firmwareVersion = { 0, 0, 0 };
-    FirmwareVersion             incomingVersion = { 0, 0, 0 };
+    LumatoneFirmware::ReleaseVersion      determinedVersion = LumatoneFirmware::ReleaseVersion ::NO_VERSION;
+    LumatoneFirmware::Version             firmwareVersion = { 0, 0, 0 };
+    LumatoneFirmware::Version             incomingVersion = { 0, 0, 0 };
     int                         octaveSize = 56;
 
-    HajuErrorVisualizer         errorVisualizer;
+    // HajuErrorVisualizer         errorVisualizer;
     TerpstraMidiDriver          midiDriver;
     
     std::unique_ptr<DeviceActivityMonitor>  deviceMonitor;

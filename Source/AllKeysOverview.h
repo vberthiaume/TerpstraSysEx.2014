@@ -25,10 +25,14 @@
 #include "LumatoneController.h"
 #include "HexagonTilingGeometry.h"
 
-#include "ImageResampling/ImageResampler.h"
 #include "BoardGeometry.h"
 #include "LumatoneController.h"
 
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
+
+class ImageProcessor;
+class LumatoneState;
+class LumatoneRender;
 
 // Representation of a key inside the overview
 class KeyMiniDisplayInsideAllKeysOverview : public Component, public LumatoneEditor::MidiListener
@@ -62,8 +66,8 @@ private:
 	int keyIndex = -1;
 	bool isHighlighted = false;
 
-	Image* colourGraphic = nullptr;
-	Image* shadowGraphic = nullptr;
+	Image colourGraphic;
+	Image shadowGraphic;
 
 	//DEBUG
 	Colour keyColour;
@@ -99,7 +103,7 @@ public:
 
     void showDeveloperMode(bool developerModeOn);
 
-    void setFirmwareVersion(FirmwareVersion versionIn);
+    void setFirmwareVersion(LumatoneFirmware::Version versionIn);
 
 	void resetOctaveSize();
 
@@ -108,7 +112,7 @@ public:
 	void connectionLost() override;
 
 	// LumatoneEditor::FirmwareListener implementation
-	void firmwareRevisionReceived(FirmwareVersion version) override;
+	void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -135,7 +139,10 @@ private:
 	int			currentOctaveSize = 0;
 	int			currentSetSelection;
 
-	HexagonTilingGeometry tilingGeometry;
+	// HexagonTilingGeometry tilingGeometry;
+
+	std::unique_ptr<LumatoneState> lumatoneRenderState;
+    std::unique_ptr<LumatoneRender> lumatoneRender;
 
 	Image keyColourLayer;
 	Image keyShadowLayer;
@@ -153,6 +160,8 @@ private:
 	Image lumatoneGraphic;
 	Image keyShapeGraphic;
 	Image keyShadowGraphic;
+
+    juce::Array<juce::Point<float>> keyCentres;
 
 	//==============================================================================
 	// Position and sizing constants in reference to parent bounds

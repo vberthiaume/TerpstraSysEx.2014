@@ -2,7 +2,7 @@
 #define LUMATONE_ADJUST_LAYOUT_COLOR_H
 
 #include "../actions/edit_actions.h"
-#include "../mapping/lumatone_hex_map.h"
+// #include "../mapping/lumatone_hex_map.h"
 
 class LumatoneState;
 
@@ -21,23 +21,23 @@ public:
         SETGRADIENT,
     };
 
-    struct SetGradientOptions
-    {
-        const juce::Array<LumatoneKeyCoord>& selection;
-        juce::ColourGradient gradient;
-        bool selectionOrigin = true;
-        bool fillRelative = true;
-        int numColumns = 1;
-        int numRows = 1;
+    // struct SetGradientOptions
+    // {
+    //     const juce::Array<LumatoneKeyCoord>& selection;
+    //     juce::ColourGradient gradient;
+    //     bool selectionOrigin = true;
+    //     bool fillRelative = true;
+    //     int numColumns = 1;
+    //     int numRows = 1;
 
-        SetGradientOptions(const juce::Array<LumatoneKeyCoord>& selectionIn, juce::ColourGradient gradientIn, bool selectionOriginIn = true, bool fillRelativeIn=true, int numColumnsIn = 1, int numRowsIn = 1)
-            : selection(selectionIn)
-            , gradient(gradientIn)
-            , selectionOrigin(selectionOriginIn)
-            , fillRelative(fillRelativeIn)
-            , numColumns(numColumnsIn)
-            , numRows(numRowsIn) {}
-    };
+    //     SetGradientOptions(const juce::Array<LumatoneKeyCoord>& selectionIn, juce::ColourGradient gradientIn, bool selectionOriginIn = true, bool fillRelativeIn=true, int numColumnsIn = 1, int numRowsIn = 1)
+    //         : selection(selectionIn)
+    //         , gradient(gradientIn)
+    //         , selectionOrigin(selectionOriginIn)
+    //         , fillRelative(fillRelativeIn)
+    //         , numColumns(numColumnsIn)
+    //         , numRows(numRowsIn) {}
+    // };
 
 public:
 
@@ -66,7 +66,7 @@ private:
     static void adjustWhiteBalanceLab(int newWhitePoint, LumatoneKey& key);
 
 public:
-    void setGradient(SetGradientOptions options);
+    // void setGradient(SetGradientOptions options);
 
     void commitChanges();
     void resetChanges();
@@ -182,7 +182,7 @@ private:
     LumatoneState* state;
     // LumatonePaletteLibrary* paletteLibrary;
 
-    LumatoneHexMap hexMap;
+    // LumatoneHexMap hexMap;
 
     LumatoneLayout originalLayout;
     LumatoneLayout layoutBeforeAdjust;

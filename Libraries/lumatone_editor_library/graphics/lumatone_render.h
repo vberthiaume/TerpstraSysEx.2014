@@ -3,15 +3,17 @@
 
 #include "./lumatone_assets.h"
 
-#include "../data/application_state.h"
+#include "../data/lumatone_state.h"
 #include "../mapping/lumatone_tiling.h"
 
-#include "../graphics/resampler/image_resampler.h"
+#include "./resampler/image_resampler.h"
 
-class LumatoneRender : private LumatoneApplicationState
+class LumatoneColourModel;
+
+class LumatoneRender : private LumatoneState
 {
 public:
-    LumatoneRender(const LumatoneApplicationState& stateIn);
+    LumatoneRender(const LumatoneState& stateIn);
     ~LumatoneRender();
 
     LumatoneGeometry& getLumatoneGeometry() { return lumatoneGeometry; }
@@ -21,7 +23,7 @@ public:
 
     juce::Array<juce::Point<float>> getKeyCentres();
 
-    void render(LumatoneAssets::LumatoneGraphicRenderSize maxRenderSize=LumatoneAssets::LumatoneGraphicRenderSize::_4x);
+    void render(LumatoneAssets::LumatoneGraphicRenderSize maxRenderSize=LumatoneAssets::LumatoneGraphicRenderSize::_4x, LumatoneColourModel* colourModel=nullptr);
     
     juce::Image getResizedRender(int targetWidth, int targetHeight);
     juce::Image getResizedAsset(LumatoneAssets::ID assetId, int targetWidth, int targetHeight, bool useJuceResize=false);

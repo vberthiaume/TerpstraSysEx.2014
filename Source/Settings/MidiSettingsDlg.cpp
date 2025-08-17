@@ -119,12 +119,12 @@ void MidiSettingsDlg::sliderValueChanged(Slider* sld)
 
     if (controlIndex >= 0 && controlIndex < ControlNames.size())
     {
-        channelSettings.setChannel((PeripheralChannel)controlIndex, sld->getValue());
+        channelSettings.setChannel((LumatoneFirmware::PeripheralChannel)controlIndex, sld->getValue());
         sendChannelSettings();
     }
 }
 
-void MidiSettingsDlg::setSupportedControls(FirmwareVersion version)
+void MidiSettingsDlg::setSupportedControls(LumatoneFirmware::Version version)
 {
     bool setChannelsEnabled = false;
 
@@ -146,13 +146,13 @@ void MidiSettingsDlg::setSupportedControls(FirmwareVersion version)
     }
 }
 
-void MidiSettingsDlg::updateChannelSettings(PeripheralChannelSettings channelSettingsIn)
+void MidiSettingsDlg::updateChannelSettings(LumatoneFirmware::PeripheralChannelSettings channelSettingsIn)
 {
     channelSettings = channelSettingsIn;
 
     for (int i = 0; i < ControlNames.size(); i++)
     {
-        auto channel = channelSettings.getChannel((PeripheralChannel)i);
+        auto channel = channelSettings.getChannel((LumatoneFirmware::PeripheralChannel)i);
         setMidiChannelSliders[i]->setValue(channel, dontSendNotification);
     }
 }
@@ -165,12 +165,12 @@ void MidiSettingsDlg::sendChannelSettings()
 //=========================================================================
 // LumatoneEditor::FirmwareListener implementation
 
-void MidiSettingsDlg::firmwareRevisionReceived(FirmwareVersion version)
+void MidiSettingsDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
     setSupportedControls(version);
 }
 
-void MidiSettingsDlg::peripheralMidiChannelsReceived(PeripheralChannelSettings channelSettings)
+void MidiSettingsDlg::peripheralMidiChannelsReceived(LumatoneFirmware::PeripheralChannelSettings channelSettings)
 {
     updateChannelSettings(channelSettings);
 }

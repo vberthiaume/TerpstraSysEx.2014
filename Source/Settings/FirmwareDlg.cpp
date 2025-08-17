@@ -118,7 +118,7 @@ void FirmwareDlg::buttonClicked(Button* btn)
     }
 }
 
-// TODO: use LumatoneFirmwareVersion
+// TODO: use LumatoneFirmware::ReleaseVersion 
 void FirmwareDlg::updateFirmwareVersionLabel()
 {
     String firmwareVersion = TerpstraSysExApplication::getApp().getFirmwareVersionStr();
@@ -159,7 +159,7 @@ void FirmwareDlg::timerCallback()
     }
 }
 
-void FirmwareDlg::firmwareRevisionReceived(FirmwareVersion version)
+void FirmwareDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
      updateFirmwareVersionLabel();
      postMessage("Firmware update complete! Lumatone is now running firmware version " + version.toDisplayString());

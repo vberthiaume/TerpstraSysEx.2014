@@ -12,7 +12,7 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include "ImageResampling/ImageResampler.h"
+// #include "ImageResampling/ImageResampler.h"
 
 //==================================================================
 //
@@ -583,15 +583,15 @@ enum LumatoneEditorAssets
     //LoadIcon            = 0x0002000,
     //SaveIcon            = 0x0002001,
     //ImportIcon          = 0x0002002,
-    LumatoneGraphic     = 0x0002100,
-    KeybedShadows       = 0x0002101,
-    KeyShape            = 0x0002200,
-    KeyShadow           = 0x0002201,
-    TickBox             = 0x0003100,
-    SavePalette         = 0x0005000,
-    CancelPalette       = 0x0005001,
-    TrashCanIcon        = 0x0005002,
-    CloneIcon           = 0x0005003
+    LumatoneGraphic     = 0x1002100,
+    KeybedShadows       = 0x1002101,
+    KeyShape            = 0x1002200,
+    KeyShadow           = 0x1002201,
+    TickBox             = 0x1003100,
+    SavePalette         = 0x1005000,
+    CancelPalette       = 0x1005001,
+    TrashCanIcon        = 0x1005002,
+    CloneIcon           = 0x1005003
 };
 
 // TODO: clean up / make a better routine with ImageCache usage

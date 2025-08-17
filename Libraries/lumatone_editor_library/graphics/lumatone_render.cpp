@@ -1,8 +1,8 @@
 #include "lumatone_render.h"
 #include "../color/colour_model.h"
 
-LumatoneRender::LumatoneRender(const LumatoneApplicationState& stateIn)
-    : LumatoneApplicationState("LumatoneRender", stateIn)
+LumatoneRender::LumatoneRender(const LumatoneState& stateIn)
+   : LumatoneState("LumatoneRender", stateIn)
 {
     imageProcessor.reset(new ImageProcessor());
 }
@@ -32,7 +32,7 @@ juce::Array<juce::Point<float>> LumatoneRender::getKeyCentres()
     return tilingGeometry.getHexagonCentresSkewed(lumatoneGeometry, 0, getNumBoards());
 }
 
-void LumatoneRender::render(LumatoneAssets::LumatoneGraphicRenderSize maxRenderSize)
+void LumatoneRender::render(LumatoneAssets::LumatoneGraphicRenderSize maxRenderSize, LumatoneColourModel* colourModel)
 {
     int width = LumatoneAssets::LumatoneKeyboardRenderWidth(maxRenderSize);
     int height = LumatoneAssets::LumatoneKeyboardRenderHeight(maxRenderSize);
@@ -48,15 +48,14 @@ void LumatoneRender::render(LumatoneAssets::LumatoneGraphicRenderSize maxRenderS
     auto shapeLayer = LumatoneAssets::getImage(LumatoneAssets::ID::KeyShape, keyHeight, keyWidth);
     auto shadowLayer = LumatoneAssets::getImage(LumatoneAssets::ID::KeyShadow, keyHeight, keyWidth);
 
-    LumatoneColourModel* colourModel = getColourModel();
-
     int keyNum = 0;
     for (int boardIndex = 0; boardIndex < getNumBoards(); boardIndex++)
     {
         for (int keyIndex = 0; keyIndex < getOctaveBoardSize(); keyIndex++)
         {
             juce::Colour keyColour = getKey(boardIndex, keyIndex).getColour();
-            keyColour = colourModel->getModelColour(keyColour);
+            if (colourModel)
+                keyColour = colourModel->getModelColour(keyColour);
 
             juce::Point<int> keyPos = juce::Point<int>(
                 juce::roundToInt(keyCentres[keyNum].x * width - keyWidth * 0.5f),
@@ -107,6 +106,9 @@ juce::Image LumatoneRender::getResizedAsset(LumatoneAssets::ID assetId, int targ
     if (cachedImage.isNull())
         return cachedImage;
 
+    if (targetWidth == cachedImage.getWidth() && targetHeight == cachedImage.getHeight())
+        return cachedImage;
+    
     if (useJuceResize)
         return cachedImage.rescaled(targetWidth, targetHeight, juce::Graphics::ResamplingQuality::highResamplingQuality);
 

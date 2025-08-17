@@ -302,9 +302,9 @@ void CalibrationDlg::updateWheelCalibrationStatus()
 	btnStop->setEnabled(inCalibration);
 }
 
-void CalibrationDlg::calibratePitchModWheelAnswer(TerpstraMIDIAnswerReturnCode code)
+void CalibrationDlg::calibratePitchModWheelAnswer(LumatoneFirmware::ReturnCode code)
 {
-    if (code == TerpstraMIDIAnswerReturnCode::ACK)
+    if (code == LumatoneFirmware::ReturnCode::ACK)
     {
         if (startCalibration)
             TerpstraSysExApplication::getApp().setCalibrationMode(true);
@@ -315,7 +315,7 @@ void CalibrationDlg::calibratePitchModWheelAnswer(TerpstraMIDIAnswerReturnCode c
     }
 }
 
-void CalibrationDlg::wheelsCalibrationDataReceived(WheelsCalibrationData calibrationData)
+void CalibrationDlg::wheelsCalibrationDataReceived(LumatoneFirmware::WheelsCalibrationData calibrationData)
 {
 	if (wheelsCalibrationComponent != nullptr)
 	{

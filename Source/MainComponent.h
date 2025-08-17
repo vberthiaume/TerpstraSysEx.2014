@@ -101,7 +101,7 @@ public:
 
 	void lumatouchConfigReceived(const int* lumatouchData) override;
 
-	void firmwareRevisionReceived(FirmwareVersion version) override;
+	void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
 
 private:
     //==============================================================================

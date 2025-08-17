@@ -173,7 +173,7 @@ void GeneralOptionsDlg::loadFromMapping()
 	buttonLightOnKeyStrokes->setToggleState(mappingInEdit.lightOnKeyStrokes, juce::NotificationType::dontSendNotification);
 }
 
-void GeneralOptionsDlg::presetFlagsReceived(PresetFlags presetFlags)
+void GeneralOptionsDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
 {
     buttonAfterTouchActive->setToggleState(presetFlags.polyphonicAftertouch, dontSendNotification);
     buttonLightOnKeyStrokes->setToggleState(presetFlags.lightsOnKeystroke, dontSendNotification);

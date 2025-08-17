@@ -23,6 +23,8 @@
 #include <JuceHeader.h>
 
 #include "LumatoneEditorStyleCommon.h"
+
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 //[/Headers]
 
 
@@ -53,8 +55,8 @@ public:
 	void lookAndFeelChanged() override;
 
     // LumatoneEditor::FirmwareListener implementation
-    void firmwareRevisionReceived(FirmwareVersion version) override;
-    void presetFlagsReceived(PresetFlags presetFlags) override;
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+    void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) override;
     void expressionPedalSensitivityReceived(int sensitivity) override;
 
     //[/UserMethods]

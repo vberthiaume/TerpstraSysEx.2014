@@ -27,18 +27,18 @@ public:
 
     void sliderValueChanged(Slider* sld) override;
 
-    void setSupportedControls(FirmwareVersion version);
+    void setSupportedControls(LumatoneFirmware::Version version);
 
-    void updateChannelSettings(PeripheralChannelSettings channelSettings);
+    void updateChannelSettings(LumatoneFirmware::PeripheralChannelSettings channelSettings);
 
     void sendChannelSettings();
 
     //=========================================================================
     // LumatoneEditor::FirmwareListener implementation
 
-    void firmwareRevisionReceived(FirmwareVersion version) override;
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
 
-    void peripheralMidiChannelsReceived(PeripheralChannelSettings channelSettings) override;
+    void peripheralMidiChannelsReceived(LumatoneFirmware::PeripheralChannelSettings channelSettings) override;
 
 
 
@@ -60,7 +60,7 @@ private:
     OwnedArray<Slider>          setMidiChannelSliders;
     OwnedArray<Label>           setMidiChannelLabels;
     
-    PeripheralChannelSettings   channelSettings;
+    LumatoneFirmware::PeripheralChannelSettings   channelSettings;
         
     FlexBox flexBox;
     Array<FlexBox> flexRows;

@@ -13,8 +13,8 @@
 
 
 LumatoneController::LumatoneController()
-    : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()),
-        readQueueSize(0)
+    // : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()),
+       : readQueueSize(0)
 {
     reset(bufferReadSize);
     midiDriver.addMessageCollector(this);
@@ -48,20 +48,20 @@ void LumatoneController::setSysExSendingMode(sysExSendingMode newMode)
 }
 
 // Takes a generic firmware version and parses it into a recognized firmware version
-void LumatoneController::setFirmwareVersion(FirmwareVersion firmwareVersionIn)
+void LumatoneController::setFirmwareVersion(LumatoneFirmware::Version firmwareVersionIn)
 {
     firmwareVersion = firmwareVersionIn;
-    setFirmwareVersion(firmwareSupport.getLumatoneFirmwareVersion(firmwareVersion), false);
+    setFirmwareVersion(firmwareSupport.getReleaseVersion(firmwareVersion), false);
 }
 
 // Takes a recognized firmware version
-void LumatoneController::setFirmwareVersion(LumatoneFirmwareVersion lumatoneVersion, bool parseVersion)
+void LumatoneController::setFirmwareVersion(LumatoneFirmware::ReleaseVersion  lumatoneVersion, bool parseVersion)
 {
     determinedVersion = lumatoneVersion;
     octaveSize = firmwareSupport.getOctaveSize(determinedVersion);
 
     if (parseVersion)
-        firmwareVersion = FirmwareVersion::fromDeterminedVersion(determinedVersion);
+        firmwareVersion = LumatoneFirmware::Version::fromReleaseVersion(determinedVersion);
     
     firmwareListeners.call(&LumatoneEditor::FirmwareListener::firmwareRevisionReceived, firmwareVersion);
     
@@ -106,7 +106,7 @@ bool LumatoneController::requestFirmwareUpdate(File firmwareFile, FirmwareTransf
 {
     if (firmwareTransfer == nullptr)
     {
-        incomingVersion = FirmwareVersion(0, 0, 0);
+        incomingVersion = LumatoneFirmware::Version(0, 0, 0);
         firmwareTransfer.reset(new FirmwareTransfer(midiDriver));
         firmwareTransfer->addTransferListener(this);
         firmwareTransfer->addListener(this);
@@ -132,7 +132,7 @@ Combined (hi-level) commands
 
 void LumatoneController::sendAllParamsOfBoard(int boardIndex, TerpstraKeys boardData)
 {
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
+    if (determinedVersion >= LumatoneFirmware::ReleaseVersion ::VERSION_1_0_11)
     {
         for (int keyIndex = 0; keyIndex < octaveSize; keyIndex++)
         {
@@ -208,7 +208,7 @@ unsigned int LumatoneController::sendTestMessageToDevice(int deviceIndex, unsign
         ? deviceIndex
         : pingId &= 0xFFFFFFF;
 
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_9)
+    if (determinedVersion >= LumatoneFirmware::ReleaseVersion ::VERSION_1_0_9)
     {
         midiDriver.ping(value, deviceIndex);
     }
@@ -230,7 +230,7 @@ void LumatoneController::testCurrentDeviceConnection()
     {
         waitingForTestResponse = true;
 
-        if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_9)
+        if (determinedVersion >= LumatoneFirmware::ReleaseVersion ::VERSION_1_0_9)
         {
             pingLumatone(0xf);
         }
@@ -287,7 +287,7 @@ void LumatoneController::sendKeyConfig(int boardIndex, int keyIndex, int noteOrC
 
 void LumatoneController::sendKeyColourConfig(int boardIndex, int keyIndex, Colour colour)
 {
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
+    if (determinedVersion >= LumatoneFirmware::ReleaseVersion ::VERSION_1_0_11)
         midiDriver.sendKeyLightParameters(boardIndex, keyIndex, colour.getRed(), colour.getGreen(), colour.getBlue());
     else
         midiDriver.sendKeyLightParameters_Version_1_0_0(boardIndex, keyIndex, colour.getRed() / 2, colour.getGreen() / 2, colour.getBlue() / 2);
@@ -310,7 +310,7 @@ void LumatoneController::sendInvertFootController(bool value)
 void LumatoneController::sendMacroButtonActiveColour(String colourAsString)
 {
     auto c = Colour::fromString(colourAsString);
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
+    if (determinedVersion >= LumatoneFirmware::ReleaseVersion ::VERSION_1_0_11)
         midiDriver.sendMacroButtonActiveColour(c.getRed(), c.getGreen(), c.getBlue());
     else
         midiDriver.sendMacroButtonActiveColour_Version_1_0_0(c.getRed(), c.getGreen(), c.getBlue());
@@ -320,7 +320,7 @@ void LumatoneController::sendMacroButtonActiveColour(String colourAsString)
 void LumatoneController::sendMacroButtonInactiveColour(String colourAsString)
 {
     auto c = Colour::fromString(colourAsString);
-    if (determinedVersion >= LumatoneFirmwareVersion::VERSION_1_0_11)
+    if (determinedVersion >= LumatoneFirmware::ReleaseVersion ::VERSION_1_0_11)
         midiDriver.sendMacroButtonInactiveColour(c.getRed(), c.getGreen(), c.getBlue());
     else
         midiDriver.sendMacroButtonInactiveColour_Version_1_0_0(c.getRed(), c.getGreen(), c.getBlue());
@@ -489,7 +489,7 @@ void LumatoneController::setPeripheralChannels(int pitchWheelChannel, int modWhe
         midiDriver.setPeripheralChannels(pitchWheelChannel, modWheelChannel, expressionChannel, sustainChannel);
 }
 
-void LumatoneController::setPeripheralChannels(PeripheralChannelSettings channelSettings)
+void LumatoneController::setPeripheralChannels(LumatoneFirmware::PeripheralChannelSettings channelSettings)
 {
     setPeripheralChannels(channelSettings.pitchWheel, channelSettings.modWheel, channelSettings.expressionPedal, channelSettings.sustainPedal);
 }
@@ -638,7 +638,7 @@ FirmwareSupport::Error LumatoneController::handleLEDConfigResponse(const MidiMes
     FirmwareSupport::Error errorCode;
 
     // Use correct unpacking function
-    if (determinedVersion < LumatoneFirmwareVersion::VERSION_1_0_11)
+    if (determinedVersion < LumatoneFirmware::ReleaseVersion ::VERSION_1_0_11)
     {
         errorCode = midiDriver.unpackGetLEDConfigResponse_Version_1_0_0(midiMessage, boardId, octaveSize, colourData);
     }
@@ -746,7 +746,7 @@ FirmwareSupport::Error LumatoneController::handleSerialIdentityResponse(const Mi
     
     // Get Firmware Version
     if (connectedSerialNumber == SERIAL_55_KEYS)
-        setFirmwareVersion(LumatoneFirmwareVersion::VERSION_55_KEYS);
+        setFirmwareVersion(LumatoneFirmware::ReleaseVersion ::VERSION_55_KEYS);
 
     if (midiDriver.hasDevicesDefined() && !currentDevicePairConfirmed)
         confirmAutoConnection();
@@ -760,7 +760,7 @@ FirmwareSupport::Error LumatoneController::handleFirmwareRevisionResponse(const 
     auto errorCode = midiDriver.unpackGetFirmwareRevisionResponse(midiMessage, major, minor, revision);
     if (errorCode == FirmwareSupport::Error::noError)
     {
-        auto version = FirmwareVersion(major, minor, revision);
+        auto version = LumatoneFirmware::Version(major, minor, revision);
         DBG("Firmware version is: " + version.toString());
         // Listener call handled here
         setFirmwareVersion(version);
@@ -793,7 +793,7 @@ FirmwareSupport::Error LumatoneController::handlePingResponse(const MidiMessage&
 
 FirmwareSupport::Error LumatoneController::handleGetPeripheralChannelResponse(const MidiMessage& midiMessage)
 {
-    auto channelSettings = PeripheralChannelSettings();
+    auto channelSettings = LumatoneFirmware::PeripheralChannelSettings();
     auto errorCode = midiDriver.unpackGetPeripheralChannelsResponse(midiMessage,
         channelSettings.pitchWheel,
         channelSettings.modWheel,
@@ -808,7 +808,7 @@ FirmwareSupport::Error LumatoneController::handleGetPeripheralChannelResponse(co
 
 FirmwareSupport::Error LumatoneController::handleGetPresetFlagsResponse(const MidiMessage& midiMessage)
 {
-    auto presetFlags = PresetFlags();
+    auto presetFlags = LumatoneFirmware::PresetFlags();
     auto errorCode = midiDriver.unpackGetPresetFlagsResponse(midiMessage,
         presetFlags.expressionPedalInverted,
         presetFlags.lightsOnKeystroke,
@@ -841,10 +841,10 @@ FirmwareSupport::Error LumatoneController::handlePeripheralCalibrationData(const
 
     switch (mode)
     {
-    case PeripheralCalibrationDataMode::ExpressionPedal:
+    case LumatoneFirmware::PeripheralCalibrationDataMode::ExpressionPedal:
         errorCode = handleExpressionPedalCalibrationData(midiMessage);
         break;
-    case PeripheralCalibrationDataMode::PitchAndModWheels:
+    case LumatoneFirmware::PeripheralCalibrationDataMode::PitchAndModWheels:
         errorCode = handleWheelsCalibrationData(midiMessage);
         break;
     default:
@@ -872,7 +872,7 @@ FirmwareSupport::Error LumatoneController::handleExpressionPedalCalibrationData(
 
 FirmwareSupport::Error LumatoneController::handleWheelsCalibrationData(const MidiMessage& midiMessage)
 {
-    WheelsCalibrationData calibrationData;
+    LumatoneFirmware::WheelsCalibrationData calibrationData;
     auto errorCode = midiDriver.unpackWheelsCalibrationPayload(midiMessage,
         calibrationData.centerPitch,
         calibrationData.minPitch,
@@ -936,30 +936,30 @@ FirmwareSupport::Error LumatoneController::getBufferErrorCode(const uint8* sysEx
 {
     switch (sysExData[MSG_STATUS])
     {
-    case TerpstraMIDIAnswerReturnCode::NACK:  // Not recognized
-        errorVisualizer.setErrorLevel(
-            HajuErrorVisualizer::ErrorLevel::error,
-            "Not Recognized");
+    case LumatoneFirmware::ReturnCode::NACK:  // Not recognized
+        // errorVisualizer.setErrorLevel(
+        //     HajuErrorVisualizer::ErrorLevel::error,
+        //     "Not Recognized");
         return FirmwareSupport::Error::unknownCommand;
         break;
 
-    case TerpstraMIDIAnswerReturnCode::ACK:  // Acknowledged, OK
-        errorVisualizer.setErrorLevel(
-            HajuErrorVisualizer::ErrorLevel::noError,
-            "Ack");
+    case LumatoneFirmware::ReturnCode::ACK:  // Acknowledged, OK
+        // errorVisualizer.setErrorLevel(
+        //     HajuErrorVisualizer::ErrorLevel::noError,
+        //     "Ack");
         break;
 
-    case TerpstraMIDIAnswerReturnCode::BUSY: // Controller busy
-        errorVisualizer.setErrorLevel(
-            HajuErrorVisualizer::ErrorLevel::warning,
-            "Busy");
+    case LumatoneFirmware::ReturnCode::BUSY: // Controller busy
+        // errorVisualizer.setErrorLevel(
+        //     HajuErrorVisualizer::ErrorLevel::warning,
+        //     "Busy");
         return FirmwareSupport::Error::deviceIsBusy;
         break;
 
-    case TerpstraMIDIAnswerReturnCode::ERROR:    // Error
-        errorVisualizer.setErrorLevel(
-            HajuErrorVisualizer::ErrorLevel::error,
-            "Error from device");
+    case LumatoneFirmware::ReturnCode::ERROR:    // Error
+        // errorVisualizer.setErrorLevel(
+        //     HajuErrorVisualizer::ErrorLevel::error,
+        //     "Error from device");
         return FirmwareSupport::Error::externalError;
         break;
 
@@ -968,9 +968,9 @@ FirmwareSupport::Error LumatoneController::getBufferErrorCode(const uint8* sysEx
         break;
 
     default:
-        errorVisualizer.setErrorLevel(
-            HajuErrorVisualizer::ErrorLevel::noError,
-            "");
+        // errorVisualizer.setErrorLevel(
+        //     HajuErrorVisualizer::ErrorLevel::noError,
+        //     "");
         break;
     }
     
@@ -1014,7 +1014,7 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
         return handleSerialIdentityResponse(midiMessage);
             
     case CALIBRATE_PITCH_MOD_WHEEL:
-        firmwareListeners.call(&LumatoneEditor::FirmwareListener::calibratePitchModWheelAnswer, (TerpstraMIDIAnswerReturnCode)sysExData[MSG_STATUS]);
+        firmwareListeners.call(&LumatoneEditor::FirmwareListener::calibratePitchModWheelAnswer, (LumatoneFirmware::ReturnCode)sysExData[MSG_STATUS]);
         return FirmwareSupport::Error::noError;
 
     case GET_LUMATOUCH_CONFIG:
@@ -1044,7 +1044,7 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
         return FirmwareSupport::Error::noError;
 
     default:
-        jassert(sysExData[MSG_STATUS] == TerpstraMIDIAnswerReturnCode::ACK);
+        jassert(sysExData[MSG_STATUS] == LumatoneFirmware::ReturnCode::ACK);
         if (midiMessage.getRawDataSize() <= 8)
         {
             // Simple confirmation
@@ -1224,8 +1224,8 @@ void LumatoneController::confirmAutoConnection()
 void LumatoneController::onConnectionConfirm(bool sendChangeSignal)
 {
     currentDevicePairConfirmed = true;
-    TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastInputDeviceId", midiDriver.getLastMidiInputInfo().identifier);
-    TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastOutputDeviceId", midiDriver.getLastMidiOutputInfo().identifier);
+    TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastInputDeviceId",  midiDriver.getMidiInputInfo().identifier);
+    TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("LastOutputDeviceId", midiDriver.getMidiOutputInfo().identifier);
     
     deviceMonitor->intializeConnectionLossDetection();
 
@@ -1259,7 +1259,7 @@ void LumatoneController::onFirmwareUpdateReceived()
     if (firmwareTransfer != nullptr)
     {
         firmwareTransfer->setProgress(1.0);
-        auto possibleUpdate = firmwareSupport.getLumatoneFirmwareVersion(incomingVersion);
+        auto possibleUpdate = firmwareSupport.getReleaseVersion(incomingVersion);
         DBG("Waiting for update, received: " + incomingVersion.toString());
         if (possibleUpdate <= determinedVersion)
         {

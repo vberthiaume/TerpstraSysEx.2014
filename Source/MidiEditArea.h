@@ -21,7 +21,6 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include "JuceHeader.h"
-#include "HajuLib/HajuErrorVisualizer.h"
 #include "ApplicationListeners.h"
 #include "LumatoneEditorLookAndFeel.h"
 //[/Headers]

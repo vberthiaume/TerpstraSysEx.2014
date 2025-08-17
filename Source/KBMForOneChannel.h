@@ -22,7 +22,7 @@
 //[Headers]     -- You can add your own extra header files here --
 #include <JuceHeader.h>
 
-#include "HajuLib/HajuErrorVisualizer.h"
+// #include "HajuLib/HajuErrorVisualizer.h"
 #include "MappingLogic.h"
 //[/Headers]
 
@@ -70,7 +70,7 @@ private:
 	File	currentFile;
 	KBMMappingDataStructure kbmMappingStructure;
     KBMFilesMappingLogic*	pMappingLogic;
-    HajuErrorVisualizer     errorVisualizer;
+    // HajuErrorVisualizer     errorVisualizer;
    	int&    periodSize;
 
     FlexBox flexBox;

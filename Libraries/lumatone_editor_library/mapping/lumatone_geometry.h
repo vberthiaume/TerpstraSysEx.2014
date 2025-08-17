@@ -8,8 +8,8 @@
   ==============================================================================
 */
 
-#ifndef BOARDGEOMETRY_H_INCLUDED
-#define BOARDGEOMETRY_H_INCLUDED
+#ifndef LUMATONE_GEOMETRY_H
+#define LUMATONE_GEOMETRY_H
 
 #include <JuceHeader.h>
 
@@ -111,4 +111,4 @@ private:
     int maxHorizontalLineSize;
 };
 
-#endif  // BOARDGEOMETRY_H_INCLUDED
+#endif  // LUMATONE_GEOMETRY_H

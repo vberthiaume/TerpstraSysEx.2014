@@ -88,14 +88,14 @@ bool DeviceActivityMonitor::testLastConnectedDevice()
     if (inputId.length() <= 0)
         return false;
 
-    int inputIndex = midiDriver.getIndexOfInputDevice(inputId);
+    int inputIndex = midiDriver.findIndexOfInputDevice(inputId);
     if (inputIndex >= 0)
     {
         String outputId = TerpstraSysExApplication::getApp().getPropertiesFile()->getValue("LastOutputDeviceId");
         if (outputId.length() <= 0)
             return false;
         
-        int outputIndex = midiDriver.getIndexOfOutputDevice(outputId);
+        int outputIndex = midiDriver.findIndexOfOutputDevice(outputId);
         if (outputIndex >= 0)
         {
             deviceDetectInProgress = true;
@@ -457,7 +457,7 @@ void DeviceActivityMonitor::handleResponse(int inputDeviceIndex, const MidiMessa
                 break;
             }
 
-            case TerpstraMIDIAnswerReturnCode::ACK:
+            case LumatoneFirmware::ReturnCode::ACK:
             {
                 switch (cmd)
                 {
@@ -491,7 +491,7 @@ void DeviceActivityMonitor::handleResponse(int inputDeviceIndex, const MidiMessa
             }
 
             // Consider a response from a different firmware state as successful
-            case TerpstraMIDIAnswerReturnCode::STATE:
+            case LumatoneFirmware::ReturnCode::STATE:
             {
                 // Find 'off' message if possible
                 //onTestResponseReceived();

@@ -56,9 +56,9 @@ public:
     //==============================================================================
     // LumatoneEditor::FirmwareListener Implementation
 
-    void calibratePitchModWheelAnswer(TerpstraMIDIAnswerReturnCode code) override;
+    void calibratePitchModWheelAnswer(LumatoneFirmware::ReturnCode code) override;
     
-    void wheelsCalibrationDataReceived(WheelsCalibrationData calibrationData) override;
+    void wheelsCalibrationDataReceived(LumatoneFirmware::WheelsCalibrationData calibrationData) override;
 
 
     //[/UserMethods]

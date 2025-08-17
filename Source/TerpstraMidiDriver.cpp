@@ -965,7 +965,7 @@ FirmwareSupport::Error TerpstraMidiDriver::messageIsValidLumatoneResponse(const 
     if (sysExData[BOARD_IND] > BOARD_OCT_5)
         return FirmwareSupport::Error::messageHasInvalidBoardIndex;
 
-    if (sysExData[MSG_STATUS] > TerpstraMIDIAnswerReturnCode::ERROR)
+    if (sysExData[MSG_STATUS] > LumatoneFirmware::ReturnCode::ERROR)
         return FirmwareSupport::Error::messageHasInvalidStatusByte;
 
     return FirmwareSupport::Error::noError;
@@ -1498,7 +1498,7 @@ void TerpstraMidiDriver::handleIncomingMidiMessage(MidiInput* source, const Midi
 //        }
 
         // if answer state is "busy": resend message after a little delay
-        if (answerState == TerpstraMIDIAnswerReturnCode::BUSY)
+        if (answerState == LumatoneFirmware::ReturnCode::BUSY)
         {
             // Start delay timer, after which message will be sent again
             timerType = delayWhileDeviceBusy;
@@ -1533,7 +1533,7 @@ void TerpstraMidiDriver::timerCallback()
         //const MessageManagerLock mmLock;
         // listeners.call(&Listener::generalLogMessage, "No answer from device", HajuErrorVisualizer::ErrorLevel::error);
         // listeners.call(&Listener::noAnswerToMessage, currentMsgWaitingForAck);
-        notifyLogMessage("No answer from device", HajuErrorVisualizer::ErrorLevel::error);
+        // notifyLogMessage("No answer from device", HajuErrorVisualizer::ErrorLevel::error);
         notifyNoAnswerToMessage(midiInput, currentMsgWaitingForAck);
     
 

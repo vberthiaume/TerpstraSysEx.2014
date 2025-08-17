@@ -62,12 +62,12 @@ void PresetSettingsDlg::buttonClicked(Button* btn)
     }
 }
 
-void PresetSettingsDlg::firmwareRevisionReceived(FirmwareVersion version)
+void PresetSettingsDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
     setSupportedControls(version);
 }
 
-void PresetSettingsDlg::setSupportedControls(FirmwareVersion version)
+void PresetSettingsDlg::setSupportedControls(LumatoneFirmware::Version version)
 {
     FirmwareSupport support;
     if (support.versionAcknowledgesCommand(version, RESET_DEFAULT_PRESETS))

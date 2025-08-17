@@ -27,12 +27,12 @@ public:
 
     void buttonClicked(Button* btn) override;
 
-    void setSupportedControls(FirmwareVersion version);
+    void setSupportedControls(LumatoneFirmware::Version version);
 
     //=========================================================================
     // LumatoneEditor::FirmwareListener implementation
 
-    void firmwareRevisionReceived(FirmwareVersion version) override;
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
 
 
 private:

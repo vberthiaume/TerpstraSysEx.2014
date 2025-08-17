@@ -12,7 +12,7 @@
 
 #pragma once
 #include  <JuceHeader.h>
-#include "LumatoneFirmwareDefinitions.h"
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
 
 enum sysExSendingMode
 {
@@ -66,21 +66,21 @@ namespace LumatoneEditor
 
         virtual void serialIdentityReceived(int inputDeviceIndex, const int* serialBytes) {};
         
-        virtual void calibratePitchModWheelAnswer(TerpstraMIDIAnswerReturnCode code) {};
+        virtual void calibratePitchModWheelAnswer(LumatoneFirmware::ReturnCode code) {};
 
         virtual void lumatouchConfigReceived(const int* lumatouchData) {};
 
-        virtual void firmwareRevisionReceived(FirmwareVersion version) {};
+        virtual void firmwareRevisionReceived(LumatoneFirmware::Version version) {};
 
         virtual void pingResponseReceived(int inputDeviceIndex, unsigned int pingValue) {};
 
-        virtual void peripheralMidiChannelsReceived(PeripheralChannelSettings channelSettings) {};
+        virtual void peripheralMidiChannelsReceived(LumatoneFirmware::PeripheralChannelSettings channelSettings) {};
 
         virtual void pedalCalibrationDataReceived(int minBound, int maxBound, bool pedalIsActive) {};
 
-        virtual void wheelsCalibrationDataReceived(WheelsCalibrationData calibrationData) {};
+        virtual void wheelsCalibrationDataReceived(LumatoneFirmware::WheelsCalibrationData calibrationData) {};
 
-        virtual void presetFlagsReceived(PresetFlags presetFlags) {};
+        virtual void presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags) {};
 
         virtual void expressionPedalSensitivityReceived(int sensitivity) {};
 

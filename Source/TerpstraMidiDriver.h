@@ -12,9 +12,20 @@
 
 //[Headers]     -- You can add your own extra header files here --
 #include "JuceHeader.h"
-#include "HajuLib/HajuMidiDriver.h"
-#include "HajuLib/HajuErrorVisualizer.h"
-#include "LumatoneFirmwareDefinitions.h"
+
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/midi_driver.h"
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_support.h"
+
+namespace HajuErrorVisualizer
+{
+    typedef enum
+    {
+        noError = 0,
+        warning = 1,
+        error = 2
+    } ErrorLevel;
+}
+
 //[/Headers]
 
 /*

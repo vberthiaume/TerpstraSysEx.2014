@@ -261,7 +261,7 @@ void PedalSensitivityDlg::loadFromMapping()
 	sldExprCtrlSensitivity->setValue(mappingInEdit.expressionControllerSensivity, juce::NotificationType::dontSendNotification);
 }
 
-void PedalSensitivityDlg::firmwareRevisionReceived(FirmwareVersion version)
+void PedalSensitivityDlg::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
     FirmwareSupport firmwareSupport;
 
@@ -277,7 +277,7 @@ void PedalSensitivityDlg::firmwareRevisionReceived(FirmwareVersion version)
     }
 }
 
-void PedalSensitivityDlg::presetFlagsReceived(PresetFlags presetFlags)
+void PedalSensitivityDlg::presetFlagsReceived(LumatoneFirmware::PresetFlags presetFlags)
 {
     btnInvertExpression->setToggleState(presetFlags.expressionPedalInverted, dontSendNotification);
     btnInvertSustain->setToggleState(presetFlags.sustainPedalInverted, dontSendNotification);

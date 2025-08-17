@@ -47,7 +47,7 @@ public:
     //=========================================================================
     // LumatoneEditor::FirmwareListener implementation
 
-    void firmwareRevisionReceived(FirmwareVersion version) override;
+    void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
     
     //=========================================================================
     // juce::Timer Implementation

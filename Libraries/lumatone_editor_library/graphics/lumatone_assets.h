@@ -173,7 +173,7 @@ namespace LumatoneAssets
     {
         LoadAssets(assetId);
 
-        LumatoneAssets::LumatoneGraphicRenderSize size = GetLumatoneRenderSize(height, width, assetId);
+        LumatoneAssets::LumatoneGraphicRenderSize size = GetLumatoneRenderSize(width, height, assetId);
 
         switch (assetId)
         {

@@ -11,7 +11,9 @@ Author:  hsstraub
 #pragma once
 
 #include <JuceHeader.h>
-#include "LumatoneFirmwareDefinitions.h"
+#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_definitions.h"
+
+typedef LumatoneFirmware::LumatoneKeyType LumatoneKeyType;
 
 // Mapping of one key
 class TerpstraKey

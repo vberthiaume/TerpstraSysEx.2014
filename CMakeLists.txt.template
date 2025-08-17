@@ -3,16 +3,15 @@ cmake_minimum_required(VERSION 3.27)
 project(LUMATONE_EDITOR VERSION 0.0.1)
 
 # find_package(juce)
-# set juce_DIR in your environment to a local JUCE directory
 add_subdirectory($ENV{juce_DIR} subprojects/juce)
 
 juce_add_gui_app(
     LumatoneEditor
         PRODUCT_NAME "Lumatone Editor"
-        VERSION "1.5.0b"
+        VERSION "1.2.0b"
         BUNDLE_ID "com.Lumatone.LumatoneEditor"
-        ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/Assets/PNG/AppIcon@1x.png"
-        ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/Assets/PNG/AppIcon@3x.png"
+        ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/PNG/AppIcon@1x.png"
+        ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/PNG/AppIcon@3x.png"
         DOCUMENT_EXTENSIONS "ltn"
         )
 juce_generate_juce_header(LumatoneEditor)
@@ -27,8 +26,22 @@ set_directory_properties(
 
 file(GLOB_RECURSE SourceCode
     CONFIGURE_DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
+    )
+
+# add selective lumatone_editor_library source
+file(GLOB EditorLibraryCode
+    CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/color/*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/data/lumatone_*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/data/state_base*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/graphics/*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/graphics/resampler/*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/mapping/lumatone_geometry*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/mapping/lumatone_tiling*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/mapping/lumatone_output*"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/lumatone_midi_driver/*"
     )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -62,6 +75,7 @@ target_sources(
     LumatoneEditor
         PRIVATE
             ${SourceCode}
+            ${EditorLibraryCode}
             ${LibraryCode}
             )
 
@@ -100,15 +114,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     )
 endif()
 
-# file(GLOB_RECURSE LibraryBinaryData
-#         CONFIGURE_DEPENDS
-#             "${CMAKE_CURRENT_SOURCE_DIR}/Source/lumatone_editor_library/assets/*"
-#     )
-# juce_add_binary_data(LumatoneEditorLibraryAssets SOURCES ${LibraryBinaryData})
-
 file(GLOB_RECURSE EditorBinaryData
-        CONFIGURE_DEPENDS
-            "${CMAKE_CURRENT_SOURCE_DIR}/BinaryData/*"
+        CONFIGURE_DEPENDS   
+            "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/*"
+            "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/assets/*"
     )
 juce_add_binary_data(LumatoneEditorAssets SOURCES ${EditorBinaryData})
 

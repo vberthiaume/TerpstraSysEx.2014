@@ -3,7 +3,7 @@
 
 AdjustLayoutColour::AdjustLayoutColour(LumatoneState* stateIn)
     : state(stateIn)
-    , hexMap(stateIn->shareMappingData())
+    // , hexMap(stateIn->shareMappingData())
 {
     endAction();
 }
@@ -227,94 +227,94 @@ void AdjustLayoutColour::adjustWhiteBalanceLab(int newWhitePoint, LumatoneKey& k
     key.setColour(labToRgb(adjustedLab));
 }
 
-void AdjustLayoutColour::setGradient(SetGradientOptions options)
-{
-    float originColumn = 0;
-    float originRow = 0;
+// void AdjustLayoutColour::setGradient(SetGradientOptions options)
+// {
+//     float originColumn = 0;
+//     float originRow = 0;
 
-    float furthestColumn = 0;
-    float furthestRow = 0;
+//     float furthestColumn = 0;
+//     float furthestRow = 0;
 
-    juce::Array<int> presentColumns;
-    juce::Array<int> presentRows;
+//     juce::Array<int> presentColumns;
+//     juce::Array<int> presentRows;
 
-    juce::Array<Hex::Point> updateHexCoords;
-    for (auto coord : options.selection)
-    {
-        Hex::Point hex = hexMap.keyCoordsToHex(coord);
-        updateHexCoords.add(hex);
+//     juce::Array<Hex::Point> updateHexCoords;
+//     for (auto coord : options.selection)
+//     {
+//         Hex::Point hex = hexMap.keyCoordsToHex(coord);
+//         updateHexCoords.add(hex);
 
-        if (hex.q < originColumn)
-            originColumn = hex.q;
-        if (hex.r < originRow)
-            originRow = hex.r;
+//         if (hex.q < originColumn)
+//             originColumn = hex.q;
+//         if (hex.r < originRow)
+//             originRow = hex.r;
 
-        if (hex.q > furthestColumn)
-            furthestColumn = hex.q;
-        if (hex.r > furthestRow)
-            furthestRow = hex.r;
+//         if (hex.q > furthestColumn)
+//             furthestColumn = hex.q;
+//         if (hex.r > furthestRow)
+//             furthestRow = hex.r;
 
-        presentColumns.addIfNotAlreadyThere((int)hex.q);
-        presentRows.addIfNotAlreadyThere((int)hex.r);
-    }
+//         presentColumns.addIfNotAlreadyThere((int)hex.q);
+//         presentRows.addIfNotAlreadyThere((int)hex.r);
+//     }
 
-    presentColumns.sort();
-    presentRows.sort();
+//     presentColumns.sort();
+//     presentRows.sort();
 
-    auto selectionOrigin = Hex::Point(originColumn, originRow);
-    auto furthestPoint = Hex::Point(furthestColumn, furthestRow);
-    int selectionDistance = furthestPoint.distanceTo(selectionOrigin);
+//     auto selectionOrigin = Hex::Point(originColumn, originRow);
+//     auto furthestPoint = Hex::Point(furthestColumn, furthestRow);
+//     int selectionDistance = furthestPoint.distanceTo(selectionOrigin);
 
-    auto boardOrigin = Hex::Point(0, 0);
-    int maxBoardDistance = 35;
+//     auto boardOrigin = Hex::Point(0, 0);
+//     int maxBoardDistance = 35;
 
-    juce::Array<MappedLumatoneKey> keyUpdates;
+//     juce::Array<MappedLumatoneKey> keyUpdates;
 
-    float maxGradientDistance = 1.0f;
-    if (options.selectionOrigin)
-    {
-        if (options.fillRelative)
-            maxGradientDistance = (float)presentColumns.size();
-        else
-            maxGradientDistance = (float)selectionDistance;
-    }
-    else
-    {
-        maxGradientDistance = (float)maxBoardDistance;
-    }
+//     float maxGradientDistance = 1.0f;
+//     if (options.selectionOrigin)
+//     {
+//         if (options.fillRelative)
+//             maxGradientDistance = (float)presentColumns.size();
+//         else
+//             maxGradientDistance = (float)selectionDistance;
+//     }
+//     else
+//     {
+//         maxGradientDistance = (float)maxBoardDistance;
+//     }
 
-    float keyGradientDistance = 0.0f;
-    for (int i = 0; i < options.selection.size(); i++)
-    {
-        auto mappedKey = options.selection[i];
-        auto hex = updateHexCoords[i];
+//     float keyGradientDistance = 0.0f;
+//     for (int i = 0; i < options.selection.size(); i++)
+//     {
+//         auto mappedKey = options.selection[i];
+//         auto hex = updateHexCoords[i];
 
-        if (options.selectionOrigin)
-            {
-                if (options.fillRelative)
-                {
-                    keyGradientDistance = hex.q - presentColumns[0];
-                }
-                else
-                {
-                    keyGradientDistance = (float)hex.distanceTo(selectionOrigin);
-                }
-            }
-        else
-        {
-            keyGradientDistance = (float)hex.distanceTo(boardOrigin);
-        }
+//         if (options.selectionOrigin)
+//             {
+//                 if (options.fillRelative)
+//                 {
+//                     keyGradientDistance = hex.q - presentColumns[0];
+//                 }
+//                 else
+//                 {
+//                     keyGradientDistance = (float)hex.distanceTo(selectionOrigin);
+//                 }
+//             }
+//         else
+//         {
+//             keyGradientDistance = (float)hex.distanceTo(boardOrigin);
+//         }
 
-        float t = (maxGradientDistance == 0.0f) ? 0.0f : keyGradientDistance / maxGradientDistance;
-        auto colour = options.gradient.getColourAtPosition(t);
-        auto key = currentLayout.getKey(mappedKey.boardIndex, mappedKey.keyIndex);
-        key.setColour(colour);
+//         float t = (maxGradientDistance == 0.0f) ? 0.0f : keyGradientDistance / maxGradientDistance;
+//         auto colour = options.gradient.getColourAtPosition(t);
+//         auto key = currentLayout.getKey(mappedKey.boardIndex, mappedKey.keyIndex);
+//         key.setColour(colour);
 
-        keyUpdates.add(MappedLumatoneKey(key, mappedKey.boardIndex, mappedKey.keyIndex));
-    }
+//         keyUpdates.add(MappedLumatoneKey(key, mappedKey.boardIndex, mappedKey.keyIndex));
+//     }
 
-    sendSelectionUpdate(keyUpdates, false);
-}
+//     sendSelectionUpdate(keyUpdates, false);
+// }
 
 void AdjustLayoutColour::beginAction(AdjustLayoutColour::Type type)
 {
