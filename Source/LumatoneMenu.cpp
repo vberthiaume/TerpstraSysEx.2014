@@ -63,7 +63,7 @@ namespace Lumatone {
 
         void MainMenuModel::createViewMenu(PopupMenu &menu)
         {
-			menu.addCommandItem(theManager, useModelColours);
+			menu.addCommandItem(theManager, useColourModel);
         }
 
         void MainMenuModel::createHelpMenu(PopupMenu& menu)

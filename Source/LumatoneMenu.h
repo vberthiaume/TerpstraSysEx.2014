@@ -32,7 +32,7 @@ namespace Lumatone {
 			undo = 0x200200,
 			redo = 0x200201,
 
-			useModelColours	= 0x200210,
+			useColourModel	= 0x200210,
 
 			recentFilesBaseID = 0x200300,
 

@@ -6,3 +6,4 @@ countries: us
 "PresetButtonColours" = "Preset Button Colors:"
 "ColourPalettes" = "Color Palettes"
 "CustomPicker" = "Custom Picker"
+"UseColourModel" = "Toggle Realistic Display Colors"

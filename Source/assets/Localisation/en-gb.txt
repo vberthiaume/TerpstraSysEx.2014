@@ -77,3 +77,4 @@ countries: ca gb au
 "EditButtonTip" = "Edit palette colours"
 "CloneButtonTip" = "Clone palette"
 "TrashButtonTip" = "Delete palette (currently irreversible)"
+"UseColourModel" = "Toggle Realistic Display Colours"

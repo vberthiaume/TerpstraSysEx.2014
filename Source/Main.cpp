@@ -42,6 +42,7 @@ TerpstraSysExApplication::TerpstraSysExApplication()
 
 	lumatoneController = std::make_unique<LumatoneController>();
 	colourModel = std::make_unique<LumatoneColourModel>();
+	useColourModelFlag = propertiesFile->getBoolValue("UseColourModel", true);
 
 	// Localisation
 	String localisation = getLocalisation(SystemStats::getDisplayLanguage());
@@ -345,7 +346,7 @@ void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
 		Lumatone::Menu::commandIDs::undo,
 		Lumatone::Menu::commandIDs::redo,
 
-		Lumatone::Menu::commandIDs::useModelColours,
+		Lumatone::Menu::commandIDs::useColourModel,
 
 		Lumatone::Debug::commandIDs::toggleDeveloperMode,
 
@@ -432,10 +433,11 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
 		result.setActive(undoManager.canRedo());
 		break;
 
-	case Lumatone::Menu::commandIDs::useModelColours:
-		result.setInfo("Toggle LED Colours", "Switch between the Lumatone display using exact RGB or LED modeled colours.", "View", 0);
-		result.addDefaultKeypress('l', juce::ModifierKeys::Flags::commandModifier);
+	case Lumatone::Menu::commandIDs::useColourModel:
+		result.setInfo(juce::translate("UseColourModel"), "Toggle between displaying RGB or realistic colours", "View", 0);
+		result.addDefaultKeypress('g', juce::ModifierKeys::Flags::commandModifier);
 		result.setActive(true);
+		result.setTicked(useColourModelFlag);
 		break;
 
 	case Lumatone::Menu::commandIDs::aboutSysEx:
@@ -486,10 +488,11 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 	case Lumatone::Menu::commandIDs::redo:
 		return redo();
 
-	case Lumatone::Menu::commandIDs::useModelColours:
+	case Lumatone::Menu::commandIDs::useColourModel:
 		{
-		bool useModel = getPropertiesFile()->getBoolValue("UseColorModel", true);
-		getPropertiesFile()->setValue("UseColorModel", juce::var(!useModel));
+		bool useModel = getPropertiesFile()->getBoolValue("UseColorModel", useColourModelFlag);
+		useColourModelFlag = !useModel;
+		getPropertiesFile()->setValue("UseColorModel", juce::var(useColourModelFlag));
 		getMainContentComponent()->repaint();
 		return true;
 		}

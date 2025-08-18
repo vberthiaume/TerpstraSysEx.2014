@@ -68,6 +68,7 @@ public:
 	bool deletePaletteFile(File pathToPalette);
 
 	LumatoneColourModel* getColourModel() const { return colourModel.get(); }
+	bool useColourModel() const { return useColourModelFlag; }
 
 	// Menu functionality
 	Lumatone::Menu::MainMenuModel* getMainMenu() { return menuModel.get(); }
@@ -160,4 +161,6 @@ private:
 	std::unique_ptr<FileChooser> chooser;
 
 	bool firmwareUpdateWasPerformed = false; // Allows us to deinitialize libssh2 a single time
+
+	bool useColourModelFlag = true;
 };

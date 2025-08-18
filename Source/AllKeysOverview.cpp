@@ -171,7 +171,7 @@ Colour KeyMiniDisplayInsideAllKeysOverview::getKeyColour() const
 	if (keyData != nullptr)
 	{
 		auto state = &TerpstraSysExApplication::getApp();
-		if (state->getPropertiesFile()->getBoolValue("UseColorModel", true))
+		if (state->useColourModel())
 			colour = state->getColourModel()->getModelColour(keyData->colour);
 		else
 			colour = keyData->colour;
