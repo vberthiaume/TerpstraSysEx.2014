@@ -23,7 +23,7 @@ namespace Lumatone {
 
 		StringArray MainMenuModel::getMenuBarNames()
 		{
-			const char* const names[] = { "File", "Edit", "Help", nullptr };
+			const char* const names[] = { "File", "Edit", "View", "Help", nullptr };
 			return StringArray(names);
 		}
 
@@ -49,17 +49,24 @@ namespace Lumatone {
 		void MainMenuModel::createEditMenu(PopupMenu& menu)
 		{
 			menu.addCommandItem(theManager, deleteOctaveBoard);
+			menu.addSeparator();
 			menu.addCommandItem(theManager, copyOctaveBoard);
 			menu.addCommandItem(theManager, pasteOctaveBoard);
             menu.addCommandItem(theManager, pasteOctaveBoardChannels);
             menu.addCommandItem(theManager, pasteOctaveBoardNotes);
             menu.addCommandItem(theManager, pasteOctaveBoardColours);
             menu.addCommandItem(theManager, pasteOctaveBoardTypes);
+			menu.addSeparator();
 			menu.addCommandItem(theManager, undo);
 			menu.addCommandItem(theManager, redo);
 		}
 
-		void MainMenuModel::createHelpMenu(PopupMenu& menu)
+        void MainMenuModel::createViewMenu(PopupMenu &menu)
+        {
+			menu.addCommandItem(theManager, useModelColours);
+        }
+
+        void MainMenuModel::createHelpMenu(PopupMenu& menu)
 		{
 			menu.addCommandItem(theManager, aboutSysEx);
 		}
@@ -70,6 +77,7 @@ namespace Lumatone {
 
 			if (menuName == "File")             createFileMenu(menu);
 			else if (menuName == "Edit")		createEditMenu(menu);
+			else if (menuName == "View")		createViewMenu(menu);
 			else if (menuName == "Help")		createHelpMenu(menu);
 			else                                jassertfalse; // names have changed?
 

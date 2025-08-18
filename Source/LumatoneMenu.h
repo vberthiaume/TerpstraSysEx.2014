@@ -32,6 +32,8 @@ namespace Lumatone {
 			undo = 0x200200,
 			redo = 0x200201,
 
+			useModelColours	= 0x200210,
+
 			recentFilesBaseID = 0x200300,
 
 			aboutSysEx = 0x200400
@@ -48,6 +50,7 @@ namespace Lumatone {
 
 			virtual void createFileMenu(PopupMenu& menu);
 			virtual void createEditMenu(PopupMenu& menu);
+			virtual void createViewMenu(PopupMenu& menu);
 			virtual void createHelpMenu(PopupMenu& menu);
 
 		private:

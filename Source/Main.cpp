@@ -345,6 +345,8 @@ void TerpstraSysExApplication::getAllCommands(Array <CommandID>& commands)
 		Lumatone::Menu::commandIDs::undo,
 		Lumatone::Menu::commandIDs::redo,
 
+		Lumatone::Menu::commandIDs::useModelColours,
+
 		Lumatone::Debug::commandIDs::toggleDeveloperMode,
 
 		Lumatone::Menu::commandIDs::aboutSysEx
@@ -430,6 +432,12 @@ void TerpstraSysExApplication::getCommandInfo(CommandID commandID, ApplicationCo
 		result.setActive(undoManager.canRedo());
 		break;
 
+	case Lumatone::Menu::commandIDs::useModelColours:
+		result.setInfo("Toggle LED Colours", "Switch between the Lumatone display using exact RGB or LED modeled colours.", "View", 0);
+		result.addDefaultKeypress('l', juce::ModifierKeys::Flags::commandModifier);
+		result.setActive(true);
+		break;
+
 	case Lumatone::Menu::commandIDs::aboutSysEx:
 		result.setInfo("About Lumatone Editor", "Shows version and copyright", "Help", 0);
 		break;
@@ -477,6 +485,14 @@ bool TerpstraSysExApplication::perform(const InvocationInfo& info)
 
 	case Lumatone::Menu::commandIDs::redo:
 		return redo();
+
+	case Lumatone::Menu::commandIDs::useModelColours:
+		{
+		bool useModel = getPropertiesFile()->getBoolValue("UseColorModel", true);
+		getPropertiesFile()->setValue("UseColorModel", juce::var(!useModel));
+		getMainContentComponent()->repaint();
+		return true;
+		}
 
 	case Lumatone::Menu::commandIDs::aboutSysEx:
 		return aboutTerpstraSysEx();
