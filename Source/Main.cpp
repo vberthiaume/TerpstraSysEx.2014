@@ -15,6 +15,8 @@
 #include "NoteOnOffVelocityCurveDialog.h"
 #include "LumatoneMenu.h"
 
+#include "../Libraries/lumatone_editor_library/color/colour_model.h"
+
 //==============================================================================
 
 MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
@@ -39,6 +41,7 @@ TerpstraSysExApplication::TerpstraSysExApplication()
 	jassert(propertiesFile != nullptr);
 
 	lumatoneController = std::make_unique<LumatoneController>();
+	colourModel = std::make_unique<LumatoneColourModel>();
 
 	// Localisation
 	String localisation = getLocalisation(SystemStats::getDisplayLanguage());

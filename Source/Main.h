@@ -21,6 +21,8 @@
 #include "LocalisationMap.h"
 #include "FirmwareTransfer.h"
 
+class LumatoneColourModel;
+
 #define CHOOSE_FILE_NOOP [](bool) -> void {}
 
 //==============================================================================
@@ -64,6 +66,8 @@ public:
 	void reloadColourPalettes();
 	bool saveColourPalette(LumatoneEditorColourPalette& palette, File pathToPalette=File());
 	bool deletePaletteFile(File pathToPalette);
+
+	LumatoneColourModel* getColourModel() const { return colourModel.get(); }
 
 	// Menu functionality
 	Lumatone::Menu::MainMenuModel* getMainMenu() { return menuModel.get(); }
@@ -129,6 +133,8 @@ private:
 	bool						hasChangesToSave;
 
 	bool						inCalibrationMode = false;
+
+	std::unique_ptr<LumatoneColourModel> colourModel;
 
 	juce::UndoManager undoManager;
 	

@@ -24,6 +24,7 @@
 #include "LumatoneMenu.h"
 
 #include "../Libraries/lumatone_editor_library/graphics/lumatone_render.h"
+#include "../Libraries/lumatone_editor_library/color/colour_model.h"
 
 //[/Headers]
 
@@ -164,11 +165,19 @@ const TerpstraKey* KeyMiniDisplayInsideAllKeysOverview::getKeyData() const
 
 Colour KeyMiniDisplayInsideAllKeysOverview::getKeyColour() const
 {
+	juce::Colour colour = juce::Colours::transparentBlack;
+
 	auto keyData = getKeyData();
-	if ( keyData != nullptr)
-		return keyData->colour;
-	else
-		return findColour(TerpstraKeyEdit::backgroundColourId);
+	if (keyData != nullptr)
+	{
+		auto state = &TerpstraSysExApplication::getApp();
+		if (state->getPropertiesFile()->getBoolValue("UseColorModel", true))
+			colour = state->getColourModel()->getModelColour(keyData->colour);
+		else
+			colour = keyData->colour;
+	}
+
+	return colour;
 }
 
 void KeyMiniDisplayInsideAllKeysOverview::setKeyGraphics(Image& colourGraphicIn, Image& shadowGraphicIn)
