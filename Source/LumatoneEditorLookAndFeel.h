@@ -911,8 +911,9 @@ public:
         }
         else
         {
+            float marginScalar = 1.0f - (0.2f);
             float fontScalar = scalarToFitString(item.text, font, width);
-            font = getPopupMenuFont().withHeight(area.getHeight() * fontScalar * CONTROLBOXFONTHEIGHTSCALAR);
+            font = getPopupMenuFont().withHeight(area.getHeight() * marginScalar * fontScalar * CONTROLBOXFONTHEIGHTSCALAR);
             textColour = findColour(LumatoneEditorColourIDs::DescriptionText);
             margin = roundToInt(height * comboBoxRoundedCornerScalar);
         }
@@ -937,7 +938,18 @@ public:
         g.setColour(textColour);
         g.setFont(font);
         
-        g.drawFittedText(item.text, areaToUse.withTrimmedLeft(margin).withTrimmedRight(margin), Justification::centredLeft, 1);
+        float itemX = areaToUse.getX() + margin;
+        if (item.isTicked)
+        {   
+            float tickWidth = areaToUse.getHeight() * 0.5f;
+            itemX += tickWidth;
+
+            float tickRadius = (tickWidth * 0.62f) * 0.5f;
+            juce::Path tick;
+            tick.addPolygon(juce::Point<float>((tickWidth + margin) * 0.5f, areaToUse.getHeight() * 0.5f), 6, tickRadius);
+            g.fillPath(tick);
+        }
+        g.drawFittedText(item.text, areaToUse.withLeft(itemX).withTrimmedRight(margin), Justification::centredLeft, 1);
 
         if (item.subMenu)
         {
