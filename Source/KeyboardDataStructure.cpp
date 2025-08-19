@@ -46,6 +46,7 @@ TerpstraVelocityCurveConfig class
 ==============================================================================
 */
 
+namespace LumatoneEditor {
 int DefaultVelocityIntervalTable[127] = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
     21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
@@ -100,6 +101,9 @@ int DefaulLumatouchVelocityTable[128] = {
     36, 37, 37, 38, 39, 39, 40, 41, 41, 42, 43, 43, 44, 45, 46, 47, 47, 48, 49, 50,
     51, 52, 53, 53, 54, 56, 57, 58, 60, 61, 63, 65, 68, 70, 73, 75, 78, 81, 84, 87,
     90, 94, 98, 102, 107, 113, 121, 127};
+}
+
+using namespace LumatoneEditor;
 
 TerpstraVelocityCurveConfig::TerpstraVelocityCurveConfig()
 {
