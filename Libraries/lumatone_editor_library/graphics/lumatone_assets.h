@@ -194,19 +194,19 @@ namespace LumatoneAssets
                     // return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::LumatoneGraphic_8x); // size is not really worth using this
             }
 
-        case LumatoneAssets::ID::KeybedShadows:
-            switch (size)
-            {
-                case LumatoneGraphicRenderSize::_1x:
-                    return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_1x);
-                default:
-                case LumatoneGraphicRenderSize::_2x:
-                    return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_2x);
-                case LumatoneGraphicRenderSize::_4x:
-                case LumatoneGraphicRenderSize::_8x:
-                    return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_4x);
-                    // return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_8x);
-            }
+        // case LumatoneAssets::ID::KeybedShadows:
+        //     switch (size)
+        //     {
+        //         case LumatoneGraphicRenderSize::_1x:
+        //             return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_1x);
+        //         default:
+        //         case LumatoneGraphicRenderSize::_2x:
+        //             return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_2x);
+        //         case LumatoneGraphicRenderSize::_4x:
+        //         case LumatoneGraphicRenderSize::_8x:
+        //             return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_4x);
+        //             // return juce::ImageCache::getFromHashCode((juce::int64)LumatoneAssets::HashCodes::KeybedShadows_8x);
+        //     }
 
         case LumatoneAssets::ID::KeyShape:
             switch (size)
