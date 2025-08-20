@@ -198,10 +198,6 @@
           <FILE id="SLpG2l" name="AppIcon@3x.png" compile="0" resource="1" file="Source/assets/PNG/AppIcon@3x.png"/>
           <FILE id="CGghOV" name="ImportIcon@4x.png" compile="0" resource="1"
                 file="Source/assets/PNG/ImportIcon@4x.png"/>
-          <FILE id="QOpDld" name="KeybedShadows.png" compile="0" resource="1"
-                file="Source/assets/PNG/KeybedShadows.png"/>
-          <FILE id="kyvd7P" name="KeybedShadows@2x.png" compile="0" resource="1"
-                file="Source/assets/PNG/KeybedShadows@2x.png"/>
           <FILE id="vfi3bq" name="LoadIcon@4x.png" compile="0" resource="1" file="Source/assets/PNG/LoadIcon@4x.png"/>
           <FILE id="c02YFn" name="ltn.ico" compile="0" resource="1" file="Source/assets/PNG/ltn.ico"/>
           <FILE id="cf3FaF" name="LTN.png" compile="0" resource="1" file="Source/assets/PNG/LTN.png"/>
