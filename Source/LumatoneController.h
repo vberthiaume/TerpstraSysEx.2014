@@ -251,6 +251,8 @@ public:
     // Get sensitivity setting of expression pedal
     void getExpressionPedalSensitivity();
 
+    void getPresetButtonColours();
+
     //============================================================================
     // FirmwareTransfer::Listener
 
@@ -379,6 +381,8 @@ private:
     FirmwareSupport::Error handleGetPresetFlagsResponse(const MidiMessage& midiMessage);
 
     FirmwareSupport::Error handleGetExpressionPedalSensitivityResponse(const MidiMessage& midiMessage);
+
+    FirmwareSupport::Error handleGetMacroLightIntensityResponse(const MidiMessage& midiMessage);
 
     void handleMidiDriverError(FirmwareSupport::Error errorToHandle, int commandReceived = -1);
 

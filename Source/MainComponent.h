@@ -77,6 +77,7 @@ public:
     void resized() override;
 
 	void refreshKeyDataFields();
+	void refreshGlobalSettings();
 	void refreshAllFields();
 
 	void setEditAreaExpanded(bool isExpanded);

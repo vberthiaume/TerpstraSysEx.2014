@@ -916,6 +916,8 @@ void TerpstraSysExApplication::requestConfigurationFromDevice()
 	getLumatoneController()->sendFaderConfigRequest();
 	getLumatoneController()->sendAftertouchConfigRequest();
 
+	getLumatoneController()->getPresetButtonColours();
+
 }
 
 void TerpstraSysExApplication::updateMainTitle()

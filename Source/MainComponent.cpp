@@ -474,11 +474,17 @@ void MainContentComponent::refreshKeyDataFields()
 	noteEditArea->refreshKeyFields();
 }
 
+void MainContentComponent::refreshGlobalSettings()
+{
+	globalSettingsArea->restoreStateFromPropertiesFile(TerpstraSysExApplication::getApp().getPropertiesFile());
+}
+
 void MainContentComponent::refreshAllFields()
 {
 	refreshKeyDataFields();
 	generalOptionsArea->loadFromMapping();
 	pedalSensitivityDlg->loadFromMapping();
+	refreshGlobalSettings();
 	curvesArea->loadFromMapping();
 	curvesArea->repaint();
 }

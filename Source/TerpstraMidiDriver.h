@@ -327,7 +327,10 @@ public:
 	// For CMD 48h response: get expression pedal sensitivity
 	void sendGetExpressionPedalSensitivity();
 	
-	// TODO CMD 49h-4Eh
+	// For CMD 49h: Get Macro button colours
+	void sendGetMacroLightIntensity();
+
+	// TODO CMD 4Ah-4Eh
 
 	//============================================================================
 	// Implementation of bidirectional communication with acknowledge messages

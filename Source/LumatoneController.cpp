@@ -13,6 +13,7 @@
 
 #include "backport/lumatone_layout.h"
 #include "backport/lumatone_action.h"
+#include "backport/firmware_sysex.h"
 
 LumatoneController::LumatoneController()
     // : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()),
@@ -142,6 +143,8 @@ void LumatoneController::setLayout(const TerpstraKeyMapping &newLayout, bool sen
     {
         sendCompleteMapping(newLayout);
     }
+
+    setHasChanges(true);
 
     // clearContext();
 
@@ -659,6 +662,12 @@ void LumatoneController::getExpressionPedalSensitivity()
         midiDriver.sendGetExpressionPedalSensitivity();
 }
 
+void LumatoneController::getPresetButtonColours()
+{
+    if (firmwareSupport.versionAcknowledgesCommand(determinedVersion, GET_MACRO_LIGHT_INTENSITY))
+        midiDriver.sendGetMacroLightIntensity();
+}
+
 //=============================================================================
 // Communication and broadcasting
 
@@ -955,6 +964,19 @@ FirmwareSupport::Error LumatoneController::handleGetExpressionPedalSensitivityRe
     return errorCode;
 }
 
+FirmwareSupport::Error LumatoneController::handleGetMacroLightIntensityResponse(const MidiMessage &midiMessage)
+{
+    juce::Colour activeColour, inactiveColour;
+
+    auto errorCode = LumatoneSysEx::unpackGetMacroLightIntensityResponse(midiMessage, activeColour, inactiveColour);
+
+    TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("ActiveMacroButtonColour", activeColour.toString());
+    TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("InactiveMacroButtonColour", inactiveColour.toString());
+    TerpstraSysExApplication::getApp().getMainContentComponent()->refreshGlobalSettings();
+
+    return errorCode;
+}
+
 FirmwareSupport::Error LumatoneController::handlePeripheralCalibrationData(const MidiMessage& midiMessage)
 {
     int mode = -1;
@@ -1161,6 +1183,9 @@ FirmwareSupport::Error LumatoneController::handleBufferCommand(const MidiMessage
 
     case GET_EXPRESSION_PEDAL_SENSITIVIY:
         return handleGetExpressionPedalSensitivityResponse(midiMessage);
+
+    case GET_MACRO_LIGHT_INTENSITY:
+        return handleGetMacroLightIntensityResponse(midiMessage);
             
     case SET_VELOCITY_CONFIG:
         DBG("Send layout complete.");
