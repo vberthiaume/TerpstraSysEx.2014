@@ -631,26 +631,33 @@ enum LumatoneEditorColourIDs
     LabelBlue,
     DisconnectedRed,
     ConnectedGreen,
+
     DarkBackground,
     MediumBackground,
     LightBackground,
     ControlAreaBackground,
     ControlBoxHighlighted,
+    ControlBoxBackground,
+    
     ActiveText,
     InactiveText,
     DescriptionText,
-    ControlBoxBackground,
+
     DefaultPresetButtonActive,
     DefaultPresetButtonInactive,
+
     OutlineColourId,
+
     CurveGradientMin,
     CurveGradientMax,
     CurveGridColour,
+    
     RotaryGradientMin,
     RotaryGradientMax,
+    
     DisabledOverlay,
+    
     MenuBarBackground,
-
     
     ExprRotaryGradientMax,
     ExprRotaryGradientMin,

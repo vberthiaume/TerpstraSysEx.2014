@@ -12,8 +12,10 @@ ToolSelectorComponent::ToolSelectorComponent()
     curvesArea = new CurvesArea();
     batchColourTools = new BatchToolsColourControls(TerpstraSysExApplication::getApp().getLumatoneController());
 
-    addTab(juce::translate("Note Velocity"), juce::Colours::transparentBlack, curvesArea, true);
-    addTab(juce::translate("Global") + juce::translate(" Colour"), juce::Colours::transparentBlack, batchColourTools, true);
+	LumatoneEditorLookAndFeel& lf = TerpstraSysExApplication::getApp().getLookAndFeel();
+    juce::Colour tabColour = lf.findColour(LumatoneEditorColourIDs::LightBackground);
+    addTab(juce::translate("Note Velocity"), tabColour, curvesArea, true);
+    addTab(juce::translate("Global") + juce::translate(" Colour"), tabColour, batchColourTools, true);
 
     auto properties = TerpstraSysExApplication::getApp().getPropertiesFile();
     if (properties->getValue("ToolSelectorTab").contains(juce::String("Col")))

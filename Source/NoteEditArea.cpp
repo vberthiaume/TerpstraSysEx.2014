@@ -36,11 +36,13 @@ NoteEditArea::NoteEditArea ()
     showIsomorphicMassAssign = TerpstraSysExApplication::getApp().getPropertiesFile()->getBoolValue("IsomorphicMassAssign", false);
     //[/Constructor_pre]
 
+	LumatoneEditorLookAndFeel& lf = TerpstraSysExApplication::getApp().getLookAndFeel();
+
     setName ("NoteEditArea");
     editFunctionsTab.reset (new juce::TabbedComponent (juce::TabbedButtonBar::TabsAtTop));
     addAndMakeVisible (editFunctionsTab.get());
     editFunctionsTab->setTabBarDepth (30);
-    editFunctionsTab->addTab (TRANS("Manual Assign"), juce::Colours::lightgrey, new SingleNoteAssign(), true);
+    editFunctionsTab->addTab (TRANS("Manual Assign"), lf.findColour(LumatoneEditorColourIDs::ControlAreaBackground), new SingleNoteAssign(), true);
     editFunctionsTab->setCurrentTabIndex (0);
 
     editFunctionsTab->setBounds (8, 48, 320, 422);
@@ -67,8 +69,9 @@ NoteEditArea::NoteEditArea ()
 
 	labelWindowTitle->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
 
+	juce::Colour tabColour = lf.findColour(LumatoneEditorColourIDs::MediumBackground);
 	if (showIsomorphicMassAssign)
-		editFunctionsTab->addTab(TRANS("Isomorphic Assign"), juce::Colours::lightgrey, new IsomorphicMassAssign(), true);
+		editFunctionsTab->addTab(TRANS("Isomorphic Assign"), tabColour, new IsomorphicMassAssign(), true);
 
 	// Selector for octave boards
 	octaveBoardSelectorTab.reset(new TabbedButtonBar(TabbedButtonBar::Orientation::TabsAtTop));
@@ -76,9 +79,8 @@ NoteEditArea::NoteEditArea ()
 
 	for (int i = 0; i < NUMBEROFBOARDS; i++)
 	{
-		octaveBoardSelectorTab->addTab(translate("Section") + " " + String(i + 1), juce::Colours::lightgrey, i + 1);
+		octaveBoardSelectorTab->addTab(translate("Section") + " " + String(i + 1), tabColour, i + 1);
 	}
-
 	octaveBoardSelectorTab->addChangeListener(this);
 
 	// Single Key fields

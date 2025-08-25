@@ -1049,12 +1049,14 @@ public:
 
     void drawTabButton(TabBarButton& tbb, Graphics& g, bool isMouseOver, bool isMouseDown) override
     {
-        Colour backgroundColour;
+        Colour backgroundColour = tbb.getTabBackgroundColour();
 
         if (tbb.getTabbedButtonBar().getNumTabs() > 1)
         {
             if (tbb.isFrontTab())
-                backgroundColour = findColour(LumatoneEditorColourIDs::LightBackground);
+            {
+                backgroundColour = backgroundColour.brighter(0.1f);
+            }
 
             if (isMouseOver)
             {
