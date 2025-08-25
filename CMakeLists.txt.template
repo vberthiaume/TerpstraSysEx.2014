@@ -30,19 +30,6 @@ file(GLOB_RECURSE SourceCode
         "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
     )
 
-# add selective lumatone_editor_library source
-file(GLOB EditorLibraryCode
-    CONFIGURE_DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/color/*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/data/lumatone_*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/data/state_base*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/graphics/*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/graphics/resampler/*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/mapping/lumatone_geometry*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/mapping/lumatone_tiling*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/mapping/lumatone_output*"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/lumatone_midi_driver/*"
-    )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64")
@@ -75,7 +62,6 @@ target_sources(
     LumatoneEditor
         PRIVATE
             ${SourceCode}
-            ${EditorLibraryCode}
             ${LibraryCode}
             )
 
@@ -117,7 +103,7 @@ endif()
 file(GLOB_RECURSE EditorBinaryData
         CONFIGURE_DEPENDS   
             "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/*"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/lumatone_editor_library/assets/*"
+            "${CMAKE_CURRENT_SOURCE_DIR}/Source/backport/assets/*"
     )
 juce_add_binary_data(LumatoneEditorAssets SOURCES ${EditorBinaryData})
 
@@ -125,7 +111,7 @@ if (APPLE OR ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_link_libraries(LumatoneEditor
         PRIVATE
             LumatoneEditorAssets
-            juce::juce_gui_extra
+            # juce::juce_gui_extra
             juce::juce_audio_utils
             juce::juce_audio_devices
             juce::juce_opengl
@@ -141,7 +127,6 @@ else()
     target_link_libraries(LumatoneEditor
         PRIVATE
             LumatoneEditorAssets
-            juce::juce_gui_extra
             juce::juce_audio_utils
             juce::juce_audio_devices
             juce::juce_opengl
