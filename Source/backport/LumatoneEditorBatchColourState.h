@@ -16,6 +16,7 @@
 
 #include <JuceHeader.h>
 // #include "./state_base.h"
+#include "../KeyboardDataStructure.h"
 
 class LumatoneController;
 
@@ -41,12 +42,14 @@ struct BatchColourEditData
 
     static float HueShiftMapToNorm(float shiftAmt)
     {
-        return (shiftAmt + 1.0f) * 0.5f;
+        // return (shiftAmt + 1.0f) * 0.5f;
+        return shiftAmt + 0.5f;
     }
 
     static float HueShiftMapFromNorm(float value)
     {
-        return value * 2 - 1.0f;
+        // return value * 2 - 1.0f;
+        return value - 0.5f;
     }
 
     // piecewise
@@ -90,6 +93,12 @@ public:
     void setHueShiftAmount(bool set, float value = 0.5f);
     void setTempShiftAmount(bool set, float value = 0.5f);
 
+    void reset();
+
+    bool isInEdit() const { return inEdit; }
+
+    const TerpstraKeyMapping& getMappingBeforeEdits() const { return mappingBeforeEdits; }
+
 protected:
 
     // juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
@@ -97,11 +106,17 @@ protected:
 
     // void loadPropertiesFile(juce::PropertiesFile*) override { };
 
+    void handleDirtyLayout();
+
 private:
 
     BatchColourEditData data;
-
     LumatoneController& state;
+
+    TerpstraKeyMapping mappingBeforeEdits;
+    bool isDirty = true; // needs to backup mapping in edit
+
+    bool inEdit = false;
 
 };
 

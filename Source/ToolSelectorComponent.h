@@ -6,7 +6,8 @@
 class CurvesArea;
 class BatchToolsColourControls;
 
-class ToolSelectorComponent : public juce::Component
+class ToolSelectorComponent : public juce::TabbedComponent,
+                               private juce::ChangeListener
 {
 public:
 
@@ -17,6 +18,9 @@ public:
     void resized() override;
 
     CurvesArea* getCurvesArea() { return curvesArea; }
+
+private:
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
 private:
 

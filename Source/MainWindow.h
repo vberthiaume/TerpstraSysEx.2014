@@ -21,6 +21,9 @@ public:
     MainWindow(ComponentBoundsConstrainer* constrainerIn);
 
     virtual ~MainWindow();
+
+    void moved() override;
+    void resized() override;
     
     void closeButtonPressed() override;
 

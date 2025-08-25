@@ -1,5 +1,6 @@
 #include "LumatoneEditorBatchColourState.h"
 #include "../LumatoneController.h"
+#include "../Main.h"
 
 static juce::Array<juce::Identifier> getBatchColourEditProperties()
 {
@@ -40,8 +41,13 @@ LumatoneEditorBatchColourState::LumatoneEditorBatchColourState(LumatoneControlle
 
 void LumatoneEditorBatchColourState::setBrightnessMultiplier(bool set, float value)
 {
+    if (isDirty)
+        handleDirtyLayout();
+
     data.useBrightness = set;
     data.brightnessMultiplier = value;
+
+    inEdit = true;
 
     // if (set)
     // {
@@ -55,8 +61,13 @@ void LumatoneEditorBatchColourState::setBrightnessMultiplier(bool set, float val
 
 void LumatoneEditorBatchColourState::setHueShiftAmount(bool set, float value)
 {
+    if (isDirty)
+        handleDirtyLayout();
+
     data.useHueShift = set;
     data.hueShiftAmount = value;
+    
+    inEdit = true;
 
     // if (set)
     // {
@@ -70,8 +81,13 @@ void LumatoneEditorBatchColourState::setHueShiftAmount(bool set, float value)
 
 void LumatoneEditorBatchColourState::setTempShiftAmount(bool set, float value)
 {
+    if (isDirty)
+        handleDirtyLayout();
+        
     data.useTemperatureShift = set;
     data.temperatureShiftValue = value;
+
+    inEdit = true;
 
     // if (set)
     // {
@@ -81,6 +97,21 @@ void LumatoneEditorBatchColourState::setTempShiftAmount(bool set, float value)
     // {
     //     state.removeProperty(LumatoneEditorBatchColourProperty::TemperatureShiftValue, nullptr);
     // }
+}
+
+void LumatoneEditorBatchColourState::reset()
+{
+    data = BatchColourEditData();
+    isDirty = true;
+    inEdit = false;
+
+    // call main content component to update?
+}
+
+void LumatoneEditorBatchColourState::handleDirtyLayout()
+{
+    TerpstraSysExApplication::getApp().getMainContentComponent()->getData(mappingBeforeEdits);
+    isDirty = false;
 }
 
 // juce::ValueTree LumatoneEditorBatchColourState::loadStateProperties(juce::ValueTree stateIn)

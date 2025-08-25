@@ -528,10 +528,9 @@ LumatoneLayout TerpstraKeyMapping::getLumatoneLayout() const
 
 TerpstraKeyMapping::TerpstraKeyMapping(const LumatoneLayout &layout)
 {
-    TerpstraKeyMapping mapping;
     for (int b = 0; b < NUMBEROFBOARDS; b++)
     {
-        TerpstraKeys& set = mapping.sets[b];
+        TerpstraKeys& set = sets[b];
         const LumatoneBoard& board = layout.getBoard(b);
         for (int k = 0; k < MAX_LUMATONE_BOARD_KEYS; k++)
         {

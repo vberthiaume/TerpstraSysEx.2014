@@ -7,22 +7,29 @@
 #include "Main.h"
 
 ToolSelectorComponent::ToolSelectorComponent()
-    : juce::Component("ToolSelectorComponent")
+    : juce::TabbedComponent(juce::TabbedButtonBar::Orientation::TabsAtTop)
 {
-
     curvesArea = new CurvesArea();
     batchColourTools = new BatchToolsColourControls(TerpstraSysExApplication::getApp().getLumatoneController());
 
-    selector = std::make_unique<juce::TabbedComponent>(juce::TabbedButtonBar::Orientation::TabsAtTop);
-    selector->addTab(juce::translate("Note Velocity"), juce::Colours::transparentBlack, curvesArea, true);
-    selector->addTab(juce::translate("Colour") + juce::String(" Tools"), juce::Colours::transparentBlack, batchColourTools, true);
-    addAndMakeVisible(selector.get());
+    addTab(juce::translate("Note Velocity"), juce::Colours::transparentBlack, curvesArea, true);
+    addTab(juce::translate("Global") + juce::translate(" Colour"), juce::Colours::transparentBlack, batchColourTools, true);
+
+    auto properties = TerpstraSysExApplication::getApp().getPropertiesFile();
+    if (properties->getValue("ToolSelectorTab").contains(juce::String("Col")))
+    {
+        setCurrentTabIndex(1);
+    }
+
+    getTabbedButtonBar().addChangeListener(this);
 }
 
 ToolSelectorComponent::~ToolSelectorComponent()
 {
     batchColourTools = nullptr;
     curvesArea = nullptr;
+
+    getTabbedButtonBar().removeAllChangeListeners();
     selector = nullptr;
 }
 
@@ -34,7 +41,16 @@ void ToolSelectorComponent::paint(juce::Graphics& g)
 
 void ToolSelectorComponent::resized()
 {
-    selector->setBounds(getLocalBounds());
-    selector->setTabBarDepth(juce::roundToInt((float)getHeight() * 0.125f));
-    background = getLocalBounds().withTrimmedTop(selector->getTabBarDepth()).toFloat();
+    juce::TabbedComponent::resized();
+    
+    setTabBarDepth(juce::roundToInt((float)getHeight() * 0.125f));
+    background = getLocalBounds().withTrimmedTop(getTabBarDepth()).toFloat();
+}
+
+void ToolSelectorComponent::changeListenerCallback(juce::ChangeBroadcaster *source)
+{
+    if (source == &getTabbedButtonBar())
+    {
+        TerpstraSysExApplication::getApp().getPropertiesFile()->setValue("ToolSelectorTab", getCurrentTabName());
+    }
 }

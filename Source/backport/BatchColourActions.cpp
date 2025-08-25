@@ -7,7 +7,7 @@ SetBatchColourSettingsAction::SetBatchColourSettingsAction(LumatoneController* s
     // , LumatoneApplicationState::Controller(static_cast<LumatoneApplicationState&>(*this))
     : LumatoneAction(stateIn, "SetBatchColourSettingsAction")
 {
-    previousData = state->getBatchColourEditData();
+    previousData = state->getBatchColourEditState().getData();
 
     newEditData.useBrightness = setBrightnessIn;
     newEditData.useHueShift = setHueIn;
@@ -92,14 +92,15 @@ SetBatchColourSettingsAction *SetBatchColourSettingsAction::NewSetTemperatureVal
     return new SetBatchColourSettingsAction(stateIn, false, false, true, 0, 0, (float)value);
 }
 
-ApplyBatchColourAdjustments::ApplyBatchColourAdjustments(LumatoneController* stateIn, std::shared_ptr<LumatoneLayout>& baseLayoutIn, BatchColourEditData editData)//, const juce::Array<MappedLumatoneKey> &keySelectionIn)
+ApplyBatchColourAdjustments::ApplyBatchColourAdjustments(LumatoneController* stateIn, BatchColourEditData oldData)//, const juce::Array<MappedLumatoneKey> &keySelectionIn)
     // : LumatoneApplicationState("ApplyBatchColourAdjustments", stateIn)
     // , LumatoneApplicationState::Controller(static_cast<LumatoneApplicationState&>(*this))
     : LumatoneAction(stateIn, "ApplyBatchColourAdjustments")
-    , baseLayout(baseLayoutIn)
-    , newData(editData)
+    // , mapping(stateIn->getBatchColourEditState().getMappingBeforeEdits())
+    , newData(stateIn->getBatchColourEditState().getData())
+    , previousData(oldData)
 {
-    previousData = state->getBatchColourEditData();
+    // previousData = state->getBatchColourEditState().getData();
 
     // if (keySelectionIn.size() > 0 && keySelection.size() < (MAX_LUMATONE_BOARDS * MAX_LUMATONE_BOARD_KEYS)) // todo get actual number from each board
     // {
@@ -113,21 +114,23 @@ ApplyBatchColourAdjustments::ApplyBatchColourAdjustments(LumatoneController* sta
     // {
     //     keySelection.addArray(baseLayout->getAllKeysMapped());
         fullLayout = true;
+        baseLayout = stateIn->getBatchColourEditState().getMappingBeforeEdits().getLumatoneLayout();
     // }
 }
 
 ApplyBatchColourAdjustments::~ApplyBatchColourAdjustments()
 {
-    baseLayout = nullptr;
+
 }
 
 bool ApplyBatchColourAdjustments::perform()
 {
     // if (fullLayout)
     // {
+
     for (int b = 0; b < state->getNumBoards(); b++)
     {
-        auto board = &baseLayout->getBoard(b);
+        auto board = &baseLayout.getBoard(b);
         for (int k = 0; k < state->getOctaveSize(); k++)
         {
             LumatoneKey updatedKey = board->getKey(k);
@@ -136,7 +139,7 @@ bool ApplyBatchColourAdjustments::perform()
         }
     }
 
-    state->setLayout(updatedLayout);
+    state->setLayout(updatedLayout, false);
     // }
     // else
     // {
@@ -161,7 +164,7 @@ bool ApplyBatchColourAdjustments::undo()
     // {
     for (int b = 0; b < state->getNumBoards(); b++)
     {
-        auto board = &baseLayout->getBoard(b);
+        auto board = &baseLayout.getBoard(b);
         for (int k = 0; k < state->getOctaveSize(); k++)
         {
             LumatoneKey updatedKey = board->getKey(k);
@@ -170,7 +173,7 @@ bool ApplyBatchColourAdjustments::undo()
         }
     }
 
-    state->setLayout(updatedLayout);
+    state->setLayout(updatedLayout, false);
     // }
     // else
     // {

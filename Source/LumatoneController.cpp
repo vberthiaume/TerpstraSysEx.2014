@@ -128,19 +128,40 @@ bool LumatoneController::requestFirmwareUpdate(File firmwareFile, FirmwareTransf
     return false;
 }
 
-void LumatoneController::setLayout(const LumatoneLayout& newLayout)
+int LumatoneController::getWindowHeight() const
 {
-    // LumatoneState::setLayout(layoutIn); // set state to new layout
+    return TerpstraSysExApplication::getApp().mainWindowBounds.getHeight();
+}
 
-    if ( editingMode == sysExSendingMode::liveEditor)
+void LumatoneController::setLayout(const TerpstraKeyMapping &newLayout, bool sendToDevice)
+{
+    TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit() = newLayout;
+    TerpstraSysExApplication::getApp().getMainContentComponent()->refreshKeyDataFields();
+
+    if (sendToDevice && editingMode == sysExSendingMode::liveEditor)
     {
-        TerpstraKeyMapping mapping(newLayout);
-        sendCompleteMapping(mapping);
+        sendCompleteMapping(newLayout);
     }
 
     // clearContext();
 
     // editorListeners->call(&LumatoneEditor::EditorListener::layoutChanged, *mappingData);
+}
+
+void LumatoneController::setLayout(const LumatoneLayout &newLayout, bool sendToDevice)
+{
+    TerpstraKeyMapping mapping(newLayout);
+
+    // LumatoneState::setLayout(layoutIn); // set state to new layout
+    setLayout(mapping, sendToDevice);
+}
+
+void LumatoneController::sendCurrentMapping()
+{
+    if (editingMode == sysExSendingMode::liveEditor)
+    {
+        sendCompleteMapping(TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit());
+    }
 }
 
 bool LumatoneController::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
@@ -179,9 +200,29 @@ void LumatoneController::setBatchColourTempShift(float value)
     batchColourState.setTempShiftAmount(true, value);
 }
 
-BatchColourEditData LumatoneController::getBatchColourEditData() const
+const LumatoneEditorBatchColourState& LumatoneController::getBatchColourEditState() const
 {
-    return batchColourState.getData();
+    return batchColourState;
+}
+
+void LumatoneController::applyBatchColours()
+{
+    setLayout(TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit());
+    batchColourState.reset();
+}
+
+void LumatoneController::resetBatchColours()
+{
+    setLayout(batchColourState.getMappingBeforeEdits());
+    batchColourState.reset();
+}
+
+void LumatoneController::checkAndResetBatchEdits()
+{
+    if (batchColourState.isInEdit())
+    {
+        resetBatchColours();
+    }
 }
 
 void LumatoneController::setHasChanges(bool hasChanges)

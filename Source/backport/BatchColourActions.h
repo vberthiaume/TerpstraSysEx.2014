@@ -61,8 +61,8 @@ class ApplyBatchColourAdjustments : //public LumatoneApplicationState
 public:
 
     ApplyBatchColourAdjustments(LumatoneController* stateIn
-                                , std::shared_ptr<LumatoneLayout>& baseLayoutIn
-                                , BatchColourEditData editData);
+                                , BatchColourEditData oldData
+                                );
                                 // , const juce::Array<MappedLumatoneKey>& keySelectionIn);
 
     ~ApplyBatchColourAdjustments() override;
@@ -76,7 +76,9 @@ public:
     static void applyColourAdjustmentToKey(LumatoneKey& key, const BatchColourEditData& editData);
 
 private:
-    std::shared_ptr<LumatoneLayout> baseLayout;
+    // const TerpstraKeyMapping& mapping;
+    // TerpstraKeyMapping updatedLayout;
+    LumatoneLayout baseLayout;
     LumatoneLayout updatedLayout;
 
     BatchColourEditData previousData;

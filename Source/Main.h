@@ -125,6 +125,7 @@ public:
 
 private:
 	std::unique_ptr<MainWindow> mainWindow;
+	juce::Rectangle<int> mainWindowBounds;
 
 	std::unique_ptr<ComponentBoundsConstrainer> boundsConstrainer;
 
@@ -152,6 +153,8 @@ private:
 
 	Array<LumatoneEditorColourPalette> colourPalettes;
 
+	TerpstraKeyMapping			lastSavedMapping;
+
 	// Make sure an open dialog window is deleted on shutdown
 	std::unique_ptr<DialogWindow> dialogWindow;
 
@@ -165,4 +168,5 @@ private:
 	bool useColourModelFlag = true;
 
 	friend LumatoneController; // for backporting convenience
+	friend MainWindow;
 };

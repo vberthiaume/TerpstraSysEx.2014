@@ -32,11 +32,15 @@ public:
     void paint(juce::Graphics& g) override {}
     void resized() override;
 
-private:
     bool isSetToDefault() const;
     void setHasChanges(bool changes);
 
+
+    void updateFromState();
+
+private:
     void applyButtonCallback();
+    void sendButtonCallback();
     void resetButtonCallback();
 
 // private:
@@ -56,10 +60,10 @@ private:
     std::unique_ptr<juce::Label>   temperatureLabel;
 
     std::unique_ptr<juce::TextButton>   applyButton;
+    std::unique_ptr<juce::TextButton>   sendButton;
     std::unique_ptr<juce::TextButton>   resetButton;
 
     bool hasChanges = false;
-    std::shared_ptr<LumatoneLayout>     lastSavedLayout;
 
 private:
 

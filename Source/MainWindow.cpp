@@ -27,7 +27,7 @@ MainWindow::MainWindow(ComponentBoundsConstrainer* constrainerIn) : DocumentWind
 
     setConstrainer(constrainer);
     updateBounds();
-    startTimer(2000);
+    // startTimer(2000);
 #endif
 
     setLookAndFeel(&TerpstraSysExApplication::getApp().getLookAndFeel());
@@ -37,6 +37,20 @@ MainWindow::~MainWindow()
 {
     stopTimer();
     setConstrainer(nullptr);
+}
+
+void MainWindow::moved()
+{
+    juce::DocumentWindow::moved();
+
+    updateBounds();
+}
+
+void MainWindow::resized()
+{
+    juce::DocumentWindow::resized();
+    verticalBoundsThreshold = round(getTitleBarHeight() * 0.25f); 
+    updateBounds();
 }
 
 void MainWindow::closeButtonPressed()
@@ -106,6 +120,8 @@ void MainWindow::updateBounds()
 
     if (isOutOfVerticalBounds())
         fixWindowPositionAndSize();
+
+    TerpstraSysExApplication::getApp().mainWindowBounds = getScreenBounds();
 }
 
 void MainWindow::fixWindowPositionAndSize(bool setToDefault)

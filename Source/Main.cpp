@@ -772,6 +772,8 @@ bool TerpstraSysExApplication::openFromCurrentFile()
 		TerpstraKeyMapping keyMapping;
 		keyMapping.fromStringArray(stringArray);
 
+		lastSavedMapping = keyMapping;
+
 		((MainContentComponent*)(mainWindow->getContentComponent()))->setData(keyMapping);
 
 		// Window title
@@ -825,6 +827,8 @@ bool TerpstraSysExApplication::saveCurrentFile(std::function<void(bool success)>
         
 	setHasChangesToSave(!appendSuccess);
     saveFileCallback(appendSuccess);
+
+	lastSavedMapping = keyMapping;
 
 	// ToDo undo history?
 

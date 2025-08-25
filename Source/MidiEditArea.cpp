@@ -607,6 +607,9 @@ void MidiEditArea::onOpenConnectionToDevice(String dialogTitle)
 				offlineEditorBtn->setToggleState(true, NotificationType::sendNotification);
 				lblConnectionState->setText("Offline", NotificationType::dontSendNotification);
 			}
+
+			auto sysExSendingMode = editModeTabIndexToMidiSysExSendingMode((int)!liveEditorBtn->getToggleState());
+			TerpstraSysExApplication::getApp().setEditMode(sysExSendingMode);
 		});
 }
 

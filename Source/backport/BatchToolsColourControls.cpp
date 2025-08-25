@@ -10,7 +10,7 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     // : LumatoneApplicationState("BatchToolsColourControls", stateIn)
     // , LumatoneApplicationState::Controller(static_cast<LumatoneEditorState&>(state))
     : juce::Component("BatchToolsColourControls")
-    , lastSavedLayout(new LumatoneLayout())
+    // , lastSavedLayout(new LumatoneLayout())
     , state(stateIn)
 {
     brightness = std::make_unique<juce::Slider>("BatchToolsBrightnessSlider");
@@ -20,13 +20,14 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     brightness->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::BrightnessSlider);
     brightness->onValueChange = [&] ()
     {
+        auto currentData = state->getBatchColourEditState().getData();
         state->performAction(SetBatchColourSettingsAction::NewSetBrightnessValue(state, brightness->getValue()));
         if (isSetToDefault())
             resetButtonCallback();
         else
         {
-            state->performAction(new ApplyBatchColourAdjustments(state, lastSavedLayout, state->getBatchColourEditData()));
-            state->setHasChanges(true);
+            state->performAction(new ApplyBatchColourAdjustments(state, currentData));
+            setHasChanges(true);
         }
     };
     brightness->valueFromTextFunction = [](const juce::String& text)
@@ -49,13 +50,14 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     hue->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::HueSlider);
     hue->onValueChange = [&] ()
     {
+        auto currentData = state->getBatchColourEditState().getData();
         state->performAction(SetBatchColourSettingsAction::NewSetHueValue(state, hue->getValue()));
         if (isSetToDefault())
             resetButtonCallback();
         else
         {
-            state->performAction(new ApplyBatchColourAdjustments(state, lastSavedLayout, state->getBatchColourEditData()));
-            state->setHasChanges(true);
+            state->performAction(new ApplyBatchColourAdjustments(state, currentData));
+            setHasChanges(true);
         }
     };
     hue->valueFromTextFunction = [](const juce::String& text)
@@ -79,13 +81,15 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     temperature->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::TemperatureSlider);
     temperature->onValueChange = [&] ()
     {
+        auto currentData = state->getBatchColourEditState().getData();
+
         state->performAction(SetBatchColourSettingsAction::NewSetTemperatureValue(state, temperature->getValue()));
         if (isSetToDefault())
             resetButtonCallback();
         else
         {
-            state->performAction(new ApplyBatchColourAdjustments(state, lastSavedLayout, state->getBatchColourEditData()));
-            state->setHasChanges(true);
+            state->performAction(new ApplyBatchColourAdjustments(state, currentData));
+            setHasChanges(true);
         }
     };
     temperature->valueFromTextFunction = [](const juce::String& text)
@@ -119,10 +123,15 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     addAndMakeVisible(temperatureLabel.get());
 
 
-    applyButton = std::make_unique<juce::TextButton>("Apply", "Commit colour changes on selection");
+    applyButton = std::make_unique<juce::TextButton>("Save", "Commit colour changes on selection");
     applyButton->onClick = [&]() { applyButtonCallback(); };
     applyButton->setEnabled(false);
     addAndMakeVisible(applyButton.get());
+
+    sendButton = std::make_unique<juce::TextButton>("Send", "Commit colour changes on selection");
+    sendButton->onClick = [&]() { sendButtonCallback(); };
+    sendButton->setEnabled(false);
+    addAndMakeVisible(sendButton.get());
 
     resetButton = std::make_unique<juce::TextButton>("Reset", "Reset all colour adjustments.");
     resetButton->onClick = [&]() { resetButtonCallback(); };
@@ -148,44 +157,51 @@ BatchToolsColourControls::~BatchToolsColourControls()
 
 void BatchToolsColourControls::resized()
 {
-    float contentMarginWidthWindowH = 0.013f;
-    float controlLabelFontScalar = 0.18f;
+    float contentMarginWidthWindowH = 0.008f;
+    float controlLabelFontScalar = 0.6f;
 
-    int windowH = getParentHeight() * 0.8f;
+    int windowH = state->getWindowHeight();
 
-    int marginX = juce::roundToInt((float)windowH * contentMarginWidthWindowH);
     contentMarginX = juce::roundToInt(windowH * contentMarginWidthWindowH);
-    contentMarginH = juce::roundToInt(windowH * 0.016f);
+    contentMarginH = juce::roundToInt(windowH * 0.03f);
 
-    int controlHeight = juce::roundToInt(windowH * 0.025f);
+    int controlHeight = juce::roundToInt(windowH * 0.024f);
 
-    int sliderMargin = juce::roundToInt((float)marginX * 0.5f);
+    int sliderMargin = juce::roundToInt((float)contentMarginX * 0.5f);
 
-    int sliderWidth = juce::roundToInt((getWidth() - marginX * 2) / 3) - sliderMargin;
+    int sliderWidth = juce::roundToInt((getWidth() - contentMarginX * 2) / 3) - sliderMargin;
     int sliderHeight = juce::roundToInt(getHeight() * sliderH);
 
-    resizeLabelWithHeight(brightnessLabel.get(), controlHeight, controlLabelFontScalar);
-    resizeLabelWithHeight(hueLabel.get(), controlHeight, controlLabelFontScalar);
-    resizeLabelWithHeight(temperatureLabel.get(), controlHeight, controlLabelFontScalar);
+    int labelHeight = juce::roundToInt(controlHeight * controlLabelFontScalar);
+    // resizeLabelWithHeight(brightnessLabel.get(), controlHeight, controlLabelFontScalar);
+    // resizeLabelWithHeight(hueLabel.get(), controlHeight, controlLabelFontScalar);
+    // resizeLabelWithHeight(temperatureLabel.get(), controlHeight, controlLabelFontScalar);
+    hueLabel->setSize(sliderWidth, labelHeight);
+    brightnessLabel->setSize(sliderWidth, labelHeight);
+    temperatureLabel->setSize(sliderWidth, labelHeight);
 
     int sliderY = contentMarginH + controlHeight / 2;
-    hue->setBounds(marginX, sliderY, sliderWidth, sliderHeight);
-    brightness->setBounds(marginX + sliderWidth + sliderMargin, juce::roundToInt((float)sliderY + (float)getHeight() * 0.25f), sliderWidth, sliderHeight);
-    temperature->setBounds(marginX + (sliderWidth + sliderMargin) * 2, sliderY, sliderWidth, sliderHeight);
+    hue->setBounds(contentMarginX, sliderY, sliderWidth, sliderHeight);
+    // brightness->setBounds(marginX + sliderWidth + sliderMargin, juce::roundToInt((float)sliderY + (float)getHeight() * 0.25f), sliderWidth, sliderHeight);
+    brightness->setBounds(contentMarginX + sliderWidth + sliderMargin, sliderY, sliderWidth, sliderHeight);
+    temperature->setBounds(contentMarginX + (sliderWidth + sliderMargin) * 2, sliderY, sliderWidth, sliderHeight);
 
     int buttonHeight = juce::roundToInt((float)controlHeight * 1.2f);
-    int buttonY = getHeight() - buttonHeight - contentMarginH;
+    int buttonY = getHeight() - buttonHeight - contentMarginH + labelHeight / 2;
 
     int applyWidth = getLookAndFeel().getTextButtonFont(*applyButton, buttonHeight)
                                      .getStringWidth(applyButton->getButtonText() + "____") ;
+    int sendWidth = getLookAndFeel().getTextButtonFont(*sendButton, buttonHeight)
+                                     .getStringWidth(sendButton->getButtonText() + "____");
     int resetWidth = getLookAndFeel().getTextButtonFont(*resetButton, buttonHeight)
                                      .getStringWidth(resetButton->getButtonText() + "____");
 
     // int buttonMargin = (getWidth() - buttonWidth * 2) / 3;
 
-
-    applyButton->setBounds(marginX, buttonY, applyWidth, buttonHeight);
-    resetButton->setBounds(getWidth() - resetWidth - marginX, buttonY, resetWidth, buttonHeight);
+    int btnMarginX = contentMarginX * 3; // compensate for extra slider margin
+    applyButton->setBounds(btnMarginX, buttonY, applyWidth, buttonHeight);
+    resetButton->setBounds(getWidth() - resetWidth - btnMarginX, buttonY, resetWidth, buttonHeight);
+    sendButton->setBounds(applyButton->getRight() + (resetButton->getX() - applyButton->getRight()) * 0.5 - sendWidth * 0.5, buttonY, sendWidth, buttonHeight);
 }
 
 bool BatchToolsColourControls::isSetToDefault() const
@@ -206,19 +222,39 @@ void BatchToolsColourControls::setHasChanges(bool changes)
     }
 
     applyButton->setEnabled(hasChanges);
+    sendButton->setEnabled(hasChanges);
     resetButton->setEnabled(hasChanges);
+}
+
+void BatchToolsColourControls::updateFromState()
+{
+    auto data = state->getBatchColourEditState().getData();
+    brightness->setValue(data.brightnessMultiplier, juce::NotificationType::dontSendNotification);
+    hue->setValue(data.hueShiftAmount, juce::NotificationType::dontSendNotification);
+    temperature->setValue(data.temperatureShiftValue, juce::NotificationType::dontSendNotification);
+    
+    setHasChanges(!isSetToDefault());
 }
 
 void BatchToolsColourControls::applyButtonCallback()
 {
     // *lastSavedLayout = *getMappingData();
+    state->applyBatchColours();
+    updateFromState();
     setHasChanges(false);
+}
+
+void BatchToolsColourControls::sendButtonCallback()
+{
+    state->sendCurrentMapping();
 }
 
 void BatchToolsColourControls::resetButtonCallback()
 {
-    // state->performAction(new LumatoneEditAction::LayoutUpdateAction(this, *lastSavedLayout, false));
+    state->resetBatchColours();
+    updateFromState();
     setHasChanges(false);
+    // state->performAction(new LumatoneEditAction::LayoutUpdateAction(this, *lastSavedLayout, false));
 }
 
 // void BatchToolsColourControls::handleStatePropertyChange(juce::ValueTree stateIn, const juce::Identifier &property)

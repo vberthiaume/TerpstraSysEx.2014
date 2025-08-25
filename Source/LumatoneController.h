@@ -85,8 +85,12 @@ public:
 
 
     // BACKPORTED COMMANDS
+    
+    int getWindowHeight() const;
 
-    void setLayout(const LumatoneLayout& newLayout);
+    void setLayout(const TerpstraKeyMapping& newLayout, bool sendToDevice=true);
+    void setLayout(const LumatoneLayout& newLayout, bool sendToDevice=true);
+    void sendCurrentMapping();
 
     bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
     
@@ -94,7 +98,12 @@ public:
     void setBatchColourHueShift(float value);
     void setBatchColourTempShift(float value);
 
-    BatchColourEditData getBatchColourEditData() const;
+    const LumatoneEditorBatchColourState& getBatchColourEditState() const;
+
+    void applyBatchColours();
+    void resetBatchColours();
+
+    void checkAndResetBatchEdits(); // if another edit happens while batch colours are being edited, reset the batch ones first
 
     void setHasChanges(bool hasChanges);
 
