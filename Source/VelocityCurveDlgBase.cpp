@@ -283,8 +283,6 @@ void VelocityCurveDlgBase::paintOverChildren(juce::Graphics& g)
 
 void VelocityCurveDlgBase::sendVelocityTableToController()
 {
-	unsigned char velocityValues[128];
-
 	for (int x = 0; x < 128; x++)
 	{
 		velocityValues[x] = velocityBeamTable[x]->getValue();
@@ -353,15 +351,25 @@ void VelocityCurveDlgBase::mouseUp(const MouseEvent &event)
 
 TerpstraKeyMapping*	VelocityCurveDlgBase::getMappingInEdit()
 {
-	// Security at start of program
-	if (getParentComponent() == nullptr)
-		return nullptr;
-	if (getParentComponent()->getParentComponent() == nullptr)
-		return nullptr;
-	if (getParentComponent()->getParentComponent()->getParentComponent() == nullptr)
+	MainContentComponent* main = nullptr;
+	Component* parent = this;
+	int limit = 10;
+	int i = 0;
+	while (++i < limit)
+	{
+		parent = parent->getParentComponent();
+		if (parent == nullptr)
+			return nullptr;
+
+		main = dynamic_cast<MainContentComponent*>(parent);
+		if (main != nullptr)
+			break;
+	}
+
+	if (main == nullptr)
 		return nullptr;
 
-	return &(dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent()))->getMappingInEdit();
+	return &main->getMappingInEdit();
 }
 
 TerpstraVelocityCurveConfig* VelocityCurveDlgBase::getConfigInEdit()

@@ -138,6 +138,10 @@
       </GROUP>
     </GROUP>
     <GROUP id="{A73AEEF5-637C-D160-EE91-9A6158A5A60C}" name="Source">
+      <FILE id="Xf9q9Q" name="ToolSelectorComponent.cpp" compile="1" resource="0"
+            file="Source/ToolSelectorComponent.cpp"/>
+      <FILE id="NkHFko" name="ToolSelectorComponent.h" compile="0" resource="0"
+            file="Source/ToolSelectorComponent.h"/>
       <GROUP id="{48EE1921-AA73-B738-CAE9-BB2BA1304466}" name="assets">
         <GROUP id="{023F5646-6534-F977-6DE6-7A6E18B1C224}" name="Fonts">
           <GROUP id="{3212BC5A-B2E2-2CAE-7689-5CE3A99E51A9}" name="UniviaPro">

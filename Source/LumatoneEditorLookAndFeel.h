@@ -610,20 +610,25 @@ public:
         addArcToPath(ring, innerBounds, rotaryAngleEnd, rotaryAngleStart, false);
         ring.closeSubPath();
 
-        Colour minColour = findColour(LumatoneEditorColourIDs::RotaryGradientMin);
-        Colour maxColour = findColour(LumatoneEditorColourIDs::RotaryGradientMax);
-        Colour dialColour = Colours::white;
-
-        if (!sld.isEnabled())
-        {
-            minColour = minColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
-            maxColour = maxColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
-            dialColour = findColour(LumatoneEditorColourIDs::InactiveText);
-        }
-
-        ColourGradient grad = ColourGradient::horizontal(minColour, maxColour, outerBounds);
+        LumatoneEditorColourGradients gradientId = LumatoneEditorColourGradients((int)sld.getProperties()[LumatoneEditorStyleIDs::sliderRotaryColourGradient]);
+        juce::ColourGradient grad = getColourGradient(gradientId, outerBounds);
         g.setGradientFill(grad);
         g.fillPath(ring);
+
+        // Colour minColour = findColour(LumatoneEditorColourIDs::RotaryGradientMin);
+        // Colour maxColour = findColour(LumatoneEditorColourIDs::RotaryGradientMax);
+        // Colour dialColour = Colours::white;
+
+        // if (!sld.isEnabled())
+        // {
+        //     minColour = minColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
+        //     maxColour = maxColour.overlaidWith(findColour(LumatoneEditorColourIDs::DisabledOverlay));
+        //     dialColour = findColour(LumatoneEditorColourIDs::InactiveText);
+        // }
+
+        // ColourGradient grad = ColourGradient::horizontal(minColour, maxColour, outerBounds);
+        // g.setGradientFill(grad);
+        // g.fillPath(ring);
 
         g.setColour(Colours::white);
 
@@ -650,10 +655,11 @@ public:
 
             label->setColour(Label::ColourIds::textColourId, textColour);
 
-            int sliderSize = jmin(sld.getWidth(), sld.getHeight());
+            int textWidth = sld.getWidth() * 0.5f;
+            int textHeight = label->getFont().getHeight();
             sld.setTextBoxStyle(Slider::TextEntryBoxPosition::TextBoxBelow, false,
-                roundToInt(sliderSize * 0.5f),
-                roundToInt((sld.getHeight() - sliderSize * 0.5f) * 0.75f)
+                textWidth, // roundToInt(textWidth * 0.5f),
+                textHeight // roundToInt(sld.getHeight() * 0.33f)
             );
 
             return label;
@@ -1082,6 +1088,9 @@ public:
 
     void drawTabButtonText(TabBarButton& tbb, Graphics& g, bool isMouseOver, bool isMouseDown) override
     {
+        if (!tbb.isVisible())
+            return;
+
         Colour c = findColour(LumatoneEditorColourIDs::InactiveText); // Maybe should change this even though it's the same default colour
 
         if (tbb.isFrontTab())
@@ -1110,8 +1119,8 @@ public:
             textMargin = font.getStringWidth("  ");
             textJustify = Justification::centredLeft;
         }
-  
-        g.drawFittedText(tbb.getButtonText(), tbb.getTextArea().translated(textMargin, 0).toNearestInt(), textJustify, 0.0f);
+        
+        g.drawFittedText(tbb.getButtonText(), tbb.getTextArea().translated(textMargin, 0), textJustify, 0.0f);
     }
 
     void drawTabAreaBehindFrontButton(TabbedButtonBar& tbb, Graphics& g, int w, int h) override {}
@@ -1263,6 +1272,50 @@ public:
 
     }
 
+
+public:
+
+    juce::ColourGradient getColourGradient(LumatoneEditorColourGradients gradientId, const juce::Rectangle<float>& area) const
+    {
+        switch (gradientId)
+        {
+            default:
+                break;
+
+            case LumatoneEditorColourGradients::ExpressionSlider:
+                return juce::ColourGradient::horizontal(
+                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMin),
+                                        findColour(LumatoneEditorColourIDs::ExprRotaryGradientMax),
+                                        area);
+            case LumatoneEditorColourGradients::BrightnessSlider:
+                return juce::ColourGradient::horizontal(
+                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMin),
+                                        findColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMax),
+                                        area);
+
+            case LumatoneEditorColourGradients::HueSlider:
+            {
+                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::HueRotaryGradientMin), area.getTopLeft(),
+                                                              findColour(LumatoneEditorColourIDs::HueRotaryGradientMax), area.getTopRight(),
+                                                              false);
+                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::HueRotaryGradientMid));
+                return g;
+            }
+
+            case LumatoneEditorColourGradients::TemperatureSlider:
+            {
+                juce::ColourGradient g = juce::ColourGradient(findColour(LumatoneEditorColourIDs::TempRotaryGradientMin), area.getTopLeft(),
+                                                              findColour(LumatoneEditorColourIDs::TempRotaryGradientMax), area.getTopRight(),
+                                                              false);
+                g.addColour(0.5f, findColour(LumatoneEditorColourIDs::TempRotaryGradientMid));
+                return g;
+            }
+        }
+
+        return juce::ColourGradient();
+    }
+
+
 public:
     //==============================================================================================
     // Non-static drawing helpers
@@ -1345,6 +1398,17 @@ private:
         setColour(AlertWindow::ColourIds::backgroundColourId, findColour(LumatoneEditorColourIDs::DarkBackground));
         setColour(AlertWindow::ColourIds::textColourId, findColour(LumatoneEditorColourIDs::DescriptionText));
         setColour(AlertWindow::ColourIds::outlineColourId, findColour(LumatoneEditorColourIDs::MediumBackground));
+
+        setColour(LumatoneEditorColourIDs::ExprRotaryGradientMin,           juce::Colour(0xff5497b6));
+        setColour(LumatoneEditorColourIDs::ExprRotaryGradientMax,           juce::Colour(0xff77a8b3));
+        setColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMin,     juce::Colour(0xff293044));
+        setColour(LumatoneEditorColourIDs::BrightnessRotaryGradientMax,     juce::Colour(0xffaac1dd));
+        setColour(LumatoneEditorColourIDs::HueRotaryGradientMin,            juce::Colour(0xffd4838b));
+        setColour(LumatoneEditorColourIDs::HueRotaryGradientMid,            juce::Colour(0xff8dd48f));
+        setColour(LumatoneEditorColourIDs::HueRotaryGradientMax,            juce::Colour(0xff8495d4));
+        setColour(LumatoneEditorColourIDs::TempRotaryGradientMin,           juce::Colour(0xffd4838b));
+        setColour(LumatoneEditorColourIDs::TempRotaryGradientMid,           juce::Colour(0xffe8e8e8));
+        setColour(LumatoneEditorColourIDs::TempRotaryGradientMax,           juce::Colour(0xff8495d4));
     }
 
 private:

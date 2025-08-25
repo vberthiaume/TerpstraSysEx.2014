@@ -42,7 +42,7 @@ PedalSensitivityDlg::PedalSensitivityDlg ()
     labelExprContrSensitivity->setEditable (false, false, false);
     labelExprContrSensitivity->setColour (juce::TextEditor::textColourId, juce::Colours::black);
     labelExprContrSensitivity->setColour (juce::TextEditor::backgroundColourId, juce::Colour (0x00000000));
-
+    labelExprContrSensitivity->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::ExpressionSlider);
     labelExprContrSensitivity->setBounds (13, 152, 74, 24);
 
     btnInvertExpression.reset (new juce::ToggleButton ("btnInvertExpression"));
@@ -69,6 +69,7 @@ PedalSensitivityDlg::PedalSensitivityDlg ()
     sldExprCtrlSensitivity->setRange (0, 127, 1);
     sldExprCtrlSensitivity->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     sldExprCtrlSensitivity->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
+    sldExprCtrlSensitivity->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::ExpressionSlider);
     sldExprCtrlSensitivity->addListener (this);
 
     sldExprCtrlSensitivity->setBounds (-32, 49, 160, 97);

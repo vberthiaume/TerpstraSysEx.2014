@@ -23,8 +23,8 @@
 #include "Main.h"
 #include "LumatoneMenu.h"
 
-#include "../Libraries/lumatone_editor_library/graphics/lumatone_render.h"
-#include "../Libraries/lumatone_editor_library/color/colour_model.h"
+#include "backport/lumatone_render.h"
+#include "backport/colour_model.h"
 
 //[/Headers]
 
@@ -230,8 +230,8 @@ AllKeysOverview::AllKeysOverview ()
 	// tilingGeometry.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
 	// tilingGeometry.setRowAngle(LUMATONEGRAPHICROWANGLE);
 
-	lumatoneRenderState = std::make_unique<LumatoneState>(juce::ValueTree("LumatoneEditor"), nullptr);
-	lumatoneRender = std::make_unique<LumatoneRender>(*lumatoneRenderState);
+	// lumatoneRenderState = std::make_unique<LumatoneState>(juce::ValueTree("LumatoneEditor"), nullptr);
+	lumatoneRender = std::make_unique<LumatoneRender>(TerpstraSysExApplication::getApp().getLumatoneController());
 
 	TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
 	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);

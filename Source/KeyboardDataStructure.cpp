@@ -508,3 +508,35 @@ TerpstraVelocityCurveConfig* TerpstraKeyMapping::getVelocityCurveConfig(Terpstra
 		return nullptr;
 	}
 }
+
+LumatoneLayout TerpstraKeyMapping::getLumatoneLayout() const
+{
+    LumatoneLayout layout;
+
+    for (int b = 0; b < NUMBEROFBOARDS; b++)
+    {
+        const TerpstraKeys& set = sets[b];
+        for (int k = 0; k < MAX_LUMATONE_BOARD_KEYS; k++)
+        {
+            const TerpstraKey& key = set.theKeys[k];
+            layout.setKey(LumatoneKey(key.keyType, key.channelNumber, key.noteNumber, key.colour, key.ccFaderDefault), b, k);
+        }
+    }
+
+    return layout;
+}
+
+TerpstraKeyMapping::TerpstraKeyMapping(const LumatoneLayout &layout)
+{
+    TerpstraKeyMapping mapping;
+    for (int b = 0; b < NUMBEROFBOARDS; b++)
+    {
+        TerpstraKeys& set = mapping.sets[b];
+        const LumatoneBoard& board = layout.getBoard(b);
+        for (int k = 0; k < MAX_LUMATONE_BOARD_KEYS; k++)
+        {
+            const LumatoneKey& key = board.getKey(k);
+            set.theKeys[k] = TerpstraKey(key.getType(), key.getMidiChannel(), key.getMidiNumber(), key.getColour(), key.isCCFaderDefault());
+        }
+    }
+}

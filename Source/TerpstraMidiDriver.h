@@ -13,8 +13,8 @@
 //[Headers]     -- You can add your own extra header files here --
 #include "JuceHeader.h"
 
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/midi_driver.h"
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_support.h"
+#include "backport/midi_driver.h"
+#include "backport/firmware_support.h"
 
 namespace HajuErrorVisualizer
 {

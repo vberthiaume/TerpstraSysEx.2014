@@ -14,8 +14,9 @@
 #include "VelocityCurveDlgBase.h"
 #include "NoteOnOffVelocityCurveDialog.h"
 #include "LumatoneMenu.h"
+#include "CurvesArea.h"
 
-#include "../Libraries/lumatone_editor_library/color/colour_model.h"
+#include "backport/colour_model.h"
 
 //==============================================================================
 

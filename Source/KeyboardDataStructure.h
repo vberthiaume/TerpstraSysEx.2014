@@ -11,7 +11,9 @@ Author:  hsstraub
 #pragma once
 
 #include <JuceHeader.h>
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_definitions.h"
+#include "backport/firmware_definitions.h"
+
+#include "backport/lumatone_layout.h"
 
 typedef LumatoneFirmware::LumatoneKeyType LumatoneKeyType;
 
@@ -92,6 +94,8 @@ public:
 
 	// Velocity curve values. Meaning varies depending on editStrategy
 	int velocityValues[128];
+
+	
 };
 
 /*
@@ -111,6 +115,7 @@ class TerpstraKeyMapping
 {
 public:
 	TerpstraKeyMapping();
+	TerpstraKeyMapping(const LumatoneLayout& layout);
 
 	void clearVelocityIntervalTable();
 	void clearAll(bool initializeWithNoteKeyType=false);
@@ -123,6 +128,10 @@ public:
 	//SortedSet<TerpstraKey::COLOURTYPE> getUsedColours();
 
 	TerpstraVelocityCurveConfig* getVelocityCurveConfig(TerpstraVelocityCurveConfig::VelocityCurveType velocityCurveType);
+
+public:
+	LumatoneLayout getLumatoneLayout() const;
+	// static TerpstraKeyMapping fromLumatoneLayout(const LumatoneLayout& layout);
 
 public:
 	// Key configuration

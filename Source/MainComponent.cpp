@@ -13,6 +13,15 @@
 #include "Main.h"
 #include "EditActions.h"
 
+#include "AllKeysOverview.h"
+#include "MidiEditArea.h"
+#include "NoteEditArea.h"
+#include "GeneralOptionsDlg.h"
+#include "GlobalSettingsArea.h"
+#include "PedalSensitivityDlg.h"
+#include "ToolSelectorComponent.h"
+
+#include "CurvesArea.h"
 
 //==============================================================================
 MainContentComponent::MainContentComponent()
@@ -40,8 +49,9 @@ MainContentComponent::MainContentComponent()
 	pedalSensitivityDlg.reset(new PedalSensitivityDlg());
 	addAndMakeVisible(pedalSensitivityDlg.get());
 
-	curvesArea.reset(new CurvesArea());
-	addAndMakeVisible(curvesArea.get());
+	toolSelector = std::make_unique<ToolSelectorComponent>();
+	addAndMakeVisible(toolSelector.get());
+	curvesArea = toolSelector->getCurvesArea();
 
 	globalSettingsArea.reset(new GlobalSettingsArea());
 	addAndMakeVisible(globalSettingsArea.get());
@@ -130,6 +140,11 @@ void MainContentComponent::deleteAll(bool withRefresh)
 void MainContentComponent::getData(TerpstraKeyMapping& newData)
 {
 	newData = mappingData;
+}
+
+TabbedButtonBar* MainContentComponent::getOctaveBoardSelectorTab()
+{ 
+	return  noteEditArea->getOctaveBoardSelectorTab(); 
 }
 
 UndoableAction* MainContentComponent::createDeleteCurrentSectionAction()
@@ -424,7 +439,7 @@ void MainContentComponent::resized()
 	float noteEditWidthRatio = assignWidth;
 	if (expandedEditArea)
 	{
-		noteEditWidthRatio += curvesAreaBounds.getWidth();
+		noteEditWidthRatio += toolSelectorAreaBounds.getWidth();
 	}
 	
 	noteEditArea->setSize(proportionOfWidth(noteEditWidthRatio), proportionOfHeight(assignHeight));
@@ -432,7 +447,7 @@ void MainContentComponent::resized()
 	generalOptionsArea->setBounds(getLocalBounds().toFloat().getProportion(generalSettingsBounds).toNearestInt());
 	pedalSensitivityDlg->setBounds(getLocalBounds().toFloat().getProportion(pedalSettingsBounds).toNearestInt());
 
-	curvesArea->setBounds(getLocalBounds().toFloat().getProportion(curvesAreaBounds).toNearestInt());
+	toolSelector->setBounds(getLocalBounds().toFloat().getProportion(toolSelectorAreaBounds).toNearestInt());
 
 	globalSettingsArea->setBounds(getLocalBounds()
 		.withTop(roundToInt(newHeight * footerAreaY))

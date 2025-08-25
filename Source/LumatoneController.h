@@ -16,7 +16,12 @@
 #include "DeviceActivityMonitor.h"
 #include "FirmwareTransfer.h"
 
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_support.h"
+// #include "backport/application_state.h"
+#include "backport/firmware_support.h"
+#include "backport/LumatoneEditorBatchColourState.h"
+
+class LumatoneAction;
+class LumatoneLayout;
 
 //==============================================================================
 // Helper class for parsing and comparing (todo) firmware versions
@@ -28,6 +33,7 @@ class LumatoneController :  private TerpstraMidiDriver::Collector,
                             private juce::Thread::Listener,              // Firmware thread exited
                             private juce::Timer,
                             private juce::ChangeListener
+                            // public LumatoneApplicationState // for backporting features
 {
 
 public:
@@ -76,6 +82,26 @@ public:
 
     bool willCheckConnectionWhenInactvie() const { return deviceMonitor->willCheckForInactivity(); }
     void checkConnectionWhenInactive(bool checkWhenInactive) { deviceMonitor->setCheckForInactivity(checkWhenInactive); }
+
+
+    // BACKPORTED COMMANDS
+
+    void setLayout(const LumatoneLayout& newLayout);
+
+    bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
+    
+    void setBatchColourBrightness(float value);
+    void setBatchColourHueShift(float value);
+    void setBatchColourTempShift(float value);
+
+    BatchColourEditData getBatchColourEditData() const;
+
+    void setHasChanges(bool hasChanges);
+
+    LumatoneLayout getMappingData();
+    LumatoneKey getKey(int boardIndex, int keyIndex);
+
+    int getOctaveBoardSize() const { return getOctaveSize(); }
 
     //============================================================================
     // Combined (hi-level) commands
@@ -366,6 +392,8 @@ private:
 
     std::unique_ptr<FirmwareTransfer>       firmwareTransfer;
 
+    // std::unique_ptr<LumatoneApplicationState>   appState;
+
 //    MidiBuffer                  responseQueue;
 //    int                         readSample = 0;
 //    int                         sampleNum = 0;
@@ -382,4 +410,9 @@ private:
     bool                        currentDevicePairConfirmed = false;
     
     sysExSendingMode editingMode = sysExSendingMode::offlineEditor;
+
+
+    // Backported state properties
+    // LumatoneLayout batchColourBackup;
+    LumatoneEditorBatchColourState batchColourState;
 };

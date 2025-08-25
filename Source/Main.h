@@ -163,4 +163,6 @@ private:
 	bool firmwareUpdateWasPerformed = false; // Allows us to deinitialize libssh2 a single time
 
 	bool useColourModelFlag = true;
+
+	friend LumatoneController; // for backporting convenience
 };

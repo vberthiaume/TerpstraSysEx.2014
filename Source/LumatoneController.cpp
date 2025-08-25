@@ -11,10 +11,14 @@
 #include "LumatoneController.h"
 #include "Main.h"
 
+#include "backport/lumatone_layout.h"
+#include "backport/lumatone_action.h"
 
 LumatoneController::LumatoneController()
     // : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()),
+    //    : LumatoneApplicationState(juce::ValueTree("LumatoneEditorController"), nullptr)
        : readQueueSize(0)
+       , batchColourState(this)
 {
     reset(bufferReadSize);
     midiDriver.addMessageCollector(this);
@@ -124,11 +128,90 @@ bool LumatoneController::requestFirmwareUpdate(File firmwareFile, FirmwareTransf
     return false;
 }
 
+void LumatoneController::setLayout(const LumatoneLayout& newLayout)
+{
+    // LumatoneState::setLayout(layoutIn); // set state to new layout
+
+    if ( editingMode == sysExSendingMode::liveEditor)
+    {
+        TerpstraKeyMapping mapping(newLayout);
+        sendCompleteMapping(mapping);
+    }
+
+    // clearContext();
+
+    // editorListeners->call(&LumatoneEditor::EditorListener::layoutChanged, *mappingData);
+}
+
+bool LumatoneController::performAction(LumatoneAction *action, bool undoable, bool newTransaction)
+{
+    if (action == nullptr)
+        return false;
+
+    if (undoable)
+    {
+        juce::UndoManager* undoManager = &TerpstraSysExApplication::getApp().undoManager;
+        if (undoManager == nullptr)
+            return false;
+
+        if (newTransaction)
+            undoManager->beginNewTransaction();
+
+        return undoManager->perform((juce::UndoableAction*)action, action->getName());
+    }
+
+    return action->perform();
+}
+
+
+void LumatoneController::setBatchColourBrightness(float value)
+{
+    batchColourState.setBrightnessMultiplier(true, value);
+}
+
+void LumatoneController::setBatchColourHueShift(float value)
+{
+    batchColourState.setHueShiftAmount(true, value);
+}
+
+void LumatoneController::setBatchColourTempShift(float value)
+{
+    batchColourState.setTempShiftAmount(true, value);
+}
+
+BatchColourEditData LumatoneController::getBatchColourEditData() const
+{
+    return batchColourState.getData();
+}
+
+void LumatoneController::setHasChanges(bool hasChanges)
+{
+    TerpstraSysExApplication::getApp().setHasChangesToSave(hasChanges);
+}
+
+LumatoneLayout LumatoneController::getMappingData()
+{
+    LumatoneLayout layout = TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit().getLumatoneLayout();
+    return layout;
+}
+
+LumatoneKey LumatoneController::getKey(int boardIndex, int keyIndex)
+{
+    TerpstraKeyMapping& mapping = TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit();
+    
+    if (boardIndex <= 0 && boardIndex < NUMBEROFBOARDS && keyIndex <= 0 && keyIndex <= MAX_LUMATONE_BOARD_KEYS)
+    {
+        const TerpstraKey& key = mapping.sets[boardIndex].theKeys[keyIndex];
+        return LumatoneKey(key.keyType, key.channelNumber, key.noteNumber, key.colour, key.ccFaderDefault);
+    }
+    
+    return LumatoneKey();
+}
+
 /*
 ==============================================================================
 Combined (hi-level) commands
 */
-
 
 void LumatoneController::sendAllParamsOfBoard(int boardIndex, TerpstraKeys boardData)
 {

@@ -10,21 +10,23 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
-#include "AllKeysOverview.h"
-#include "ViewComponents.h"
 #include "KeyboardDataStructure.h"
-#include "LumatoneController.h"
-#include "MidiEditArea.h"
-#include "NoteEditArea.h"
-#include "GeneralOptionsDlg.h"
-#include "CurvesArea.h"
-#include "GlobalSettingsArea.h"
-#include "PedalSensitivityDlg.h"
 #include "LumatoneEditorLookAndFeel.h"
+
+#include "LumatoneController.h"
+#include "ViewComponents.h"
 #include "ColourPaletteWindow.h"
 
+class AllKeysOverview;
+class MidiEditArea;
+class NoteEditArea;
+class GeneralOptionsDlg;
+class GlobalSettingsArea;
+class PedalSensitivityDlg;
+class ToolSelectorComponent;
+class CurvesArea;
 
 
 //==============================================================================
@@ -52,8 +54,8 @@ public:
 	void getData(TerpstraKeyMapping& newData);
 	TerpstraKeyMapping&	getMappingInEdit() { return this->mappingData; }
 
-	TabbedButtonBar* getOctaveBoardSelectorTab() { return  noteEditArea->getOctaveBoardSelectorTab(); }
-	CurvesArea* getCurvesArea() { return curvesArea.get(); }
+	TabbedButtonBar* getOctaveBoardSelectorTab();
+	CurvesArea* getCurvesArea() { return curvesArea; }
 
 	// Board edit operations
 	UndoableAction* createDeleteCurrentSectionAction();
@@ -121,7 +123,9 @@ private:
 
 	std::unique_ptr<GeneralOptionsDlg>	generalOptionsArea;
 	
-	std::unique_ptr<CurvesArea> curvesArea;
+	std::unique_ptr<ToolSelectorComponent> toolSelector;
+
+	CurvesArea* curvesArea;
 
 	std::unique_ptr<GlobalSettingsArea> globalSettingsArea;
 
@@ -181,5 +185,5 @@ private:
 
     const Rectangle<float> generalSettingsBounds = { settingsColumnX, settingsAreaY, 0.17f, settingsAreaHeight };
     const Rectangle<float>   pedalSettingsBounds = { 0.777778f,       settingsAreaY, 0.18f, settingsAreaHeight };
-    const Rectangle<float>      curvesAreaBounds = { settingsColumnX, 0.7174f,       0.3626f, 0.21f };
+    const Rectangle<float>toolSelectorAreaBounds = { settingsColumnX, 0.7174f,       0.3626f, 0.21f };
 };

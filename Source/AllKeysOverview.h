@@ -28,10 +28,9 @@
 #include "BoardGeometry.h"
 #include "LumatoneController.h"
 
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
+#include "backport/firmware_types.h"
 
 class ImageProcessor;
-class LumatoneState;
 class LumatoneRender;
 
 // Representation of a key inside the overview
@@ -140,8 +139,6 @@ private:
 	int			currentSetSelection;
 
 	// HexagonTilingGeometry tilingGeometry;
-
-	std::unique_ptr<LumatoneState> lumatoneRenderState;
     std::unique_ptr<LumatoneRender> lumatoneRender;
 
 	Image keyColourLayer;

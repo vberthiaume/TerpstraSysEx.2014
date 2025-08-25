@@ -11,7 +11,7 @@
 #include "FirmwareTransfer.h"
 #include "Main.h"
 
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
+#include "backport/firmware_types.h"
 
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>

@@ -649,7 +649,27 @@ enum LumatoneEditorColourIDs
     RotaryGradientMin,
     RotaryGradientMax,
     DisabledOverlay,
-    MenuBarBackground
+    MenuBarBackground,
+
+    
+    ExprRotaryGradientMax,
+    ExprRotaryGradientMin,
+    BrightnessRotaryGradientMin,
+    BrightnessRotaryGradientMax,
+    HueRotaryGradientMin,
+    HueRotaryGradientMid,
+    HueRotaryGradientMax,
+    TempRotaryGradientMin,
+    TempRotaryGradientMid,
+    TempRotaryGradientMax
+};
+
+enum LumatoneEditorColourGradients
+{
+    ExpressionSlider,
+    BrightnessSlider,
+    HueSlider,
+    TemperatureSlider
 };
 
 namespace LumatoneEditorStyleIDs
@@ -695,6 +715,8 @@ namespace LumatoneEditorStyleIDs
     // Even values will have top left and bottom right rounded corners
     static Identifier roundedDiagonalCorners = Identifier("RoundedDiagonalCorners");
 
+    // Specify LumatoneEditorColourGradient id for rotary juce::Slider
+    static juce::Identifier sliderRotaryColourGradient = juce::Identifier("SliderRotaryColourGradient");
 }
 
 // LookAndFeel doesn't have Slider IncDec button access in drawIncDecButtonsBackground

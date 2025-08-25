@@ -76,15 +76,14 @@ CurvesArea::CurvesArea ()
     curvesTab->setTabBarDepth (30);
     curvesTab->addTab (TRANS("Note Velocity"), juce::Colours::lightgrey, new NoteOnOffVelocityCurveDialog(), true);
     curvesTab->setCurrentTabIndex (0);
-
     curvesTab->setBounds (8, 40, 464, 200);
 
-    btnDeveloperMode.reset (new juce::ToggleButton ("btnDeveloperMode"));
-    addAndMakeVisible (btnDeveloperMode.get());
-    btnDeveloperMode->setButtonText (TRANS("Developer Mode"));
-    btnDeveloperMode->addListener (this);
+    // btnDeveloperMode.reset (new juce::ToggleButton ("btnDeveloperMode"));
+    // addAndMakeVisible (btnDeveloperMode.get());
+    // btnDeveloperMode->setButtonText (TRANS("Developer Mode"));
+    // btnDeveloperMode->addListener (this);
 
-    btnDeveloperMode->setBounds (200, 8, 158, 24);
+    // btnDeveloperMode->setBounds (200, 8, 158, 24);
 
 
     //[UserPreSize]
@@ -92,6 +91,7 @@ CurvesArea::CurvesArea ()
 
     labelWindowTitle->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
     labelWindowTitle->setColour(Label::backgroundColourId, Colour());
+    labelWindowTitle->setVisible(false);
 
     curvesTab->setColour(TabbedComponent::ColourIds::outlineColourId, Colour());
     curvesTab->setColour(TabbedComponent::ColourIds::backgroundColourId, Colour());
@@ -120,7 +120,7 @@ CurvesArea::~CurvesArea()
 
     labelWindowTitle = nullptr;
     curvesTab = nullptr;
-    btnDeveloperMode = nullptr;
+    // btnDeveloperMode = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -131,38 +131,32 @@ CurvesArea::~CurvesArea()
 void CurvesArea::paint (juce::Graphics& g)
 {
     //[UserPrePaint] Add your own custom painting code here..
-    /*
-    //[/UserPrePaint]
-
-    g.fillAll (juce::Colour (0xff323e44));
-
-    //[UserPaint] Add your own custom painting code here..
-    */
     //[/UserPaint]
 }
 
 void CurvesArea::resized()
 {
     //[UserPreResize] Add your own custom resize code here..
-    int tabBarDepth = roundToInt(getHeight() * tabDepth);
-    int tabY = proportionOfHeight(tabYScalar);
+    // int tabY = proportionOfHeight(tabYScalar);
+    // int tabY = 0;
     //[/UserPreResize]
 
     //[UserResized] Add your own custom resize handling here..
 
-    btnDeveloperMode->setBounds(
-        getWidth() - btnDeveloperMode->getWidth(),
-        proportionOfHeight(0.0f),
-        btnDeveloperMode->getWidth(),
-        tabY);
+    // btnDeveloperMode->setBounds(
+    //     getWidth() - btnDeveloperMode->getWidth(),
+    //     proportionOfHeight(0.0f),
+    //     btnDeveloperMode->getWidth(),
+    //     proportionOfHeight(tabYScalar));
 
-    curvesTab->setTabBarDepth(tabBarDepth);
+    int tabBarDepth = roundToInt(getHeight() * tabDepth);
+    int offset = showDeveloperMode ? tabBarDepth : 0;
+    curvesTab->setBounds(0, 0, getWidth(), getHeight());
+    curvesTab->setTabBarDepth(offset);
     curvesTab->setTabsIndent(roundToInt(getWidth() * tabXScalar));
 
-    curvesTab->setBounds(0, tabY, getWidth(), getHeight() - tabY);
-
-    resizeLabelWithHeight(labelWindowTitle.get(), tabBarDepth * 0.9f);
-    labelWindowTitle->setTopLeftPosition(roundToInt(getWidth() * 0.01f), tabY);
+    // resizeLabelWithHeight(labelWindowTitle.get(), tabBarDepth * 0.9f);
+    // labelWindowTitle->setTopLeftPosition(roundToInt(getWidth() * 0.01f), tabY);
     //[/UserResized]
 }
 
@@ -171,24 +165,12 @@ void CurvesArea::buttonClicked (juce::Button* buttonThatWasClicked)
     //[UserbuttonClicked_Pre]
     //[/UserbuttonClicked_Pre]
 
-    if (buttonThatWasClicked == btnDeveloperMode.get())
-    {
-        //[UserButtonCode_btnDeveloperMode] -- add your button handler code here..
-		if (btnDeveloperMode->getToggleState())
-		{
-			curvesTab->addTab(TRANS("CC Fader"), juce::Colours::lightgrey, new FaderVelocityCurveDialog(), true);
-			curvesTab->addTab(TRANS("Aftertouch"), juce::Colours::lightgrey, new AftertouchVelocityCurveDialog(), true);
-			curvesTab->addTab(TRANS("Lumatouch"), juce::Colours::lightgrey, new LumatouchVelocityCurveDialog(), true);
-		}
-		else
-		{
-			curvesTab->setCurrentTabIndex(0);
-			curvesTab->removeTab(3);
-			curvesTab->removeTab(2);
-			curvesTab->removeTab(1);
-		}
-        //[/UserButtonCode_btnDeveloperMode]
-    }
+    // if (buttonThatWasClicked == btnDeveloperMode.get())
+    // {
+    //     //[UserButtonCode_btnDeveloperMode] -- add your button handler code here..
+
+    //     //[/UserButtonCode_btnDeveloperMode]
+    // }
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
@@ -216,8 +198,23 @@ void CurvesArea::sendConfigToController()
 void CurvesArea::setDeveloperMode(bool devModeOn)
 {
     showDeveloperMode = devModeOn;
-    btnDeveloperMode->setVisible(showDeveloperMode);
-    repaint();
+
+    if (showDeveloperMode)
+    {
+        curvesTab->addTab(TRANS("CC Fader"), juce::Colours::lightgrey, new FaderVelocityCurveDialog(), true);
+        curvesTab->addTab(TRANS("Aftertouch"), juce::Colours::lightgrey, new AftertouchVelocityCurveDialog(), true);
+        curvesTab->addTab(TRANS("Lumatouch"), juce::Colours::lightgrey, new LumatouchVelocityCurveDialog(), true);
+    }
+    else
+    {
+        curvesTab->setCurrentTabIndex(0);
+        curvesTab->removeTab(3);
+        curvesTab->removeTab(2);
+        curvesTab->removeTab(1);
+    }
+
+    resized();
+
 }
 
 //[/MiscUserCode]

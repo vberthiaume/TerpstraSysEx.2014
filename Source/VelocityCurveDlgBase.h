@@ -20,7 +20,7 @@
 #pragma once
 
 //[Headers]     -- You can add your own extra header files here --
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "VelocityCurveComponents.h"
 #include "VelocityCurveEditStrategy.h"
@@ -58,6 +58,8 @@ public:
 	void mouseDown(const MouseEvent &event);
 	void mouseDrag(const MouseEvent &event);
 	void mouseUp(const MouseEvent &event);
+
+	juce::uint8 velocityValues[VELOCITYINTERVALTABLESIZE];
 
 protected:
 	virtual float beamWidth(int xPos) { return getWidth() / 128.0f; }

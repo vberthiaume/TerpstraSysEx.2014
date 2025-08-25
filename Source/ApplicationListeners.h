@@ -12,7 +12,7 @@
 
 #pragma once
 #include  <JuceHeader.h>
-#include "../Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"
+#include "backport/firmware_types.h"
 
 enum sysExSendingMode
 {
