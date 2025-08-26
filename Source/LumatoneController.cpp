@@ -208,23 +208,24 @@ const LumatoneEditorBatchColourState& LumatoneController::getBatchColourEditStat
     return batchColourState;
 }
 
-void LumatoneController::applyBatchColours()
+void LumatoneController::applyBatchColours(bool sendToDevice)
 {
-    setLayout(TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit());
+    setLayout(TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit(), sendToDevice);
     batchColourState.reset();
 }
 
-void LumatoneController::resetBatchColours()
+void LumatoneController::resetBatchColours(bool sendToDevice)
 {
-    setLayout(batchColourState.getMappingBeforeEdits());
+    setLayout(batchColourState.getMappingBeforeEdits(), sendToDevice);
     batchColourState.reset();
 }
 
-void LumatoneController::checkAndResetBatchEdits()
+void LumatoneController::checkAndResetBatchEdits(bool sendToDevice)
 {
     if (batchColourState.isInEdit())
     {
-        resetBatchColours();
+        resetBatchColours(sendToDevice);
+        TerpstraSysExApplication::getApp().getMainContentComponent()->refreshBatchColours();
     }
 }
 
@@ -375,7 +376,7 @@ void LumatoneController::testCurrentDeviceConnection()
 
 // Send parametrization of one key to the device
 void LumatoneController::sendKeyParam(int boardIndex, int keyIndex, TerpstraKey keyData)
-{    
+{
     // Default CC polarity = 1, Inverted CC polarity = 0
     sendKeyConfig(boardIndex, keyIndex, keyData.noteNumber, keyData.channelNumber, keyData.keyType, keyData.ccFaderDefault);
     sendKeyColourConfig(boardIndex, keyIndex, keyData.colour);

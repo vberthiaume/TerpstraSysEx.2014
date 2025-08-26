@@ -35,6 +35,8 @@ namespace Lumatone {
 		auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 		jassert(mainComponent != nullptr);
 
+		TerpstraSysExApplication::getApp().getLumatoneController()->checkAndResetBatchEdits();
+
 		previousData = mainComponent->getMappingInEdit().sets[setSelection].theKeys[keySelection];
 	}
 
@@ -162,6 +164,8 @@ namespace Lumatone {
 	{
 		auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 		jassert(mainComponent != nullptr);
+
+		TerpstraSysExApplication::getApp().getLumatoneController()->checkAndResetBatchEdits();
 
 		previousData = mainComponent->getMappingInEdit().sets[setSelection];
 	}

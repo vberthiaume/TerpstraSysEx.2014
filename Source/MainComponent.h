@@ -80,6 +80,9 @@ public:
 	void refreshGlobalSettings();
 	void refreshAllFields();
 
+	void refreshToolFields();
+	void refreshBatchColours();
+
 	void setEditAreaExpanded(bool isExpanded);
 
 	// Implementation of LumatoneEditor::FirmwareListener

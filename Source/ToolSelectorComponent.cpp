@@ -49,6 +49,11 @@ void ToolSelectorComponent::resized()
     background = getLocalBounds().withTrimmedTop(getTabBarDepth()).toFloat();
 }
 
+void ToolSelectorComponent::resetBatchColours()
+{
+    batchColourTools->updateFromState();
+}
+
 void ToolSelectorComponent::changeListenerCallback(juce::ChangeBroadcaster *source)
 {
     if (source == &getTabbedButtonBar())

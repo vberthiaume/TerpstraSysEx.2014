@@ -742,7 +742,9 @@ bool IsomorphicMassAssign::performMouseDown(int setSelection, int keySelection)
 	int startNoteIndex = this->startingPointBox->getSelectedItemIndex();
 	if (this->mappingLogic != nullptr && startNoteIndex >= 0)
 	{
-	    auto mainComponent = dynamic_cast<MainContentComponent*>(getParentComponent()->getParentComponent()->getParentComponent());
+	    auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
+        TerpstraSysExApplication::getApp().getLumatoneController()->resetBatchColours(false);
+        mainComponent->refreshBatchColours();
 
 		int horizStepSize = editHorizontalSteps->getText().getIntValue();
 		int rUpwStepSize = editRightUpwardSteps->getText().getIntValue();

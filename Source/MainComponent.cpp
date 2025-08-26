@@ -134,6 +134,7 @@ void MainContentComponent::deleteAll(bool withRefresh)
 {
 	TerpstraKeyMapping keyMapping;
 	setData(keyMapping, withRefresh);
+	toolSelector->resetBatchColours();
 }
 
 // Copy the edited mapping to the variable passed as parameter
@@ -484,9 +485,21 @@ void MainContentComponent::refreshAllFields()
 	refreshKeyDataFields();
 	generalOptionsArea->loadFromMapping();
 	pedalSensitivityDlg->loadFromMapping();
+	refreshToolFields();
 	refreshGlobalSettings();
+}
+
+void MainContentComponent::refreshToolFields()
+{
 	curvesArea->loadFromMapping();
 	curvesArea->repaint();
+	
+	toolSelector->resetBatchColours();
+}
+
+void MainContentComponent::refreshBatchColours()
+{
+	toolSelector->resetBatchColours();
 }
 
 void MainContentComponent::setEditAreaExpanded(bool isExpanded)

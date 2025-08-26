@@ -556,6 +556,7 @@ bool TerpstraSysExApplication::resetSysExMapping()
 	currentFile = File();
 
 	// Clear all edit fields
+	lumatoneController->resetBatchColours(false);
 	((MainContentComponent*)(mainWindow->getContentComponent()))->deleteAll();
 
 	setHasChangesToSave(false);
@@ -774,6 +775,7 @@ bool TerpstraSysExApplication::openFromCurrentFile()
 
 		lastSavedMapping = keyMapping;
 
+		lumatoneController->resetBatchColours(false);
 		((MainContentComponent*)(mainWindow->getContentComponent()))->setData(keyMapping);
 
 		// Window title

@@ -19,6 +19,8 @@ public:
 
     CurvesArea* getCurvesArea() { return curvesArea; }
 
+    void resetBatchColours();
+
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 

@@ -100,10 +100,10 @@ public:
 
     const LumatoneEditorBatchColourState& getBatchColourEditState() const;
 
-    void applyBatchColours();
-    void resetBatchColours();
+    void applyBatchColours(bool sendToDevice=true);
+    void resetBatchColours(bool sendToDevice=true);
 
-    void checkAndResetBatchEdits(); // if another edit happens while batch colours are being edited, reset the batch ones first
+    void checkAndResetBatchEdits(bool sendToDevice=true); // if another edit happens while batch colours are being edited, reset the batch ones first
 
     void setHasChanges(bool hasChanges);
 
