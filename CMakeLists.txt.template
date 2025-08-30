@@ -16,6 +16,8 @@ juce_add_gui_app(
         )
 juce_generate_juce_header(LumatoneEditor)
 
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+
 set_directory_properties(
     PROPERTIES
         COMPANY_COPYRIGHT "BSD-0"
@@ -138,6 +140,10 @@ else()
             juce::juce_recommended_lto_flags
             juce::juce_recommended_warning_flags
         )
+endif()
+
+if (APPLE)
+   target_link_options(LumatoneEditor PUBLIC -Wl -ld_classic)
 endif()
 
 if (APPLE)
