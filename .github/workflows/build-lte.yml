@@ -61,14 +61,23 @@ jobs:
           cp CMakeLists.txt.template CMakeLists.txt
           cmake -S . -B build
           cmake --build build --config Release
-      - name: List build directory
+      # - name: List build directory
+      #   run: |
+      #     find build/$ARTIFACTS/Lumatone\ Editor.app
+      - name: Make package directory for artifact
         run: |
-          find build/$ARTIFACTS/Lumatone\ Editor.app
+          cd build/${{ env.ARTIFACTS }}
+          DATE=`date +%Y%m%d`
+          macTarget="LumatoneEditor_${DATE}-macOS"
+          echo "macTarget=${macTarget}" >> $GITHUB_ENV
+          echo "Making dir ${macTarget}"
+          mkdir ${macTarget}
+          mv "Lumatone Editor.app" ${macTarget}
       - name: Upload Lumatone Editor
         uses: actions/upload-artifact@v4
         with:
           name: LumatoneEditor-macOS
-          path: "build/${{ env.ARTIFACTS }}/Lumatone Editor.app"
+          path: "build/${{ env.ARTIFACTS }}/${{ env.macTarget }}"
           if-no-files-found: error
 
   build-lte-windows:
