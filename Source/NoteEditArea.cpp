@@ -196,7 +196,7 @@ void NoteEditArea::resized()
 	// Single Key fields
 
 	keyEditBounds = contentBackground.withLeft(assignControlsBounds.getRight() + assignControlsBounds.getX() * 0.5f);
-	DBG("KeyEditBounds: " + keyEditBounds.toString());
+	// DBG("KeyEditBounds: " + keyEditBounds.toString());
 
 	int numOctaves = 1;
 	int widestRow = boardGeometry.getMaxHorizontalLineSize();
