@@ -473,34 +473,13 @@
         <MODULEPATH id="juce_audio_basics" path="..\..\JUCE\modules"/>
       </MODULEPATHS>
     </VS2017>
-    <VS2019 targetFolder="Builds/VisualStudio2019" externalLibraries="libssh2.dll.a"
-            smallIcon="fwSyLL" bigIcon="yjLw0u" extraDefs="SERVERHOST=&quot;192.168.7.2&quot;">
-      <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="$(ProjectDir)..\..\Libraries\win64\include"
-                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib" targetName="Lumatone Editor"
-                       postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Debug\App&quot; /Y"/>
-        <CONFIGURATION isDebug="0" name="Release" libraryPath="$(ProjectDir)..\..\Libraries\win64\lib"
-                       headerPath="$(ProjectDir)..\..\Libraries\win64\include" targetName="Lumatone Editor"
-                       postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Release\App&quot; /Y"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra"/>
-        <MODULEPATH id="juce_gui_basics"/>
-        <MODULEPATH id="juce_graphics"/>
-        <MODULEPATH id="juce_events"/>
-        <MODULEPATH id="juce_data_structures"/>
-        <MODULEPATH id="juce_core"/>
-        <MODULEPATH id="juce_audio_devices"/>
-        <MODULEPATH id="juce_audio_basics"/>
-      </MODULEPATHS>
-    </VS2019>
     <VS2022 targetFolder="Builds/VisualStudio2022" extraDefs="SERVERHOST=&quot;192.168.7.2&quot;"
-            externalLibraries="libssh2.dll.a" smallIcon="fwSyLL" bigIcon="yjLw0u">
+            smallIcon="fwSyLL" bigIcon="yjLw0u" externalLibraries="libssh2.lib">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="$(ProjectDir)..\..\Libraries\win64\include"
-                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib" postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Debug\App&quot; /Y"/>
+                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="$(ProjectDir)..\..\Libraries\win64\include"
-                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib" postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Release\App&quot; /Y"/>
+                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="P:\Programming-Projects\juce-framework\JUCE6\modules"/>
