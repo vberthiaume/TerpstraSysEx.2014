@@ -32,12 +32,14 @@ struct BatchColourEditData
 
     static float BrightnessMapToNorm(float multiplier)
     {
-        return sqrtf(multiplier * 0.25f);
+        // return sqrtf(multiplier * 0.25f);
+        return multiplier * 0.5f;
     }
 
     static float BrightnessMapFromNorm(float value)
     {
-        return 4 * value * value;
+        // return 4 * value * value;
+        return value * 2.0f;
     }
 
     static float HueShiftMapToNorm(float shiftAmt)
