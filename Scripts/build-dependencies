@@ -1,0 +1,163 @@
+#!/bin/zsh
+
+USAGE="usage: build-dependencies-arm [ libgpg-error | libgcrypt | libssh2 | all ] [ ?copy_target_parent ] [ ?build_id? ]"
+if [[ -z $1 ]]; then
+    echo $USAGE
+    exit 0
+fi
+
+[[ $1 == "all" ]] && MAKE_ALL=1
+[[ $MAKE_ALL || $1 == "libgpg-error" ]] && MAKE_LIBGPGERROR=1
+[[ $MAKE_ALL || $1 == "libgcrypt" ]] && MAKE_LIBGCRYPT=1
+[[ $MAKE_ALL || $1 == "libssh2" ]] && MAKE_LIBSSH2=1
+
+[[ $MAKE_ALL ]] && echo "Making all targets:"
+[[ $MAKE_LIBGPGERROR ]] && echo "Making libgpg-error.dylib"
+[[ $MAKE_LIBGCRYPT ]] && echo "Making libgcrypt.dylib"
+[[ $MAKE_LIBSSH2 ]] && echo "Making libssh2.dylib"
+
+if [[ -z $MAKE_LIBGPGERROR && -z $MAKE_LIBGCRYPT && -z $MAKE_LIBSSH2 ]]; then
+    echo $USAGE
+    exit 0
+fi
+
+[[ $3 ]] && ID=$3 || ID=`date +"%y%m%d"`
+
+echo ID is $ID
+
+LIB_DIR=/Users/vito/Programming/Libs
+
+BUILDS_PARENT=release-arm64
+
+LIBGPGERR_DIR=${LIB_DIR}/libgpg-error-1.55
+LIBGPGERR_TARGET=${LIBGPGERR_DIR}/${BUILDS_PARENT}/libgpgerror_${ID}
+
+LIBGCRYPT_DIR=${LIB_DIR}/libgcrypt-1.11.2
+LIBGCRYPT_TARGET=${LIBGCRYPT_DIR}/${BUILDS_PARENT}/libgcrypt_${ID}
+
+LIBSSH2_DIR=${LIB_DIR}/libssh2-1.11.1
+LIBSSH2_TARGET=${LIBSSH2_DIR}/${BUILDS_PARENT}/libssh2_${ID}
+
+export MACOSX_DEPLOYMENT_TARGET=10.15
+export CC=Clang
+
+if [[ $2 ]]; then 
+    COPY_DIR=$2
+    [[ -d $COPY_DIR ]] || mkdir $COPY_DIR
+
+    COPY_LIB_DIR=$COPY_DIR/lib
+    [[ -d $COPY_LIB_DIR ]] || mkdir $COPY_LIB_DIR
+
+    COPY_INC_DIR=$COPY_DIR/include
+    [[ -d $COPY_INC_DIR ]] || mkdir $COPY_INC_DIR
+
+    echo Will copy targets to $COPY_DIR
+fi
+
+DO_SIGNING=0
+[[ $COPY_DIR && $DO_SIGNING != 0 ]] && echo Will codesign targets.
+
+
+### Build release version of libgpg-error
+
+if [[ $MAKE_LIBGPGERROR ]]; then
+
+    [[ -d ${LIBGPGERR_DIR}/${BUILDS_PARENT} ]] || mkdir ${LIBGPGERR_DIR}/${BUILDS_PARENT}
+
+    cd ${LIBGPGERR_DIR}
+    ./configure --prefix=${LIBGPGERR_TARGET} --disable-nls --disable-doc --enable-static --disable-shared --enable-install-gpg-error-config
+    make && make install && make clean && LIBGPGERR_BUILT=1
+    if [[ $LIBGPGERR_BUILT ]]; then
+        echo -e libgpg-error successful!
+    #     LIBGPGERR_LIB=${LIBGPGERR_TARGET}/lib
+    #     LIBGPGERR_LINK=libgpg-error.dylib
+    #     LIBGPGERR_OUT=`readlink ${LIBGPGERR_LIB}/${LIBGPGERR_LINK}`
+    #     LIBGPGERR_BIN=${LIBGPGERR_LIB}/${LIBGPGERR_OUT}
+        
+    #     ## set r_path relative to app binary
+    #     # install_name_tool -add_rpath @executable_path/../Frameworks ${LIBGPGERR_BIN}
+    #     # install_name_tool -id @rpath/${LIBGPGERR_LINK} ${LIBGPGERR_BIN}
+
+    #     ## install to project directory
+    #     [[ $COPY_DIR ]] && \
+    #         cp ${LIBGPGERR_BIN} ${COPY_LIB_DIR} && \
+    #         ln -s ${LIBGPGERR_BIN} ${COPY_LIB_DIR}/${LIBGPGERR_LINK} && \
+    #         cp -r ${LIBGPGERR_TARGET}/include/* ${COPY_INC_DIR}
+    else
+        echo Error building libgpg-error.dylib
+        exit 1
+    fi
+fi
+
+
+### Build release version of libgcrypt
+if [[ $MAKE_LIBGCRYPT ]]; then
+    [[ -d ${LIBGCRYPT_DIR}/${BUILDS_PARENT} ]] || mkdir ${LIBGCRYPT_DIR}/${BUILDS_PARENT}
+
+    cd ${LIBGCRYPT_DIR}
+    export GPGRT_CONFIG=${LIBGPGERR_TARGET}/bin/gpgrt-config
+    ./configure --prefix=${LIBGCRYPT_TARGET} --with-libgpg-error-prefix=${LIBGPGERR_TARGET} --disable-doc --enable-static --disable-shared
+    make && make install && make clean && LIBGCRYPT_BUILT=1
+    if [[ $LIBGCRYPT_BUILT ]]; then
+        echo -e libgcrypt build successful!
+        # LIBGCRYPT_LIB=${LIBGCRYPT_TARGET}/lib
+        # LIBGCRYPT_LINK=libgcrypt.dylib
+        # LIBGCRYPT_OUT=`readlink ${LIBGCRYPT_LIB}/${LIBGCRYPT_LINK}`
+        # LIBGCRYPT_BIN=${LIBGCRYPT_LIB}/${LIBGCRYPT_OUT}
+
+        # ## set r_path relative to app binary
+        # install_name_tool -add_rpath @executable_path/../Frameworks ${LIBGCRYPT_BIN} && echo add rpath successful
+        # install_name_tool -change ${LIBGPGERR_BIN} @rpath/${LIBGPGERR_OUT} ${LIBGCRYPT_BIN} && echo change libgpg-error path succesful
+        # install_name_tool -id @rpath/${LIBGCRYPT_LINK} ${LIBGCRYPT_BIN} && echo change id successful
+
+        # ## install to project directory
+        # [[ $COPY_DIR ]] && \
+        #     cp ${LIBGCRYPT_BIN} ${COPY_LIB_DIR} && \
+        #     ln -s ${LIBGCRYPT_BIN} ${COPY_LIB_DIR}/${LIBGCRYPT_LINK} && \
+        #     cp -r ${LIBGCRYPT_TARGET}/include/* ${COPY_INC_DIR}
+    else
+        echo Error building libgcrypt.dylib
+        exit 1
+    fi
+fi
+
+### Build release version of libssh2
+
+if [[ $MAKE_LIBSSH2 ]]; then
+    [[ -d ${LIBSSH2_DIR}/${BUILDS_PARENT} ]] || mkdir ${LIBSSH2_DIR}/${BUILDS_PARENT}
+
+    cd ${LIBSSH2_DIR}
+    ./configure --prefix=${LIBSSH2_TARGET} --with-libgcrypt-prefix=${LIBGCRYPT_TARGET} --without-libz --enable-static --disable-shared
+    make && make install && make clean && LIBSSH2_BUILT=1
+    if [[ LIBSSH2_BUILT ]]; then
+        echo -e libssh2 build successful!
+        # LIBSSH2_LIB=${LIBSSH2_TARGET}/lib
+        # LIBSSH2_LINK=libssh2.dylib
+        # LIBSSH2_OUT=`readlink ${LIBSSH2_LIB}/${LIBSSH2_LINK}`
+        # LIBSSH2_BIN=${LIBSSH2_LIB}/${LIBSSH2_OUT}
+
+        # ## set r_path relative to app binary
+        # install_name_tool -add_rpath @executable_path/../Frameworks ${LIBSSH2_BIN}
+        # install_name_tool -change ${LIBGCRYPT_BIN} @rpath/${LIBGCRYPT_OUT} ${LIBSSH2_BIN}
+        # install_name_tool -change ${LIBGPGERR_BIN} @rpath/${LIBGPGERR_OUT} ${LIBSSH2_BIN}
+        # install_name_tool -id @rpath/${LIBSSH2_LINK} ${LIBSSH2_BIN}
+
+        # ## install to project directory
+        # [[ $COPY_DIR ]] && \
+        #     cp ${LIBSSH2_BIN} ${COPY_LIB_DIR} && \
+        #     ln -s ${LIBSSH2_BIN} ${COPY_LIB_DIR}/${LIBSSH2_LINK} && \
+        #     cp -r ${LIBSSH2_TARGET}/include/* ${COPY_INC_DIR}
+    else
+        echo Error building libssh2.dylib
+        exit 1
+    fi
+fi
+
+### Sign everything in the lib folder
+if [[ $COPY_DIR && $DO_SIGNING != 0 ]]; then
+    LUMATONE_DEV_APP_ID=69P563VA6F
+    find ${COPY_DIR} -type f -exec codesign -f -v -s ${LUMATONE_DEV_APP_ID} {} \;
+    cd ${COPY_DIR}
+fi
+
+exit 0

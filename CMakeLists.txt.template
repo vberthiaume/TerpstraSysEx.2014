@@ -34,22 +34,19 @@ file(GLOB_RECURSE SourceCode
 
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64")
-    set(LibraryInclude "${LibraryPath}/include")
-    set(LibraryCode "${LibraryInclude}/libssh2.h")
+    set(LibraryPath     "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64")
+    set(LibraryInclude  "${LibraryPath}/include")
+    set(SSHLib          "${LibraryPath}/lib/libssh2.lib")
 
-    add_library( SSHLib SHARED IMPORTED )
-    set_target_properties( SSHLib PROPERTIES IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/libssh2-x64.dll" )
-    set_target_properties( SSHLib PROPERTIES IMPORTED_IMPLIB "${LibraryPath}/lib/libssh2.dll.a" )
-endif()
+elseif(APPLE)
+    set_target_properties(LumatoneEditor PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-if (APPLE)
-    set(LibraryPath "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
-    set(LibraryInclude "${LibraryPath}/include")
-    set(LibraryCode "${LibraryInclude}/libssh2.h")
+    set(LibraryPath     "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
+    set(LibraryInclude  "${LibraryPath}/include")
+    set(LibGpgError     "${LibraryPath}/lib/libgpg-error.a")
+    set(LibGCrypt       "${LibraryPath}/lib/libgcrypt.a")
+    set(SSHLib          "${LibraryPath}/lib/libssh2.a")
 
-    add_library(SSHLib SHARED IMPORTED)
-    set_target_properties( SSHLib PROPERTIES IMPORTED_LOCATION "${LibraryPath}/lib/libssh2.dylib")
 elseif(UNIX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(SSHLib REQUIRED libssh2)
@@ -64,7 +61,6 @@ target_sources(
     LumatoneEditor
         PRIVATE
             ${SourceCode}
-            ${LibraryCode}
             )
 
 target_compile_definitions(LumatoneEditor
@@ -113,12 +109,13 @@ if (APPLE OR ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_link_libraries(LumatoneEditor
         PRIVATE
             LumatoneEditorAssets
-            # juce::juce_gui_extra
             juce::juce_audio_utils
             juce::juce_audio_devices
             juce::juce_opengl
 
-            SSHLib
+            ${LibGpgError}
+            ${LibGCrypt}
+            ${SSHLib}
 
         PUBLIC
             juce::juce_recommended_config_flags
@@ -147,27 +144,15 @@ if (APPLE)
 endif()
 
 if (APPLE)
+    # todo sign
 
     # not sure why this isn't already set
-    set(JUCE_PRODUCT_NAME "Lumatone Editor")
-    set(TARGET_APP ./LumatoneEditor_artefacts/${CMAKE_BUILD_TYPE}/${JUCE_PRODUCT_NAME}.app)
+    # set(JUCE_PRODUCT_NAME "Lumatone Editor")
+    # set(TARGET_APP ./LumatoneEditor_artefacts/${CMAKE_BUILD_TYPE}/${JUCE_PRODUCT_NAME}.app)
 
-    add_custom_command(
-        TARGET LumatoneEditor POST_BUILD
-        COMMAND ../Scripts/setup-package.sh ${TARGET_APP}
-    )
+    # add_custom_command(
+    #     TARGET LumatoneEditor POST_BUILD
+    #     COMMAND ../Scripts/setup-package.sh ${TARGET_APP}
+    # )
 
-elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-
-add_custom_command(
-    TARGET LumatoneEditor POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${LibraryPath}/bin
-        ${CMAKE_CURRENT_BINARY_DIR}/LumatoneEditor_artefacts/$<CONFIG>
-    )
 endif()
-
-# set_target_properties(LumatoneEditor PROPERTIES
-#                       RUNTIME_OUTPUT_DIRECTORY_DEBUG ./Builds/Debug
-#                       RUNTIME_OUTPUT_DIRECTORY_RELEASE ./Builds/Release
-# )

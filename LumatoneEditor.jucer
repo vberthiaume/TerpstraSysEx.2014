@@ -11,211 +11,207 @@
     <GROUP id="{0C0C01A7-7D12-68B9-2CA8-9F3D2FF41CF7}" name="Libraries">
       <GROUP id="{96667A4F-E44D-2DFC-0749-E88CB35C7C55}" name="mac">
         <GROUP id="{693844E0-4D97-DCC2-79BD-F8AB2272C2C9}" name="include">
-          <FILE id="aPeFIJ" name="gcrypt.h" compile="0" resource="0" file="Libraries/mac/include/gcrypt.h"/>
-          <FILE id="zM4rN7" name="gpg-error.h" compile="0" resource="0" file="Libraries/mac/include/gpg-error.h"/>
-          <FILE id="xQedbr" name="gpgrt.h" compile="0" resource="0" file="Libraries/mac/include/gpgrt.h"/>
           <FILE id="kwteHa" name="libssh2.h" compile="0" resource="0" file="Libraries/mac/include/libssh2.h"/>
-          <FILE id="arppeD" name="libssh2_publickey.h" compile="0" resource="0"
-                file="Libraries/mac/include/libssh2_publickey.h"/>
-          <FILE id="KxdO0a" name="libssh2_sftp.h" compile="0" resource="0" file="Libraries/mac/include/libssh2_sftp.h"/>
         </GROUP>
       </GROUP>
       <GROUP id="{2DB20667-3258-BE07-5618-CD9A56DD134A}" name="win64">
         <GROUP id="{E4C5D036-9389-7978-DAAF-A03754BDAF29}" name="include">
           <FILE id="SlWVHi" name="libssh2.h" compile="0" resource="0" file="Libraries/win64/include/libssh2.h"/>
-          <FILE id="jUA5LG" name="libssh2_publickey.h" compile="0" resource="0"
-                file="Libraries/win64/include/libssh2_publickey.h"/>
-          <FILE id="YuZ6ua" name="libssh2_sftp.h" compile="0" resource="0" file="Libraries/win64/include/libssh2_sftp.h"/>
-        </GROUP>
-      </GROUP>
-      <GROUP id="{8B291545-6ECC-6918-FD7F-7F4EF43CD5AD}" name="lumatone_editor_library">
-        <GROUP id="{E6D47E07-26A5-D791-D9A9-674F554EDE9D}" name="assets">
-          <GROUP id="{6806566C-74D2-569F-E7C3-F82451E54687}" name="colours">
-            <FILE id="ViJJpZ" name="model.json" compile="0" resource="1" file="Libraries/lumatone_editor_library/assets/colours/model.json"/>
-          </GROUP>
-          <GROUP id="{D05F19E6-63D7-F2E8-4667-DC0409FEE130}" name="png">
-            <FILE id="MWNAvw" name="KeyboardBase.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyboardBase.png"/>
-            <FILE id="SXR00a" name="KeyboardBase@2x.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyboardBase@2x.png"/>
-            <FILE id="XuJzFC" name="KeyboardBase@4x.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyboardBase@4x.png"/>
-            <FILE id="KERfaw" name="KeyShadow.png" compile="0" resource="1" file="Libraries/lumatone_editor_library/assets/png/KeyShadow.png"/>
-            <FILE id="YW0Vjm" name="KeyShadow@2x.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyShadow@2x.png"/>
-            <FILE id="tOX41G" name="KeyShadow@4x.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyShadow@4x.png"/>
-            <FILE id="iU3em2" name="KeyShadow@8x.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyShadow@8x.png"/>
-            <FILE id="UYO2G9" name="KeyShadow@16x.png" compile="0" resource="1"
-                  file="Libraries/lumatone_editor_library/assets/png/KeyShadow@16x.png"/>
-            <FILE id="VfSQii" name="KeyShape.png" compile="0" resource="1" file="Libraries/lumatone_editor_library/assets/png/KeyShape.png"/>
-            <FILE id="dYJkXR" name="KeyShape@2x.png" compile="0" resource="1" file="Libraries/lumatone_editor_library/assets/png/KeyShape@2x.png"/>
-            <FILE id="XrpvWp" name="KeyShape@4x.png" compile="0" resource="1" file="Libraries/lumatone_editor_library/assets/png/KeyShape@4x.png"/>
-            <FILE id="TRdSHY" name="KeyShape@8x.png" compile="0" resource="1" file="Libraries/lumatone_editor_library/assets/png/KeyShape@8x.png"/>
-          </GROUP>
-        </GROUP>
-        <GROUP id="{4CE73321-4F78-6018-3D53-7BE367895713}" name="color">
-          <FILE id="wQ5ojG" name="adjust_layout_colour.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/color/adjust_layout_colour.cpp"/>
-          <FILE id="f9QFMl" name="adjust_layout_colour.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/color/adjust_layout_colour.h"/>
-          <FILE id="M7GKVx" name="colour_model.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/color/colour_model.cpp"/>
-          <FILE id="mkPWol" name="colour_model.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/color/colour_model.h"/>
-          <FILE id="Pr4v4g" name="interpolation.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/color/interpolation.h"/>
-        </GROUP>
-        <GROUP id="{94BE58F8-A22C-DD6E-EE1B-D16239FBE35E}" name="common">
-          <FILE id="td4D7Q" name="data.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/common/data.h"/>
-          <FILE id="R4WZtx" name="math.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/common/math.h"/>
-          <FILE id="j5W0RZ" name="utility.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/common/utility.h"/>
-        </GROUP>
-        <GROUP id="{1567DCDB-A588-8D3A-52A3-FDBC7E50BEA2}" name="data">
-          <FILE id="wmhhra" name="lumatone_board.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_board.cpp"/>
-          <FILE id="VhDoxI" name="lumatone_board.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_board.h"/>
-          <FILE id="JpIHqE" name="lumatone_key.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_key.cpp"/>
-          <FILE id="zsrzCH" name="lumatone_key.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/data/lumatone_key.h"/>
-          <FILE id="MbVIxi" name="lumatone_layout.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_layout.cpp"/>
-          <FILE id="tyO8Tb" name="lumatone_layout.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_layout.h"/>
-          <FILE id="NNbTP1" name="lumatone_state.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_state.cpp"/>
-          <FILE id="d3k8U5" name="lumatone_state.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/data/lumatone_state.h"/>
-          <FILE id="LrYTZ6" name="state_base.cpp" compile="1" resource="0" file="Libraries/lumatone_editor_library/data/state_base.cpp"/>
-          <FILE id="C3fePJ" name="state_base.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/data/state_base.h"/>
-        </GROUP>
-        <GROUP id="{2C37F386-5EDA-D0DC-5631-640029AC19C2}" name="graphics">
-          <GROUP id="{92BA854A-467B-D093-8D85-EBA39D917C3E}" name="resampler">
-            <FILE id="b7stsZ" name="image_resampler.h" compile="0" resource="0"
-                  file="Libraries/lumatone_editor_library/graphics/resampler/image_resampler.h"/>
-            <FILE id="DcAzx0" name="resampler.cpp" compile="1" resource="0" file="Libraries/lumatone_editor_library/graphics/resampler/resampler.cpp"/>
-            <FILE id="PdMzU7" name="resampler.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/graphics/resampler/resampler.h"/>
-          </GROUP>
-          <FILE id="BZqUYB" name="lumatone_assets.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/graphics/lumatone_assets.h"/>
-          <FILE id="LWFWIs" name="lumatone_render.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/graphics/lumatone_render.cpp"/>
-          <FILE id="L2Kciq" name="lumatone_render.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/graphics/lumatone_render.h"/>
-          <FILE id="K8HeFA" name="view_constants.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/graphics/view_constants.h"/>
-        </GROUP>
-        <GROUP id="{3C2AA935-2D9F-6A67-600D-746179736468}" name="lumatone_midi_driver">
-          <FILE id="JQ8ymN" name="firmware_definitions.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_definitions.h"/>
-          <FILE id="WWZJ2g" name="firmware_driver_listener.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_driver_listener.h"/>
-          <FILE id="anYiFk" name="firmware_support.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_support.h"/>
-          <FILE id="UVvw9d" name="firmware_sysex.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_sysex.cpp"/>
-          <FILE id="yGv9Ot" name="firmware_sysex.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_sysex.h"/>
-          <FILE id="zQo5m2" name="firmware_types.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/lumatone_midi_driver/firmware_types.h"/>
-          <FILE id="dDb0nr" name="midi_driver.cpp" compile="1" resource="0" file="Libraries/lumatone_editor_library/lumatone_midi_driver/midi_driver.cpp"/>
-          <FILE id="B8Ah8C" name="midi_driver.h" compile="0" resource="0" file="Libraries/lumatone_editor_library/lumatone_midi_driver/midi_driver.h"/>
-        </GROUP>
-        <GROUP id="{2D94AC24-DE91-4B14-4BB9-F28ACA2E474D}" name="mapping">
-          <FILE id="JTgBGD" name="lumatone_geometry.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/mapping/lumatone_geometry.cpp"/>
-          <FILE id="YsCw4y" name="lumatone_geometry.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/mapping/lumatone_geometry.h"/>
-          <FILE id="iQgAVI" name="lumatone_output_map.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/mapping/lumatone_output_map.cpp"/>
-          <FILE id="UFuTyJ" name="lumatone_output_map.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/mapping/lumatone_output_map.h"/>
-          <FILE id="kMOnbg" name="lumatone_tiling.cpp" compile="1" resource="0"
-                file="Libraries/lumatone_editor_library/mapping/lumatone_tiling.cpp"/>
-          <FILE id="uoiPKk" name="lumatone_tiling.h" compile="0" resource="0"
-                file="Libraries/lumatone_editor_library/mapping/lumatone_tiling.h"/>
         </GROUP>
       </GROUP>
     </GROUP>
     <GROUP id="{A73AEEF5-637C-D160-EE91-9A6158A5A60C}" name="Source">
       <FILE id="Xf9q9Q" name="ToolSelectorComponent.cpp" compile="1" resource="0"
             file="Source/ToolSelectorComponent.cpp"/>
-      <FILE id="NkHFko" name="ToolSelectorComponent.h" compile="0" resource="0"
-            file="Source/ToolSelectorComponent.h"/>
-      <GROUP id="{48EE1921-AA73-B738-CAE9-BB2BA1304466}" name="assets">
-        <GROUP id="{023F5646-6534-F977-6DE6-7A6E18B1C224}" name="Fonts">
-          <GROUP id="{3212BC5A-B2E2-2CAE-7689-5CE3A99E51A9}" name="UniviaPro">
-            <FILE id="DWKBCe" name="UniviaPro-Black.ttf" compile="0" resource="1"
+      <GROUP id="{636B098F-A1C5-E3C6-9638-D401BC78FFB9}" name="assets">
+        <GROUP id="{F427B08F-4047-8B7D-E15E-2BFA03F1ABE0}" name="Fonts">
+          <GROUP id="{F76E997A-77EB-255F-C53A-A46FB7FECEF0}" name="UniviaPro">
+            <FILE id="Kx614v" name="UniviaPro-Black.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-Black.ttf"/>
-            <FILE id="N6d81I" name="UniviaPro-Bold.ttf" compile="0" resource="1"
+            <FILE id="Ajt1lp" name="UniviaPro-Bold.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-Bold.ttf"/>
-            <FILE id="aVchtM" name="UniviaPro-Light.ttf" compile="0" resource="1"
+            <FILE id="cPEvau" name="UniviaPro-Light.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-Light.ttf"/>
-            <FILE id="G48YD2" name="UniviaPro-LightItalic.ttf" compile="0" resource="1"
+            <FILE id="hmPuP9" name="UniviaPro-LightItalic.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-LightItalic.ttf"/>
-            <FILE id="ENCETB" name="UniviaPro-Medium.ttf" compile="0" resource="1"
+            <FILE id="noWGo3" name="UniviaPro-Medium.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-Medium.ttf"/>
-            <FILE id="AxUbow" name="UniviaPro-MediumItalic.ttf" compile="0" resource="1"
+            <FILE id="DgptiA" name="UniviaPro-MediumItalic.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-MediumItalic.ttf"/>
-            <FILE id="sNw0Gd" name="UniviaPro-Regular.ttf" compile="0" resource="1"
+            <FILE id="L1aIgw" name="UniviaPro-Regular.ttf" compile="0" resource="1"
                   file="Source/assets/Fonts/UniviaPro/UniviaPro-Regular.ttf"/>
           </GROUP>
-          <FILE id="idwMhL" name="framd.ttf" compile="0" resource="1" file="Source/assets/Fonts/framd.ttf"/>
-          <FILE id="rl5L7H" name="framdit.ttf" compile="0" resource="1" file="Source/assets/Fonts/framdit.ttf"/>
-          <FILE id="dgxxjl" name="GothamNarrow-Black.otf" compile="0" resource="1"
+          <FILE id="VhVbw3" name="framd.ttf" compile="0" resource="1" file="Source/assets/Fonts/framd.ttf"/>
+          <FILE id="fCEuw6" name="framdit.ttf" compile="0" resource="1" file="Source/assets/Fonts/framdit.ttf"/>
+          <FILE id="dazqIk" name="GothamNarrow-Black.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Black.otf"/>
-          <FILE id="pbCdCu" name="GothamNarrow-BlackItalic.otf" compile="0" resource="1"
+          <FILE id="jGkML7" name="GothamNarrow-BlackItalic.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-BlackItalic.otf"/>
-          <FILE id="S13NDk" name="GothamNarrow-Bold.otf" compile="0" resource="1"
+          <FILE id="wn4ori" name="GothamNarrow-Bold.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Bold.otf"/>
-          <FILE id="fyLpJ4" name="GothamNarrow-BoldItalic.otf" compile="0" resource="1"
+          <FILE id="eMy3Wy" name="GothamNarrow-BoldItalic.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-BoldItalic.otf"/>
-          <FILE id="w5lYEH" name="GothamNarrow-Book.otf" compile="0" resource="1"
+          <FILE id="CE5VCX" name="GothamNarrow-Book.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Book.otf"/>
-          <FILE id="asBlh2" name="GothamNarrow-BookItalic.otf" compile="0" resource="1"
+          <FILE id="FliBD1" name="GothamNarrow-BookItalic.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-BookItalic.otf"/>
-          <FILE id="liQRMG" name="GothamNarrow-Light.otf" compile="0" resource="1"
+          <FILE id="ph7vqv" name="GothamNarrow-Light.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Light.otf"/>
-          <FILE id="sU2GXj" name="GothamNarrow-LightItalic.otf" compile="0" resource="1"
+          <FILE id="ZwHgLg" name="GothamNarrow-LightItalic.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-LightItalic.otf"/>
-          <FILE id="SEeWhH" name="GothamNarrow-Medium.otf" compile="0" resource="1"
+          <FILE id="K89tgX" name="GothamNarrow-Medium.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Medium.otf"/>
-          <FILE id="tFw1Tr" name="GothamNarrow-MediumItalic.otf" compile="0"
+          <FILE id="ZbMmAT" name="GothamNarrow-MediumItalic.otf" compile="0"
                 resource="1" file="Source/assets/Fonts/GothamNarrow-MediumItalic.otf"/>
-          <FILE id="bGc8qw" name="GothamNarrow-Thin.otf" compile="0" resource="1"
+          <FILE id="YLMWnV" name="GothamNarrow-Thin.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Thin.otf"/>
-          <FILE id="b31UTp" name="GothamNarrow-ThinItalic.otf" compile="0" resource="1"
+          <FILE id="O36JRJ" name="GothamNarrow-ThinItalic.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-ThinItalic.otf"/>
-          <FILE id="KDz68j" name="GothamNarrow-Ultra.otf" compile="0" resource="1"
+          <FILE id="puyvA4" name="GothamNarrow-Ultra.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-Ultra.otf"/>
-          <FILE id="heFKdv" name="GothamNarrow-UltraItalic.otf" compile="0" resource="1"
+          <FILE id="HnJPrL" name="GothamNarrow-UltraItalic.otf" compile="0" resource="1"
                 file="Source/assets/Fonts/GothamNarrow-UltraItalic.otf"/>
         </GROUP>
-        <GROUP id="{6530D772-F1FF-A399-E5BA-B4A92FC3BB82}" name="Localisation">
-          <FILE id="zJIOpU" name="en-gb.txt" compile="0" resource="1" file="Source/assets/Localisation/en-gb.txt"/>
-          <FILE id="vxKfPM" name="en-us.txt" compile="0" resource="1" file="Source/assets/Localisation/en-us.txt"/>
-          <FILE id="EJbB9L" name="es-es.txt" compile="0" resource="1" file="Source/assets/Localisation/es-es.txt"/>
-          <FILE id="kpUhkn" name="fr-ca.txt" compile="0" resource="1" file="Source/assets/Localisation/fr-ca.txt"/>
+        <GROUP id="{175B3A8F-B101-941C-6C31-56DAB632C7D3}" name="Localisation">
+          <FILE id="P83JbN" name="en-gb.txt" compile="0" resource="1" file="Source/assets/Localisation/en-gb.txt"/>
+          <FILE id="vwdasW" name="en-us.txt" compile="0" resource="1" file="Source/assets/Localisation/en-us.txt"/>
+          <FILE id="Z2OYh7" name="es-es.txt" compile="0" resource="1" file="Source/assets/Localisation/es-es.txt"/>
+          <FILE id="NwRE8C" name="fr-ca.txt" compile="0" resource="1" file="Source/assets/Localisation/fr-ca.txt"/>
         </GROUP>
-        <GROUP id="{22968AFF-42DD-51CA-0AE7-5831FBE9A081}" name="PNG">
-          <FILE id="tfBnIs" name="AppIcon@1x.png" compile="0" resource="1" file="Source/assets/PNG/AppIcon@1x.png"/>
-          <FILE id="SLpG2l" name="AppIcon@3x.png" compile="0" resource="1" file="Source/assets/PNG/AppIcon@3x.png"/>
-          <FILE id="CGghOV" name="ImportIcon@4x.png" compile="0" resource="1"
+        <GROUP id="{AFA59251-2D67-7112-4CA7-7840F1192286}" name="PNG">
+          <FILE id="gnHaAT" name="AppIcon@1x.png" compile="0" resource="1" file="Source/assets/PNG/AppIcon@1x.png"/>
+          <FILE id="wyDF0P" name="AppIcon@3x.png" compile="0" resource="1" file="Source/assets/PNG/AppIcon@3x.png"/>
+          <FILE id="xVImR0" name="ImportIcon@4x.png" compile="0" resource="1"
                 file="Source/assets/PNG/ImportIcon@4x.png"/>
-          <FILE id="vfi3bq" name="LoadIcon@4x.png" compile="0" resource="1" file="Source/assets/PNG/LoadIcon@4x.png"/>
-          <FILE id="c02YFn" name="ltn.ico" compile="0" resource="1" file="Source/assets/PNG/ltn.ico"/>
-          <FILE id="cf3FaF" name="LTN.png" compile="0" resource="1" file="Source/assets/PNG/LTN.png"/>
-          <FILE id="UHrtzi" name="ltp.ico" compile="0" resource="1" file="Source/assets/PNG/ltp.ico"/>
-          <FILE id="xaIl9f" name="LTP.png" compile="0" resource="1" file="Source/assets/PNG/LTP.png"/>
-          <FILE id="lQg4iN" name="SaveIcon@4x.png" compile="0" resource="1" file="Source/assets/PNG/SaveIcon@4x.png"/>
-          <FILE id="zt8Od2" name="TrashCanIcon.png" compile="0" resource="1"
+          <FILE id="LVyDBl" name="LoadIcon@4x.png" compile="0" resource="1" file="Source/assets/PNG/LoadIcon@4x.png"/>
+          <FILE id="mbPrvu" name="ltn.ico" compile="0" resource="1" file="Source/assets/PNG/ltn.ico"/>
+          <FILE id="ElL0u9" name="LTN.png" compile="0" resource="1" file="Source/assets/PNG/LTN.png"/>
+          <FILE id="Fabcqy" name="ltp.ico" compile="0" resource="1" file="Source/assets/PNG/ltp.ico"/>
+          <FILE id="dMa8Cu" name="LTP.png" compile="0" resource="1" file="Source/assets/PNG/LTP.png"/>
+          <FILE id="kFjs8v" name="SaveIcon@4x.png" compile="0" resource="1" file="Source/assets/PNG/SaveIcon@4x.png"/>
+          <FILE id="MR7vZC" name="TrashCanIcon.png" compile="0" resource="1"
                 file="Source/assets/PNG/TrashCanIcon.png"/>
-          <FILE id="B6u72n" name="TrashCanIcon@2x.png" compile="0" resource="1"
+          <FILE id="ag6zmo" name="TrashCanIcon@2x.png" compile="0" resource="1"
                 file="Source/assets/PNG/TrashCanIcon@2x.png"/>
-          <FILE id="qTdJUC" name="TrashcanIcon@4x.png" compile="0" resource="1"
+          <FILE id="LckABo" name="TrashcanIcon@4x.png" compile="0" resource="1"
                 file="Source/assets/PNG/TrashcanIcon@4x.png"/>
         </GROUP>
       </GROUP>
+      <GROUP id="{E26D404C-24BD-2911-3A0E-30B791A70A82}" name="backport">
+        <GROUP id="{16C83B77-58E8-B853-7E58-48404C069920}" name="assets">
+          <GROUP id="{FBB6E963-530A-05C3-9C52-75B4BAE07B62}" name="colours">
+            <FILE id="CEh3dp" name="model.json" compile="0" resource="1" file="Source/backport/assets/colours/model.json"/>
+          </GROUP>
+          <GROUP id="{F328819E-D6B3-530D-B97F-9CE9852A76FC}" name="png">
+            <FILE id="ZFmd8I" name="KeyboardBase.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyboardBase.png"/>
+            <FILE id="K1QZc4" name="KeyboardBase@2x.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyboardBase@2x.png"/>
+            <FILE id="keaCvj" name="KeyboardBase@4x.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyboardBase@4x.png"/>
+            <FILE id="YE6cQr" name="KeyShadow.png" compile="0" resource="1" file="Source/backport/assets/png/KeyShadow.png"/>
+            <FILE id="xZhOrI" name="KeyShadow@2x.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyShadow@2x.png"/>
+            <FILE id="c2aYLd" name="KeyShadow@4x.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyShadow@4x.png"/>
+            <FILE id="sALV6A" name="KeyShadow@8x.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyShadow@8x.png"/>
+            <FILE id="ob1d8r" name="KeyShadow@16x.png" compile="0" resource="1"
+                  file="Source/backport/assets/png/KeyShadow@16x.png"/>
+            <FILE id="AmehZC" name="KeyShape.png" compile="0" resource="1" file="Source/backport/assets/png/KeyShape.png"/>
+            <FILE id="vUXOaZ" name="KeyShape@2x.png" compile="0" resource="1" file="Source/backport/assets/png/KeyShape@2x.png"/>
+            <FILE id="D4VelC" name="KeyShape@4x.png" compile="0" resource="1" file="Source/backport/assets/png/KeyShape@4x.png"/>
+            <FILE id="p8dSRn" name="KeyShape@8x.png" compile="0" resource="1" file="Source/backport/assets/png/KeyShape@8x.png"/>
+          </GROUP>
+        </GROUP>
+        <GROUP id="{0B620ECF-A43B-7396-1F55-DB0E024A6B1D}" name="resampler">
+          <FILE id="CWJdwF" name="image_resampler.h" compile="0" resource="0"
+                file="Source/backport/resampler/image_resampler.h"/>
+          <FILE id="vfYGzw" name="resampler.cpp" compile="1" resource="0" file="Source/backport/resampler/resampler.cpp"/>
+          <FILE id="mNCUMK" name="resampler.h" compile="0" resource="0" file="Source/backport/resampler/resampler.h"/>
+        </GROUP>
+        <FILE id="rfzXVC" name="adjust_layout_colour.cpp" compile="1" resource="0"
+              file="Source/backport/adjust_layout_colour.cpp"/>
+        <FILE id="kKXxOi" name="adjust_layout_colour.h" compile="0" resource="0"
+              file="Source/backport/adjust_layout_colour.h"/>
+        <FILE id="YSDoN7" name="BatchColourActions.cpp" compile="1" resource="0"
+              file="Source/backport/BatchColourActions.cpp"/>
+        <FILE id="Zy7zBA" name="BatchColourActions.h" compile="0" resource="0"
+              file="Source/backport/BatchColourActions.h"/>
+        <FILE id="ds1J49" name="BatchToolsColourControls.cpp" compile="1" resource="0"
+              file="Source/backport/BatchToolsColourControls.cpp"/>
+        <FILE id="TEJomM" name="BatchToolsColourControls.h" compile="0" resource="0"
+              file="Source/backport/BatchToolsColourControls.h"/>
+        <FILE id="I6Uzlc" name="colour_model.cpp" compile="1" resource="0"
+              file="Source/backport/colour_model.cpp"/>
+        <FILE id="h6z7EB" name="colour_model.h" compile="0" resource="0" file="Source/backport/colour_model.h"/>
+        <FILE id="ExvHQa" name="firmware_definitions.h" compile="0" resource="0"
+              file="Source/backport/firmware_definitions.h"/>
+        <FILE id="UFnwqm" name="firmware_driver_listener.h" compile="0" resource="0"
+              file="Source/backport/firmware_driver_listener.h"/>
+        <FILE id="za3e1Y" name="firmware_support.h" compile="0" resource="0"
+              file="Source/backport/firmware_support.h"/>
+        <FILE id="Q5RGFm" name="firmware_sysex.cpp" compile="1" resource="0"
+              file="Source/backport/firmware_sysex.cpp"/>
+        <FILE id="ynyqtd" name="firmware_sysex.h" compile="0" resource="0"
+              file="Source/backport/firmware_sysex.h"/>
+        <FILE id="qdEFXk" name="firmware_types.h" compile="0" resource="0"
+              file="Source/backport/firmware_types.h"/>
+        <FILE id="z7JypY" name="interpolation.h" compile="0" resource="0" file="Source/backport/interpolation.h"/>
+        <FILE id="lOT5ai" name="key_update_buffer.cpp" compile="1" resource="0"
+              file="Source/backport/key_update_buffer.cpp"/>
+        <FILE id="XgYW0X" name="key_update_buffer.h" compile="0" resource="0"
+              file="Source/backport/key_update_buffer.h"/>
+        <FILE id="aoQzu1" name="lumatone_action.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_action.cpp"/>
+        <FILE id="qd5L8n" name="lumatone_action.h" compile="0" resource="0"
+              file="Source/backport/lumatone_action.h"/>
+        <FILE id="MBmWEj" name="lumatone_assets.h" compile="0" resource="0"
+              file="Source/backport/lumatone_assets.h"/>
+        <FILE id="m9ZPJJ" name="lumatone_board.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_board.cpp"/>
+        <FILE id="jB7CVo" name="lumatone_board.h" compile="0" resource="0"
+              file="Source/backport/lumatone_board.h"/>
+        <FILE id="MM7lNf" name="lumatone_editor_common.h" compile="0" resource="0"
+              file="Source/backport/lumatone_editor_common.h"/>
+        <FILE id="PUv99l" name="lumatone_geometry.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_geometry.cpp"/>
+        <FILE id="PJ7PzM" name="lumatone_geometry.h" compile="0" resource="0"
+              file="Source/backport/lumatone_geometry.h"/>
+        <FILE id="ctZRHh" name="lumatone_key.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_key.cpp"/>
+        <FILE id="foxkBs" name="lumatone_key.h" compile="0" resource="0" file="Source/backport/lumatone_key.h"/>
+        <FILE id="MGefl3" name="lumatone_layout.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_layout.cpp"/>
+        <FILE id="RWHZTW" name="lumatone_layout.h" compile="0" resource="0"
+              file="Source/backport/lumatone_layout.h"/>
+        <FILE id="Lvenh2" name="lumatone_midi_driver.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_midi_driver.cpp"/>
+        <FILE id="fXzoXn" name="lumatone_midi_driver.h" compile="0" resource="0"
+              file="Source/backport/lumatone_midi_driver.h"/>
+        <FILE id="EZZxYV" name="lumatone_output_map.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_output_map.cpp"/>
+        <FILE id="FAYZcN" name="lumatone_output_map.h" compile="0" resource="0"
+              file="Source/backport/lumatone_output_map.h"/>
+        <FILE id="TEGbO1" name="lumatone_render.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_render.cpp"/>
+        <FILE id="ZwJvbq" name="lumatone_render.h" compile="0" resource="0"
+              file="Source/backport/lumatone_render.h"/>
+        <FILE id="Nmq3cd" name="lumatone_tiling.cpp" compile="1" resource="0"
+              file="Source/backport/lumatone_tiling.cpp"/>
+        <FILE id="SoRZ0m" name="lumatone_tiling.h" compile="0" resource="0"
+              file="Source/backport/lumatone_tiling.h"/>
+        <FILE id="VlQqtc" name="LumatoneEditorBatchColourState.cpp" compile="1"
+              resource="0" file="Source/backport/LumatoneEditorBatchColourState.cpp"/>
+        <FILE id="o1Q6yS" name="LumatoneEditorBatchColourState.h" compile="0"
+              resource="0" file="Source/backport/LumatoneEditorBatchColourState.h"/>
+        <FILE id="aPTwZD" name="midi_driver.cpp" compile="1" resource="0" file="Source/backport/midi_driver.cpp"/>
+        <FILE id="f1qJEg" name="midi_driver.h" compile="0" resource="0" file="Source/backport/midi_driver.h"/>
+        <FILE id="U5P3uO" name="view_constants.h" compile="0" resource="0"
+              file="Source/backport/view_constants.h"/>
+      </GROUP>
+      <FILE id="NkHFko" name="ToolSelectorComponent.h" compile="0" resource="0"
+            file="Source/ToolSelectorComponent.h"/>
       <FILE id="uHwlF9" name="MainWindow.cpp" compile="1" resource="0" file="Source/MainWindow.cpp"/>
       <FILE id="GIvNyp" name="MainWindow.h" compile="0" resource="0" file="Source/MainWindow.h"/>
       <FILE id="S1tuPL" name="ApplicationListeners.h" compile="0" resource="0"
@@ -435,16 +431,17 @@
         <MODULEPATH id="juce_audio_basics" path="..\..\JUCE\modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="yjLw0u" hardenedRuntime="1"
+    <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="wyDF0P" hardenedRuntime="1"
                extraDefs="HAVE_SYS_SOCKET_H=1 HAVE_NETINET_IN_H=1 HAVE_SYS_SELECT_H=1 HAVE_UNISTD_H=1 HAVE_ARPA_INET_H=1 HAVE_SYS_TIME_H=1 HAVE_POLL_H=1 SERVERHOST1=&quot;192.168.6.2&quot; SERVERHOST2=&quot;192.168.7.2&quot;"
                xcodeValidArchs="arm64,x86_64" extraCompilerFlags="-I../../Libraries/mac/include"
-               embeddedFrameworks="../../Libraries/mac/lib/libgpg-error.dylib&#10;../../Libraries/mac/lib/libgcrypt.dylib&#10;../../Libraries/mac/lib/libssh2.dylib"
-               smallIcon="fwSyLL">
+               smallIcon="gnHaAT" extraLinkerFlags="-lgpg-error&#10;-lgcrypt&#10;-lssh2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Lumatone Editor"
-                       osxArchitecture="64BitIntel" libraryPath="../../Libraries/mac/lib"/>
+                       osxArchitecture="64BitIntel" libraryPath="../../Libraries/mac/lib"
+                       macOSDeploymentTarget="10.15" osxCompatibility="10.15 SDK"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="Lumatone Editor" osxArchitecture="64BitIntel"
-                       libraryPath="../../Libraries/mac/lib"/>
+                       libraryPath="../../Libraries/mac/lib" macOSDeploymentTarget="10.15"
+                       osxCompatibility="10.15 SDK"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="..\..\JUCE\modules"/>
@@ -476,34 +473,13 @@
         <MODULEPATH id="juce_audio_basics" path="..\..\JUCE\modules"/>
       </MODULEPATHS>
     </VS2017>
-    <VS2019 targetFolder="Builds/VisualStudio2019" externalLibraries="libssh2.dll.a"
-            smallIcon="fwSyLL" bigIcon="yjLw0u" extraDefs="SERVERHOST=&quot;192.168.7.2&quot;">
-      <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="$(ProjectDir)..\..\Libraries\win64\include"
-                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib" targetName="Lumatone Editor"
-                       postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Debug\App&quot; /Y"/>
-        <CONFIGURATION isDebug="0" name="Release" libraryPath="$(ProjectDir)..\..\Libraries\win64\lib"
-                       headerPath="$(ProjectDir)..\..\Libraries\win64\include" targetName="Lumatone Editor"
-                       postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Release\App&quot; /Y"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra"/>
-        <MODULEPATH id="juce_gui_basics"/>
-        <MODULEPATH id="juce_graphics"/>
-        <MODULEPATH id="juce_events"/>
-        <MODULEPATH id="juce_data_structures"/>
-        <MODULEPATH id="juce_core"/>
-        <MODULEPATH id="juce_audio_devices"/>
-        <MODULEPATH id="juce_audio_basics"/>
-      </MODULEPATHS>
-    </VS2019>
     <VS2022 targetFolder="Builds/VisualStudio2022" extraDefs="SERVERHOST=&quot;192.168.7.2&quot;"
-            externalLibraries="libssh2.dll.a" smallIcon="fwSyLL" bigIcon="yjLw0u">
+            smallIcon="fwSyLL" bigIcon="yjLw0u" externalLibraries="libssh2.lib">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="$(ProjectDir)..\..\Libraries\win64\include"
-                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib" postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Debug\App&quot; /Y"/>
+                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="$(ProjectDir)..\..\Libraries\win64\include"
-                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib" postbuildCommand="xcopy &quot;..\..\Libraries\win64\bin\*&quot; &quot;x64\Release\App&quot; /Y"/>
+                       libraryPath="$(ProjectDir)..\..\Libraries\win64\lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="P:\Programming-Projects\juce-framework\JUCE6\modules"/>
