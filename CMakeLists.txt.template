@@ -5,15 +5,18 @@ project(LUMATONE_EDITOR VERSION 0.0.1)
 # find_package(juce)
 add_subdirectory($ENV{juce_DIR} subprojects/juce)
 
+set(SourceDir "${CMAKE_CURRENT_SOURCE_DIR}/Source")
+
 juce_add_gui_app(
     LumatoneEditor
         PRODUCT_NAME "Lumatone Editor"
         VERSION "1.2.0b"
         BUNDLE_ID "com.Lumatone.LumatoneEditor"
-        ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/PNG/AppIcon@1x.png"
-        ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/PNG/AppIcon@3x.png"
+        ICON_SMALL "${SourceDir}/assets/PNG/AppIcon@1x.png"
+        ICON_BIG "${SourceDir}/assets/PNG/AppIcon@3x.png"
         DOCUMENT_EXTENSIONS "ltn"
         )
+
 juce_generate_juce_header(LumatoneEditor)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
@@ -26,22 +29,16 @@ set_directory_properties(
         COMPANY_EMAIL "support@lumatone.io"
 )
 
-file(GLOB_RECURSE SourceCode
-    CONFIGURE_DEPENDS
-        "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/Source/*.cpp"
-    )
+file(GLOB_RECURSE SourceCode CONFIGURE_DEPENDS "${SourceDir}/*.cpp")
 
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(LibraryPath     "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/win64")
     set(LibraryInclude  "${LibraryPath}/include")
     set(SSHLib          "${LibraryPath}/lib/libssh2.lib")
-
 elseif(APPLE)
     set_target_properties(LumatoneEditor PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-    set(LibraryPath     "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
+    set(LibraryPath     "$${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
     set(LibraryInclude  "${LibraryPath}/include")
     set(LibGpgError     "${LibraryPath}/lib/libgpg-error.a")
     set(LibGCrypt       "${LibraryPath}/lib/libgcrypt.a")
@@ -100,8 +97,8 @@ endif()
 
 file(GLOB_RECURSE EditorBinaryData
         CONFIGURE_DEPENDS   
-            "${CMAKE_CURRENT_SOURCE_DIR}/Source/assets/*"
-            "${CMAKE_CURRENT_SOURCE_DIR}/Source/backport/assets/*"
+            "${SourceDir}/assets/*"
+            "${SourceDir}/backport/assets/*"
     )
 juce_add_binary_data(LumatoneEditorAssets SOURCES ${EditorBinaryData})
 
