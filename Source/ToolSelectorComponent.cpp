@@ -13,7 +13,7 @@ ToolSelectorComponent::ToolSelectorComponent()
     batchColourTools = new BatchToolsColourControls(TerpstraSysExApplication::getApp().getLumatoneController());
 
 	LumatoneEditorLookAndFeel& lf = TerpstraSysExApplication::getApp().getLookAndFeel();
-    juce::Colour tabColour = lf.findColour(LumatoneEditorColourIDs::LightBackground);
+    juce::Colour tabColour = lf.findColour(LumatoneEditorColourIDs::LightBackground).brighter(0.02f);
     addTab(juce::translate("Note Velocity"), tabColour, curvesArea, true);
     addTab(juce::translate("Global") + juce::translate(" Colour"), tabColour, batchColourTools, true);
 

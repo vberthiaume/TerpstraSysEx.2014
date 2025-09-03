@@ -109,17 +109,14 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
 
     brightnessLabel = std::make_unique<juce::Label>("brightnessLabel", "Brightness");
     brightnessLabel->setJustificationType(juce::Justification::centred);
-    brightnessLabel->attachToComponent(brightness.get(), false);
     addAndMakeVisible(brightnessLabel.get());
 
     hueLabel = std::make_unique<juce::Label>("hueLabel", "Hue Shift");
     hueLabel->setJustificationType(juce::Justification::centred);
-    hueLabel->attachToComponent(hue.get(), false);
     addAndMakeVisible(hueLabel.get());
 
     temperatureLabel = std::make_unique<juce::Label>("temperatureLabel", "Temp. Shift");
     temperatureLabel->setJustificationType(juce::Justification::centred);
-    temperatureLabel->attachToComponent(temperature.get(), false);
     addAndMakeVisible(temperatureLabel.get());
 
 
@@ -158,7 +155,7 @@ BatchToolsColourControls::~BatchToolsColourControls()
 void BatchToolsColourControls::resized()
 {
     float contentMarginWidthWindowH = 0.008f;
-    float controlLabelFontScalar = 0.6f;
+    float controlLabelFontScalar = 0.8f;
 
     int windowH = state->getWindowHeight();
 
@@ -172,19 +169,22 @@ void BatchToolsColourControls::resized()
     int sliderWidth = juce::roundToInt((getWidth() - contentMarginX * 2) / 3) - sliderMargin;
     int sliderHeight = juce::roundToInt(getHeight() * sliderH);
 
-    int labelHeight = juce::roundToInt(controlHeight * controlLabelFontScalar);
-    // resizeLabelWithHeight(brightnessLabel.get(), controlHeight, controlLabelFontScalar);
-    // resizeLabelWithHeight(hueLabel.get(), controlHeight, controlLabelFontScalar);
-    // resizeLabelWithHeight(temperatureLabel.get(), controlHeight, controlLabelFontScalar);
-    hueLabel->setSize(sliderWidth, labelHeight);
-    brightnessLabel->setSize(sliderWidth, labelHeight);
-    temperatureLabel->setSize(sliderWidth, labelHeight);
-
     int sliderY = contentMarginH + controlHeight / 2;
     hue->setBounds(contentMarginX, sliderY, sliderWidth, sliderHeight);
-    // brightness->setBounds(marginX + sliderWidth + sliderMargin, juce::roundToInt((float)sliderY + (float)getHeight() * 0.25f), sliderWidth, sliderHeight);
     brightness->setBounds(contentMarginX + sliderWidth + sliderMargin, sliderY, sliderWidth, sliderHeight);
     temperature->setBounds(contentMarginX + (sliderWidth + sliderMargin) * 2, sliderY, sliderWidth, sliderHeight);
+
+    int labelHeight = juce::roundToInt(controlHeight * controlLabelFontScalar);
+    int labelMargin = juce::roundToInt(labelHeight * 0.8f);
+    hueLabel->setSize(sliderWidth, labelHeight);
+    hueLabel->setCentrePosition(hue->getBounds().getCentre().withY(hue->getY() - labelMargin));
+
+    brightnessLabel->setSize(sliderWidth, labelHeight);
+    brightnessLabel->setCentrePosition(brightness->getBounds().getCentre().withY(brightness->getY() - labelMargin));
+
+    temperatureLabel->setSize(sliderWidth, labelHeight);
+    temperatureLabel->setCentrePosition(temperature->getBounds().getCentre().withY(temperature->getY() - labelMargin));
+
 
     int buttonHeight = juce::roundToInt((float)controlHeight * 1.2f);
     int buttonY = getHeight() - buttonHeight - contentMarginH + labelHeight / 2;
@@ -196,7 +196,6 @@ void BatchToolsColourControls::resized()
     int resetWidth = getLookAndFeel().getTextButtonFont(*resetButton, buttonHeight)
                                      .getStringWidth(resetButton->getButtonText() + "____");
 
-    // int buttonMargin = (getWidth() - buttonWidth * 2) / 3;
 
     int btnMarginX = contentMarginX * 3; // compensate for extra slider margin
     applyButton->setBounds(btnMarginX, buttonY, applyWidth, buttonHeight);
