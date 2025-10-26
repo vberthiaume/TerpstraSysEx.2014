@@ -287,6 +287,8 @@ void AllKeysOverview::paint (juce::Graphics& g)
 		g.strokePath(selectionMarkPath, PathStrokeType(1.0f));
 	}
 
+    //g.fillAll (juce::Colours::red);
+
     //[/UserPaint]
 }
 
