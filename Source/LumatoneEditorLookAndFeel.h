@@ -255,6 +255,7 @@ public:
     {
         Path roundedBounds = getConnectedRoundedRectPath(l.getBounds().toFloat(), l.getHeight() * comboBoxRoundedCornerScalar, 0);
         g.setColour(l.findColour(Label::ColourIds::backgroundColourId));
+        //g.setColour (juce::Colours::red);
         g.fillPath(roundedBounds);
 
         g.setColour(l.findColour(Label::ColourIds::textColourId));
