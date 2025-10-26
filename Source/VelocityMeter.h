@@ -29,7 +29,7 @@ public:
         decayValue = static_cast<float>(velocity);
         repaint ();
 
-        startTimerHz (30); // ~33ms interval, smooth enough for GUI
+        startTimerHz (30);
     }
 
     void paint (juce::Graphics& g) override

@@ -43,12 +43,12 @@ KeyMiniDisplayInsideAllKeysOverview::KeyMiniDisplayInsideAllKeysOverview(int new
 	boardIndex = newBoardIndex;
 	keyIndex = newKeyIndex;
 
-//	TerpstraSysExApplication::getApp().getLumatoneController()->addMidiListener(this);
+	TerpstraSysExApplication::getApp().getLumatoneController()->addMidiListener(this);
 }
 
 KeyMiniDisplayInsideAllKeysOverview::~KeyMiniDisplayInsideAllKeysOverview()
 {
-//	TerpstraSysExApplication::getApp().getLumatoneController()->removeMidiListener(this);
+	TerpstraSysExApplication::getApp().getLumatoneController()->removeMidiListener(this);
 }
 
 void KeyMiniDisplayInsideAllKeysOverview::paint(Graphics& g)
@@ -227,6 +227,9 @@ AllKeysOverview::AllKeysOverview ()
 	lblFirmwareVersion.reset(new Label("FirmwareVersionLabel"));
 	addChildComponent(lblFirmwareVersion.get());
 
+    velocityMeter.reset (new VelocityMeter());
+    addAndMakeVisible (velocityMeter.get ());
+
 	// tilingGeometry.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
 	// tilingGeometry.setRowAngle(LUMATONEGRAPHICROWANGLE);
 
@@ -235,6 +238,7 @@ AllKeysOverview::AllKeysOverview ()
 
 	TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
 	TerpstraSysExApplication::getApp().getLumatoneController()->addFirmwareListener(this);
+    TerpstraSysExApplication::getApp ().getLumatoneController ()->addMidiListener (this);
 
 	resetOctaveSize();
 
@@ -326,6 +330,9 @@ void AllKeysOverview::resized()
 
 	resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
 	lblFirmwareVersion->setTopLeftPosition(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 0.6f);
+
+    const auto velocityMeterW = 25;
+    velocityMeter->setBounds ((lumatoneBounds.getX() - velocityMeterW) / 2, lumatoneBounds.getY (), velocityMeterW, lumatoneBounds.getHeight ());
 
 	int keyWidth = roundToInt(lumatoneBounds.getWidth() * keyW);
 	int keyHeight = roundToInt(lumatoneBounds.getHeight() * keyH);
@@ -465,6 +472,11 @@ void AllKeysOverview::connectionLost()
 void AllKeysOverview::firmwareRevisionReceived(LumatoneFirmware::Version version)
 {
 	setFirmwareVersion(version);
+}
+
+void AllKeysOverview::handleMidiMessage (const MidiMessage& msg)
+{
+    velocityMeter->setVelocity (msg.getVelocity());
 }
 
 void AllKeysOverview::resetOctaveSize()
