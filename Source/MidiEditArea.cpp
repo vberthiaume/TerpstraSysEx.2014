@@ -578,8 +578,10 @@ void MidiEditArea::editorModeChanged(sysExSendingMode editMode)
 
 void MidiEditArea::handleMidiMessage (const MidiMessage& msg)
 {
-    const auto text = juce::String ("NOTE ON: CHANNEL " + juce::String (msg.getChannel ()) + ", NOTE " +
-                                    juce::String (msg.getNoteNumber ()) << ", VELOCITY " << juce::String (msg.getVelocity ()));
+    const auto text = juce::String ("NOTE ON: CHANNEL ") + juce::String (msg.getChannel ())
+                      + juce::String (", NOTE ") + juce::String (msg.getNoteNumber ())
+                      + juce::String (", VELOCITY ") + juce::String (msg.getVelocity ());
+
     noteOnLabel->setText (text, juce::dontSendNotification);
 
     if (!noteLabelClearTimer)
