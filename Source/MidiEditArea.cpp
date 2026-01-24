@@ -580,23 +580,26 @@ void MidiEditArea::editorModeChanged(sysExSendingMode editMode)
 
 void MidiEditArea::handleMidiMessage (const MidiMessage& msg)
 {
-    const auto text = juce::String ("NOTE ON: CHANNEL ") + juce::String (msg.getChannel ())
-                      + juce::String (", NOTE ") + juce::String (msg.getNoteNumber ())
-                      + juce::String (", VELOCITY ") + juce::String (msg.getVelocity ());
+	if (msg.isNoteOn())
+	{
+		const auto text = juce::String ("NOTE ON: CHANNEL ") + juce::String (msg.getChannel ())
+						+ juce::String (", NOTE ") + juce::String (msg.getNoteNumber ())
+						+ juce::String (", VELOCITY ") + juce::String (msg.getVelocity ());
 
-    noteOnLabel->setText (text, juce::dontSendNotification);
+		noteOnLabel->setText (text, juce::dontSendNotification);
 
-    if (!noteLabelClearTimer)
-    {
-        noteLabelClearTimer = std::make_unique<OneShotTimer> ();
-        noteLabelClearTimer->callback = [label = juce::Component::SafePointer<juce::Label> (noteOnLabel.get ())]()
-            {
-                if (label)
-                    label->setText ({}, juce::dontSendNotification);
-            };
-    }
+		if (!noteLabelClearTimer)
+		{
+			noteLabelClearTimer = std::make_unique<OneShotTimer> ();
+			noteLabelClearTimer->callback = [label = juce::Component::SafePointer<juce::Label> (noteOnLabel.get ())]()
+				{
+					if (label)
+						label->setText ({}, juce::dontSendNotification);
+				};
+		}
 
-    noteLabelClearTimer->start (2000); // restart the 2-second countdown
+		noteLabelClearTimer->start (2000); // restart the 2-second countdown
+	}
 }
 
 void MidiEditArea::onOpenConnectionToDevice(String dialogTitle)
