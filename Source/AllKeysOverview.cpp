@@ -476,7 +476,8 @@ void AllKeysOverview::firmwareRevisionReceived(LumatoneFirmware::Version version
 
 void AllKeysOverview::handleMidiMessage (const MidiMessage& msg)
 {
-    velocityMeter->setVelocity (msg.getVelocity());
+	if (msg.isNoteOn())
+    	velocityMeter->setVelocity (msg.getVelocity());
 }
 
 void AllKeysOverview::resetOctaveSize()
