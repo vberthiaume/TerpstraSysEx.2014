@@ -208,7 +208,8 @@ public:
                 return getComboBoxFont(*comboBox);            
         }
         
-        Font font = l.getFont().withHeight(l.getHeight());
+        // Font font = l.getFont().withHeight(l.getHeight());
+        Font font = l.getFont();
         
         if (parent)
         {
@@ -230,7 +231,7 @@ public:
         {
             int overrideIndex = properties[LumatoneEditorStyleIDs::fontOverride];
             if (overrideIndex >= 0 && overrideIndex < appFonts.size())
-                font = appFonts[overrideIndex].withHeight(l.getHeight());
+                font = appFonts[overrideIndex].withHeight(font.getHeight());
         }
 
         if (properties.contains(LumatoneEditorStyleIDs::fontOverrideTypefaceStyle))
@@ -253,9 +254,8 @@ public:
 
     void drawLabel(Graphics& g, Label& l) override	
     {
-        Path roundedBounds = getConnectedRoundedRectPath(l.getBounds().toFloat(), l.getHeight() * comboBoxRoundedCornerScalar, 0);
+        Path roundedBounds = getConnectedRoundedRectPath(l.getLocalBounds().toFloat(), l.getHeight() * comboBoxRoundedCornerScalar, 0);
         g.setColour(l.findColour(Label::ColourIds::backgroundColourId));
-        //g.setColour (juce::Colours::red);
         g.fillPath(roundedBounds);
 
         g.setColour(l.findColour(Label::ColourIds::textColourId));
@@ -274,6 +274,7 @@ public:
         font.setHeight(font.getHeight() * fontScalar * GLOBALFONTSCALAR);
         g.setFont(font);
 
+        // g.drawText(l.getText(), l.getLocalBounds(), l.getJustificationType(), false);
         g.drawFittedText(l.getText(), l.getLocalBounds(), l.getJustificationType(), maxLines, 0.0f);
         g.setColour(l.findColour(Label::ColourIds::outlineColourId));
         g.drawRect(l.getLocalBounds());
