@@ -48,8 +48,7 @@ MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
     noteOnLabel.reset (new juce::Label ("noteOnLabel", ""));
     noteOnLabel->setJustificationType (Justification::centred);
     addAndMakeVisible (noteOnLabel.get ());
-    noteOnLabel->setFont (TerpstraSysExApplication::getApp ().getAppFont (LumatoneEditorFont::CourierNew).withHeight (6.f));
-    //TODO: these, along with the font height above, are not doing anything
+    noteOnLabel->setFont (TerpstraSysExApplication::getApp ().getAppFont (LumatoneEditorFont::CourierNew).withHeight (18.f));
     noteOnLabel->setColour (juce::Label::ColourIds::backgroundColourId, lookAndFeel.findColour (LumatoneEditorColourIDs::DarkBackground));
     noteOnLabel->setColour (juce::Label::ColourIds::textColourId, lookAndFeel.findColour (LumatoneEditorColourIDs::ActiveText));
 
@@ -266,6 +265,8 @@ void MidiEditArea::resized()
 
 	if (isConnected)
 	{
+		connectivityArea = getBounds().toFloat().withLeft(roundToInt(w * connectedAreaX));
+
 		int lblHeight = roundToInt(h * editModeHeight);
 		resizeLabelWithHeight(lblEditMode.get(), lblHeight);
 		lblEditMode->setTopLeftPosition(
@@ -283,11 +284,12 @@ void MidiEditArea::resized()
 			liveEditorBtn->getRight(), liveEditorBtn->getY(), roundToInt(w * offlineEditButtonWidth), liveEditorBtn->getHeight()
 		);
 
-        noteOnLabel->setBounds (
-            offlineEditorBtn->getRight () + 50, offlineEditorBtn->getY (), 500, liveEditorBtn->getHeight ()
-        );
+		noteOnLabel->setTopLeftPosition(offlineEditorBtn->getRight() + 30, offlineEditorBtn->getY());
+		noteOnLabel->setSize((connectivityArea.getX() - 30) - noteOnLabel->getX(), liveEditorBtn->getHeight());
+        // noteOnLabel->setBounds (
+        //     offlineEditorBtn->getRight () + 30, offlineEditorBtn->getY (), connectivityArea.getX() - 100, liveEditorBtn->getHeight ()
+        // );
 
-		connectivityArea = getBounds().toFloat().withLeft(roundToInt(w * connectedAreaX));
 
 		int logoMargin = w - logomarkBounds.getRight();
 		lblConnectionState->setTopLeftPosition(connectivityArea.getX(), roundToInt((h - lblHeight) * 0.5f));
