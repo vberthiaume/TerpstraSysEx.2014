@@ -24,9 +24,9 @@
 
 #include "LumatoneController.h"
 #include "HexagonTilingGeometry.h"
+#include "VelocityMeter.h"
 
 #include "BoardGeometry.h"
-#include "LumatoneController.h"
 
 #include "backport/firmware_types.h"
 
@@ -48,7 +48,7 @@ public:
 
 	void setKeyGraphics(Image& colourGraphicIn, Image& shadowGraphicIn);
 
-	// Implementation of TerpstraNidiDriver::Listener
+	// Implementation of TerpstraMidiDriver::Listener
 	//void midiMessageReceived(const MidiMessage& midiMessage) override;
 	//void midiMessageSent(const MidiMessage& midiMessage) override {}
 	//void midiSendQueueSize(int queueSize) override {}
@@ -87,6 +87,7 @@ private:
 class AllKeysOverview  : public juce::Component,
                          public LumatoneEditor::StatusListener,
                          public LumatoneEditor::FirmwareListener,
+                         public LumatoneEditor::MidiListener,
                          public juce::Button::Listener
 {
 public:
@@ -112,6 +113,10 @@ public:
 
 	// LumatoneEditor::FirmwareListener implementation
 	void firmwareRevisionReceived(LumatoneFirmware::Version version) override;
+
+    // LumatoneEditor::MidiListener implementation
+    void handleMidiMessage (const MidiMessage& msg) override;
+
     //[/UserMethods]
 
     void paint (juce::Graphics& g) override;
@@ -145,6 +150,8 @@ private:
 	Image keyShadowLayer;
 
     std::unique_ptr<Label> lblFirmwareVersion;
+
+    std::unique_ptr <VelocityMeter> velocityMeter;
 
 	//==============================================================================
 	// Style helpers

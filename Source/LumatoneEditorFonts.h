@@ -19,7 +19,8 @@ typedef enum
     GothamNarrowMedium,
     GothamNarrowBold,
     GothamNarrowItalic,
-    GothamNarrowLight
+    GothamNarrowLight,
+    CourierNew
     
 } LumatoneEditorFont;
 
@@ -82,7 +83,9 @@ struct LumatoneEditorFonts
             fonts.set(LumatoneEditorFont::GothamNarrowLight,
                   Font(Typeface::createSystemTypefaceFor(BinaryData::GothamNarrowLight_otf, BinaryData::GothamNarrowLight_otfSize))
             );
-        
+
+            // CourierNew
+            fonts.add (Font ("Courier New", 6.0f, Font::plain));
       }
 
       Font getFont(LumatoneEditorFont fontId, float heightIn)

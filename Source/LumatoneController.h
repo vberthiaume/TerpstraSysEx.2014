@@ -324,11 +324,11 @@ public:
      void    addEditorListener(LumatoneEditor::EditorListener* listenerIn) { editorListeners.add(listenerIn); }
      void removeEditorListener(LumatoneEditor::EditorListener* listenerIn) { editorListeners.remove(listenerIn); }
 
-//private:
-//    ListenerList<MidiListener> midiListeners;
-//public:
-//    void    addMidiListener(MidiListener* listenerIn) { midiListeners.add(listenerIn); }
-//    void removeMidiListener(MidiListener* listenerIn) { midiListeners.remove(listenerIn); }
+private:
+    ListenerList<LumatoneEditor::MidiListener> midiListeners;
+public:
+    void    addMidiListener(LumatoneEditor::MidiListener* listenerIn) { midiListeners.add(listenerIn); }
+    void removeMidiListener(LumatoneEditor::MidiListener* listenerIn) { midiListeners.remove(listenerIn); }
 
 private:
     //============================================================================

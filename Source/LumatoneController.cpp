@@ -708,6 +708,7 @@ void LumatoneController::midiMessageReceived(MidiInput* source, const MidiMessag
     else
     {
         // do something with regular midi messages
+        midiListeners.call (&LumatoneEditor::MidiListener::handleMidiMessage, midiMessage);
     }
 }
 

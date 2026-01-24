@@ -38,6 +38,7 @@
 class MidiEditArea  : public Component,
                       public LumatoneEditor::StatusListener,
                       public LumatoneEditor::EditorListener,
+                      public LumatoneEditor::MidiListener,
                       public juce::ComboBox::Listener,
                       public juce::Button::Listener,
                       public juce::Timer
@@ -64,6 +65,8 @@ public:
     // Implementation of LumatoneEditor::EditorListener
     void editorModeChanged(sysExSendingMode editMode) override;
 
+    // Implementation of LumatoneEditor::MidiListener
+    void handleMidiMessage (const MidiMessage& msg) override;
 
     void timerCallback() override;
 
@@ -100,6 +103,7 @@ private:
 
     std::unique_ptr<TextButton> liveEditorBtn;
     std::unique_ptr<TextButton> offlineEditorBtn;
+    std::unique_ptr<juce::Label> noteOnLabel;
 
     std::unique_ptr<Label>      pleaseConnectLabel;
     std::unique_ptr<Label>      offlineMsgLabel;
@@ -181,6 +185,26 @@ private:
     std::unique_ptr<juce::Label> lblConnectionState;
     std::unique_ptr<juce::Label> lblEditMode;
     std::unique_ptr<juce::TextButton> btnAutoConnect;
+
+    class OneShotTimer : public juce::Timer
+    {
+    public:
+        std::function<void ()> callback;
+
+        void start (int milliseconds)
+        {
+            stopTimer ();
+            startTimer (milliseconds);
+        }
+
+        void timerCallback () override
+        {
+            stopTimer ();
+            if (callback)
+                callback ();
+        }
+    };
+    std::unique_ptr<OneShotTimer> noteLabelClearTimer;
 
 
     //==============================================================================

@@ -45,6 +45,14 @@ MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
 	lumatoneLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(lumatoneLabel.get());
 
+    noteOnLabel.reset (new juce::Label ("noteOnLabel", ""));
+    noteOnLabel->setJustificationType (Justification::centred);
+    addAndMakeVisible (noteOnLabel.get ());
+    noteOnLabel->setFont (TerpstraSysExApplication::getApp ().getAppFont (LumatoneEditorFont::CourierNew).withHeight (6.f));
+    //TODO: these, along with the font height above, are not doing anything
+    noteOnLabel->setColour (juce::Label::ColourIds::backgroundColourId, lookAndFeel.findColour (LumatoneEditorColourIDs::DarkBackground));
+    noteOnLabel->setColour (juce::Label::ColourIds::textColourId, lookAndFeel.findColour (LumatoneEditorColourIDs::ActiveText));
+
 	liveEditorBtn.reset(new TextButton("LiveEditorButton"));
 	lookAndFeel.setupRadioTextButton(*liveEditorBtn, 10, true);
 	liveEditorBtn->setButtonText(translate("LiveEditor"));
@@ -169,6 +177,7 @@ MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
     //[Constructor] You can add your own custom stuff here..
 	TerpstraSysExApplication::getApp().getLumatoneController()->addStatusListener(this);
     TerpstraSysExApplication::getApp().getLumatoneController()->addEditorListener(this);
+    TerpstraSysExApplication::getApp ().getLumatoneController ()->addMidiListener (this);
 	auto inputs = TerpstraSysExApplication::getApp().getLumatoneController()->getMidiInputList();
 	auto outputs = TerpstraSysExApplication::getApp().getLumatoneController()->getMidiOutputList();
 	refreshInputMenuAndSetSelected(0, dontSendNotification);
@@ -229,6 +238,7 @@ void MidiEditArea::paint (juce::Graphics& g)
 	g.setColour(connectedColours[(int)(isConnected && liveEditorBtn->getToggleState())]);
 	drawPathToFillBounds(g, logomarkPath, logomarkBounds);
     //[/UserPaint]
+
 }
 
 void MidiEditArea::resized()
@@ -272,6 +282,10 @@ void MidiEditArea::resized()
 		offlineEditorBtn->setBounds(
 			liveEditorBtn->getRight(), liveEditorBtn->getY(), roundToInt(w * offlineEditButtonWidth), liveEditorBtn->getHeight()
 		);
+
+        noteOnLabel->setBounds (
+            offlineEditorBtn->getRight () + 50, offlineEditorBtn->getY (), 500, liveEditorBtn->getHeight ()
+        );
 
 		connectivityArea = getBounds().toFloat().withLeft(roundToInt(w * connectedAreaX));
 
@@ -560,6 +574,27 @@ void MidiEditArea::editorModeChanged(sysExSendingMode editMode)
 
     lblConnectionState->setColour(Label::ColourIds::textColourId, connectedColours[(int)liveEditorBtn->getToggleState()]);
     repaint();
+}
+
+void MidiEditArea::handleMidiMessage (const MidiMessage& msg)
+{
+    const auto text = juce::String ("NOTE ON: CHANNEL ") + juce::String (msg.getChannel ())
+                      + juce::String (", NOTE ") + juce::String (msg.getNoteNumber ())
+                      + juce::String (", VELOCITY ") + juce::String (msg.getVelocity ());
+
+    noteOnLabel->setText (text, juce::dontSendNotification);
+
+    if (!noteLabelClearTimer)
+    {
+        noteLabelClearTimer = std::make_unique<OneShotTimer> ();
+        noteLabelClearTimer->callback = [label = juce::Component::SafePointer<juce::Label> (noteOnLabel.get ())]()
+            {
+                if (label)
+                    label->setText ({}, juce::dontSendNotification);
+            };
+    }
+
+    noteLabelClearTimer->start (2000); // restart the 2-second countdown
 }
 
 void MidiEditArea::onOpenConnectionToDevice(String dialogTitle)

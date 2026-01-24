@@ -410,6 +410,7 @@
             file="Source/LumatoneController.cpp"/>
       <FILE id="A92lud" name="LumatoneController.h" compile="0" resource="0"
             file="Source/LumatoneController.h"/>
+      <FILE id="rHUmRH" name="VelocityMeter.h" compile="0" resource="0" file="Source/VelocityMeter.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
