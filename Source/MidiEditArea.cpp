@@ -151,6 +151,7 @@ MidiEditArea::MidiEditArea (LumatoneEditorLookAndFeel& lookAndFeelIn)
 	lblConnectionState->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
 	lblConnectionState->setColour(Label::ColourIds::textColourId, connectedColours[isConnected]);
     lblConnectionState->getProperties().set(LumatoneEditorStyleIDs::labelMaximumLineCount, 2);
+    lblConnectionState->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 1.0f);
 
 	lblEditMode->setFont(TerpstraSysExApplication::getApp().getAppFont(LumatoneEditorFont::UniviaProBold));
 	lblEditMode->setColour(Label::ColourIds::textColourId, lookAndFeel.findColour(LumatoneEditorColourIDs::LabelPink));
