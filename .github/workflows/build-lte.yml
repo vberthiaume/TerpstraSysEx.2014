@@ -80,6 +80,45 @@ jobs:
           path: "build/${{ env.ARTIFACTS }}/${{ env.macTarget }}"
           if-no-files-found: error
 
+  build-lte-macos-intel:
+    name: Build Lumatone Editor (macOS Intel)
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install JUCE to $HOME
+        run: |
+          export juce_DIR=juce-${{ env.JUCE_VERSION }}-osx
+          wget https://github.com/juce-framework/JUCE/releases/download/${{ env.JUCE_VERSION }}/$juce_DIR.zip
+          unzip $juce_DIR.zip
+
+      - name: Build Lumatone Editor (Intel only)
+        run: |
+          export juce_DIR=JUCE
+          cp CMakeLists.txt.template CMakeLists.txt
+
+          cmake -S . -B build \
+            -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+            -DCMAKE_BUILD_TYPE=Release
+
+          cmake --build build --config Release
+
+      - name: Make package directory for artifact
+        run: |
+          cd build/${{ env.ARTIFACTS }}
+          DATE=`date +%Y%m%d`
+          macTarget="LumatoneEditor_${DATE}-macOS"
+          echo "macTarget=${macTarget}" >> $GITHUB_ENV
+          echo "Making dir ${macTarget}"
+          mkdir ${macTarget}
+          mv "Lumatone Editor.app" ${macTarget}
+
+      - name: Upload Lumatone Editor (Intel)
+        uses: actions/upload-artifact@v4
+        with:
+          name: LumatoneEditor-macOS-Intel
+          path: "build/${{ env.ARTIFACTS }}/${{ env.macTarget }}"
+          if-no-files-found: error
+
   build-lte-windows:
     name: Build Lumatone Editor (Windows)
 
