@@ -108,7 +108,7 @@ jobs:
 
       - name: Make package directory for artifact
         run: |
-          cd build/${{ env.ARTIFACTS }}
+          cd build/${{ env.ARTIFACTS }}/Release
           DATE=`date +%Y%m%d`
           macTarget="LumatoneEditor_${DATE}-macOS"
           echo "macTarget=${macTarget}" >> $GITHUB_ENV
