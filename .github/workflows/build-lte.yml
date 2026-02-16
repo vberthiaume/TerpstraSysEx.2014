@@ -91,6 +91,10 @@ jobs:
           wget https://github.com/juce-framework/JUCE/releases/download/${{ env.JUCE_VERSION }}/$juce_DIR.zip
           unzip $juce_DIR.zip
 
+      - name: Install dependencies (Intel)
+        run: |
+          brew install libssh2 libgcrypt
+
       - name: Build Lumatone Editor (Intel only)
         run: |
           export juce_DIR=JUCE
