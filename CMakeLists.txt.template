@@ -37,12 +37,22 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     set(SSHLib          "${LibraryPath}/lib/libssh2.lib")
 elseif(APPLE)
     set_target_properties(LumatoneEditor PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 
-    set(LibraryPath     "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
-    set(LibraryInclude  "${LibraryPath}/include")
-    set(LibGpgError     "${LibraryPath}/lib/libgpg-error.a")
-    set(LibGCrypt       "${LibraryPath}/lib/libgcrypt.a")
-    set(SSHLib          "${LibraryPath}/lib/libssh2.a")
+        # Intel build → use Homebrew
+        find_library(SSHLib ssh2 REQUIRED)
+        set(LibGpgError "")
+        set(LibGCrypt "")
+        set(LibraryInclude "")
+    else()
+        # Apple Silicon build → use bundled static libs
+        set(LibraryPath     "${CMAKE_CURRENT_SOURCE_DIR}/Libraries/mac")
+        set(LibraryInclude  "${LibraryPath}/include")
+        set(LibGpgError     "${LibraryPath}/lib/libgpg-error.a")
+        set(LibGCrypt       "${LibraryPath}/lib/libgcrypt.a")
+        set(SSHLib          "${LibraryPath}/lib/libssh2.a")
+
+    endif()
 
 elseif(UNIX)
     find_package(PkgConfig REQUIRED)
@@ -102,7 +112,7 @@ file(GLOB_RECURSE EditorBinaryData
     )
 juce_add_binary_data(LumatoneEditorAssets SOURCES ${EditorBinaryData})
 
-if (APPLE OR ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows" OR APPLE)
     target_link_libraries(LumatoneEditor
         PRIVATE
             LumatoneEditorAssets
