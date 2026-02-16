@@ -120,7 +120,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: LumatoneEditor-macOS-Intel
-          path: "build/${{ env.ARTIFACTS }}/${{ env.macTarget }}"
+          path: build/${{ env.ARTIFACTS }}/Release/${{ env.macTarget }}
           if-no-files-found: error
 
   build-lte-windows:
