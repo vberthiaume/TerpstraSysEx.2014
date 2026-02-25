@@ -652,6 +652,7 @@ bool TerpstraSysExApplication::redo()
 bool TerpstraSysExApplication::toggleUseColourModel()
 {
     commandManager->invokeDirectly(Lumatone::Menu::commandIDs::useColourModel, true);
+	return useColourModel();
 }
 
 bool TerpstraSysExApplication::toggleDeveloperMode()

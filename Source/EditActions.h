@@ -40,7 +40,9 @@ namespace Lumatone {
 			, setNote(second.setNote)
 			, setColour(second.setColour)
             , setCCFaderPolarity(second.setCCFaderPolarity)
+			, batchEditActiveAtCreation(second.batchEditActiveAtCreation)
 			, previousData(second.previousData)
+			, previousVisibleColour(second.previousVisibleColour)
 			, newData(second.newData)
 		{}
 
@@ -61,7 +63,9 @@ namespace Lumatone {
 		bool setColour = false;
         bool setCCFaderPolarity = false;
 
+		bool batchEditActiveAtCreation = false;
 		TerpstraKey previousData;
+		juce::Colour previousVisibleColour;
 		TerpstraKey newData;
 	};
 
@@ -72,6 +76,7 @@ namespace Lumatone {
 
 		SectionEditAction(const SectionEditAction& second)
 			: setSelection(second.setSelection)
+			, batchEditActiveAtCreation(second.batchEditActiveAtCreation)
 			, previousData(second.previousData)
 			, newData(second.newData)
 		{}
@@ -85,6 +90,7 @@ namespace Lumatone {
 	private:
 		int setSelection = -1;
 
+		bool batchEditActiveAtCreation = false;
 		TerpstraKeys previousData;
 		TerpstraKeys newData;
 	};

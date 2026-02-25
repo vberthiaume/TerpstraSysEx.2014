@@ -100,6 +100,11 @@ public:
 
     const LumatoneEditorBatchColourState& getBatchColourEditState() const;
 
+    // Get color of keys that's affected by the batch color edit state
+    juce::Colour getAdjustedBatchColour(juce::Colour baseColour) const;
+    void updateBatchColourBaseKey(int boardIndex, int keyIndex, const TerpstraKey& baseKey);
+    void updateBatchColourBaseSection(int boardIndex, const TerpstraKeys& baseSection);
+
     void applyBatchColours(bool sendToDevice=true);
     void resetBatchColours(bool sendToDevice=true);
 

@@ -35,9 +35,18 @@ namespace Lumatone {
 		auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 		jassert(mainComponent != nullptr);
 
-		TerpstraSysExApplication::getApp().getLumatoneController()->checkAndResetBatchEdits();
+		auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+		batchEditActiveAtCreation = controller->getBatchColourEditState().isInEdit();
 
-		previousData = mainComponent->getMappingInEdit().sets[setSelection].theKeys[keySelection];
+		if (batchEditActiveAtCreation)
+		{
+			previousData = controller->getBatchColourEditState().getMappingBeforeEdits().sets[setSelection].theKeys[keySelection];
+			previousVisibleColour = mainComponent->getMappingInEdit().sets[setSelection].theKeys[keySelection].colour;
+		}
+		else
+		{
+			previousData = mainComponent->getMappingInEdit().sets[setSelection].theKeys[keySelection];
+		}
 	}
 
 	bool SingleNoteAssignAction::isValid() const
@@ -54,35 +63,39 @@ namespace Lumatone {
 				auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 				jassert(mainComponent != nullptr);
 				TerpstraKeyMapping& mappingInEdit = mainComponent->getMappingInEdit();
+				auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+				const bool batchStillActive = batchEditActiveAtCreation && controller->getBatchColourEditState().isInEdit();
 
 				if (setKeyType)
-				{
 					mappingInEdit.sets[setSelection].theKeys[keySelection].keyType = newData.keyType;
-				}
 				if (setChannel)
-				{
 					mappingInEdit.sets[setSelection].theKeys[keySelection].channelNumber = newData.channelNumber;
-				}
 				if (setNote)
-				{
 					mappingInEdit.sets[setSelection].theKeys[keySelection].noteNumber = newData.noteNumber;
-				}
 				if (setColour)
 				{
-					mappingInEdit.sets[setSelection].theKeys[keySelection].colour = newData.colour;
+					mappingInEdit.sets[setSelection].theKeys[keySelection].colour =
+						batchStillActive ? controller->getAdjustedBatchColour(newData.colour) : newData.colour;
 				}
-                if (setCCFaderPolarity)
-                {
-                    mappingInEdit.sets[setSelection].theKeys[keySelection].ccFaderDefault = newData.ccFaderDefault;
-                }
+				if (setCCFaderPolarity)
+					mappingInEdit.sets[setSelection].theKeys[keySelection].ccFaderDefault = newData.ccFaderDefault;
+
+				if (batchStillActive)
+				{
+					TerpstraKey baseKey = controller->getBatchColourEditState().getMappingBeforeEdits().sets[setSelection].theKeys[keySelection];
+					if (setKeyType)         baseKey = baseKey.withKeyType(newData.keyType);
+					if (setChannel)         baseKey = baseKey.withChannelNumber(newData.channelNumber);
+					if (setNote)            baseKey = baseKey.withNoteOrCC(newData.noteNumber);
+					if (setColour)          baseKey = baseKey.withColour(newData.colour);
+					if (setCCFaderPolarity) baseKey = baseKey.withInvertCCFader(newData.ccFaderDefault);
+					controller->updateBatchColourBaseKey(setSelection, keySelection, baseKey);
+				}
 
 				// Send to device
-				TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyParam(
-					setSelection + 1, 
-					keySelection, 
+				controller->sendKeyParam(
+					setSelection + 1,
+					keySelection,
 					mappingInEdit.sets[setSelection].theKeys[keySelection]);
-				
-				// Notfy that there are changes: in calling function
 			}
 			else
 			{
@@ -108,36 +121,43 @@ namespace Lumatone {
 				auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 				jassert(mainComponent != nullptr);
 				TerpstraKeyMapping& mappingInEdit = mainComponent->getMappingInEdit();
+				auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+				const bool batchStillActive = batchEditActiveAtCreation && controller->getBatchColourEditState().isInEdit();
 
 				if (setKeyType)
-				{
 					mappingInEdit.sets[setSelection].theKeys[keySelection].keyType = previousData.keyType;
-				}
 				if (setChannel)
-				{
 					mappingInEdit.sets[setSelection].theKeys[keySelection].channelNumber = previousData.channelNumber;
-				}
 				if (setNote)
-				{
 					mappingInEdit.sets[setSelection].theKeys[keySelection].noteNumber = previousData.noteNumber;
-				}
 				if (setColour)
 				{
-					mappingInEdit.sets[setSelection].theKeys[keySelection].colour = previousData.colour;
+					if (batchStillActive)
+						mappingInEdit.sets[setSelection].theKeys[keySelection].colour = controller->getAdjustedBatchColour(previousData.colour);
+					else if (batchEditActiveAtCreation)
+						mappingInEdit.sets[setSelection].theKeys[keySelection].colour = previousVisibleColour;
+					else
+						mappingInEdit.sets[setSelection].theKeys[keySelection].colour = previousData.colour;
 				}
-                if (setCCFaderPolarity)
-                {
-                    mappingInEdit.sets[setSelection].theKeys[keySelection].ccFaderDefault = previousData.ccFaderDefault;
-                }
+				if (setCCFaderPolarity)
+					mappingInEdit.sets[setSelection].theKeys[keySelection].ccFaderDefault = previousData.ccFaderDefault;
 
+				if (batchStillActive)
+				{
+					TerpstraKey baseKey = controller->getBatchColourEditState().getMappingBeforeEdits().sets[setSelection].theKeys[keySelection];
+					if (setKeyType)         baseKey = baseKey.withKeyType(previousData.keyType);
+					if (setChannel)         baseKey = baseKey.withChannelNumber(previousData.channelNumber);
+					if (setNote)            baseKey = baseKey.withNoteOrCC(previousData.noteNumber);
+					if (setColour)          baseKey = baseKey.withColour(previousData.colour);
+					if (setCCFaderPolarity) baseKey = baseKey.withInvertCCFader(previousData.ccFaderDefault);
+					controller->updateBatchColourBaseKey(setSelection, keySelection, baseKey);
+				}
 
 				// Send to device
-				TerpstraSysExApplication::getApp().getLumatoneController()->sendKeyParam(
+				controller->sendKeyParam(
 					setSelection + 1,
 					keySelection,
 					mappingInEdit.sets[setSelection].theKeys[keySelection]);
-
-				// Notify that there are changes: in calling function
 			}
 			else
 			{
@@ -165,9 +185,13 @@ namespace Lumatone {
 		auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 		jassert(mainComponent != nullptr);
 
-		TerpstraSysExApplication::getApp().getLumatoneController()->checkAndResetBatchEdits();
+		auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+		batchEditActiveAtCreation = controller->getBatchColourEditState().isInEdit();
 
-		previousData = mainComponent->getMappingInEdit().sets[setSelection];
+		if (batchEditActiveAtCreation)
+			previousData = controller->getBatchColourEditState().getMappingBeforeEdits().sets[setSelection];
+		else
+			previousData = mainComponent->getMappingInEdit().sets[setSelection];
 	}
 
 	bool SectionEditAction::isValid() const
@@ -182,13 +206,17 @@ namespace Lumatone {
 			auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 			jassert(mainComponent != nullptr);
 			TerpstraKeyMapping& mappingInEdit = mainComponent->getMappingInEdit();
+			auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+			const bool batchStillActive = batchEditActiveAtCreation && controller->getBatchColourEditState().isInEdit();
 
-			mappingInEdit.sets[setSelection] = newData;
+			if (batchStillActive)
+				controller->updateBatchColourBaseSection(setSelection, newData);
+			else
+				mappingInEdit.sets[setSelection] = newData;
 
 			// Send to device
-			TerpstraSysExApplication::getApp().getLumatoneController()->sendAllParamsOfBoard(setSelection + 1, mappingInEdit.sets[setSelection]);
+			controller->sendAllParamsOfBoard(setSelection + 1, mappingInEdit.sets[setSelection]);
 
-			// Notify that there are changes: in calling function
 			return true;
 		}
 		else
@@ -205,13 +233,17 @@ namespace Lumatone {
 			auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
 			jassert(mainComponent != nullptr);
 			TerpstraKeyMapping& mappingInEdit = mainComponent->getMappingInEdit();
+			auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+			const bool batchStillActive = batchEditActiveAtCreation && controller->getBatchColourEditState().isInEdit();
 
-			mappingInEdit.sets[setSelection] = previousData;
+			if (batchStillActive)
+				controller->updateBatchColourBaseSection(setSelection, previousData);
+			else
+				mappingInEdit.sets[setSelection] = previousData;
 
 			// Send to device
-			TerpstraSysExApplication::getApp().getLumatoneController()->sendAllParamsOfBoard(setSelection + 1, mappingInEdit.sets[setSelection]);
+			controller->sendAllParamsOfBoard(setSelection + 1, mappingInEdit.sets[setSelection]);
 
-			// Notify that there are changes: in calling function
 			return true;
 		}
 		else
@@ -219,7 +251,6 @@ namespace Lumatone {
 			jassertfalse;
 			return false;
 		}
-
 	}
 
 	// ==============================================================================

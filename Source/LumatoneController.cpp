@@ -14,6 +14,7 @@
 #include "backport/lumatone_layout.h"
 #include "backport/lumatone_action.h"
 #include "backport/firmware_sysex.h"
+#include "backport/BatchColourActions.h"
 
 LumatoneController::LumatoneController()
     // : errorVisualizer(TerpstraSysExApplication::getApp().getLookAndFeel()),
@@ -206,6 +207,37 @@ void LumatoneController::setBatchColourTempShift(float value)
 const LumatoneEditorBatchColourState& LumatoneController::getBatchColourEditState() const
 {
     return batchColourState;
+}
+
+juce::Colour LumatoneController::getAdjustedBatchColour(juce::Colour baseColour) const
+{
+    LumatoneKey tempKey(LumatoneKeyType::noteOnNoteOff, 0, 0, baseColour, false);
+    ApplyBatchColourAdjustments::applyColourAdjustmentToKey(tempKey, batchColourState.getData());
+    return tempKey.getColour();
+}
+
+void LumatoneController::updateBatchColourBaseKey(int boardIndex, int keyIndex, const TerpstraKey& baseKey)
+{
+    batchColourState.updateBaseKey(boardIndex, keyIndex, baseKey);
+}
+
+void LumatoneController::updateBatchColourBaseSection(int boardIndex, const TerpstraKeys& baseSection)
+{
+    batchColourState.updateBaseSection(boardIndex, baseSection);
+
+    auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
+    TerpstraKeyMapping& mappingInEdit = mainComponent->getMappingInEdit();
+    mappingInEdit.sets[boardIndex] = baseSection;
+
+    const BatchColourEditData& colourData = batchColourState.getData();
+    for (int k = 0; k < getOctaveSize(); k++)
+    {
+        LumatoneKey tempKey(baseSection.theKeys[k].keyType, baseSection.theKeys[k].channelNumber,
+                            baseSection.theKeys[k].noteNumber, baseSection.theKeys[k].colour,
+                            baseSection.theKeys[k].ccFaderDefault);
+        ApplyBatchColourAdjustments::applyColourAdjustmentToKey(tempKey, colourData);
+        mappingInEdit.sets[boardIndex].theKeys[k].colour = tempKey.getColour();
+    }
 }
 
 void LumatoneController::applyBatchColours(bool sendToDevice)
