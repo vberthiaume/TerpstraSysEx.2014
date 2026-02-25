@@ -217,12 +217,20 @@ AllKeysOverview::AllKeysOverview ()
 
     buttonReceive->setBounds (584, 8, 176, 24);
 
+	btnColourModel.reset(new juce::TextButton("btnColourModel"));
+	addAndMakeVisible(btnColourModel.get());
+	btnColourModel->setTooltip(TRANS("Toggle realistic display colors"));
+	btnColourModel->setClickingTogglesState(true);
+	btnColourModel->addListener(this);
+	btnColourModel->setButtonText("");
+	btnColourModel->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 1.5f);
 
     //[UserPreSize]
 	btnLoadFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::LoadIcon);
 	btnSaveFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::SaveIcon);
 	buttonReceive->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ArrowUp);
 	buttonReceive->getProperties().set(LumatoneEditorStyleIDs::textButtonIconPlacement, LumatoneEditorStyleIDs::TextButtonIconPlacement::RightOfText);
+	btnColourModel->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ColourModelIcon);
 
 	lblFirmwareVersion.reset(new Label("FirmwareVersionLabel"));
 	addChildComponent(lblFirmwareVersion.get());
@@ -241,6 +249,9 @@ AllKeysOverview::AllKeysOverview ()
     TerpstraSysExApplication::getApp ().getLumatoneController ()->addMidiListener (this);
 
 	resetOctaveSize();
+
+	// Initialize the colour model button state
+	btnColourModel->setToggleState(TerpstraSysExApplication::getApp().useColourModel(), juce::dontSendNotification);
 
     //[/UserPreSize]
 
@@ -262,6 +273,7 @@ AllKeysOverview::~AllKeysOverview()
     btnLoadFile = nullptr;
     btnSaveFile = nullptr;
     buttonReceive = nullptr;
+	btnColourModel = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -327,6 +339,9 @@ void AllKeysOverview::resized()
 	int importY = lumatoneBounds.getY() - roundToInt(getHeight() * importYFromImageTop);
 	int importWidth = roundToInt(getWidth() * importW);
 	buttonReceive->setBounds(lumatoneBounds.getRight() - importWidth, importY, importWidth, btnHeight);
+
+	// Position colour model toggle button above the keyboard display on the left side
+	btnColourModel->setBounds(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 1.08f, btnHeight, btnHeight);
 
 	resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
 	lblFirmwareVersion->setTopLeftPosition(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 0.6f);
@@ -411,6 +426,12 @@ void AllKeysOverview::buttonClicked (juce::Button* buttonThatWasClicked)
 		TerpstraSysExApplication::getApp().requestConfigurationFromDevice();
         //[/UserButtonCode_buttonReceive]
     }
+	else if (buttonThatWasClicked == btnColourModel.get())
+	{
+		//[UserButtonCode_btnColourModel] -- add your button handler code here..
+		TerpstraSysExApplication::getApp().toggleUseColourModel();
+		//[/UserButtonCode_btnColourModel]
+	}
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]

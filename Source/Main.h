@@ -96,6 +96,8 @@ public:
 	bool undo();
 	bool redo();
 
+	bool toggleUseColourModel();
+
 	bool toggleDeveloperMode();
 
 	bool generalOptionsDialog();

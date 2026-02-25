@@ -354,6 +354,9 @@ public:
             case LumatoneEditorIcon::ArrowUp:
                 margin = font.getStringWidth(" ");
                 break;
+            case LumatoneEditorIcon::ColourModelIcon:
+                margin = font.getStringWidth("");
+                break;
             }
             
             if (iconW < 1) iconW = 1;
@@ -384,6 +387,11 @@ public:
                 auto boundsAdj = Rectangle<float>(iconX, iconY, iconW, iconH);
                 boundsAdj.expand(iconW * 0.1f, iconH * 0.1f);
                 drawFolderIconAt(g, boundsAdj.getX(), boundsAdj.getY(), boundsAdj.getWidth(), boundsAdj.getHeight(), textColour, btn.findColour(bkgdColourId));
+            }
+            else if (iconCode == LumatoneEditorIcon::ColourModelIcon)
+            {
+                // Draw hexagon with toggle state
+                drawHexagonColourModelIconAt(g, iconX, iconY, iconW, iconH, textColour, textColour, btn.getToggleState());
             }
             else
             {

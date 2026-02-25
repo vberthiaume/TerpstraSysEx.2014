@@ -483,6 +483,61 @@ static void drawFolderIconAt(Graphics& g, int x, int y, int width, int height, C
     g.strokePath(arrowPath, stroke);
 }
 
+static void drawHexagonColourModelIconAt(Graphics& g, int x, int y, int width, int height, Colour hexFillColour, Colour lineColour, bool isToggled)
+{
+    // Create hexagon centered in bounds (0-1 normalized space)
+    auto centre = Point<float>(0.5f, 0.5f);
+    auto size = 0.35f;
+    
+    Path hexagon;
+    for (int i = 0; i < 6; ++i)
+    {
+        auto angle = MathConstants<float>::twoPi * i / 6.0f - MathConstants<float>::pi / 2.0f;
+        auto px = centre.x + size * std::cos(angle);
+        auto py = centre.y + size * std::sin(angle);
+        if (i == 0)
+            hexagon.startNewSubPath(px, py);
+        else
+            hexagon.lineTo(px, py);
+    }
+    hexagon.closeSubPath();
+    
+    // Draw diagonal line
+    // Path diagonalLine;
+    // auto lineStart = Point<float>(centre.x - size * 0.6f, centre.y - size * 0.6f);
+    // auto lineEnd = Point<float>(centre.x + size * 0.6f, centre.y + size * 0.6f);
+    // diagonalLine.startNewSubPath(lineStart);
+    // diagonalLine.lineTo(lineEnd);
+    
+    // Apply transform to scale to button size and position
+    auto transform = AffineTransform::scale(width, height).followedBy(AffineTransform::translation(x, y));
+    hexagon.applyTransform(transform);
+    // diagonalLine.applyTransform(transform);
+    
+    // Draw hexagon fill - gradient when toggled, static dark color when off
+    if (isToggled)
+    {
+        // Create gradient from darker to lighter tone
+        ColourGradient gradient(hexFillColour.darker(1.0f), (float)x, (float)y,
+                                hexFillColour.darker(0.1f), (float)(x + width), (float)(y + height),
+                                false);
+        g.setGradientFill(gradient);
+    }
+    else
+    {
+        g.setColour(hexFillColour.darker(0.9f));
+    }
+    g.fillPath(hexagon);
+    
+    // Draw hexagon outline
+    PathStrokeType stroke(1.0f);
+    g.setColour(lineColour);
+    g.strokePath(hexagon, stroke);
+    
+    // Draw diagonal line - always visible
+    // g.strokePath(diagonalLine, stroke);
+}
+
 static Path getSaveIconPath()
 {
     float boxHeight = 0.6f;
@@ -622,7 +677,8 @@ enum LumatoneEditorIcon
     ArrowDown,
     SaveIcon,
     LoadIcon,
-    CCPolarityIcon
+    CCPolarityIcon,
+    ColourModelIcon
 };
 
 enum LumatoneEditorColourIDs

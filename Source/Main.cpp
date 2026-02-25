@@ -649,6 +649,11 @@ bool TerpstraSysExApplication::redo()
 		return false;
 }
 
+bool TerpstraSysExApplication::toggleUseColourModel()
+{
+    commandManager->invokeDirectly(Lumatone::Menu::commandIDs::useColourModel, true);
+}
+
 bool TerpstraSysExApplication::toggleDeveloperMode()
 {
 	bool newMode = !propertiesFile->getBoolValue("DeveloperMode");
