@@ -93,7 +93,8 @@ public:
     void sendCurrentMapping();
 
     bool performAction(LumatoneAction* action, bool undoable=true, bool newTransaction=true);
-    
+    void beginNewUndoTransaction();
+
     void setBatchColourBrightness(float value);
     void setBatchColourHueShift(float value);
     void setBatchColourTempShift(float value);
@@ -107,8 +108,6 @@ public:
 
     void applyBatchColours(bool sendToDevice=true);
     void resetBatchColours(bool sendToDevice=true);
-
-    void checkAndResetBatchEdits(bool sendToDevice=true); // if another edit happens while batch colours are being edited, reset the batch ones first
 
     void setHasChanges(bool hasChanges);
 

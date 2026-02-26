@@ -188,6 +188,10 @@ bool LumatoneController::performAction(LumatoneAction *action, bool undoable, bo
     return action->perform();
 }
 
+void LumatoneController::beginNewUndoTransaction()
+{
+    TerpstraSysExApplication::getApp().undoManager.beginNewTransaction();
+}
 
 void LumatoneController::setBatchColourBrightness(float value)
 {
@@ -252,14 +256,6 @@ void LumatoneController::resetBatchColours(bool sendToDevice)
     batchColourState.reset();
 }
 
-void LumatoneController::checkAndResetBatchEdits(bool sendToDevice)
-{
-    if (batchColourState.isInEdit())
-    {
-        resetBatchColours(sendToDevice);
-        TerpstraSysExApplication::getApp().getMainContentComponent()->refreshBatchColours();
-    }
-}
 
 void LumatoneController::setHasChanges(bool hasChanges)
 {
