@@ -135,11 +135,11 @@ namespace Lumatone {
     {
     public:
         InvertSustainEditAction(bool newValue);
-        
+
         InvertSustainEditAction(const InvertSustainEditAction& second)
             : previousData(second.previousData), newData(second.newData)
         {}
-        
+
         virtual bool perform() override;
         virtual bool undo() override;
         int getSizeInUnits() override { return sizeof(InvertSustainEditAction); }
@@ -147,6 +147,27 @@ namespace Lumatone {
     private:
         int previousData;
         int newData;;
+    };
+
+    // Finds all keys across the entire mapping that match searchColour and
+    // replaces them with replaceColour, with full undo support.
+    class ColourReplaceAction : public UndoableAction
+    {
+    public:
+        ColourReplaceAction(juce::Colour searchColour, juce::Colour replaceColour);
+
+        virtual bool perform() override;
+        virtual bool undo() override;
+        int getSizeInUnits() override { return sizeof(ColourReplaceAction); }
+
+        int getMatchCount() const { return affectedKeys.size(); }
+
+    private:
+        juce::Colour searchColour;
+        juce::Colour replaceColour;
+
+        struct AffectedKey { int boardIndex; int keyIndex; };
+        juce::Array<AffectedKey> affectedKeys;
     };
 
 }

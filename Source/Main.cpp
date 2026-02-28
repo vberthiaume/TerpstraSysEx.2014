@@ -22,7 +22,9 @@
 
 MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
 {
-	jassert(mainWindow != nullptr);
+	// jassert(mainWindow != nullptr);
+	if (mainWindow == nullptr || mainWindow->getContentComponent() == nullptr)
+		return nullptr;
 	return (MainContentComponent*)(mainWindow->getContentComponent());
 }
 

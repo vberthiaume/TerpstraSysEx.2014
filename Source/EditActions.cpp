@@ -378,4 +378,68 @@ namespace Lumatone {
         // Notify that there are changes: in calling function
         return true;
     }
+
+    // ==============================================================================
+    // Implementation of ColourReplaceAction
+
+    ColourReplaceAction::ColourReplaceAction(juce::Colour searchColourIn, juce::Colour replaceColourIn)
+        : searchColour(searchColourIn), replaceColour(replaceColourIn)
+    {
+        auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
+        jassert(mainComponent != nullptr);
+
+        const TerpstraKeyMapping& mapping = mainComponent->getMappingInEdit();
+        const int boardSize = TerpstraSysExApplication::getApp().getOctaveBoardSize();
+
+        for (int board = 0; board < NUMBEROFBOARDS; board++)
+            for (int key = 0; key < boardSize; key++)
+                if (mapping.sets[board].theKeys[key].colour == searchColour)
+                    affectedKeys.add({ board, key });
+    }
+
+    bool ColourReplaceAction::perform()
+    {
+        if (affectedKeys.isEmpty())
+            return false;
+
+        auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
+        jassert(mainComponent != nullptr);
+        TerpstraKeyMapping& mapping = mainComponent->getMappingInEdit();
+        auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+
+        juce::Array<int> changedBoards;
+        for (const auto& entry : affectedKeys)
+        {
+            mapping.sets[entry.boardIndex].theKeys[entry.keyIndex].colour = replaceColour;
+            changedBoards.addIfNotAlreadyThere(entry.boardIndex);
+        }
+
+        for (int board : changedBoards)
+            controller->sendAllParamsOfBoard(board + 1, mapping.sets[board]);
+
+        return true;
+    }
+
+    bool ColourReplaceAction::undo()
+    {
+        if (affectedKeys.isEmpty())
+            return false;
+
+        auto mainComponent = TerpstraSysExApplication::getApp().getMainContentComponent();
+        jassert(mainComponent != nullptr);
+        TerpstraKeyMapping& mapping = mainComponent->getMappingInEdit();
+        auto controller = TerpstraSysExApplication::getApp().getLumatoneController();
+
+        juce::Array<int> changedBoards;
+        for (const auto& entry : affectedKeys)
+        {
+            mapping.sets[entry.boardIndex].theKeys[entry.keyIndex].colour = searchColour;
+            changedBoards.addIfNotAlreadyThere(entry.boardIndex);
+        }
+
+        for (int board : changedBoards)
+            controller->sendAllParamsOfBoard(board + 1, mapping.sets[board]);
+
+        return true;
+    }
 }

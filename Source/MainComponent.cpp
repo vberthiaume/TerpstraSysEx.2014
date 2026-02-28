@@ -473,6 +473,7 @@ void MainContentComponent::refreshKeyDataFields()
 {
 	allKeysOverview->repaint();
 	noteEditArea->refreshKeyFields();
+	toolSelector->refreshColourReplace();
 }
 
 void MainContentComponent::refreshGlobalSettings()
@@ -493,13 +494,15 @@ void MainContentComponent::refreshToolFields()
 {
 	curvesArea->loadFromMapping();
 	curvesArea->repaint();
-	
+
 	toolSelector->resetBatchColours();
+	toolSelector->refreshColourReplace();
 }
 
 void MainContentComponent::refreshBatchColours()
 {
 	toolSelector->resetBatchColours();
+	toolSelector->refreshColourReplace();
 }
 
 void MainContentComponent::setEditAreaExpanded(bool isExpanded)

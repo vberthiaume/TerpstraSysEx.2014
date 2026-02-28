@@ -5,6 +5,7 @@
 
 class CurvesArea;
 class BatchToolsColourControls;
+class ColourReplacePanel;
 
 class ToolSelectorComponent : public juce::TabbedComponent,
                                private juce::ChangeListener
@@ -20,6 +21,7 @@ public:
     CurvesArea* getCurvesArea() { return curvesArea; }
 
     void resetBatchColours();
+    void refreshColourReplace();
 
 private:
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
@@ -30,6 +32,7 @@ private:
 
     CurvesArea* curvesArea = nullptr;
     BatchToolsColourControls* batchColourTools = nullptr;
+    ColourReplacePanel* colourReplacePanel = nullptr;
 
     juce::Rectangle<float> background;
 };
