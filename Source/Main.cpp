@@ -516,8 +516,12 @@ bool TerpstraSysExApplication::openSysExMapping()
 	chooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
-			currentFile = chooser.getResult();
-			openFromCurrentFile();
+			auto result = chooser.getResult();
+			if (!result.getFullPathName().isEmpty())
+			{
+				currentFile = result;
+				openFromCurrentFile();
+			}
 		});
 
 	return true;
@@ -538,7 +542,14 @@ bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> save
 	chooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
-			currentFile = chooser.getResult();
+			auto result = chooser.getResult();
+			if (result.getFullPathName().isEmpty())
+			{
+				saveFileCallback(false);
+				return;
+			}
+
+			currentFile = result;
 			bool saved = saveCurrentFile();
 			if (saved)
 			{
