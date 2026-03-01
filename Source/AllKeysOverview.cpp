@@ -407,10 +407,12 @@ void AllKeysOverview::resized()
 
 	int importY = lumatoneBounds.getY() - roundToInt(getHeight() * importYFromImageTop);
 	int importWidth = roundToInt(getWidth() * importW);
-	buttonReceive->setBounds(lumatoneBounds.getRight() - importWidth, importY, importWidth, btnHeight);
 
-	// Position colour model toggle button above the keyboard display on the left side
-	btnColourModel->setBounds(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 1.08f, btnHeight, btnHeight);
+	// Colour model toggle: above graphics, right-aligned with the graphic edge
+	btnColourModel->setBounds(lumatoneBounds.getRight() - btnHeight, importY, btnHeight, btnHeight);
+
+	// Import button: to the left of the colour model toggle
+	buttonReceive->setBounds(lumatoneBounds.getRight() - btnHeight - btnMargin - importWidth, importY, importWidth, btnHeight);
 
     // Calibrate button sits next to the colour model button (only visible in developer mode)
     btnCalibrate->setBounds(lumatoneBounds.getX() + btnHeight + btnMargin, lumatoneBounds.getY() - btnHeight * 1.08f, saveLoadWidth, btnHeight);
