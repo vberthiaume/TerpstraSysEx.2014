@@ -32,16 +32,16 @@ jobs:
         run: |
           export juce_DIR=~/JUCE
           cp CMakeLists.txt.template CMakeLists.txt
-          cmake -S . -B build
-          cmake --build build --config Release
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
       - name: List build directory
         run: |
-          find build/$ARTIFACTS/Lumatone\ Editor
+          find build/$ARTIFACTS/Release/Lumatone\ Editor
       - name: Upload Lumatone Editor
         uses: actions/upload-artifact@v4
         with:
-          name: LumatoneEditor-Linux
-          path: build/${{ env.ARTIFACTS }}/Lumatone\ Editor
+          name: LumatoneEditor_Linux
+          path: build/${{ env.ARTIFACTS }}/Release/Lumatone\ Editor
           if-no-files-found: error
 
   build-lte-macos:
@@ -59,16 +59,19 @@ jobs:
         run: |
           export juce_DIR=JUCE
           cp CMakeLists.txt.template CMakeLists.txt
-          cmake -S . -B build
-          cmake --build build --config Release
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
       # - name: List build directory
       #   run: |
       #     find build/$ARTIFACTS/Lumatone\ Editor.app
+      - name: List build directory
+        run: |
+          ls build/${{ env.ARTIFACTS }}
       - name: Make package directory for artifact
         run: |
-          cd build/${{ env.ARTIFACTS }}
+          cd build/${{ env.ARTIFACTS }}/Release
           DATE=`date +%Y%m%d`
-          macTarget="LumatoneEditor_${DATE}-macOS"
+          macTarget="LumatoneEditor_${DATE}_macOS"
           echo "macTarget=${macTarget}" >> $GITHUB_ENV
           echo "Making dir ${macTarget}"
           mkdir ${macTarget}
@@ -77,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: LumatoneEditor-macOS
-          path: "build/${{ env.ARTIFACTS }}/${{ env.macTarget }}"
+          path: "build/${{ env.ARTIFACTS }}/Release/${{ env.macTarget }}"
           if-no-files-found: error
 
   build-lte-windows:
@@ -108,6 +111,6 @@ jobs:
       - name: Upload Lumatone Editor
         uses: actions/upload-artifact@v4
         with:
-          name: LumatoneEditor-Windows
+          name: LumatoneEditor_Windows
           path: build/${{ env.ARTIFACTS }}/Release/
           if-no-files-found: error
