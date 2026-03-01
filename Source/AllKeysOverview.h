@@ -105,6 +105,8 @@ public:
 
 	void resetOctaveSize();
 
+    void openCalibrationWindow();
+
 	// LumatoneEditor::StatusListener
 	void connectionEstablished(int, int) override;
 	void connectionLost() override;
@@ -209,6 +211,9 @@ private:
 	// Geometry settings
 	TerpstraBoardGeometry	boardGeometry;
 
+	// Debug tool 
+    std::unique_ptr<juce::DocumentWindow> calibrationWindow;
+
     //[/UserVariables]
 
     //==============================================================================
@@ -216,6 +221,7 @@ private:
     std::unique_ptr<juce::TextButton> btnSaveFile;
     std::unique_ptr<juce::TextButton> buttonReceive;
     std::unique_ptr<juce::TextButton> btnColourModel;
+    std::unique_ptr<juce::TextButton> btnCalibrate;
 
 
     //==============================================================================

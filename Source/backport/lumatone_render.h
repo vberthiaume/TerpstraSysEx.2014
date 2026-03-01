@@ -14,6 +14,17 @@ class LumatoneController;
 class LumatoneRender// : private LumatoneState
 {
 public:
+
+    struct CalibrationPoints
+    {
+        float oct1Key1X  = 0.0849709f;
+        float oct1Key1Y  = 0.3394341f;
+        float oct1Key56X = 0.2743560f;
+        float oct1Key56Y = 0.8333349f;
+        float oct5Key7X  = 0.8802155f;
+        float oct5Key7Y  = 0.3574272f;
+    };
+
     LumatoneRender(LumatoneController* stateIn);
     ~LumatoneRender();
 
@@ -21,8 +32,16 @@ public:
     LumatoneTiling& getLumatoneTiling() { return tilingGeometry; }
 
     void resetOctaveSize();
+    void recalibrate();
+
+    CalibrationPoints calibration;
+    bool  showCalibrationOverlay = false;
+    float keyScaleFactor         = 1.0716f;
 
     juce::Array<juce::Point<float>> getKeyCentres();
+
+    float getKeyW() const { return keyW; }
+    float getKeyH() const { return keyH; }
 
     void render(LumatoneAssets::LumatoneGraphicRenderSize maxRenderSize=LumatoneAssets::LumatoneGraphicRenderSize::_4x, LumatoneColourModel* colourModel=nullptr);
     
@@ -46,26 +65,9 @@ private:
 
     juce::Array<juce::Image> renders;
 
-    // In reference to lumatoneBounds
     const float keybedX = 0.06908748f;
-
-    const float oct1Key1X = 0.0839425f;
-    const float oct1Key1Y = 0.335887f;
-
-    const float oct1Key56X = 0.2731f;
-    const float oct1Key56Y = 0.83135f;
-
-    const float oct5Key7X = 0.879f;
-    const float oct5Key7Y = 0.355f;
-
     const float keyW = 0.027352f;
     const float keyH = 0.07307f;
-
-    //===============================================================================
-
-    juce::Point<float>  oct1Key1;
-    juce::Point<float> oct1Key56;
-    juce::Point<float>  oct5Key7;
 };
 
 #endif LUMATONE_GRAPHICS_RENDER_H
