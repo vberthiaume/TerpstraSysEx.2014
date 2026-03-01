@@ -980,7 +980,8 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 		<< "Version " << getApplicationVersion() << newLine
 		<< newLine
 		<< "@ Hans Straub 2014 - 2021," << newLine
-		<< "& Vincenzo Sicurella 2020 - 2022" << newLine
+		<< "& Vincenzo Sicurella 2020 - 2026" << newLine
+		<< "& Vincent Berthiaume 2025 - 2026" << newLine
 		<< newLine
 		<< "Based on the program 'TerpstraSysEx' @ Dylan Horvath 2007" << newLine
 		<< newLine
