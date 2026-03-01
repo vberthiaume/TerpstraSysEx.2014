@@ -272,7 +272,7 @@ LumatoneKey LumatoneController::getKey(int boardIndex, int keyIndex)
 {
     TerpstraKeyMapping& mapping = TerpstraSysExApplication::getApp().getMainContentComponent()->getMappingInEdit();
     
-    if (boardIndex <= 0 && boardIndex < NUMBEROFBOARDS && keyIndex <= 0 && keyIndex <= MAX_LUMATONE_BOARD_KEYS)
+    if (boardIndex >= 0 && boardIndex < NUMBEROFBOARDS && keyIndex >= 0 && keyIndex < MAX_LUMATONE_BOARD_KEYS)
     {
         const TerpstraKey& key = mapping.sets[boardIndex].theKeys[keyIndex];
         return LumatoneKey(key.keyType, key.channelNumber, key.noteNumber, key.colour, key.ccFaderDefault);
