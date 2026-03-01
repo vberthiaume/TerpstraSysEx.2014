@@ -17,6 +17,7 @@
 #include <JuceHeader.h>
 #include "LumatoneEditorStyleCommon.h"
 #include "EditActions.h"
+#include "ColourSelectionGroup.h"
 
 //==============================================================================
 /*
@@ -28,7 +29,7 @@
       via callAsync so it is safe to rebuild the swatch list inside the callback.
 */
 class ColourSwatchButton : public juce::TextButton,
-                           private juce::ChangeListener,
+                           private ColourSelectionListener,
                            private juce::ComponentListener
 {
 public:
@@ -48,11 +49,8 @@ public:
 
     ~ColourSwatchButton() override
     {
-        if (activePicker != nullptr)
-        {
-            activePicker->removeChangeListener(this);
-            activePicker->removeComponentListener(this);
-        }
+        if (activeWindow != nullptr)
+            activeWindow->removeComponentListener(this);
     }
 
     void paintButton(juce::Graphics& g, bool highlighted, bool down) override
@@ -75,38 +73,22 @@ public:
 
 private:
 
-    void showPicker()
+    void showPicker();  // Implemented in ColourReplacePanel.cpp
+
+    // Live preview: update display as the user picks in the palette window.
+    void colourChangedCallback(ColourSelectionBroadcaster* source, juce::Colour newColour) override
     {
-        auto picker = std::make_unique<juce::ColourSelector>(
-            juce::ColourSelector::showColourspace
-            | juce::ColourSelector::editableColour
-            | juce::ColourSelector::showColourAtTop
-        );
-        picker->setCurrentColour(displayColour);
-        picker->setSize(280, 300);
-        picker->addChangeListener(this);
-        picker->addComponentListener(this);
-        activePicker = picker.get();
-        juce::CallOutBox::launchAsynchronously(std::move(picker), getScreenBounds(), nullptr);
+        displayColour = newColour.withAlpha((uint8) 255);
+        repaint();
     }
 
-    // Live preview: update display as the user drags in the picker.
-    void changeListenerCallback(juce::ChangeBroadcaster* source) override
-    {
-        if (source == activePicker)
-        {
-            displayColour = activePicker->getCurrentColour().withAlpha((uint8) 255);
-            repaint();
-        }
-    }
-
-    // Fired once when the ColourSelector (and its CallOutBox) is destroyed.
+    // Fired once when the ColourPaletteWindow (and its CallOutBox) is destroyed.
     void componentBeingDeleted(juce::Component& comp) override
     {
-        if (&comp == activePicker)
+        if (&comp == activeWindow)
         {
             const juce::Colour picked = displayColour;
-            activePicker = nullptr;
+            activeWindow = nullptr;
 
             if (picked != originalColour && onColourChanged)
             {
@@ -124,7 +106,7 @@ private:
 
     const juce::Colour originalColour;
     juce::Colour       displayColour;
-    juce::ColourSelector* activePicker = nullptr;
+    juce::Component*   activeWindow = nullptr;
 };
 
 //==============================================================================

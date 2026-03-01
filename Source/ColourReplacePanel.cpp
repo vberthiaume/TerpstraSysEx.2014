@@ -11,6 +11,29 @@
 #include "ColourReplacePanel.h"
 #include "Main.h"
 #include "LumatoneController.h"
+#include "ColourPaletteWindow.h"
+
+//==============================================================================
+
+void ColourSwatchButton::showPicker()
+{
+    TerpstraSysExApplication::getApp().reloadColourPalettes();
+
+    auto* paletteWindow = new ColourPaletteWindow(TerpstraSysExApplication::getApp().getColourPalettes());
+    paletteWindow->setSize(360, 300);
+    paletteWindow->listenToColourSelection(this);
+    paletteWindow->addComponentListener(this);
+    activeWindow = paletteWindow;
+
+    auto* topLevel = getTopLevelComponent();
+    auto area = getScreenBounds().translated(-topLevel->getScreenX(), -topLevel->getScreenY());
+
+    juce::CallOutBox::launchAsynchronously(
+        std::unique_ptr<juce::Component>(paletteWindow),
+        area,
+        topLevel
+    );
+}
 
 //==============================================================================
 
