@@ -21,7 +21,16 @@ ToolSelectorComponent::ToolSelectorComponent()
     addTab(juce::translate("Colour Replace"), tabColour, colourReplacePanel, true);
 
     auto properties = TerpstraSysExApplication::getApp().getPropertiesFile();
-    if (properties->getValue("ToolSelectorTab").contains(juce::String("Col")))
+    auto tabName = properties->getValue("ToolSelectorTab");
+    if (tabName.isEmpty() || tabName == "Note Velocity")
+    {
+        setCurrentTabIndex(0);
+    }
+    else if (tabName == "Colour Replace")
+    {
+        setCurrentTabIndex(2);
+    }
+    else
     {
         setCurrentTabIndex(1);
     }
