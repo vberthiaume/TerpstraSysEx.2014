@@ -116,6 +116,7 @@ public:
 	void updateMainTitle();
 
 	bool getHasChangesToSave() const { return hasChangesToSave; }
+	const File& getCurrentFile() const { return currentFile; }
 	void setHasChangesToSave(bool value);
 
 	void setOpenDialogWindow(DialogWindow* dialogWindowIn);
