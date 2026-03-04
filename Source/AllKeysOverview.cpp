@@ -158,6 +158,9 @@ Colour KeyMiniDisplayInsideAllKeysOverview::getKeyColour() const
 			colour = state->getColourModel()->getModelColour(keyData->colour);
 		else
 			colour = keyData->colour;
+
+		if (isHighlighted)
+			colour = colour.contrasting(.4f);
 	}
 
 	return colour;
