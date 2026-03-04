@@ -61,12 +61,47 @@ jobs:
           cp CMakeLists.txt.template CMakeLists.txt
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build
-      # - name: List build directory
-      #   run: |
-      #     find build/$ARTIFACTS/Lumatone\ Editor.app
-      - name: List build directory
+
+      - name: Bundle macOS dylibs
         run: |
-          ls build/${{ env.ARTIFACTS }}
+          APP_PATH="build/${{ env.ARTIFACTS }}/Release/Lumatone Editor.app"
+          FRAMEWORKS="$APP_PATH/Contents/Frameworks"
+          EXEC="$APP_PATH/Contents/MacOS/Lumatone Editor"
+
+          mkdir -p "$FRAMEWORKS"
+
+          # Copy libraries
+          cp Libraries/mac/lib/libssh2.1.dylib "$FRAMEWORKS/"
+          cp Libraries/mac/lib/libgcrypt.20.dylib "$FRAMEWORKS/"
+          cp Libraries/mac/lib/libgpg-error.0.dylib "$FRAMEWORKS/"
+
+          # Fix library IDs
+          install_name_tool -id @rpath/libssh2.1.dylib "$FRAMEWORKS/libssh2.1.dylib"
+          install_name_tool -id @rpath/libgcrypt.20.dylib "$FRAMEWORKS/libgcrypt.20.dylib"
+          install_name_tool -id @rpath/libgpg-error.0.dylib "$FRAMEWORKS/libgpg-error.0.dylib"
+
+          # Fix inter-library dependencies
+          install_name_tool -change libgpg-error.0.dylib @rpath/libgpg-error.0.dylib "$FRAMEWORKS/libgcrypt.20.dylib"
+          install_name_tool -change libgcrypt.20.dylib @rpath/libgcrypt.20.dylib "$FRAMEWORKS/libssh2.1.dylib"
+
+          # Make app look in Frameworks folder
+          install_name_tool -add_rpath @executable_path/../Frameworks "$EXEC"
+
+          install_name_tool -change \
+            libssh2.1.dylib \
+            @rpath/libssh2.1.dylib \
+            "$EXEC"
+
+          install_name_tool -change \
+            libgcrypt.20.dylib \
+            @rpath/libgcrypt.20.dylib \
+            "$EXEC"
+
+          install_name_tool -change \
+            libgpg-error.0.dylib \
+            @rpath/libgpg-error.0.dylib \
+            "$EXEC"
+
       - name: Make package directory for artifact
         run: |
           cd build/${{ env.ARTIFACTS }}/Release
@@ -94,10 +129,6 @@ jobs:
           wget https://github.com/juce-framework/JUCE/releases/download/${{ env.JUCE_VERSION }}/$juce_DIR.zip
           unzip $juce_DIR.zip
 
-      - name: Install dependencies (Intel)
-        run: |
-          brew install libssh2 libgcrypt
-
       - name: Build Lumatone Editor (Intel only)
         run: |
           export juce_DIR=JUCE
@@ -108,6 +139,46 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
 
           cmake --build build --config Release
+
+      - name: Bundle macOS dylibs
+        run: |
+          APP_PATH="build/${{ env.ARTIFACTS }}/Release/Lumatone Editor.app"
+          FRAMEWORKS="$APP_PATH/Contents/Frameworks"
+          EXEC="$APP_PATH/Contents/MacOS/Lumatone Editor"
+
+          mkdir -p "$FRAMEWORKS"
+
+          # Copy libraries
+          cp Libraries/mac/lib/libssh2.1.dylib "$FRAMEWORKS/"
+          cp Libraries/mac/lib/libgcrypt.20.dylib "$FRAMEWORKS/"
+          cp Libraries/mac/lib/libgpg-error.0.dylib "$FRAMEWORKS/"
+
+          # Fix library IDs
+          install_name_tool -id @rpath/libssh2.1.dylib "$FRAMEWORKS/libssh2.1.dylib"
+          install_name_tool -id @rpath/libgcrypt.20.dylib "$FRAMEWORKS/libgcrypt.20.dylib"
+          install_name_tool -id @rpath/libgpg-error.0.dylib "$FRAMEWORKS/libgpg-error.0.dylib"
+
+          # Fix inter-library dependencies
+          install_name_tool -change libgpg-error.0.dylib @rpath/libgpg-error.0.dylib "$FRAMEWORKS/libgcrypt.20.dylib"
+          install_name_tool -change libgcrypt.20.dylib @rpath/libgcrypt.20.dylib "$FRAMEWORKS/libssh2.1.dylib"
+
+          # Make app look in Frameworks folder
+          install_name_tool -add_rpath @executable_path/../Frameworks "$EXEC"
+
+          install_name_tool -change \
+            libssh2.1.dylib \
+            @rpath/libssh2.1.dylib \
+            "$EXEC"
+
+          install_name_tool -change \
+            libgcrypt.20.dylib \
+            @rpath/libgcrypt.20.dylib \
+            "$EXEC"
+
+          install_name_tool -change \
+            libgpg-error.0.dylib \
+            @rpath/libgpg-error.0.dylib \
+            "$EXEC"
 
       - name: Make package directory for artifact
         run: |
