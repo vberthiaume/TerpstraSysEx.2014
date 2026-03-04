@@ -55,6 +55,8 @@ public:
 	//void generalLogMessage(String textMessage, HajuErrorVisualizer::ErrorLevel errorLevel) override {}
 	void handleMidiMessage(const MidiMessage& msg) override;
 
+	bool getIsHighlighted() const { return isHighlighted; }
+
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(KeyMiniDisplayInsideAllKeysOverview)
 

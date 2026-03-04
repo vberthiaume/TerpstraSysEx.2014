@@ -309,6 +309,11 @@ void AllKeysOverview::paint (juce::Graphics& g)
             if (colourModel != nullptr)
                 keyColour = colourModel->getModelColour(keyColour);
 
+            // Brighten key if it's currently being played via MIDI
+            auto* key = octaveBoards[i / octaveBoardSize]->keyMiniDisplay[i % octaveBoardSize];
+            if (key->getIsHighlighted())
+                keyColour = keyColour.contrasting(0.4f);
+
             const float kx = keyCentres[i].x * bW + bX - kW * 0.5f;
             const float ky = keyCentres[i].y * bH + bY - kH * 0.5f;
 
