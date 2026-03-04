@@ -240,6 +240,8 @@
       </GROUP>
       <FILE id="WG01Cj" name="EditActions.cpp" compile="1" resource="0" file="Source/EditActions.cpp"/>
       <FILE id="cMcg6t" name="EditActions.h" compile="0" resource="0" file="Source/EditActions.h"/>
+      <FILE id="xR3mK1" name="ColourReplacePanel.cpp" compile="1" resource="0" file="Source/ColourReplacePanel.cpp"/>
+      <FILE id="bZ7pQ9" name="ColourReplacePanel.h" compile="0" resource="0" file="Source/ColourReplacePanel.h"/>
       <FILE id="O80YOu" name="LumatoneMenu.cpp" compile="1" resource="0"
             file="Source/LumatoneMenu.cpp"/>
       <FILE id="W7Jek7" name="FileBrowserComponent.h" compile="0" resource="0"
@@ -294,6 +296,8 @@
             file="Source/AllKeysOverview.cpp"/>
       <FILE id="WhW1Za" name="AllKeysOverview.h" compile="0" resource="0"
             file="Source/AllKeysOverview.h"/>
+      <FILE id="kCal01" name="KeyCalibrationPanel.h" compile="0" resource="0"
+            file="Source/KeyCalibrationPanel.h"/>
       <FILE id="oPf8iZ" name="NoteOnOffVelocityCurveDialog.cpp" compile="1"
             resource="0" file="Source/NoteOnOffVelocityCurveDialog.cpp"/>
       <FILE id="Vj8Ki8" name="NoteOnOffVelocityCurveDialog.h" compile="0"

@@ -42,7 +42,10 @@ bool SetBatchColourSettingsAction::perform()
 
 bool SetBatchColourSettingsAction::undo()
 {
-    // apply old data
+    // Don't re-enter batch edit mode on undo after apply/reset.
+    // The layout is restored by the paired ApplyBatchColourAdjustments undo.
+    if (!state->getBatchColourEditState().isInEdit())
+        return true;
 
     if (newEditData.useHueShift)
     {

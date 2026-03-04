@@ -64,6 +64,7 @@ private:
     std::unique_ptr<juce::TextButton>   resetButton;
 
     bool hasChanges = false;
+    bool isDragging = false;
 
 private:
 

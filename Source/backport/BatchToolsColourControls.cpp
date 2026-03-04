@@ -18,15 +18,17 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     brightness->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     brightness->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
     brightness->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::BrightnessSlider);
+    brightness->onDragStart = [&]() { isDragging = true;  state->beginNewUndoTransaction(); };
+    brightness->onDragEnd   = [&]() { isDragging = false; };
     brightness->onValueChange = [&] ()
     {
         auto currentData = state->getBatchColourEditState().getData();
-        state->performAction(SetBatchColourSettingsAction::NewSetBrightnessValue(state, brightness->getValue()));
+        state->performAction(SetBatchColourSettingsAction::NewSetBrightnessValue(state, brightness->getValue()), true, !isDragging);
         if (isSetToDefault())
             resetButtonCallback();
         else
         {
-            state->performAction(new ApplyBatchColourAdjustments(state, currentData));
+            state->performAction(new ApplyBatchColourAdjustments(state, currentData), true, false);
             setHasChanges(true);
         }
     };
@@ -48,15 +50,17 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     hue->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     hue->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
     hue->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::HueSlider);
+    hue->onDragStart = [&]() { isDragging = true;  state->beginNewUndoTransaction(); };
+    hue->onDragEnd   = [&]() { isDragging = false; };
     hue->onValueChange = [&] ()
     {
         auto currentData = state->getBatchColourEditState().getData();
-        state->performAction(SetBatchColourSettingsAction::NewSetHueValue(state, hue->getValue()));
+        state->performAction(SetBatchColourSettingsAction::NewSetHueValue(state, hue->getValue()), true, !isDragging);
         if (isSetToDefault())
             resetButtonCallback();
         else
         {
-            state->performAction(new ApplyBatchColourAdjustments(state, currentData));
+            state->performAction(new ApplyBatchColourAdjustments(state, currentData), true, false);
             setHasChanges(true);
         }
     };
@@ -79,16 +83,17 @@ BatchToolsColourControls::BatchToolsColourControls(LumatoneController* stateIn)
     temperature->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     temperature->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 60, 20);
     temperature->getProperties().set(LumatoneEditorStyleIDs::sliderRotaryColourGradient, (int)LumatoneEditorColourGradients::TemperatureSlider);
+    temperature->onDragStart = [&]() { isDragging = true;  state->beginNewUndoTransaction(); };
+    temperature->onDragEnd   = [&]() { isDragging = false; };
     temperature->onValueChange = [&] ()
     {
         auto currentData = state->getBatchColourEditState().getData();
-
-        state->performAction(SetBatchColourSettingsAction::NewSetTemperatureValue(state, temperature->getValue()));
+        state->performAction(SetBatchColourSettingsAction::NewSetTemperatureValue(state, temperature->getValue()), true, !isDragging);
         if (isSetToDefault())
             resetButtonCallback();
         else
         {
-            state->performAction(new ApplyBatchColourAdjustments(state, currentData));
+            state->performAction(new ApplyBatchColourAdjustments(state, currentData), true, false);
             setHasChanges(true);
         }
     };

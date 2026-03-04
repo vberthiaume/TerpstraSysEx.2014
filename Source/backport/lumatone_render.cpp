@@ -18,15 +18,17 @@ LumatoneRender::~LumatoneRender()
 void LumatoneRender::resetOctaveSize()
 {
     lumatoneGeometry = LumatoneGeometry(GetLumatoneBoardSize(state->getOctaveBoardSize()));
+    calibration = CalibrationPoints{};
+    recalibrate();
+}
 
-    // tilingGeometry.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
-    // tilingGeometry.setRowAngle(LUMATONEGRAPHICROWANGLE);
+void LumatoneRender::recalibrate()
+{
+    juce::Point<float> pt1Key1  (calibration.oct1Key1X,  calibration.oct1Key1Y);
+    juce::Point<float> pt1Key56 (calibration.oct1Key56X, calibration.oct1Key56Y);
+    juce::Point<float> pt5Key7  (calibration.oct5Key7X,  calibration.oct5Key7Y);
 
-    oct1Key1 = juce::Point<float>(oct1Key1X, oct1Key1Y);
-    oct1Key56 = juce::Point<float>(oct1Key56X, oct1Key56Y);
-    oct5Key7 = juce::Point<float>(oct5Key7X, oct5Key7Y);
-
-    tilingGeometry.fitSkewedTiling(oct1Key1, oct1Key56, 10, oct5Key7, 24, true);
+    tilingGeometry.fitSkewedTiling(pt1Key1, pt1Key56, 10, pt5Key7, 24, true);
     keyCentres = tilingGeometry.getHexagonCentresSkewed(lumatoneGeometry, 0, state->getNumBoards());
 }
 

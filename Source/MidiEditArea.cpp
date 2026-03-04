@@ -524,7 +524,18 @@ void MidiEditArea::connectionEstablished(int inputDevice, int outputDevice)
 		refreshOutputMenuAndSetSelected(outputDevice + 1, dontSendNotification);
         setConnectivity(true);
 
-		onOpenConnectionToDevice();
+		auto& app = TerpstraSysExApplication::getApp();
+		if (!app.getHasChangesToSave() && app.getCurrentFile().getFileName().isEmpty())
+		{
+			app.requestConfigurationFromDevice();
+			liveEditorBtn->setToggleState(true, NotificationType::sendNotification);
+			lblConnectionState->setText("Connected", NotificationType::dontSendNotification);
+			app.setEditMode(sysExSendingMode::liveEditor);
+		}
+		else
+		{
+			onOpenConnectionToDevice();
+		}
     }
     else
     {

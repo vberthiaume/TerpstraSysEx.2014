@@ -108,6 +108,16 @@ void LumatoneEditorBatchColourState::reset()
     // call main content component to update?
 }
 
+void LumatoneEditorBatchColourState::updateBaseKey(int boardIndex, int keyIndex, const TerpstraKey& key)
+{
+    mappingBeforeEdits.sets[boardIndex].theKeys[keyIndex] = key;
+}
+
+void LumatoneEditorBatchColourState::updateBaseSection(int boardIndex, const TerpstraKeys& keys)
+{
+    mappingBeforeEdits.sets[boardIndex] = keys;
+}
+
 void LumatoneEditorBatchColourState::handleDirtyLayout()
 {
     TerpstraSysExApplication::getApp().getMainContentComponent()->getData(mappingBeforeEdits);

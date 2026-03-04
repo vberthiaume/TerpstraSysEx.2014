@@ -58,9 +58,11 @@ CalibrationDlg::CalibrationDlg ()
 	calibrationSelectorTab.reset(new TabbedButtonBar(TabbedButtonBar::Orientation::TabsAtTop));
 	addAndMakeVisible(calibrationSelectorTab.get());
 
-	calibrationSelectorTab->addTab(translate("Keys"), juce::Colours::lightgrey, 1);
-	calibrationSelectorTab->addTab(translate("Aftertouch"), juce::Colours::lightgrey, 2);
-	calibrationSelectorTab->addTab(translate("Pitch & Mod Wheels"), juce::Colours::lightgrey, 3);
+	auto& lf = TerpstraSysExApplication::getApp().getLookAndFeel();
+	juce::Colour tabColour = lf.findColour(LumatoneEditorColourIDs::LightBackground).brighter(0.02f);
+	calibrationSelectorTab->addTab(translate("Keys"), tabColour, 1);
+	calibrationSelectorTab->addTab(translate("Aftertouch"), tabColour, 2);
+	calibrationSelectorTab->addTab(translate("Pitch & Mod Wheels"), tabColour, 3);
 
 	calibrationSelectorTab->addChangeListener(this);
 
@@ -229,6 +231,10 @@ void CalibrationDlg::lookAndFeelChanged()
 	{
 		setColour(ResizableWindow::ColourIds::backgroundColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::LightBackground));
 		setColour(DocumentWindow::ColourIds::textColourId, lookAndFeel->findColour(LumatoneEditorColourIDs::InactiveText));
+
+		juce::Colour tabColour = lookAndFeel->findColour(LumatoneEditorColourIDs::LightBackground).brighter(0.02f);
+		for (int i = 0; i < calibrationSelectorTab->getNumTabs(); i++)
+			calibrationSelectorTab->setTabBackgroundColour(i, tabColour);
 	}
     //[/UserCode_lookAndFeelChanged]
 }

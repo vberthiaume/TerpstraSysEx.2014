@@ -1,6 +1,7 @@
 #include "ToolSelectorComponent.h"
 #include "CurvesArea.h"
 #include "./backport/BatchToolsColourControls.h"
+#include "ColourReplacePanel.h"
 
 #include "LumatoneController.h"
 
@@ -11,14 +12,25 @@ ToolSelectorComponent::ToolSelectorComponent()
 {
     curvesArea = new CurvesArea();
     batchColourTools = new BatchToolsColourControls(TerpstraSysExApplication::getApp().getLumatoneController());
+    colourReplacePanel = new ColourReplacePanel();
 
 	LumatoneEditorLookAndFeel& lf = TerpstraSysExApplication::getApp().getLookAndFeel();
     juce::Colour tabColour = lf.findColour(LumatoneEditorColourIDs::LightBackground).brighter(0.02f);
     addTab(juce::translate("Note Velocity"), tabColour, curvesArea, true);
     addTab(juce::translate("Global") + juce::translate(" Colour"), tabColour, batchColourTools, true);
+    addTab(juce::translate("Colour Replace"), tabColour, colourReplacePanel, true);
 
     auto properties = TerpstraSysExApplication::getApp().getPropertiesFile();
-    if (properties->getValue("ToolSelectorTab").contains(juce::String("Col")))
+    auto tabName = properties->getValue("ToolSelectorTab");
+    if (tabName.isEmpty() || tabName == "Note Velocity")
+    {
+        setCurrentTabIndex(0);
+    }
+    else if (tabName == "Colour Replace")
+    {
+        setCurrentTabIndex(2);
+    }
+    else
     {
         setCurrentTabIndex(1);
     }
@@ -28,6 +40,7 @@ ToolSelectorComponent::ToolSelectorComponent()
 
 ToolSelectorComponent::~ToolSelectorComponent()
 {
+    colourReplacePanel = nullptr;
     batchColourTools = nullptr;
     curvesArea = nullptr;
 
@@ -52,6 +65,11 @@ void ToolSelectorComponent::resized()
 void ToolSelectorComponent::resetBatchColours()
 {
     batchColourTools->updateFromState();
+}
+
+void ToolSelectorComponent::refreshColourReplace()
+{
+    colourReplacePanel->refreshMatchCount();
 }
 
 void ToolSelectorComponent::changeListenerCallback(juce::ChangeBroadcaster *source)

@@ -22,7 +22,9 @@
 
 MainContentComponent* TerpstraSysExApplication::getMainContentComponent() const
 {
-	jassert(mainWindow != nullptr);
+	// jassert(mainWindow != nullptr);
+	if (mainWindow == nullptr || mainWindow->getContentComponent() == nullptr)
+		return nullptr;
 	return (MainContentComponent*)(mainWindow->getContentComponent());
 }
 
@@ -514,8 +516,12 @@ bool TerpstraSysExApplication::openSysExMapping()
 	chooser->launchAsync(FileBrowserComponent::FileChooserFlags::canSelectFiles | FileBrowserComponent::FileChooserFlags::openMode,
 		[&](const FileChooser& chooser)
 		{
-			currentFile = chooser.getResult();
-			openFromCurrentFile();
+			auto result = chooser.getResult();
+			if (!result.getFullPathName().isEmpty())
+			{
+				currentFile = result;
+				openFromCurrentFile();
+			}
 		});
 
 	return true;
@@ -536,7 +542,14 @@ bool TerpstraSysExApplication::saveSysExMappingAs(std::function<void(bool)> save
 	chooser->launchAsync(FileBrowserComponent::FileChooserFlags::saveMode | FileBrowserComponent::FileChooserFlags::warnAboutOverwriting,
 		[this, saveFileCallback](const FileChooser& chooser)
 		{
-			currentFile = chooser.getResult();
+			auto result = chooser.getResult();
+			if (result.getFullPathName().isEmpty())
+			{
+				saveFileCallback(false);
+				return;
+			}
+
+			currentFile = result;
 			bool saved = saveCurrentFile();
 			if (saved)
 			{
@@ -647,6 +660,12 @@ bool TerpstraSysExApplication::redo()
 	}
 	else
 		return false;
+}
+
+bool TerpstraSysExApplication::toggleUseColourModel()
+{
+    commandManager->invokeDirectly(Lumatone::Menu::commandIDs::useColourModel, true);
+	return useColourModel();
 }
 
 bool TerpstraSysExApplication::toggleDeveloperMode()
@@ -961,7 +980,8 @@ bool TerpstraSysExApplication::aboutTerpstraSysEx()
 		<< "Version " << getApplicationVersion() << newLine
 		<< newLine
 		<< "@ Hans Straub 2014 - 2021," << newLine
-		<< "& Vincenzo Sicurella 2020 - 2022" << newLine
+		<< "& Vincenzo Sicurella 2020 - 2026" << newLine
+		<< "& Vincent Berthiaume 2025 - 2026" << newLine
 		<< newLine
 		<< "Based on the program 'TerpstraSysEx' @ Dylan Horvath 2007" << newLine
 		<< newLine

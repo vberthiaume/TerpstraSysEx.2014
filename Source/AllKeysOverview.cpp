@@ -25,6 +25,8 @@
 
 #include "backport/lumatone_render.h"
 #include "backport/colour_model.h"
+#include "KeyCalibrationPanel.h"
+#include "DebugCalibrationDragView.h"
 
 //[/Headers]
 
@@ -53,26 +55,7 @@ KeyMiniDisplayInsideAllKeysOverview::~KeyMiniDisplayInsideAllKeysOverview()
 
 void KeyMiniDisplayInsideAllKeysOverview::paint(Graphics& g)
 {
-	jassert(getParentComponent() != nullptr);
-	bool boardIsSelected = boardIndex == dynamic_cast<AllKeysOverview*>(getParentComponent())->getCurrentSetSelection();
-
-	juce::Colour hexagonColour = getKeyColour();
-	// Colour hexagonColour = findColour(TerpstraKeyEdit::backgroundColourId).overlaidWith(getKeyColour());
-    // if (hexagonColour.getPerceivedBrightness() >= 0.6)
-    //     hexagonColour = hexagonColour.darker((1.0 - hexagonColour.getPerceivedBrightness()));
-
-    g.setColour(hexagonColour);
-
-	// if (colourGraphic && shadowGraphic)
-	// {
-		// int x = roundToInt((getWidth()  - colourGraphic->getWidth()) * 0.5f);
-		// int y = roundToInt((getHeight() - colourGraphic->getHeight()) * 0.5f);
-
-	if (colourGraphic.isValid())
-		g.drawImageAt(colourGraphic, 0, 0, true);
-	if (shadowGraphic.isValid())
-		g.drawImageAt(shadowGraphic, 0, 0);
-	// }
+    // Rendering handled by AllKeysOverview::paint() at float precision; this component exists for mouse hit-testing only
 }
 
 void KeyMiniDisplayInsideAllKeysOverview::resized()
@@ -220,18 +203,30 @@ AllKeysOverview::AllKeysOverview ()
 
     buttonReceive->setBounds (584, 8, 176, 24);
 
+	btnColourModel.reset(new juce::TextButton("btnColourModel"));
+	addAndMakeVisible(btnColourModel.get());
+	btnColourModel->setTooltip(TRANS("Toggle realistic display colors"));
+	btnColourModel->setClickingTogglesState(true);
+	btnColourModel->addListener(this);
+	btnColourModel->setButtonText("");
+	btnColourModel->getProperties().set(LumatoneEditorStyleIDs::fontHeightScalar, 1.5f);
 
     //[UserPreSize]
 	btnLoadFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::LoadIcon);
 	btnSaveFile->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::SaveIcon);
 	buttonReceive->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ArrowUp);
 	buttonReceive->getProperties().set(LumatoneEditorStyleIDs::textButtonIconPlacement, LumatoneEditorStyleIDs::TextButtonIconPlacement::RightOfText);
+	btnColourModel->getProperties().set(LumatoneEditorStyleIDs::textButtonIconHashCode, LumatoneEditorIcon::ColourModelIcon);
 
 	lblFirmwareVersion.reset(new Label("FirmwareVersionLabel"));
 	addChildComponent(lblFirmwareVersion.get());
 
     velocityMeter.reset (new VelocityMeter());
     addAndMakeVisible (velocityMeter.get ());
+
+    btnCalibrate.reset(new juce::TextButton("Calibrate Keys"));
+    addChildComponent(btnCalibrate.get());
+    btnCalibrate->onClick = [this]() { openCalibrationWindow(); };
 
 	// tilingGeometry.setColumnAngle(LUMATONEGRAPHICCOLUMNANGLE);
 	// tilingGeometry.setRowAngle(LUMATONEGRAPHICROWANGLE);
@@ -244,6 +239,9 @@ AllKeysOverview::AllKeysOverview ()
     TerpstraSysExApplication::getApp ().getLumatoneController ()->addMidiListener (this);
 
 	resetOctaveSize();
+
+	// Initialize the colour model button state
+	btnColourModel->setToggleState(TerpstraSysExApplication::getApp().useColourModel(), juce::dontSendNotification);
 
     //[/UserPreSize]
 
@@ -265,6 +263,7 @@ AllKeysOverview::~AllKeysOverview()
     btnLoadFile = nullptr;
     btnSaveFile = nullptr;
     buttonReceive = nullptr;
+	btnColourModel = nullptr;
 
 
     //[Destructor]. You can add your own custom destruction code here..
@@ -282,6 +281,89 @@ void AllKeysOverview::paint (juce::Graphics& g)
 
 	g.drawImageAt(lumatoneGraphic, lumatoneBounds.getX(), lumatoneBounds.getY());
 
+    const float bX = (float)lumatoneBounds.getX();
+    const float bY = (float)lumatoneBounds.getY();
+    const float bW = (float)lumatoneBounds.getWidth();
+    const float bH = (float)lumatoneBounds.getHeight();
+    const float kW = bW * keyW * lumatoneRender->keyScaleFactor;
+    const float kH = bH * keyH * lumatoneRender->keyScaleFactor;
+
+    // Draw key colours at float positions — avoids per-component roundToInt snapping
+    if (keyCentres.size() > 0 && keyShapeGraphic.isValid() && keyShadowGraphic.isValid())
+    {
+        auto* controller  = TerpstraSysExApplication::getApp().getLumatoneController();
+        auto* colourModel = TerpstraSysExApplication::getApp().useColourModel()
+                                ? TerpstraSysExApplication::getApp().getColourModel()
+                                : nullptr;
+
+        const int shapeW  = keyShapeGraphic.getWidth();
+        const int shapeH  = keyShapeGraphic.getHeight();
+        const int shadowW = keyShadowGraphic.getWidth();
+        const int shadowH = keyShadowGraphic.getHeight();
+
+        const int octaveBoardSize = TerpstraSysExApplication::getApp().getOctaveBoardSize();
+
+        for (int i = 0; i < keyCentres.size(); i++)
+        {
+            juce::Colour keyColour = controller->getKey(i / octaveBoardSize, i % octaveBoardSize).getColour();
+            if (colourModel != nullptr)
+                keyColour = colourModel->getModelColour(keyColour);
+
+            const float kx = keyCentres[i].x * bW + bX - kW * 0.5f;
+            const float ky = keyCentres[i].y * bH + bY - kH * 0.5f;
+
+            if (!keyColour.isTransparent())
+            {
+                g.setColour(keyColour);
+                g.drawImage(keyShapeGraphic, kx, ky, kW, kH, 0, 0, shapeW, shapeH, true);
+            }
+
+            g.drawImage(keyShadowGraphic, kx, ky, kW, kH, 0, 0, shadowW, shadowH);
+        }
+    }
+
+    // Calibration overlay: key centre dots, anchor triangle, anchor markers
+    if (lumatoneRender->showCalibrationOverlay && keyCentres.size() > 0)
+    {
+        // Dot at every key centre
+        const float dotR = 1.5f;
+        g.setColour(juce::Colours::white.withAlpha(0.8f));
+        for (int i = 0; i < keyCentres.size(); i++)
+        {
+            const float px = keyCentres[i].x * bW + bX;
+            const float py = keyCentres[i].y * bH + bY;
+            g.fillEllipse(px - dotR, py - dotR, dotR * 2.0f, dotR * 2.0f);
+        }
+
+        auto& c = lumatoneRender->calibration;
+
+        // Pixel positions of the 3 anchors
+        const float ax1 = c.oct1Key1X  * bW + bX,  ay1 = c.oct1Key1Y  * bH + bY;
+        const float ax2 = c.oct1Key56X * bW + bX,  ay2 = c.oct1Key56Y * bH + bY;
+        const float ax3 = c.oct5Key7X  * bW + bX,  ay3 = c.oct5Key7Y  * bH + bY;
+
+        // Triangle connecting the 3 anchor points
+        g.setColour(juce::Colours::yellow.withAlpha(0.6f));
+        g.drawLine(ax1, ay1, ax2, ay2, 1.0f);
+        g.drawLine(ax2, ay2, ax3, ay3, 1.0f);
+        g.drawLine(ax3, ay3, ax1, ay1, 1.0f);
+
+        // Crosshair + circle at each anchor
+        auto drawAnchor = [&](float px, float py, juce::Colour colour)
+        {
+            const float radius = 5.0f;
+            const float arm    = 9.0f;
+            g.setColour(colour);
+            g.drawLine(px - arm, py, px + arm, py, 1.5f);
+            g.drawLine(px, py - arm, px, py + arm, 1.5f);
+            g.drawEllipse(px - radius, py - radius, radius * 2.0f, radius * 2.0f, 1.5f);
+        };
+
+        drawAnchor(ax1, ay1, juce::Colours::red);
+        drawAnchor(ax2, ay2, juce::Colours::limegreen);
+        drawAnchor(ax3, ay3, juce::Colours::cyan);
+    }
+
 	// Draw a line under the selected sub board
 	if (currentSetSelection >= 0 && currentSetSelection < NUMBEROFBOARDS)
 	{
@@ -294,7 +376,6 @@ void AllKeysOverview::paint (juce::Graphics& g)
 		g.strokePath(selectionMarkPath, PathStrokeType(1.0f));
 	}
 
-    //g.fillAll (juce::Colours::red);
 
     //[/UserPaint]
 }
@@ -329,7 +410,15 @@ void AllKeysOverview::resized()
 
 	int importY = lumatoneBounds.getY() - roundToInt(getHeight() * importYFromImageTop);
 	int importWidth = roundToInt(getWidth() * importW);
-	buttonReceive->setBounds(lumatoneBounds.getRight() - importWidth, importY, importWidth, btnHeight);
+
+	// Colour model toggle: above graphics, right-aligned with the graphic edge
+	btnColourModel->setBounds(lumatoneBounds.getRight() - btnHeight, importY, btnHeight, btnHeight);
+
+	// Import button: to the left of the colour model toggle
+	buttonReceive->setBounds(lumatoneBounds.getRight() - btnHeight - btnMargin - importWidth, importY, importWidth, btnHeight);
+
+    // Calibrate button sits next to the colour model button (only visible in developer mode)
+    btnCalibrate->setBounds(lumatoneBounds.getX() + btnHeight + btnMargin, lumatoneBounds.getY() - btnHeight * 1.08f, saveLoadWidth, btnHeight);
 
 	resizeLabelWithHeight(lblFirmwareVersion.get(), btnHeight * 0.6f);
 	lblFirmwareVersion->setTopLeftPosition(lumatoneBounds.getX(), lumatoneBounds.getY() - btnHeight * 0.6f);
@@ -337,8 +426,8 @@ void AllKeysOverview::resized()
     const auto velocityMeterW = 25;
     velocityMeter->setBounds ((lumatoneBounds.getX() - velocityMeterW) / 2, lumatoneBounds.getY (), velocityMeterW, lumatoneBounds.getHeight ());
 
-	int keyWidth = roundToInt(lumatoneBounds.getWidth() * keyW);
-	int keyHeight = roundToInt(lumatoneBounds.getHeight() * keyH);
+	int keyWidth  = roundToInt(lumatoneBounds.getWidth()  * keyW * lumatoneRender->keyScaleFactor);
+	int keyHeight = roundToInt(lumatoneBounds.getHeight() * keyH * lumatoneRender->keyScaleFactor);
 
 	// Scale key graphics once
 	// lumatoneGraphic = imageProcessor->resizeImage(ImageCache::getFromHashCode(LumatoneEditorAssets::LumatoneGraphic), lumatoneBounds.getWidth(), lumatoneBounds.getHeight());
@@ -414,6 +503,12 @@ void AllKeysOverview::buttonClicked (juce::Button* buttonThatWasClicked)
 		TerpstraSysExApplication::getApp().requestConfigurationFromDevice();
         //[/UserButtonCode_buttonReceive]
     }
+	else if (buttonThatWasClicked == btnColourModel.get())
+	{
+		//[UserButtonCode_btnColourModel] -- add your button handler code here..
+		TerpstraSysExApplication::getApp().toggleUseColourModel();
+		//[/UserButtonCode_btnColourModel]
+	}
 
     //[UserbuttonClicked_Post]
     //[/UserbuttonClicked_Post]
@@ -459,7 +554,102 @@ void AllKeysOverview::showDeveloperMode(bool developerModeOn)
 	if (developerModeOn)
 		buttonReceive->setVisible(true);
 
+    btnCalibrate->setVisible(developerModeOn);
+
     repaint();
+}
+
+struct CalibrationDocWindow : public juce::DocumentWindow
+{
+    CalibrationDocWindow(const juce::String& title, juce::Colour bg, std::function<void()> onCloseCb)
+        : juce::DocumentWindow(title, bg, juce::DocumentWindow::closeButton)
+        , onClose(std::move(onCloseCb)) {}
+
+    void closeButtonPressed() override { onClose(); }
+
+    std::function<void()> onClose;
+};
+
+// Combined container: drag view on the left, nudge panel on the right.
+// Both share the same LumatoneRender and are kept in sync via a shared callback.
+struct CalibrationEditorComponent : public juce::Component
+{
+    CalibrationEditorComponent(LumatoneRender* render,
+                               std::function<void()> overviewCallback)
+    {
+        // Shared callback: syncs drag view display, panel readouts, and AllKeysOverview
+        auto sharedCb = [this, overviewCallback]()
+        {
+            dragView->refresh();
+            panel->refreshValueLabels();
+            if (overviewCallback) overviewCallback();
+        };
+
+        panel    = std::make_unique<KeyCalibrationPanel>(render, sharedCb);
+        dragView = std::make_unique<DebugCalibrationDragView>(
+            render,
+            TerpstraSysExApplication::getApp().getLumatoneController(),
+            sharedCb);
+
+        addAndMakeVisible(*dragView);
+        addAndMakeVisible(*panel);
+
+        panel->setKeyScaleCallbacks(
+            [this]()        { return dragView->getKeyScaleFactor(); },
+            [this, overviewCallback](float f) {
+                dragView->setKeyScaleFactor(f);
+                if (overviewCallback) overviewCallback();  // rebuild main view key graphics
+            }
+        );
+    }
+
+    void resized() override
+    {
+        const int panelW = KeyCalibrationPanel::preferredWidth() + 8;
+        panel->setBounds(getWidth() - panelW, 0, panelW, getHeight());
+        dragView->setBounds(0, 0, getWidth() - panelW, getHeight());
+    }
+
+    std::unique_ptr<DebugCalibrationDragView>  dragView;
+    std::unique_ptr<KeyCalibrationPanel>  panel;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CalibrationEditorComponent)
+};
+
+void AllKeysOverview::openCalibrationWindow()
+{
+    if (calibrationWindow != nullptr)
+    {
+        calibrationWindow->toFront(true);
+        return;
+    }
+
+    auto* editor = new CalibrationEditorComponent(
+        lumatoneRender.get(),
+        [this]()
+        {
+            keyCentres = lumatoneRender->getKeyCentres();
+            resized();
+            repaint();
+        }
+    );
+
+    // Default: drag view ~2x the original image width (≈1060) + panel sidebar
+    const int panelW    = KeyCalibrationPanel::preferredWidth() + 8;
+    const int contentW  = 1060 + panelW;   // ~1340
+    const int contentH  = 430;
+    editor->setSize(contentW, contentH);
+
+    calibrationWindow = std::make_unique<CalibrationDocWindow>(
+        "Key Calibration",
+        juce::Desktop::getInstance().getDefaultLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId),
+        [this]() { calibrationWindow.reset(); }
+    );
+    calibrationWindow->setContentOwned(editor, true);
+    calibrationWindow->setResizable(true, false);
+    calibrationWindow->setUsingNativeTitleBar(true);
+    calibrationWindow->centreWithSize(contentW, contentH);
+    calibrationWindow->setVisible(true);
 }
 
 void AllKeysOverview::connectionEstablished(int, int)

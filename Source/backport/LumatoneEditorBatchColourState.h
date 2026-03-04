@@ -101,6 +101,9 @@ public:
 
     const TerpstraKeyMapping& getMappingBeforeEdits() const { return mappingBeforeEdits; }
 
+    void updateBaseKey(int boardIndex, int keyIndex, const TerpstraKey& key);
+    void updateBaseSection(int boardIndex, const TerpstraKeys& keys);
+
 protected:
 
     // juce::ValueTree loadStateProperties(juce::ValueTree stateIn) override;
